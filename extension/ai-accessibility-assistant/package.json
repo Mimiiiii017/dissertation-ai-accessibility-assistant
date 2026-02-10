@@ -9,7 +9,6 @@
   "categories": ["Other"],
 
   "activationEvents": [
-    "onCommand:ai-accessibility-assistant.helloWorld",
     "onCommand:ai-accessibility-assistant.analyseFile",
     "onCommand:ai-accessibility-assistant.selectModel"
   ],
@@ -18,10 +17,6 @@
 
   "contributes": {
     "commands": [
-      {
-        "command": "ai-accessibility-assistant.helloWorld",
-        "title": "Hello World"
-      },
       {
         "command": "ai-accessibility-assistant.analyseFile",
         "title": "Accessibility: Analyse Current File"
