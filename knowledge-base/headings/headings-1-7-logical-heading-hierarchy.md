@@ -49,3 +49,222 @@ Ensure headings create a logical, thorough page structure so users (especially s
 <p role="heading" aria-level="1">Heading Level 1</p>
 <div role="heading" aria-level="3">Heading Level 3</div>
 ```
+
+## Framework-Specific Examples
+
+### React/Next.js
+```jsx
+// Logical heading structure in React
+function HomePage() {
+  return (
+    <>
+      <h1>
+        <a href="/">
+          <img src="/logo.png" alt="Company Name (go back to homepage)" />
+        </a>
+      </h1>
+      
+      <h2>Featured Products</h2>
+      <section>
+        <h3>Product Category 1</h3>
+        <ProductList category="1" />
+        
+        <h3>Product Category 2</h3>
+        <ProductList category="2" />
+      </section>
+      
+      <h2>Latest News</h2>
+      <article>
+        <h3>Article Title</h3>
+        <p>Article content...</p>
+      </article>
+    </>
+  );
+}
+
+// Dynamic heading levels
+function Heading({ level, children }) {
+  const Tag = `h${level}`;
+  return <Tag>{children}</Tag>;
+}
+
+// Usage
+<Heading level={2}>Section Title</Heading>
+
+// Next.js with metadata
+export const metadata = {
+  title: 'Page Title', // Used for <title> tag
+};
+```
+
+### Vue/Nuxt
+```vue
+<template>
+  <div>
+    <h1>
+      <NuxtLink to="/">
+        <img src="/logo.png" alt="Company Name (go back to homepage)" />
+      </NuxtLink>
+    </h1>
+    
+    <h2>Featured Products</h2>
+    <section>
+      <h3>Product Category 1</h3>
+      <ProductList category="1" />
+      
+      <h3>Product Category 2</h3>
+      <ProductList category="2" />
+    </section>
+    
+    <h2>Latest News</h2>
+    <article>
+      <h3>{{ article.title }}</h3>
+      <p>{{ article.content }}</p>
+    </article>
+  </div>
+</template>
+
+<!-- Dynamic heading component -->
+<template>
+  <component :is="tag">
+    <slot></slot>
+  </component>
+</template>
+
+<script setup>
+const props = defineProps({
+  level: {
+    type: Number,
+    required: true,
+    validator: (value) => value >= 1 && value <= 6
+  }
+});
+
+const tag = computed(() => `h${props.level}`);
+</script>
+
+<!-- Usage -->
+<Heading :level="2">Section Title</Heading>
+
+<!-- Nuxt metadata -->
+<script setup>
+useHead({
+  title: 'Page Title'
+});
+</script>
+```
+
+### Angular
+```typescript
+// Component template
+<div>
+  <h1>
+    <a [routerLink]="['/']">
+      <img src="/logo.png" alt="Company Name (go back to homepage)" />
+    </a>
+  </h1>
+  
+  <h2>Featured Products</h2>
+  <section>
+    <h3>Product Category 1</h3>
+    <app-product-list [category]="'1'"></app-product-list>
+    
+    <h3>Product Category 2</h3>
+    <app-product-list [category]="'2'"></app-product-list>
+  </section>
+  
+  <h2>Latest News</h2>
+  <article *ngFor="let article of articles">
+    <h3>{{ article.title }}</h3>
+    <p>{{ article.content }}</p>
+  </article>
+</div>
+
+// Dynamic heading component
+<ng-container [ngSwitch]="level">
+  <h1 *ngSwitchCase="1"><ng-content></ng-content></h1>
+  <h2 *ngSwitchCase="2"><ng-content></ng-content></h2>
+  <h3 *ngSwitchCase="3"><ng-content></ng-content></h3>
+  <h4 *ngSwitchCase="4"><ng-content></ng-content></h4>
+  <h5 *ngSwitchCase="5"><ng-content></ng-content></h5>
+  <h6 *ngSwitchCase="6"><ng-content></ng-content></h6>
+</ng-container>
+
+// Component TypeScript
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-heading',
+  templateUrl: './heading.component.html'
+})
+export class HeadingComponent {
+  @Input() level: number = 2;
+}
+```
+
+### Svelte/SvelteKit
+```svelte
+<script>
+  let articles = [];
+</script>
+
+<h1>
+  <a href="/">
+    <img src="/logo.png" alt="Company Name (go back to homepage)" />
+  </a>
+</h1>
+
+<h2>Featured Products</h2>
+<section>
+  <h3>Product Category 1</h3>
+  <ProductList category="1" />
+  
+  <h3>Product Category 2</h3>
+  <ProductList category="2" />
+</section>
+
+<h2>Latest News</h2>
+{#each articles as article}
+  <article>
+    <h3>{article.title}</h3>
+    <p>{article.content}</p>
+  </article>
+{/each}
+
+<!-- Dynamic heading component -->
+<script>
+  export let level = 2;
+  const tag = `h${level}`;
+</script>
+
+<svelte:element this={tag}>
+  <slot></slot>
+</svelte:element>
+
+<!-- Usage -->
+<Heading level={2}>Section Title</Heading>
+```
+
+### WordPress/PHP
+```php
+<!-- WordPress theme hierarchy -->
+<h1>
+  <a href="<?php echo esc_url(home_url('/')); ?>">
+    <?php bloginfo('name'); ?>
+  </a>
+</h1>
+
+<h2><?php esc_html_e('Latest Posts', 'text-domain'); ?></h2>
+
+<?php if (have_posts()) : while (have_posts()) : the_post(); ?>
+  <article>
+    <h3>
+      <a href="<?php the_permalink(); ?>">
+        <?php the_title(); ?>
+      </a>
+    </h3>
+    <?php the_excerpt(); ?>
+  </article>
+<?php endwhile; endif; ?>
+```
+```

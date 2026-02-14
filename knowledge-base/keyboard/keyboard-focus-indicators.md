@@ -47,3 +47,237 @@ input:focus-visible {
 <!-- Focusable element with visible focus -->
 <a href="/settings">Account settings</a>
 ```
+
+## Framework-Specific Examples
+
+### React/Next.js
+```jsx
+// Custom focus styles in Next.js with Tailwind
+function Navigation() {
+  return (
+    <nav>
+      <a 
+        href="/home"
+        className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        Home
+      </a>
+      <a 
+        href="/about"
+        className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        About
+      </a>
+    </nav>
+  );
+}
+
+// Custom button with focus indicator
+function Button({ children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '8px 16px',
+        border: '1px solid #ccc',
+        borderRadius: '4px'
+      }}
+      className="focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-2"
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+```css
+/* Global focus styles in CSS modules or global CSS */
+*:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+```
+
+### Vue/Nuxt
+```vue
+<template>
+  <nav>
+    <NuxtLink 
+      to="/home"
+      class="nav-link"
+    >
+      Home
+    </NuxtLink>
+    <NuxtLink 
+      to="/about"
+      class="nav-link"
+    >
+      About
+    </NuxtLink>
+  </nav>
+</template>
+
+<style scoped>
+.nav-link {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-link:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Alternative: custom focus ring */
+.nav-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 95, 204, 0.5);
+}
+</style>
+```
+
+### Angular
+```typescript
+// Component template
+<nav>
+  <a 
+    routerLink="/home" 
+    routerLinkActive="active"
+    class="nav-link"
+  >
+    Home
+  </a>
+  <a 
+    routerLink="/about" 
+    routerLinkActive="active"
+    class="nav-link"
+  >
+    About
+  </a>
+</nav>
+
+<button 
+  mat-raised-button 
+  color="primary"
+  (click)="handleClick()"
+>
+  Submit
+</button>
+```
+
+```css
+/* Global styles.css */
+*:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+/* Component styles */
+.nav-link {
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.nav-link:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Angular Material focus indicators are built-in */
+```
+
+### Svelte/SvelteKit
+```svelte
+<nav>
+  <a href="/home" class="nav-link">
+    Home
+  </a>
+  <a href="/about" class="nav-link">
+    About
+  </a>
+</nav>
+
+<button on:click={handleClick} class="custom-button">
+  Submit
+</button>
+
+<style>
+  .nav-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .nav-link:focus-visible {
+    outline: 3px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  
+  .custom-button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+  }
+  
+  .custom-button:focus-visible {
+    outline: 3px solid #0056b3;
+    outline-offset: 2px;
+  }
+  
+  /* Global focus styles using :global() */
+  :global(*:focus-visible) {
+    outline: 3px solid #005fcc;
+    outline-offset: 2px;
+  }
+</style>
+```
+
+### WordPress/PHP
+```php
+<!-- WordPress with custom focus styles -->
+<nav class="main-navigation">
+  <a href="<?php echo esc_url(home_url('/')); ?>" class="nav-link">
+    <?php esc_html_e('Home', 'text-domain'); ?>
+  </a>
+  <a href="<?php echo esc_url(home_url('/about')); ?>" class="nav-link">
+    <?php esc_html_e('About', 'text-domain'); ?>
+  </a>
+</nav>
+```
+
+```css
+/* In theme's style.css */
+*:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.nav-link:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="button"]:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+```
+```

@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
-import { ollamaGenerateStream } from "../utils/ollama";
+import { ollamaGenerateStream, RAG_CONFIG } from "../utils/ollama";
 import { ragRetrieve, buildRagQuery, formatRagContext } from "../utils/rag";
-import { findImgMissingAlt, findInputsMissingLabel } from "../utils/baseline";
+import { runBaselineChecks } from "../utils/baseline";
 import { buildAiPrompt, safeJsonParse , parseTextResponse, aiIssueToDiagnostic, type AiIssue } from "../utils/analysis";
+import { getFileTypeContext } from "../utils/fileTypeContext";
 
 // Map model responses to my standard format since different models use different field names
 function normalizeAiIssue(raw: any): AiIssue {
@@ -31,41 +32,18 @@ function getIssueSignature(issue: AiIssue): string {
 }
 
 // Extract only accessibility-relevant code to send to the model (keeps it fast and focused)
-function buildRelevantExcerpt(doc: vscode.TextDocument, maxChars = 6000): string {
+function buildRelevantExcerpt(doc: vscode.TextDocument, keywords: string[]): string {
+  const maxChars = RAG_CONFIG.maxExcerptChars;
+  const contextLines = RAG_CONFIG.contextLinesAround;
   const lines = doc.getText().split(/\r?\n/);
-
-  const keywords = [
-    "<img",
-    "<input",
-    "<label",
-    "<form",
-    "aria-",
-    "role=",
-    "tabindex",
-    "onclick",
-    "<button",
-    "<a ",
-    "<nav",
-    "<main",
-    "<header",
-    "<footer",
-    "<h1",
-    "<h2",
-    "<h3",
-    "<table",
-    "<select",
-    "<textarea",
-  ];
-
   const chosen = new Set<number>();
 
   // Find lines with accessibility-related keywords and include surrounding context
-  // (grabs 2 lines before and after each match for better context)
   for (let i = 0; i < lines.length; i++) {
     const l = lines[i].toLowerCase();
-    if (keywords.some((k) => l.includes(k))) {
-      // Include the match plus 2 lines of context on each side
-      for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
+    if (keywords.some((k) => l.includes(k.toLowerCase()))) {
+      // Include the match plus configurable context lines on each side
+      for (let j = Math.max(0, i - contextLines); j <= Math.min(lines.length - 1, i + contextLines); j++) {
         chosen.add(j);
       }
     }
@@ -88,9 +66,8 @@ function buildRelevantExcerpt(doc: vscode.TextDocument, maxChars = 6000): string
   return out.slice(0, maxChars);
 }
 
-// Cache RAG results for 60 seconds to avoid redundant API calls
+// Cache RAG results to avoid redundant API calls
 const ragCache = new Map<string, { at: number; context: string }>();
-const RAG_CACHE_TTL_MS = 60_000;
 
 export async function analyzeFileCommand(
   channel: vscode.OutputChannel,
@@ -131,11 +108,18 @@ export async function analyzeFileCommand(
     async (progress, token) => {
       diagnostics.delete(doc.uri);
       const issues: vscode.Diagnostic[] = [];
+      
+      // Get file-type specific keywords for code extraction
+      const fileTypeContext = getFileTypeContext(doc);
+      
+      channel.appendLine(`File type: ${doc.languageId}`);
+      channel.appendLine("");
 
       // Run baseline checks first (simple regex-based validation)
-      if (doc.languageId === "html") {
-        issues.push(...findImgMissingAlt(doc));
-        issues.push(...findInputsMissingLabel(doc));
+      const baselineIssues = runBaselineChecks(doc);
+      if (baselineIssues.length > 0) {
+        channel.appendLine(`Baseline checks found ${baselineIssues.length} issue(s)`);
+        issues.push(...baselineIssues);
       }
 
       if (!model) {
@@ -143,9 +127,8 @@ export async function analyzeFileCommand(
       } else {
         let fullResponse = "";
         try {
-          // Build a focused excerpt of accessibility-related code
-          const excerpt = buildRelevantExcerpt(doc);
-          const topK = 5; // Number of knowledge base chunks to retrieve
+          // Build a focused excerpt of accessibility-related code using file-type specific keywords
+          const excerpt = buildRelevantExcerpt(doc, fileTypeContext.keywords);
           const ragQuery = buildRagQuery(doc.languageId, excerpt);
           // Use language, query, and length as cache key since same inputs = same results
           const cacheKey = `${doc.languageId}::${ragQuery}::${excerpt.length}`;
@@ -154,15 +137,15 @@ export async function analyzeFileCommand(
           let contextBlock: string;
 
           // Check cache first to avoid redundant RAG calls
-          if (cached && Date.now() - cached.at < RAG_CACHE_TTL_MS) {
+          if (cached && Date.now() - cached.at < RAG_CONFIG.cacheTimeMs) {
             contextBlock = cached.context;
-            channel.appendLine(`RAG: cache hit (topK=${topK}).`);
+            channel.appendLine(`RAG: cache hit (topK=${RAG_CONFIG.topK}).`);
           } else {
             const tRag0 = Date.now();
-            const rag = await ragRetrieve(ragEndpoint, ragQuery, topK);
+            const rag = await ragRetrieve(ragEndpoint, ragQuery, RAG_CONFIG.topK);
             contextBlock = formatRagContext(rag.chunks);
             ragCache.set(cacheKey, { at: Date.now(), context: contextBlock });
-            channel.appendLine(`RAG: retrieved ${rag.chunks.length} chunk(s) in ${Date.now() - tRag0} ms (topK=${topK}).`);
+            channel.appendLine(`RAG: retrieved ${rag.chunks.length} chunk(s) in ${Date.now() - tRag0} ms (topK=${RAG_CONFIG.topK}).`);
           }
 
           if (!contextBlock || contextBlock === "(no context)") {

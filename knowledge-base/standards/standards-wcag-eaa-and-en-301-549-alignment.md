@@ -47,9 +47,9 @@ Explain how WCAG guidelines relate to the European Accessibility Act (EAA) and E
 | Robust | 4.1.2 Name, Role, Value | 9.4.1.2 |
 
 ### EAA Compliance Scope Checklist
-- Website accessible to WCAG 2.1 AA? ✓
-- Mobile app follows platform accessibility guidelines? ✓
-- Accessibility statement published? ✓
-- Feedback mechanism for accessibility issues? ✓
-- Support services aware of accessibility features? ✓
-- Documentation describes accessibility features? ✓
+- Website accessible to WCAG 2.1 AA? 
+- Mobile app follows platform accessibility guidelines? 
+- Accessibility statement published? 
+- Feedback mechanism for accessibility issues? 
+- Support services aware of accessibility features? 
+- Documentation describes accessibility features? 

@@ -48,3 +48,193 @@ Ensure all form controls have clear, programmatically associated labels so users
   <label><input type="radio" name="contact" value="phone"> Phone</label>
 </fieldset>
 ```
+
+## Framework-Specific Examples
+
+### React/Next.js
+```jsx
+// Correct label association
+function EmailInput() {
+  return (
+    <>
+      <label htmlFor="email">Email address</label>
+      <input id="email" type="email" />
+    </>
+  );
+}
+
+// Using React Hook Form with labels
+import { useForm } from 'react-hook-form';
+
+function ContactForm() {
+  const { register } = useForm();
+  
+  return (
+    <form>
+      <label htmlFor="name">Name</label>
+      <input {...register('name')} id="name" />
+      
+      <label htmlFor="email">Email</label>
+      <input {...register('email')} id="email" type="email" />
+    </form>
+  );
+}
+
+// Visually hidden label
+function SearchInput() {
+  return (
+    <>
+      <label htmlFor="search" className="sr-only">Search</label>
+      <input id="search" type="text" placeholder="Search..." />
+    </>
+  );
+}
+```
+
+### Vue/Nuxt
+```vue
+<template>
+  <!-- Correct label association -->
+  <div>
+    <label for="email">Email address</label>
+    <input id="email" type="email" v-model="email" />
+  </div>
+  
+  <!-- Visually hidden label -->
+  <div>
+    <label for="search" class="sr-only">Search</label>
+    <input id="search" type="text" v-model="searchQuery" />
+  </div>
+  
+  <!-- Grouped controls -->
+  <fieldset>
+    <legend>Preferred contact method</legend>
+    <label>
+      <input type="radio" name="contact" value="email" v-model="contactMethod" />
+      Email
+    </label>
+    <label>
+      <input type="radio" name="contact" value="phone" v-model="contactMethod" />
+      Phone
+    </label>
+  </fieldset>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const email = ref('');
+const searchQuery = ref('');
+const contactMethod = ref('email');
+</script>
+```
+
+### Angular
+```typescript
+// Component template
+<div>
+  <!-- Correct label association -->
+  <label for="email">Email address</label>
+  <input id="email" type="email" [(ngModel)]="email" />
+  
+  <!-- Using Reactive Forms -->
+  <form [formGroup]="contactForm">
+    <label for="name">Name</label>
+    <input id="name" formControlName="name" />
+    
+    <label for="emailField">Email</label>
+    <input id="emailField" formControlName="email" type="email" />
+  </form>
+  
+  <!-- Angular Material with proper labels -->
+  <mat-form-field>
+    <mat-label>Email address</mat-label>
+    <input matInput type="email" formControlName="email" />
+  </mat-form-field>
+</div>
+
+// Component TypeScript
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+
+@Component({
+  selector: 'app-contact-form',
+  templateUrl: './contact-form.component.html'
+})
+export class ContactFormComponent {
+  email = '';
+  contactForm: FormGroup;
+  
+  constructor(private fb: FormBuilder) {
+    this.contactForm = this.fb.group({
+      name: [''],
+      email: ['']
+    });
+  }
+}
+```
+
+### Svelte/SvelteKit
+```svelte
+<script>
+  let email = '';
+  let searchQuery = '';
+  let contactMethod = 'email';
+</script>
+
+<!-- Correct label association -->
+<label for="email">Email address</label>
+<input id="email" type="email" bind:value={email} />
+
+<!-- Visually hidden label -->
+<label for="search" class="sr-only">Search</label>
+<input id="search" type="text" bind:value={searchQuery} />
+
+<!-- Grouped controls -->
+<fieldset>
+  <legend>Preferred contact method</legend>
+  <label>
+    <input type="radio" name="contact" value="email" bind:group={contactMethod} />
+    Email
+  </label>
+  <label>
+    <input type="radio" name="contact" value="phone" bind:group={contactMethod} />
+    Phone
+  </label>
+</fieldset>
+```
+
+### WordPress/PHP
+```php
+<!-- Using WordPress form helpers -->
+<label for="<?php echo esc_attr($field_id); ?>">
+  <?php echo esc_html($field_label); ?>
+</label>
+<input 
+  id="<?php echo esc_attr($field_id); ?>" 
+  type="email" 
+  name="user_email"
+  value="<?php echo esc_attr($email); ?>" 
+/>
+
+<!-- Contact Form 7 (accessible by default) -->
+<label> Your email
+  [email* your-email] 
+</label>
+```
+
+### Django/Jinja2
+```django
+{# Using Django forms (labels automatic) #}
+{{ form.email.label_tag }}
+{{ form.email }}
+
+{# Manual label association #}
+<label for="{{ form.email.id_for_label }}">Email address</label>
+{{ form.email }}
+
+{# Crispy Forms (accessible by default) #}
+{% load crispy_forms_tags %}
+{{ form|crispy }}
+```
+```

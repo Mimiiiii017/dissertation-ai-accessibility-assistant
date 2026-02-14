@@ -34,22 +34,22 @@ Ensure web content and applications are compatible with voice control and speech
 ```html
 <!-- Voice-friendly: visible label matches accessible name -->
 <button>Submit application</button>
-<!-- Voice user says: "click Submit application" ✓ -->
+<!-- Voice user says: "click Submit application" -->
 
 <!-- Voice-unfriendly: icon only without visible text -->
 <button aria-label="Send">
   <svg aria-hidden="true"><!-- send icon --></svg>
 </button>
-<!-- Voice user cannot see what to say ✗ -->
+<!-- Voice user cannot see what to say -->
 
 <!-- Fixed: icon with visible text -->
 <button>
   <svg aria-hidden="true"><!-- send icon --></svg>
   Send
 </button>
-<!-- Voice user says: "click Send" ✓ -->
+<!-- Voice user says: "click Send" -->
 
 <!-- Voice-friendly link -->
 <a href="/contact">Contact us</a>
-<!-- Voice user says: "click Contact us" ✓ -->
+<!-- Voice user says: "click Contact us" -->
 ```

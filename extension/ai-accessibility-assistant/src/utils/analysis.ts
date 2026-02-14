@@ -11,16 +11,21 @@ export type AiIssue = {
 };
 
 // Build the prompt that tells the AI what to analyze and how to respond
-export function buildAiPrompt(languageId: string, code: string, contextBlock: string): string {
-  return `You are an expert accessibility auditor. Carefully analyze the CODE using the CONTEXT from the knowledge base.
+export function buildAiPrompt(languageId: string, code: string, contextBlock: string, fileTypeInstructions?: string): string {
+  return `You are an expert accessibility auditor performing a COMPREHENSIVE, EXHAUSTIVE analysis. Your goal is to find EVERY accessibility issue in the code.
 
-IMPORTANT:
+ANALYSIS REQUIREMENTS:
 - Review ALL context documents thoroughly before identifying issues
+- Analyze EVERY line of code systematically - do not skip any sections
 - Each issue MUST cite specific contextIds from the knowledge base as evidence
 - Apply WCAG guidelines and best practices from the provided context
-- Identify ALL accessibility issues, not just obvious ones
-- Look for multiple different types of issues (structure, ARIA, keyboard navigation, color contrast, etc.)
-- Return as many issues as you find - there is no limit
+- Find ALL issues: obvious ones AND subtle ones
+- Only report issues that are RELEVANT to what is ACTUALLY PRESENT in this code
+- If something is not in the code (e.g., no colors = no color contrast issues, no forms = no form issues), don't report issues about it
+- There is NO LIMIT to the number of issues - report everything you find
+- Check every element, attribute, style, handler, and interaction
+- Even if you find many issues, keep analyzing until you've reviewed everything
+- Be intelligent: analyze what's there, ignore what's not there
 
 CRITICAL - JSON FORMAT:
 Return ONLY valid, well-formed JSON. No markdown, no comments, no additional text.

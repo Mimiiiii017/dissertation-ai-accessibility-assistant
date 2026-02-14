@@ -88,7 +88,7 @@ Explain the different methods for hiding content in HTML and CSS, and how each m
 
 <!-- INCORRECT: focusable element inside aria-hidden -->
 <div aria-hidden="true">
-  <button>Delete</button> <!-- ✗ DANGER: focusable but hidden from AT -->
+  <button>Delete</button> <!-- DANGER: focusable but hidden from AT -->
 </div>
 
 <!-- CORRECT: use inert to disable an entire section -->

@@ -40,7 +40,7 @@ Ensure web content works well with refreshable braille displays, which render sc
 
 <!-- Use text instead of emoji for meaning -->
 <!-- Incorrect -->
-<p>Status: ✅</p>
+<p>Status: </p>
 <!-- Correct -->
 <p>Status: Approved</p>
 
