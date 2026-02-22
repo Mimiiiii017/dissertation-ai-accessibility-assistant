@@ -1,73 +1,25 @@
+// analyzeFile.ts — orchestrates the full accessibility analysis pipeline from start to finish
+// Implements the "Analyse Current File" command — the main entry point for
+// accessibility analysis. Orchestrates the full pipeline:
+//   1. Baseline regex checks  (baseline.ts)
+//   2. Code excerpt extraction (excerptBuilder.ts)
+//   3. RAG context retrieval   (rag.ts / ragQueryBuilder.ts)
+//   4. Ollama AI analysis      (ollama.ts + prompt.ts)
+//   5. Result parsing          (parser.ts)
+//   6. Diagnostic reporting    (diagnostics.ts)
+// Used by: extension.ts
+
 import * as vscode from "vscode";
-import { ollamaGenerateStream, RAG_CONFIG } from "../utils/ollama";
-import { ragRetrieve, buildRagQuery, formatRagContext } from "../utils/rag";
+import { ollamaGenerateStream } from "../utils/ollama";
+import { ragRetrieve, formatRagContext, RAG_CONFIG } from "../utils/rag";
+import { buildRagQuery } from "../utils/ragQueryBuilder";
 import { runBaselineChecks } from "../utils/baseline";
-import { buildAiPrompt, safeJsonParse , parseTextResponse, aiIssueToDiagnostic, type AiIssue } from "../utils/analysis";
+import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompt";
+import { parseTextResponse } from "../utils/parser";
+import { aiIssueToDiagnostic } from "../utils/diagnostics";
 import { getFileTypeContext } from "../utils/fileTypeContext";
-
-// Map model responses to my standard format since different models use different field names
-function normalizeAiIssue(raw: any): AiIssue {
-  return {
-    severity: raw.severity || "med",
-    title: raw.title || raw.description || "Accessibility issue",
-    explanation: raw.explanation || raw.description || "",
-    fix: raw.fix || raw.solution || "No fix provided",
-    lineHint: raw.lineHint || raw.line_hint,
-    evidence: raw.evidence,
-  };
-}
-
-// Make sure we only show valid issues - filters out incomplete JSON fragments and malformed responses
-function isValidIssue(issue: AiIssue): boolean {
-  // Filter out incomplete or malformed issues
-  const hasValidTitle = !!(issue.title && issue.title.length > 3 && !issue.title.match(/^[{\[\"}\]\s]+$/));
-  const hasContent = !!((issue.explanation && issue.explanation.length > 0) || (issue.fix && issue.fix !== "No fix provided"));
-  return hasValidTitle && hasContent;
-}
-
-// Generate unique ID for each issue to prevent duplicates during streaming
-function getIssueSignature(issue: AiIssue): string {
-  // Create a unique signature for each issue to prevent duplicates during streaming
-  return `${issue.severity}::${issue.title}::${issue.lineHint || 0}`;
-}
-
-// Extract only accessibility-relevant code to send to the model (keeps it fast and focused)
-function buildRelevantExcerpt(doc: vscode.TextDocument, keywords: string[]): string {
-  const maxChars = RAG_CONFIG.maxExcerptChars;
-  const contextLines = RAG_CONFIG.contextLinesAround;
-  const lines = doc.getText().split(/\r?\n/);
-  const chosen = new Set<number>();
-
-  // Find lines with accessibility-related keywords and include surrounding context
-  for (let i = 0; i < lines.length; i++) {
-    const l = lines[i].toLowerCase();
-    if (keywords.some((k) => l.includes(k.toLowerCase()))) {
-      // Include the match plus configurable context lines on each side
-      for (let j = Math.max(0, i - contextLines); j <= Math.min(lines.length - 1, i + contextLines); j++) {
-        chosen.add(j);
-      }
-    }
-  }
-
-  // If no accessibility-related code found, just send the first chunk
-  if (chosen.size === 0) {
-    return `// Excerpt (fallback)\n${doc.getText().slice(0, maxChars)}`;
-  }
-
-  const indices = Array.from(chosen).sort((a, b) => a - b);
-
-  let out = `// Excerpt (selected lines). Total lines: ${lines.length}\n`;
-  for (const idx of indices) {
-    out += `${idx + 1}: ${lines[idx]}\n`;
-    if (out.length >= maxChars) {
-      break;
-    }
-  }
-  return out.slice(0, maxChars);
-}
-
-// Cache RAG results to avoid redundant API calls
-const ragCache = new Map<string, { at: number; context: string }>();
+import { buildRelevantExcerpt, ragCache } from "../utils/excerptBuilder";
+import { getExtensionConfig } from "../utils/config";
 
 export async function analyzeFileCommand(
   channel: vscode.OutputChannel,
@@ -82,11 +34,7 @@ export async function analyzeFileCommand(
   const doc = editor.document;
   const text = doc.getText();
 
-  const cfg = vscode.workspace.getConfiguration("aiAccessibilityAssistant");
-  // Strip trailing slashes to avoid double-slash issues in URLs
-  const ollamaHost = String(cfg.get("ollamaHost", "http://localhost:11434")).replace(/\/$/, "");
-  const model = String(cfg.get("model", ""));
-  const ragEndpoint = String(cfg.get("ragEndpoint", "http://127.0.0.1:8000")).replace(/\/$/, "");
+  const { ollamaHost, model, ragEndpoint } = getExtensionConfig();
 
   channel.show(true);
   channel.appendLine("=== Accessibility: Analyse Current File (Baseline + RAG + Ollama) ===");
@@ -156,99 +104,56 @@ export async function analyzeFileCommand(
           const prompt = buildAiPrompt(doc.languageId, excerpt, contextBlock);
           const t0 = Date.now();
           let firstTokenMs: number | null = null;
-          // Track which issues we've already shown to prevent duplicates
-          const displayedIssues = new Set<string>();
+          let issueStreamStarted = false;  // true once we see "Issue N:" in the stream
+          let preIssueBuffer = "";         // collects tokens before the first issue
+          let stopStreaming = false;       // stop printing after "Final Answer:" etc.
+          let streamedText = "";          // tracks what's been streamed to detect repeats
           
           channel.appendLine("--- Analyzing accessibility issues ---");
           
-          // Stream response from Ollama and parse issues incrementally
+          // Stream response from Ollama — separate thinking from issues
           await ollamaGenerateStream(ollamaHost, model, prompt, (chunk) => {
             fullResponse += chunk;
 
             // Log timing for the very first token received
             if (firstTokenMs === null) {
               firstTokenMs = Date.now() - t0;
-              channel.appendLine(`First token after ${firstTokenMs} ms\n`);
+              channel.appendLine(`First token after ${firstTokenMs} ms`);
+              channel.appendLine('');
             }
-            
-            let aiIssues: AiIssue[] = [];
-            
-            // Try parsing as JSON first, fall back to text parsing if that fails
-            try {
-              const parsed = safeJsonParse(fullResponse) as { issues?: any[] };
-              const rawIssues = Array.isArray(parsed.issues) ? parsed.issues : [];
-              aiIssues = rawIssues.map(normalizeAiIssue).filter(isValidIssue);
-            } catch {
-              // Fallback to text parsing for non-JSON models
-              try {
-                aiIssues = parseTextResponse(fullResponse).filter(isValidIssue);
-              } catch {
-                // Can't parse yet, just keep collecting more chunks
+
+            if (issueStreamStarted) {
+              if (stopStreaming) { return; }
+              // Check if model is starting to repeat with "Final Answer:" or similar
+              streamedText += chunk;
+              if (streamedText.match(/\bFinal\s+Answer\s*:/i)) {
+                // Strip the "Final Answer:..." text from what's already been appended
+                stopStreaming = true;
                 return;
               }
+              channel.append(chunk);
+              return;
             }
 
-            // Only display issues we haven't shown yet (avoids duplicates during streaming)
-            aiIssues.forEach((issue, index) => {
-              const sig = getIssueSignature(issue);
-              if (!displayedIssues.has(sig)) {
-                displayedIssues.add(sig);
-                channel.appendLine(`Issue ${index + 1}: ${issue.title || 'Unknown issue'}`);
-                channel.appendLine(`  Severity: ${issue.severity?.toUpperCase() || 'N/A'}`);
-                if (issue.lineHint) {
-                  channel.appendLine(`  Line: ${issue.lineHint}`);
-                }
-                channel.appendLine(`  Problem: ${issue.explanation || 'No description provided'}`);
-                channel.appendLine(`  Solution: ${issue.fix || 'No solution provided'}`);
-                channel.appendLine('');
-              }
-            });
+            // Buffer everything until we see "Issue <N>:" which marks real output
+            preIssueBuffer += chunk;
+            const issueIdx = preIssueBuffer.search(/Issue\s+\d+\s*:/i);
 
-            // Update diagnostics panel in real-time as issues are found
-            const currentIssues = [...issues];
-            for (const ai of aiIssues) {
-              currentIssues.push(aiIssueToDiagnostic(doc, ai));
+            if (issueIdx >= 0) {
+              issueStreamStarted = true;
+              // Print the issue text that was buffered
+              const issueText = preIssueBuffer.slice(issueIdx);
+              streamedText = issueText;
+              channel.append(issueText);
             }
-            diagnostics.set(doc.uri, currentIssues);
-          });
+          }, SYSTEM_PROMPT);
 
-          // Streaming complete
+          // Ensure newline after streamed content
+          channel.appendLine('');
           channel.appendLine(`Ollama completed in ${Date.now() - t0} ms`);
 
-          // Do a final parse to make sure we got everything (sometimes streaming misses the last bit)
-          let aiIssues: AiIssue[] = [];
-          
-          try {
-            const parsed = safeJsonParse(fullResponse) as { issues?: any[] };
-            const rawIssues = Array.isArray(parsed.issues) ? parsed.issues : [];
-            aiIssues = rawIssues.map(normalizeAiIssue).filter(isValidIssue);
-          } catch {
-            // Fallback to text parsing
-            try {
-              aiIssues = parseTextResponse(fullResponse).filter(isValidIssue);
-            } catch (finalError: any) {
-              channel.appendLine(`\nWARNING: Could not parse final response (${fullResponse.length} chars received)`);
-              if (fullResponse.length === 0) {
-                channel.appendLine("Empty response from model - check if model is loaded correctly.");
-              } else if (fullResponse.length > 0) {
-                channel.appendLine("--- DEBUG: Model response preview ---");
-                channel.appendLine(fullResponse.slice(0, 500));
-                if (fullResponse.length > 500) {
-                  channel.appendLine("...\n(response truncated for display)");
-                }
-              }
-              throw new Error(`Both JSON and text parsing failed. Check model output above.`);
-            }
-          }
-          
-          if (fullResponse.length > 0 && aiIssues.length === 0) {
-            channel.appendLine(`\nWARNING: Model returned ${fullResponse.length} chars but 0 valid issues were extracted.`);
-            channel.appendLine("--- DEBUG: Model response preview ---");
-            channel.appendLine(fullResponse.slice(0, 500));
-            if (fullResponse.length > 500) {
-              channel.appendLine("...\n(response truncated for display)");
-            }
-          }
+          // Parse the completed plain-text response to extract issues for diagnostics
+          const aiIssues = parseTextResponse(fullResponse);
           
           channel.appendLine(`\nAI issues parsed: ${aiIssues.length}`);
           channel.appendLine("--- Summary ---");
@@ -268,14 +173,41 @@ export async function analyzeFileCommand(
         } catch (e: any) {
           const msg = String(e?.message ?? e);
           channel.appendLine(`AI/RAG ERROR: ${msg}`);
+
+          // Unwrap and print the underlying network error cause if present
+          if (e?.cause) {
+            const cause = e.cause;
+            const causeDetail = cause?.code
+              ? `${cause.code}: ${cause.message ?? cause}`
+              : String(cause?.message ?? cause);
+            channel.appendLine(`  Cause: ${causeDetail}`);
+          }
+
+          // Suggest likely fixes based on the error message
+          if (msg.includes("connection failed") || msg.includes("ECONNREFUSED")) {
+            channel.appendLine("  → Is Ollama running? Try: ollama serve");
+          } else if (msg.includes("timed out")) {
+            channel.appendLine("  → The model took too long. It may have run out of RAM.");
+            channel.appendLine("  → Try a smaller model, or increase available memory.");
+          } else if (msg.includes("ECONNRESET") || msg.includes("socket hang up")) {
+            channel.appendLine("  → Ollama closed the connection mid-stream.");
+            channel.appendLine("  → The model may have crashed (out of memory) or restarted.");
+            channel.appendLine("  → Run: ollama ps  to check if the model is still loaded.");
+          } else if (msg.includes("HTTP 404")) {
+            channel.appendLine("  → Model not found. Run 'Accessibility: Select Ollama Model' to pick one.");
+          } else if (msg.includes("HTTP 5")) {
+            channel.appendLine("  → Ollama returned a server error. Check Ollama logs for details.");
+          }
+
           channel.appendLine("Continuing with baseline-only results.");
           channel.appendLine("");
           
-          // Log debug info if response was received
+          // Log the partial response if any tokens were received (helps diagnose cut-off issues)
           if (typeof fullResponse === 'string' && fullResponse.length > 0) {
-            channel.appendLine("--- DEBUG: First 500 chars of Ollama response ---");
+            channel.appendLine(`--- DEBUG: Received ${fullResponse.length} chars before error ---`);
+            channel.appendLine("--- First 500 chars ---");
             channel.appendLine(fullResponse.slice(0, 500));
-            channel.appendLine("--- DEBUG: Last 500 chars of Ollama response ---");
+            channel.appendLine("--- Last 500 chars ---");
             channel.appendLine(fullResponse.slice(-500));
             channel.appendLine("");
           }

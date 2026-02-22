@@ -1,3 +1,12 @@
+// ollama.ts — sends prompts to the local Ollama server and streams the response back
+// All communication with the local Ollama server.
+// Exposes:
+//   ollamaListModels     — fetches available model names (/api/tags)
+//   ollamaWarmup         — pre-loads a model to reduce first-analysis latency
+//   ollamaGenerateStream — streams the chat response chunk-by-chunk (/api/chat)
+//   ANALYSIS_OPTIONS     — tuneable generation parameters (temperature, tokens, etc.)
+// Used by: commands/analyzeFile.ts, commands/selectModel.ts
+
 type OllamaTagsResponse = { models: { name: string }[] };
 
 // Ollama can respond in different formats depending on the endpoint
@@ -23,16 +32,25 @@ export interface OllamaOptions {
   mirostat?: number; // 0=disabled, 1=Mirostat v1, 2=Mirostat v2 (alternative sampling, usually leave at 0)
 }
 
-// Fetch list of available models from Ollama server
-export async function ollamaListModels(host: string): Promise<string[]> {
-  const base = host.replace(/\/$/, "");
-  const url = `${base}/api/tags`;
+// Strip trailing slashes so URL construction never produces double-slashes
+function normalizeHost(host: string): string {
+  return host.replace(/\/$/, "");
+}
 
-  const res = await fetch(url, { method: "GET" });
+// Read the response body and throw a descriptive error if the request failed
+async function throwIfNotOk(res: Response, context: string): Promise<void> {
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Ollama tags failed (HTTP ${res.status}): ${body || res.statusText}`);
+    throw new Error(`${context} (HTTP ${res.status}): ${body || res.statusText}`);
   }
+}
+
+// Fetch list of available models from Ollama server
+export async function ollamaListModels(host: string): Promise<string[]> {
+  const url = `${normalizeHost(host)}/api/tags`;
+
+  const res = await fetch(url, { method: "GET" });
+  await throwIfNotOk(res, "Ollama tags failed");
 
   const data = (await res.json()) as OllamaTagsResponse;
   return (data.models ?? []).map((m) => m.name).filter(Boolean).sort();
@@ -40,7 +58,7 @@ export async function ollamaListModels(host: string): Promise<string[]> {
 
 // Send a dummy request to load the model into memory (makes first real analysis faster)
 export async function ollamaWarmup(host: string, model: string): Promise<void> {
-  const url = `${host.replace(/\/$/, "")}/api/generate`;
+  const url = `${normalizeHost(host)}/api/generate`;
 
   try {
     await fetch(url, {
@@ -62,7 +80,7 @@ export async function ollamaWarmup(host: string, model: string): Promise<void> {
 export const ANALYSIS_OPTIONS: OllamaOptions = {
   num_predict: 10000,         // Max response length
   num_ctx: 8192,              // Context window
-  temperature: 0.1,           // Low = focused/consistent
+  temperature: 0.3,           // Low = focused/consistent
   top_p: 0.9,                 // Nucleus sampling
   top_k: 40,                  // Top-k sampling
   repeat_penalty: 1.1,        // Discourage repetition
@@ -73,42 +91,66 @@ export const ANALYSIS_OPTIONS: OllamaOptions = {
   mirostat: 0,                // 0 = disabled (use temperature/top_p)
 };
 
-// RAG and code extraction configuration - Centralized settings for testing/tuning
-export const RAG_CONFIG = {
-  topK: 5,                    // Number of knowledge base chunks to retrieve
-  maxExcerptChars: 6000,      // Max characters to extract from code
-  cacheTimeMs: 60000,         // Cache RAG results for 60 seconds
-  contextLinesAround: 2,      // Lines of context around keyword matches
-};
+/** How long to wait for the full generation before giving up (ms). */
+const GENERATE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
-// Stream response from Ollama
+// Unwrap the cause chain from a fetch network error into a readable string
+function describeFetchError(e: any): string {
+  const cause = e?.cause;
+  if (!cause) { return String(e?.message ?? e); }
+  // cause may itself be a chain (e.g. AggregateError wrapping ECONNREFUSED)
+  const causeMsg = cause?.code
+    ? `${cause.code}: ${cause.message ?? cause}`
+    : String(cause?.message ?? cause);
+  return `${e.message} — ${causeMsg}`;
+}
+
+// Stream response from Ollama using the chat API with system + user messages
 export async function ollamaGenerateStream(
   host: string,
   model: string,
   prompt: string,
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
+  systemPrompt?: string
 ): Promise<void> {
-  const url = `${host.replace(/\/$/, "")}/api/generate`;
+  const url = `${normalizeHost(host)}/api/chat`;
   
   // Use the parameters defined at the top of this file
   const modelOptions = ANALYSIS_OPTIONS;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      prompt,
-      stream: true,
-      format: "json", // Request JSON but not all models respect this
-      options: modelOptions,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Ollama generate failed (HTTP ${res.status}): ${body || res.statusText}`);
+  const messages: { role: string; content: string }[] = [];
+  if (systemPrompt) {
+    messages.push({ role: "system", content: systemPrompt });
   }
+  messages.push({ role: "user", content: prompt });
+
+  // Abort the request if Ollama takes longer than GENERATE_TIMEOUT_MS
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages,
+        stream: true,
+        options: modelOptions,
+      }),
+      signal: controller.signal,
+    });
+  } catch (e: any) {
+    clearTimeout(timeoutId);
+    if (e?.name === "AbortError") {
+      throw new Error(`Ollama request timed out after ${GENERATE_TIMEOUT_MS / 1000}s. The model may be too slow or out of memory.`);
+    }
+    throw new Error(`Ollama connection failed — ${describeFetchError(e)}`);
+  }
+
+  clearTimeout(timeoutId);
+  await throwIfNotOk(res, "Ollama generate failed");
 
   const reader = res.body?.getReader();
   if (!reader) {

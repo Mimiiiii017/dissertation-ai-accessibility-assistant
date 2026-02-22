@@ -1,15 +1,34 @@
-/**
- * File Type Context - Multimodal Accessibility Analysis FOOR ALL TYPES OF TECHSTACKS
- * Provides comprehensive keyword extraction for accessibility analysis across all modalities:
- * Based on WCAG 2.2 (A, AA, AAA) and European Accessibility Act (EAA) requirements.
- * RAG knowledge base provides detailed context for each pattern during analysis.
- */
+// fileTypeContext.ts — decides which lines of code to extract from the active file
+// Returns a list of accessibility-relevant keywords for the active file's
+// language and framework. These keywords drive the excerpt builder — only
+// lines containing them (plus surrounding context) are sent to the model,
+// keeping prompts short and focused.
+// Covers 30+ languages and frameworks based on WCAG 2.2 (A, AA, AAA) and
+// the European Accessibility Act (EAA).
+// Used by: commands/analyzeFile.ts
 
 import * as vscode from "vscode";
 
 export interface FileTypeContext {
   keywords: string[];
 }
+
+// ---------------------------------------------------------------------------
+// Shared ARIA keyword constants
+// Spread these into each framework's keywords array to avoid repeating the
+// same boilerplate attribute strings across 30+ sections.
+// ---------------------------------------------------------------------------
+
+/** The three universal label attributes present in every HTML-producing framework */
+const ARIA_LABELS: readonly string[] = [
+  "aria-label", "aria-labelledby", "aria-describedby",
+];
+
+/** Full ARIA widget-state set used in rich SPA frameworks */
+const ARIA_WIDGET_STATES: readonly string[] = [
+  "aria-expanded", "aria-pressed", "aria-checked", "aria-selected",
+  "aria-current", "aria-disabled", "aria-invalid", "aria-required",
+];
 
 // Get comprehensive file type context for multimodal accessibility analysis
 export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
@@ -69,7 +88,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "<table", "<th", "<td", "scope=", "<caption", "headers=", "<thead", "<tbody",
         
         // ARIA: Roles & Properties
-        "aria-label", "aria-labelledby", "aria-describedby", "aria-hidden",
+        ...ARIA_LABELS, "aria-hidden",
         
         // ARIA: Live Regions & Dynamic Content
         "aria-live", "aria-atomic", "aria-busy", "role=\"alert", "role=\"status",
@@ -168,12 +187,11 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
       return {
         keywords: [
           // ARIA: Roles & Labels
-          "aria-label", "aria-labelledby", "aria-describedby", "role=",
+          ...ARIA_LABELS, "role=",
           "aria-hidden", "aria-live", "aria-atomic", "aria-busy",
           
           // ARIA: Widget States
-          "aria-expanded", "aria-pressed", "aria-checked", "aria-selected",
-          "aria-current", "aria-disabled", "aria-invalid", "aria-required",
+          ...ARIA_WIDGET_STATES,
           
           // MOTOR: Keyboard Events
           "onKeyDown", "onKeyUp", "onKeyPress", "onKeyboardEvent",
@@ -247,12 +265,11 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
       return {
         keywords: [
           // ARIA: Roles & Labels
-          "aria-label", "aria-labelledby", "aria-describedby", "role=",
+          ...ARIA_LABELS, "role=",
           "aria-hidden", "aria-live", "aria-atomic", "aria-busy",
           
           // ARIA: Widget States
-          "aria-expanded", "aria-pressed", "aria-checked", "aria-selected",
-          "aria-current", "aria-disabled", "aria-invalid", "aria-required",
+          ...ARIA_WIDGET_STATES,
           
           // MOTOR: Keyboard Events
           "@keydown", "@keyup", "@keypress", "tabindex", "autofocus",
@@ -322,12 +339,11 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
       return {
         keywords: [
           // ARIA: Roles & Labels
-          "aria-label", "aria-labelledby", "aria-describedby", "role=",
+          ...ARIA_LABELS, "role=",
           "aria-hidden", "aria-live", "aria-atomic", "aria-busy",
           
           // ARIA: Widget States
-          "aria-expanded", "aria-pressed", "aria-checked", "aria-selected",
-          "aria-current", "aria-disabled", "aria-invalid", "aria-required",
+          ...ARIA_WIDGET_STATES,
           
           // MOTOR: Keyboard Events
           "(keydown)", "(keyup)", "(keypress)", "tabindex", "autofocus",
@@ -451,12 +467,11 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Roles & Labels
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         "aria-hidden", "aria-live", "aria-atomic", "aria-busy",
         
         // ARIA: Widget States
-        "aria-expanded", "aria-pressed", "aria-checked", "aria-selected",
-        "aria-current", "aria-disabled", "aria-invalid", "aria-required",
+        ...ARIA_WIDGET_STATES,
         
         // MOTOR: Keyboard Events
         "on:keydown", "on:keyup", "on:keypress", "tabindex", "autofocus",
@@ -506,7 +521,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: All attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         "aria-hidden", "aria-live", "aria-expanded", "aria-pressed",
         
         // MOTOR: Events & Focus
@@ -594,7 +609,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         
         // STRUCTURE: Semantic elements
         "<nav", "<main", "<header", "<footer", "<button", "<input",
@@ -620,7 +635,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         "aria-hidden", "aria-live", "aria-expanded",
         
         // STRUCTURE: Semantic HTML
@@ -652,7 +667,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         "aria-hidden", "aria-live",
         
         // JINJA/DJANGO: Template syntax
@@ -710,7 +725,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         
         // EJS: Template syntax
         "<%=", "<%", "%>", "<%- include",
@@ -768,7 +783,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby", "role=",
+        ...ARIA_LABELS, "role=",
         "aria-hidden", "aria-live", "aria-expanded",
         
         // EMBER: Template syntax (Handlebars)
@@ -849,7 +864,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
     return {
       keywords: [
         // ARIA: SVG accessibility
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden",
         
         // SVG: Accessible SVG elements
@@ -907,7 +922,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "---", "Astro.props", "Astro.slots",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live", "role=",
         
         // STRUCTURE: Semantic HTML
@@ -977,7 +992,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "Html.BeginForm", "Html.ActionLink",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         
         // STRUCTURE: Semantic HTML
         "<nav", "<main", "<header", "<footer",
@@ -1004,7 +1019,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "{% include", "{{ form_widget", "{{ form_label",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live",
         
         // STRUCTURE: Semantic HTML
@@ -1036,7 +1051,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "{% assign", "{% capture",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live",
         
         // STRUCTURE: Semantic HTML
@@ -1070,7 +1085,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "{{ define", "{{ block", "{{ end }}",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live",
         
         // STRUCTURE: Semantic HTML
@@ -1157,7 +1172,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "$:", "onClick$", "onKeyDown$",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live", "role=",
         
         // MOTOR: Events (Qwik syntax)
@@ -1188,7 +1203,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "alt=", "priority", "loading=", "placeholder=",
         
         // ARIA: All React patterns plus Next.js
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden", "aria-live",
         
         // MOTOR: Navigation
@@ -1220,7 +1235,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "alt=", ":alt", "loading=", "sizes=",
         
         // ARIA: All Vue patterns plus Nuxt
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden", "aria-live",
         
         // MOTOR: Navigation
@@ -1265,7 +1280,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "w-", "h-", "p-", "min-w-", "min-h-",
         
         // ARIA: Standard attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         
         // STRUCTURE: Semantic elements
         "<button", "<input", "<nav", "<main"
@@ -1325,7 +1340,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "meta", "links", "title", "description",
         
         // ARIA: All React patterns
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden", "aria-live", "aria-busy",
         
         // MOTOR: Events & focus
@@ -1355,7 +1370,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "use:enhance", "<form", "method=", "action=",
         
         // ARIA: All Svelte patterns
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "aria-hidden", "aria-live", "role=",
         
         // MOTOR: Events
@@ -1386,7 +1401,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "alt=", "loading=", "placeholder=",
         
         // ARIA: All React patterns
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden",
         
         // MOTOR: Navigation
@@ -1420,7 +1435,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         
         // WORDPRESS: Accessibility
         "screen-reader-text", "skip-link",
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         
         // STRUCTURE: Semantic HTML
         "<nav", "<main", "<header", "<footer", "<article",
@@ -1450,7 +1465,7 @@ export function getFileTypeContext(doc: vscode.TextDocument): FileTypeContext {
         "content.field_", "{{ content.body",
         
         // ARIA: Attributes
-        "aria-label", "aria-labelledby", "aria-describedby",
+        ...ARIA_LABELS,
         "role=", "aria-hidden",
         
         // STRUCTURE: Semantic HTML

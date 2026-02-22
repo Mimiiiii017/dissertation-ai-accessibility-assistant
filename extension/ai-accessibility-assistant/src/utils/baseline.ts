@@ -1,4 +1,28 @@
+// baseline.ts — runs fast regex checks for common issues before the AI analysis starts
+// Fast, regex-based accessibility checks that run before the AI analysis.
+// Does not require Ollama or the RAG service — results appear instantly.
+// Currently checks:
+//   HTML — images missing alt text, form inputs missing associated labels
+//   CSS  — interactive elements missing :focus styles
+// Used by: commands/analyzeFile.ts
+
 import * as vscode from "vscode";
+
+const BASELINE_SOURCE = "AI Accessibility Assistant (baseline)";
+
+// Helper to create a baseline diagnostic without repeating the range/source boilerplate
+function makeDiag(
+  doc: vscode.TextDocument,
+  matchIndex: number,
+  matchLength: number,
+  message: string,
+  severity: vscode.DiagnosticSeverity
+): vscode.Diagnostic {
+  const range = new vscode.Range(doc.positionAt(matchIndex), doc.positionAt(matchIndex + matchLength));
+  const d = new vscode.Diagnostic(range, message, severity);
+  d.source = BASELINE_SOURCE;
+  return d;
+}
 
 // Run appropriate baseline checks based on file type
 export function runBaselineChecks(doc: vscode.TextDocument): vscode.Diagnostic[] {
@@ -36,17 +60,11 @@ export function findImgMissingAlt(doc: vscode.TextDocument): vscode.Diagnostic[]
     const altValue = altMatch?.[1]?.trim();
 
     if (!altMatch || !altValue) {
-      const start = doc.positionAt(match.index);
-      const end = doc.positionAt(match.index + tag.length);
-      const range = new vscode.Range(start, end);
-
-      const d = new vscode.Diagnostic(
-        range,
+      diags.push(makeDiag(
+        doc, match.index, tag.length,
         "Image is missing a meaningful alt attribute (screen readers may not describe it).",
         vscode.DiagnosticSeverity.Warning
-      );
-      d.source = "AI Accessibility Assistant (baseline)";
-      diags.push(d);
+      ));
     }
   }
 
@@ -74,17 +92,11 @@ export function findInputsMissingLabel(doc: vscode.TextDocument): vscode.Diagnos
     const idValue = idMatch?.[1]?.trim();
 
     if (!idValue) {
-      const start = doc.positionAt(match.index);
-      const end = doc.positionAt(match.index + tag.length);
-      const range = new vscode.Range(start, end);
-
-      const d = new vscode.Diagnostic(
-        range,
+      diags.push(makeDiag(
+        doc, match.index, tag.length,
         'Input is missing an id (needed to associate it with a <label for="...">).',
         vscode.DiagnosticSeverity.Warning
-      );
-      d.source = "AI Accessibility Assistant (baseline)";
-      diags.push(d);
+      ));
       continue;
     }
 
@@ -94,17 +106,11 @@ export function findInputsMissingLabel(doc: vscode.TextDocument): vscode.Diagnos
     );
 
     if (!labelForRegex.test(text)) {
-      const start = doc.positionAt(match.index);
-      const end = doc.positionAt(match.index + tag.length);
-      const range = new vscode.Range(start, end);
-
-      const d = new vscode.Diagnostic(
-        range,
+      diags.push(makeDiag(
+        doc, match.index, tag.length,
         `Input id="${idValue}" has no matching <label for="${idValue}">.`,
         vscode.DiagnosticSeverity.Warning
-      );
-      d.source = "AI Accessibility Assistant (baseline)";
-      diags.push(d);
+      ));
     }
   }
 
@@ -134,17 +140,11 @@ export function findMissingFocusStyles(doc: vscode.TextDocument): vscode.Diagnos
       const nearbyText = text.slice(Math.max(0, match.index - 500), Math.min(text.length, match.index + 500));
       
       if (!nearbyText.includes(":focus") && !nearbyText.includes("outline")) {
-        const start = doc.positionAt(match.index);
-        const end = doc.positionAt(match.index + match[0].length);
-        const range = new vscode.Range(start, end);
-        
-        const d = new vscode.Diagnostic(
-          range,
+        diags.push(makeDiag(
+          doc, match.index, match[0].length,
           `${pattern.name} may be missing :focus styles for keyboard navigation.`,
           vscode.DiagnosticSeverity.Information
-        );
-        d.source = "AI Accessibility Assistant (baseline)";
-        diags.push(d);
+        ));
       }
     }
   }
