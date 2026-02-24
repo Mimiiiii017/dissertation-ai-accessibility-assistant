@@ -68,12 +68,41 @@ export function parseTextResponse(text: string): AiIssue[] {
     issues.push(issue);
   }
 
-  // Deduplicate by title + line number (some models repeat issues)
+  // Post-processing filters
+
+  // 1. Drop issues whose explanation says "not applicable" / "N/A" / speculative / unverifiable
+  const NA_PATTERNS = [
+    /not\s+applicable/i,
+    /\bN\/A\b/,
+    /not\s+present\s+in\s+this/i,
+    /no\s+.*\s+(?:present|visible|found)/i,
+    /if\s+(?:present|any|used|available)/i,
+    /cannot\s+(?:verify|confirm|determine)/i,
+    /can(?:'t|not)\s+(?:verify|confirm|determine)/i,
+    /without\s+seeing/i,
+    /(?:exact|actual)\s+.*(?:isn't|is not)\s+specified/i,
+    /we\s+cannot\s+verify/i,
+    /appears?\s+to\s+be/i,
+  ];
+
+  const filtered = issues.filter(issue => {
+    const text = `${issue.title || ''} ${issue.explanation || ''}`;
+    return !NA_PATTERNS.some(p => p.test(text));
+  });
+
+  // 2. Deduplicate by normalised title (ignore line — same problem = same issue)
   const seen = new Set<string>();
-  return issues.filter(issue => {
-    const key = `${(issue.title || '').toLowerCase()}::${issue.lineHint || 0}`;
-    if (seen.has(key)) { return false; }
-    seen.add(key);
+  const deduped = filtered.filter(issue => {
+    // Normalise: lowercase, strip "missing aria attributes on", collapse whitespace
+    const norm = (issue.title || '')
+      .toLowerCase()
+      .replace(/missing\s+aria\s+attributes?\s+on\s+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (seen.has(norm)) { return false; }
+    seen.add(norm);
     return true;
   });
+
+  return deduped;
 }

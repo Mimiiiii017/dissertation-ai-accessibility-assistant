@@ -78,7 +78,7 @@ export async function ollamaWarmup(host: string, model: string): Promise<void> {
 
 // Analysis options - Changing these parameters will tune model behavior
 export const ANALYSIS_OPTIONS: OllamaOptions = {
-  num_predict: 10000,         // Max response length
+  num_predict: 10000,          // Max response length
   num_ctx: 8192,              // Context window
   temperature: 0.3,           // Low = focused/consistent
   top_p: 0.9,                 // Nucleus sampling

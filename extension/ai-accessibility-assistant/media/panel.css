@@ -1,0 +1,174 @@
+/* panel.css — styles for the Accessibility Assistant sidebar webview */
+
+:root {
+  --pad: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-sideBar-background);
+  padding: var(--pad);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+.header {
+  margin-bottom: 10px;
+}
+.header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-foreground);
+  margin-bottom: 6px;
+}
+/* Model row (dropdown + badge) */
+.model-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#modelSelect {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font-family: var(--vscode-font-family);
+  font-size: 11px;
+  color: var(--vscode-dropdown-foreground);
+  background: var(--vscode-dropdown-background);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  appearance: auto;
+}
+#modelSelect:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.model-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-badge-background);
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.model-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--vscode-charts-green);
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+button {
+  flex: 1;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--vscode-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  transition: background 0.15s;
+}
+button:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.secondary {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+button.secondary:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Output log */
+.output-area {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  padding: 8px;
+  font-family: var(--vscode-editor-font-family, 'Consolas, monospace');
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.output-area .log-line {
+  color: var(--vscode-terminal-foreground);
+}
+.output-area .stream-block {
+  color: var(--vscode-editor-foreground);
+  border-left: 2px solid var(--vscode-textLink-foreground);
+  padding-left: 8px;
+  margin: 4px 0;
+}
+.output-area .error-line {
+  color: var(--vscode-errorForeground);
+}
+.output-area .separator {
+  border-top: 1px solid var(--vscode-panel-border);
+  margin: 6px 0;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+.spinner {
+  display: none;
+  width: 12px; height: 12px;
+  border: 2px solid var(--vscode-descriptionForeground);
+  border-top-color: var(--vscode-textLink-foreground);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.spinner.active { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toolbar row */
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.toolbar button {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+}
+.toolbar button:hover {
+  color: var(--vscode-foreground);
+  background: var(--vscode-toolbar-hoverBackground);
+}

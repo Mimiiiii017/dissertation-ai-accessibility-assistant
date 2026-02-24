@@ -1,0 +1,181 @@
+// analysePanel.ts — analysis pipeline for the webview panel
+// Orchestrates baseline + RAG + Ollama analysis and streams results
+// to the panel via PanelLogger callbacks.
+// Used by: webview/AccessibilityPanel.ts
+
+import * as vscode from "vscode";
+import { ollamaGenerateStream } from "../utils/ollama";
+import { ragRetrieve, formatRagContext, RAG_CONFIG } from "../utils/rag";
+import { buildRagQuery } from "../utils/ragQueryBuilder";
+import { runBaselineChecks } from "../utils/baseline";
+import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompt";
+import { parseTextResponse } from "../utils/parser";
+import { aiIssueToDiagnostic } from "../utils/diagnostics";
+import { getFileTypeContext } from "../utils/fileTypeContext";
+import { buildRelevantExcerpt, ragCache } from "../utils/excerptBuilder";
+import { getExtensionConfig } from "../utils/config";
+import type { PanelLogger } from "../webview/panelLogger";
+
+export async function analyseFileForPanel(
+  logger: PanelLogger,
+  diagnostics: vscode.DiagnosticCollection
+): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showWarningMessage("Open a file first, then run Analyse.");
+    return;
+  }
+
+  const doc = editor.document;
+  const text = doc.getText();
+  const { ollamaHost, model, ragEndpoint } = getExtensionConfig();
+
+  logger.log("═══ Accessibility Analysis ═══");
+  logger.log(`File: ${doc.fileName}`);
+  logger.log(`Language: ${doc.languageId}  |  Lines: ${doc.lineCount}  |  Chars: ${text.length}`);
+  logger.log(`Model: ${model || "(not set)"}  |  RAG: ${ragEndpoint}`);
+  logger.log("");
+
+  diagnostics.delete(doc.uri);
+  const issues: vscode.Diagnostic[] = [];
+  const fileTypeContext = getFileTypeContext(doc);
+
+  // Baseline checks
+  const baselineIssues = runBaselineChecks(doc);
+  if (baselineIssues.length > 0) {
+    logger.log(`Baseline: ${baselineIssues.length} issue(s) found`);
+    issues.push(...baselineIssues);
+  }
+
+  // AI analysis
+  if (!model) {
+    logger.log("No model selected — skipping AI analysis.");
+  } else {
+    let fullResponse = "";
+    try {
+      const excerpt = buildRelevantExcerpt(doc, fileTypeContext.keywords);
+      const ragQuery = buildRagQuery(doc.languageId, excerpt);
+      const cacheKey = `${doc.languageId}::${ragQuery}::${excerpt.length}`;
+
+      const cached = ragCache.get(cacheKey);
+      let contextBlock: string;
+
+      if (cached && Date.now() - cached.at < RAG_CONFIG.cacheTimeMs) {
+        contextBlock = cached.context;
+        logger.log("RAG: cache hit");
+      } else {
+        const t0 = Date.now();
+        const rag = await ragRetrieve(ragEndpoint, ragQuery, RAG_CONFIG.topK);
+        contextBlock = formatRagContext(rag.chunks);
+        ragCache.set(cacheKey, { at: Date.now(), context: contextBlock });
+        logger.log(`RAG: ${rag.chunks.length} chunk(s) in ${Date.now() - t0} ms`);
+      }
+
+      if (!contextBlock || contextBlock === "(no context)") {
+        logger.log("⚠ No knowledge-base chunks retrieved.");
+      }
+
+      const prompt = buildAiPrompt(doc.languageId, excerpt, contextBlock);
+      const t0 = Date.now();
+      let firstTokenMs: number | null = null;
+      let issueStreamStarted = false;
+      let preIssueBuffer = "";
+      let stopStreaming = false;
+      let streamedText = "";
+
+      logger.postMessage({ type: "streamStart" });
+
+      await ollamaGenerateStream(
+        ollamaHost,
+        model,
+        prompt,
+        (chunk) => {
+          fullResponse += chunk;
+          if (firstTokenMs === null) {
+            firstTokenMs = Date.now() - t0;
+          }
+
+          if (issueStreamStarted) {
+            if (stopStreaming) { return; }
+            streamedText += chunk;
+            if (streamedText.match(/\bFinal\s+Answer\s*:/i)) {
+              stopStreaming = true;
+              return;
+            }
+            logger.streamChunk(chunk);
+            return;
+          }
+
+          preIssueBuffer += chunk;
+          const issueIdx = preIssueBuffer.search(/Issue\s+\d+\s*:/i);
+          if (issueIdx >= 0) {
+            issueStreamStarted = true;
+            const issueText = preIssueBuffer.slice(issueIdx);
+            streamedText = issueText;
+            logger.streamChunk(issueText);
+          }
+        },
+        SYSTEM_PROMPT
+      );
+
+      logger.postMessage({ type: "streamEnd" });
+      logger.log(`\nCompleted in ${Date.now() - t0} ms (first token: ${firstTokenMs} ms)`);
+
+      const aiIssues = parseTextResponse(fullResponse);
+      logger.log(`AI issues: ${aiIssues.length}`);
+
+      for (const ai of aiIssues) {
+        issues.push(aiIssueToDiagnostic(doc, ai));
+      }
+
+      if (aiIssues.length > 0) {
+        logger.log("");
+        logger.log("Summary:");
+        aiIssues.forEach((ai, i) => {
+          logger.log(`  ${i + 1}. [${ai.severity}] ${ai.title}`);
+        });
+      }
+    } catch (e: any) {
+      const msg = String(e?.message ?? e);
+      logger.log(`\nERROR: ${msg}`);
+
+      if (e?.cause) {
+        const cause = e.cause;
+        const detail = cause?.code
+          ? `${cause.code}: ${cause.message ?? cause}`
+          : String(cause?.message ?? cause);
+        logger.log(`  Cause: ${detail}`);
+      }
+
+      if (msg.includes("connection failed") || msg.includes("ECONNREFUSED")) {
+        logger.log("  → Is Ollama running? Try: ollama serve");
+      } else if (msg.includes("timed out")) {
+        logger.log("  → Model too slow — try a smaller one.");
+      } else if (msg.includes("ECONNRESET") || msg.includes("socket hang up")) {
+        logger.log("  → Ollama closed the connection (likely OOM).");
+      } else if (msg.includes("HTTP 404")) {
+        logger.log("  → Model not found. Select one first.");
+      } else if (msg.includes("HTTP 5")) {
+        logger.log("  → Ollama server error. Check Ollama logs.");
+      }
+
+      logger.log("Continuing with baseline-only results.");
+
+      if (fullResponse.length > 0) {
+        logger.log(`  (received ${fullResponse.length} chars before error)`);
+      }
+    }
+  }
+
+  diagnostics.set(doc.uri, issues);
+
+  if (issues.length > 0) {
+    logger.log(`\nTotal issues: ${issues.length} (see Problems tab)`);
+    vscode.window.showWarningMessage(
+      `Accessibility: ${issues.length} issue(s). Check Problems tab.`
+    );
+  } else {
+    logger.log("\n✓ No issues found.");
+    vscode.window.showInformationMessage("Accessibility: No issues found.");
+  }
+}

@@ -9,13 +9,30 @@
   "categories": ["Other"],
 
   "activationEvents": [
-    "onCommand:ai-accessibility-assistant.analyseFile",
-    "onCommand:ai-accessibility-assistant.selectModel"
+    "onView:aiAccessibilityAssistant.panel"
   ],
 
   "main": "./dist/extension.js",
 
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiAccessibilityAssistant",
+          "title": "Accessibility Assistant",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "aiAccessibilityAssistant": [
+        {
+          "type": "webview",
+          "id": "aiAccessibilityAssistant.panel",
+          "name": "Accessibility Assistant"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ai-accessibility-assistant.analyseFile",

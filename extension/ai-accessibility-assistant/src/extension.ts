@@ -1,24 +1,43 @@
 import * as vscode from "vscode";
-import { selectModelCommand } from "./commands/selectModel";
-import { analyzeFileCommand } from "./commands/analyzeFile";
+import {
+  AccessibilityPanelProvider,
+  VIEW_ID,
+} from "./webview/AccessibilityPanel";
 
 export function activate(context: vscode.ExtensionContext) {
-  const channel = vscode.window.createOutputChannel("AI Accessibility Assistant");
-  const diagnostics = vscode.languages.createDiagnosticCollection("ai-accessibility-assistant");
+  const diagnostics = vscode.languages.createDiagnosticCollection(
+    "ai-accessibility-assistant"
+  );
 
-  channel.appendLine("AI Accessibility Assistant activated.");
+  // Register the sidebar webview panel
+  const panelProvider = new AccessibilityPanelProvider(
+    context.extensionUri,
+    diagnostics
+  );
+
+  const viewDisposable = vscode.window.registerWebviewViewProvider(
+    VIEW_ID,
+    panelProvider,
+    { webviewOptions: { retainContextWhenHidden: true } }
+  );
+
+  // Commands still work from the Command Palette — they delegate to the panel
+  const analyseDisposable = vscode.commands.registerCommand(
+    "ai-accessibility-assistant.analyseFile",
+    () => panelProvider.analyseFromCommand()
+  );
 
   const selectModelDisposable = vscode.commands.registerCommand(
     "ai-accessibility-assistant.selectModel",
-    () => selectModelCommand(channel)
+    () => panelProvider.selectModelFromCommand()
   );
 
-  const analyseDisposable = vscode.commands.registerCommand(
-    "ai-accessibility-assistant.analyseFile",
-    () => analyzeFileCommand(channel, diagnostics)
+  context.subscriptions.push(
+    diagnostics,
+    viewDisposable,
+    analyseDisposable,
+    selectModelDisposable
   );
-
-  context.subscriptions.push(channel, diagnostics, selectModelDisposable, analyseDisposable);
 }
 
 export function deactivate() {}
