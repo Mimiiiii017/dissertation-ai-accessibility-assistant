@@ -6,6 +6,7 @@
 
 import * as vscode from "vscode";
 import { analyseFileForPanel } from "../commands/analysePanel";
+import { analyseFileForTlx } from "../commands/tlxPanel";
 import { fetchModelsForPanel, applyModelForPanel } from "../commands/selectModelPanel";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "./panelLogger";
@@ -16,6 +17,7 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   private _diagnostics: vscode.DiagnosticCollection;
   private _isAnalysing = false;
+  private _isTlxAnalysing = false;
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
@@ -46,6 +48,7 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (msg) => {
       switch (msg.type) {
         case "analyseFile":   await this._runAnalysis(); break;
+        case "tlxFile":       await this._runTlxAnalysis(); break;
         case "selectModel":   await this._applyModel(msg.model); break;
         case "refreshModels": await this._sendModels(); break;
         case "clear":         break; // handled client-side
@@ -58,6 +61,11 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
   public async analyseFromCommand(): Promise<void> {
     this._view?.show?.(true);
     await this._runAnalysis();
+  }
+
+  public async tlxFromCommand(): Promise<void> {
+    this._view?.show?.(true);
+    await this._runTlxAnalysis();
   }
 
   public async selectModelFromCommand(): Promise<void> {
@@ -79,6 +87,21 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
     } finally {
       this._isAnalysing = false;
       this._postMessage({ type: "analysisEnd" });
+    }
+  }
+
+  private async _runTlxAnalysis(): Promise<void> {
+    if (this._isTlxAnalysing) {
+      vscode.window.showWarningMessage("TLX analysis already in progress.");
+      return;
+    }
+    this._isTlxAnalysing = true;
+    this._postMessage({ type: "tlxStart" });
+    try {
+      await analyseFileForTlx(this._logger());
+    } finally {
+      this._isTlxAnalysing = false;
+      this._postMessage({ type: "tlxEnd" });
     }
   }
 
@@ -142,6 +165,9 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
   <div class="actions">
     <button id="btnAnalyse" title="Analyse the currently open file for accessibility issues">
       ▶  Analyse File
+    </button>
+    <button id="btnTlx" title="Analyze the file for NASA TLX cognitive workload">
+      ▶  TLX Analysis
     </button>
   </div>
 

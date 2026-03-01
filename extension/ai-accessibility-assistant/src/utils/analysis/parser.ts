@@ -4,9 +4,9 @@
 // de-duplicates repeated issues.
 // Used by: commands/analyzeFile.ts
 
-import { type AiIssue } from "./types";
+import { type AiIssue } from "../types";
 
-// Parse plain-text "Issue N: ..." blocks returned by the model
+// Parse plain-text "Issue N: ..." blocks returned by the model (returns RAW issues without deduplication)
 export function parseTextResponse(text: string): AiIssue[] {
   const issues: AiIssue[] = [];
 
@@ -48,9 +48,14 @@ export function parseTextResponse(text: string): AiIssue[] {
     }
 
     // Line
-    const lineMatch = block.match(/Line\s*:\s*(\d+)/i);
+    const lineMatch = block.match(/Line\s*:\s*(\d+(?:\s*,\s*\d+)*)/i);
     if (lineMatch) {
-      issue.lineHint = parseInt(lineMatch[1], 10);
+      const lineStr = lineMatch[1];
+      const lines = lineStr.split(',').map(l => parseInt(l.trim(), 10)).filter(l => !isNaN(l));
+      if (lines.length > 0) {
+        issue.lineHints = lines.length > 1 ? lines : undefined;
+        issue.lineHint = lines[0];
+      }
     }
 
     // Problem → explanation (capture everything until the next labelled field)
@@ -68,6 +73,11 @@ export function parseTextResponse(text: string): AiIssue[] {
     issues.push(issue);
   }
 
+  return issues;
+}
+
+// Deduplicate and combine issues with the same problem across multiple lines
+export function deduplicateIssues(issues: AiIssue[]): AiIssue[] {
   // Post-processing filters
 
   // 1. Drop issues whose explanation says "not applicable" / "N/A" / speculative / unverifiable
@@ -90,19 +100,49 @@ export function parseTextResponse(text: string): AiIssue[] {
     return !NA_PATTERNS.some(p => p.test(text));
   });
 
-  // 2. Deduplicate by normalised title (ignore line — same problem = same issue)
-  const seen = new Set<string>();
-  const deduped = filtered.filter(issue => {
-    // Normalise: lowercase, strip "missing aria attributes on", collapse whitespace
+  // 2. Group issues by normalised title (same problem = combine across multiple lines)
+  const grouped = new Map<string, AiIssue[]>();
+  for (const issue of filtered) {
+    // Normalise: lowercase, strip location qualifiers and common prefixes, collapse whitespace
     const norm = (issue.title || '')
       .toLowerCase()
       .replace(/missing\s+aria\s+attributes?\s+on\s+/g, '')
+      .replace(/\s+in\s+(the\s+)?(footer|header|sidebar|topbar|menu|body|page)/g, '')  // Remove location qualifiers
       .replace(/\s+/g, ' ')
       .trim();
-    if (seen.has(norm)) { return false; }
-    seen.add(norm);
-    return true;
-  });
+    if (!grouped.has(norm)) {
+      grouped.set(norm, []);
+    }
+    grouped.get(norm)!.push(issue);
+  }
 
-  return deduped;
+  // 3. Combine issues with same problem into single blocks with multiple line numbers
+  const combined: AiIssue[] = [];
+  for (const issueGroup of grouped.values()) {
+    if (issueGroup.length === 1) {
+      // Single instance → keep as-is
+      combined.push(issueGroup[0]);
+    } else {
+      // Multiple instances of same problem → combine into one block with all lines
+      const first = issueGroup[0];
+      
+      // Collect all unique line numbers
+      const allLines = issueGroup
+        .map(i => i.lineHint)
+        .filter((line): line is number => line !== undefined)
+        .filter((line, idx, arr) => arr.indexOf(line) === idx) // deduplicate
+        .sort((a, b) => a - b);
+
+      combined.push({
+        title: first.title,
+        severity: first.severity,
+        explanation: first.explanation,
+        fix: first.fix,
+        lineHints: allLines.length > 0 ? allLines : undefined,
+        evidence: first.evidence,
+      });
+    }
+  }
+
+  return combined;
 }

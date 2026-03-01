@@ -507,3 +507,72 @@ export function buildRagQuery(languageId: string, code: string): string {
 
   return hints.join(", ");
 }
+
+// Build a TLX-specific query focused on cognitive workload & task complexity
+export function buildTlxRagQuery(languageId: string, code: string): string {
+  const lower = code.toLowerCase();
+  const hints: string[] = [];
+
+  // Base TLX dimensions and factors
+  hints.push("NASA TLX cognitive workload mental demand physical demand temporal demand performance effort frustration");
+  hints.push("task complexity cognitive load decision-making problem-solving attention demands reasoning");
+  hints.push("user interface complexity interaction patterns visual density information overload");
+
+  // Complexity indicators by context
+  if (languageId === "html" || languageId === "javascript" || languageId.includes("react") || languageId === "vue") {
+    hints.push("UI/UX mental workload user input complexity interaction design cognitive friction");
+    hints.push("form complexity validation feedback loops user error recovery interaction steps");
+    hints.push("visual complexity navigation depth information scent sensemaking learnability");
+    
+    // Advanced interaction detection
+    if (lower.includes("form") || lower.includes("input") || lower.includes("validation")) {
+      hints.push("form design input fields error handling user confirmation steps completion rates user burden");
+    }
+    if (lower.includes("modal") || lower.includes("dialog") || lower.includes("popup")) {
+      hints.push("modal interaction focus management dismissal clarity interruption cognitive load interruption cost");
+    }
+    if (lower.includes("table") || lower.includes("data") || lower.includes("list")) {
+      hints.push("data presentation complexity information density scanning speed comprehension effort table navigation");
+    }
+    if (lower.includes("menu") || lower.includes("navigation") || lower.includes("nav")) {
+      hints.push("navigation complexity menu depth wayfinding cognitive map mental model learning curve");
+    }
+  }
+
+  // Code complexity by language
+  if (["javascript", "typescript", "pythonreact", "typescriptreact"].includes(languageId) || 
+      lower.includes("function") || lower.includes("class") || lower.includes("async")) {
+    hints.push("code logic complexity algorithm decision trees branching cognitive difficulty learning effort");
+    hints.push("asynchronous programming callback chains promise complexity error handling mental model");
+    hints.push("state management data flow complexity debugging difficulty troubleshooting cognitive overhead");
+  }
+
+  if (lower.includes("css") || lower.includes("style") || lower.includes("layout")) {
+    hints.push("visual complexity layout complexity color understanding contrast readability mental effort visual processing");
+  }
+
+  if (lower.includes("animation") || lower.includes("transition") || lower.includes("gesture")) {
+    hints.push("animation cognitive load motion sickness distraction temporal demands user attention required");
+  }
+
+  if (lower.includes("api") || lower.includes("endpoint") || lower.includes("request")) {
+    hints.push("API complexity integration effort documentation burden learning steep");
+  }
+
+  // Framework-specific cognitive load
+  if (lower.includes("react")) {
+    hints.push("React hooks state management complexity side effects mental model rendering understanding");
+  }
+  if (lower.includes("vue")) {
+    hints.push("Vue reactivity complexity template syntax learning curve directive usage");
+  }
+  if (lower.includes("angular")) {
+    hints.push("Angular complexity dependency injection decorators RxJS complexity steep learning curve");
+  }
+
+  // Performance affecting cognitive load
+  hints.push("performance responsiveness feedback latency user perception task completion time");
+  hints.push("user satisfaction efficiency ergonomic demands physical strain repetition burden");
+
+  return hints.join(", ");
+}

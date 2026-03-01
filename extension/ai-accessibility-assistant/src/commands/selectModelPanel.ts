@@ -5,7 +5,7 @@
 // Used by: webview/AccessibilityPanel.ts
 
 import * as vscode from "vscode";
-import { ollamaListModels, ollamaWarmup } from "../utils/ollama";
+import { ollamaListModels, ollamaWarmup } from "../utils/llm/ollama";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
 

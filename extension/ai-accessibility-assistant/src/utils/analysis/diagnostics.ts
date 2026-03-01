@@ -4,12 +4,12 @@
 // Used by: commands/analyzeFile.ts
 
 import * as vscode from "vscode";
-import { type AiIssue } from "./types";
+import { type AiIssue } from "../types";
 
-// Convert AI issue to VSCode diagnostic (shows up in Problems panel)
-export function aiIssueToDiagnostic(doc: vscode.TextDocument, issue: AiIssue): vscode.Diagnostic {
-  const range = bestEffortRange(doc, issue.lineHint);
-
+// Convert AI issue to VSCode diagnostic(s) (shows up in Problems panel)
+// If issue has multiple lines (lineHints), creates one diagnostic per line
+// If issue has single line (lineHint), creates one diagnostic
+export function aiIssueToDiagnostic(doc: vscode.TextDocument, issue: AiIssue): vscode.Diagnostic[] {
   const severity =
     issue.severity === "high"
       ? vscode.DiagnosticSeverity.Error
@@ -28,9 +28,19 @@ export function aiIssueToDiagnostic(doc: vscode.TextDocument, issue: AiIssue): v
   const parts = [title, explanation, `Fix: ${fix}`, evidence].filter(Boolean);
   const message = parts.join("\n");
 
-  const d = new vscode.Diagnostic(range, message, severity);
-  d.source = "AI Accessibility Assistant (RAG+Ollama)";
-  return d;
+  // Determine which lines to create diagnostics for
+  const linesToReport = issue.lineHints && issue.lineHints.length > 0
+    ? issue.lineHints  // Multiple lines
+    : issue.lineHint   // Single line
+      ? [issue.lineHint]
+      : [1]; // Default to line 1 if no line hint
+
+  return linesToReport.map(lineNum => {
+    const range = bestEffortRange(doc, lineNum);
+    const d = new vscode.Diagnostic(range, message, severity);
+    d.source = "AI Accessibility Assistant (RAG+Ollama)";
+    return d;
+  });
 }
 
 // Try to highlight the right line, or just use line 1 if we don't have a line number

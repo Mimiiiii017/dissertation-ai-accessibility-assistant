@@ -27,6 +27,11 @@ export function activate(context: vscode.ExtensionContext) {
     () => panelProvider.analyseFromCommand()
   );
 
+  const tlxDisposable = vscode.commands.registerCommand(
+    "ai-accessibility-assistant.tlxAnalysis",
+    () => panelProvider.tlxFromCommand()
+  );
+
   const selectModelDisposable = vscode.commands.registerCommand(
     "ai-accessibility-assistant.selectModel",
     () => panelProvider.selectModelFromCommand()
@@ -36,6 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
     diagnostics,
     viewDisposable,
     analyseDisposable,
+    tlxDisposable,
     selectModelDisposable
   );
 }

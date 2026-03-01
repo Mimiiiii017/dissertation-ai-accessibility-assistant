@@ -151,4 +151,3 @@ export function findMissingFocusStyles(doc: vscode.TextDocument): vscode.Diagnos
   
   return diags;
 }
-

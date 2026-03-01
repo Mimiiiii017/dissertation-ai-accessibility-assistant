@@ -1,15 +1,10 @@
 // excerptBuilder.ts — extracts the relevant code lines to send to the model
 // Extracts a focused, accessibility-relevant excerpt from the active document
 // so only the most relevant lines are sent to the model (keeps analysis fast).
-// Also holds the in-memory RAG cache so repeated analyses skip duplicate
-// network calls.
 // Used by: commands/analyzeFile.ts
 
 import * as vscode from "vscode";
-import { RAG_CONFIG } from "./rag";
-
-// Cache RAG results to avoid redundant API calls
-export const ragCache = new Map<string, { at: number; context: string }>();
+import { RAG_CONFIG } from "../rag/rag";
 
 // Extract only accessibility-relevant code to send to the model (keeps it fast and focused)
 export function buildRelevantExcerpt(doc: vscode.TextDocument, keywords: string[]): string {

@@ -11,20 +11,28 @@ type RagRetrieveResponse = { chunks: RagChunk[] };
 
 // RAG and code extraction configuration - Centralized settings for testing/tuning
 export const RAG_CONFIG = {
-  topK: 7,                    // Number of knowledge base chunks to retrieve
-  maxExcerptChars: 10000,      // Max characters to extract from code
+  topK: 100,                   // Number of knowledge base chunks to retrieve (100% coverage)
+  maxExcerptChars: 20000,      // Max characters to extract from code
   cacheTimeMs: 60000,         // Cache RAG results for 60 seconds
   contextLinesAround: 2,      // Lines of context around keyword matches
 };
 
+// Cache RAG results to avoid redundant API calls within the same session
+export const ragCache = new Map<string, { at: number; context: string }>();
+
 // Get relevant context from the RAG knowledge base
-export async function ragRetrieve(endpoint: string, query: string, topK: number): Promise<RagRetrieveResponse> {
+export async function ragRetrieve(
+  endpoint: string,
+  query: string,
+  topK: number,
+  kbType: "accessibility" | "tlx" = "accessibility"
+): Promise<RagRetrieveResponse> {
   const url = `${endpoint.replace(/\/$/, "")}/retrieve`;
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, top_k: topK }),
+    body: JSON.stringify({ query, top_k: topK, kb_type: kbType }),
   });
 
   if (!res.ok) {
@@ -40,8 +48,8 @@ export function formatRagContext(chunks: RagChunk[]): string {
   if (!chunks.length) {
     return "(no context)";
   }
-  // Truncate each chunk to 800 chars to keep prompt manageable
+  // Truncate each chunk to 2000 chars for richer context
   return chunks.map((c, i) =>
-    `[#${i + 1}] ${c.id}\n${c.text.slice(0, 800)}${c.text.length > 800 ? "…" : ""}`
+    `[#${i + 1}] ${c.id}\n${c.text.slice(0, 2000)}${c.text.length > 2000 ? "…" : ""}`
   ).join("\n\n");
 }

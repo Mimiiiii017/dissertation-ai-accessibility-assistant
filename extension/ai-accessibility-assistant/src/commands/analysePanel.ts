@@ -4,15 +4,15 @@
 // Used by: webview/AccessibilityPanel.ts
 
 import * as vscode from "vscode";
-import { ollamaGenerateStream } from "../utils/ollama";
-import { ragRetrieve, formatRagContext, RAG_CONFIG } from "../utils/rag";
-import { buildRagQuery } from "../utils/ragQueryBuilder";
-import { runBaselineChecks } from "../utils/baseline";
-import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompt";
-import { parseTextResponse } from "../utils/parser";
-import { aiIssueToDiagnostic } from "../utils/diagnostics";
-import { getFileTypeContext } from "../utils/fileTypeContext";
-import { buildRelevantExcerpt, ragCache } from "../utils/excerptBuilder";
+import { ollamaGenerateStream } from "../utils/llm/ollama";
+import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
+import { buildRagQuery } from "../utils/rag/ragQueryBuilder";
+import { runBaselineChecks } from "../utils/analysis/baseline";
+import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompts/prompt";
+import { parseTextResponse, deduplicateIssues } from "../utils/analysis/parser";
+import { aiIssueToDiagnostic } from "../utils/analysis/diagnostics";
+import { getFileTypeContext } from "../utils/code/fileTypeContext";
+import { buildRelevantExcerpt } from "../utils/code/excerptBuilder";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
 
@@ -65,7 +65,7 @@ export async function analyseFileForPanel(
         logger.log("RAG: cache hit");
       } else {
         const t0 = Date.now();
-        const rag = await ragRetrieve(ragEndpoint, ragQuery, RAG_CONFIG.topK);
+        const rag = await ragRetrieve(ragEndpoint, ragQuery, RAG_CONFIG.topK, "accessibility");
         contextBlock = formatRagContext(rag.chunks);
         ragCache.set(cacheKey, { at: Date.now(), context: contextBlock });
         logger.log(`RAG: ${rag.chunks.length} chunk(s) in ${Date.now() - t0} ms`);
@@ -121,17 +121,18 @@ export async function analyseFileForPanel(
       logger.postMessage({ type: "streamEnd" });
       logger.log(`\nCompleted in ${Date.now() - t0} ms (first token: ${firstTokenMs} ms)`);
 
-      const aiIssues = parseTextResponse(fullResponse);
+      const rawIssues = parseTextResponse(fullResponse);
+      const aiIssues = deduplicateIssues(rawIssues);
       logger.log(`AI issues: ${aiIssues.length}`);
 
       for (const ai of aiIssues) {
-        issues.push(aiIssueToDiagnostic(doc, ai));
+        issues.push(...aiIssueToDiagnostic(doc, ai));
       }
 
-      if (aiIssues.length > 0) {
+      if (rawIssues.length > 0) {
         logger.log("");
         logger.log("Summary:");
-        aiIssues.forEach((ai, i) => {
+        rawIssues.forEach((ai, i) => {
           logger.log(`  ${i + 1}. [${ai.severity}] ${ai.title}`);
         });
       }

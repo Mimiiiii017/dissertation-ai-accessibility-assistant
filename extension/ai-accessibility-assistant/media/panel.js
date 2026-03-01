@@ -8,6 +8,7 @@
   const modelName    = document.getElementById("modelName");
   const modelSelect  = document.getElementById("modelSelect");
   const btnAnalyse   = document.getElementById("btnAnalyse");
+  const btnTlx       = document.getElementById("btnTlx");
   const btnClear     = document.getElementById("btnClear");
 
   let currentStreamBlock = null;
@@ -15,6 +16,9 @@
   // Button / dropdown handlers
   btnAnalyse.addEventListener("click", () => {
     vscode.postMessage({ type: "analyseFile" });
+  });
+  btnTlx.addEventListener("click", () => {
+    vscode.postMessage({ type: "tlxFile" });
   });
   modelSelect.addEventListener("change", () => {
     const selected = modelSelect.value;
@@ -54,6 +58,7 @@
 
   function setButtons(enabled) {
     btnAnalyse.disabled = !enabled;
+    btnTlx.disabled = !enabled;
   }
 
   // Message handler
@@ -88,6 +93,23 @@
         break;
 
       case "analysisEnd":
+        setButtons(true);
+        spinner.classList.remove("active");
+        status.textContent = "Idle";
+        break;
+
+      case "tlxStart":
+        setButtons(false);
+        spinner.classList.add("active");
+        status.textContent = "Analyzing workload…";
+        if (output.children.length > 0) {
+          const sep = document.createElement("div");
+          sep.className = "separator";
+          output.appendChild(sep);
+        }
+        break;
+
+      case "tlxEnd":
         setButtons(true);
         spinner.classList.remove("active");
         status.textContent = "Idle";
