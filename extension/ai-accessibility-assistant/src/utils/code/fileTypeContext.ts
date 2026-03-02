@@ -3,8 +3,8 @@
 // language and framework. These keywords drive the excerpt builder — only
 // lines containing them (plus surrounding context) are sent to the model,
 // keeping prompts short and focused.
-// Covers 30+ languages and frameworks based on WCAG 2.2 (A, AA, AAA) and
-// the European Accessibility Act (EAA).
+// Covers HTML, CSS, JavaScript/TypeScript, React, Vue, and Angular based on
+// WCAG 2.2 (A, AA, AAA) and the European Accessibility Act (EAA).
 // Used by: commands/analyzeFile.ts
 
 import * as vscode from "vscode";

@@ -39,6 +39,10 @@
         "title": "Accessibility: Analyse Current File"
       },
       {
+        "command": "ai-accessibility-assistant.tlxAnalysis",
+        "title": "Accessibility: NASA TLX Analysis"
+      },
+      {
         "command": "ai-accessibility-assistant.selectModel",
         "title": "Accessibility: Select Ollama Model"
       }

@@ -52,4 +52,4 @@ Explain how WCAG guidelines relate to the European Accessibility Act (EAA) and E
 - Accessibility statement published? 
 - Feedback mechanism for accessibility issues? 
 - Support services aware of accessibility features? 
-- Documentation describes accessibility features? 
+- Documentation describes accessibility features?
