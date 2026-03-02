@@ -123,17 +123,18 @@ export async function analyseFileForPanel(
 
       const rawIssues = parseTextResponse(fullResponse);
       const aiIssues = deduplicateIssues(rawIssues);
-      logger.log(`AI issues: ${aiIssues.length}`);
 
       for (const ai of aiIssues) {
         issues.push(...aiIssueToDiagnostic(doc, ai));
       }
 
+      // Structured summary — rendered as a card in the webview
       if (rawIssues.length > 0) {
-        logger.log("");
-        logger.log("Summary:");
-        rawIssues.forEach((ai, i) => {
-          logger.log(`  ${i + 1}. [${ai.severity}] ${ai.title}`);
+        logger.postMessage({
+          type: "summary",
+          aiCount: aiIssues.length,
+          totalCount: issues.length,
+          issues: rawIssues.map(ai => ({ title: ai.title, severity: ai.severity })),
         });
       }
     } catch (e: any) {
@@ -171,7 +172,6 @@ export async function analyseFileForPanel(
   diagnostics.set(doc.uri, issues);
 
   if (issues.length > 0) {
-    logger.log(`\nTotal issues: ${issues.length} (see Problems tab)`);
     vscode.window.showWarningMessage(
       `Accessibility: ${issues.length} issue(s). Check Problems tab.`
     );

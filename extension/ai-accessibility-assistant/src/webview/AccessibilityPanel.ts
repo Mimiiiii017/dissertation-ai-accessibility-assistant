@@ -145,8 +145,12 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 style-src ${webview.cspSource};
+                 style-src ${webview.cspSource} https://fonts.googleapis.com;
+                 font-src https://fonts.gstatic.com;
                  script-src 'nonce-${nonce}';" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="${cssUri}" />
 </head>
 <body>
@@ -176,7 +180,6 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
   </div>
 
   <div class="output-area" id="output">
-    <span class="log-line">Ready. Open a file and click <b>Analyse File</b> to begin.</span>
   </div>
 
   <div class="status-bar">

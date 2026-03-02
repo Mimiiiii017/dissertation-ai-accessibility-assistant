@@ -115,21 +115,18 @@ export async function analyseFileForTlx(
     logger.postMessage({ type: "streamEnd" });
     logger.log(`\nCompleted in ${Date.now() - t0} ms (first token: ${firstTokenMs} ms)`);
 
-    // Parse TLX response (basic parsing for now)
+    // Parse TLX response and send as structured summary card
     const dimensions = extractTlxDimensions(fullResponse);
-    
-    logger.log("");
-    logger.log("NASA-TLX Assessment:");
-    if (dimensions.length > 0) {
-      dimensions.forEach((dim) => {
-        logger.log(`  ${dim.name}: ${dim.rating}/100 (Confidence: ${dim.confidence}%)`);
-      });
 
+    if (dimensions.length > 0) {
       const avgRating = dimensions.reduce((sum, d) => sum + d.rating, 0) / dimensions.length;
-      logger.log(`\n  Overall Cognitive Load: ${avgRating.toFixed(1)}/100`);
+      logger.postMessage({
+        type: "tlxSummary",
+        dimensions,
+        overall: parseFloat(avgRating.toFixed(1)),
+      });
     } else {
       logger.log("  (Could not parse TLX dimensions from response)");
-      logger.log(`  Raw response:\n${fullResponse.slice(0, 500)}`);
     }
 
   } catch (e: any) {
