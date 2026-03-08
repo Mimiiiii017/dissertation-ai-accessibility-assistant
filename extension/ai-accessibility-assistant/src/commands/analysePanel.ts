@@ -4,7 +4,11 @@
 // Used by: webview/AccessibilityPanel.ts
 
 import * as vscode from "vscode";
-import { ollamaGenerateStream } from "../utils/llm/ollama";
+import {
+  FIXED_MODEL,
+  ollamaGenerateStream,
+  resolveAnalysisPreset,
+} from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildRagQuery } from "../utils/rag/ragQueryBuilder";
 import { runBaselineChecks } from "../utils/analysis/baseline";
@@ -27,12 +31,14 @@ export async function analyseFileForPanel(
 
   const doc = editor.document;
   const text = doc.getText();
-  const { ollamaHost, model, ragEndpoint } = getExtensionConfig();
+  const { ollamaHost, analysisPreset, ragEndpoint } = getExtensionConfig();
+  const model = FIXED_MODEL;
+  const preset = resolveAnalysisPreset(analysisPreset);
 
   logger.log("═══ Accessibility Analysis ═══");
   logger.log(`File: ${doc.fileName}`);
   logger.log(`Language: ${doc.languageId}  |  Lines: ${doc.lineCount}  |  Chars: ${text.length}`);
-  logger.log(`Model: ${model || "(not set)"}  |  RAG: ${ragEndpoint}`);
+  logger.log(`Model: ${model}  |  Profile: ${preset.label} (${preset.id})  |  RAG: ${ragEndpoint}`);
   logger.log("");
 
   diagnostics.delete(doc.uri);
@@ -46,11 +52,8 @@ export async function analyseFileForPanel(
   }
 
   // AI analysis
-  if (!model) {
-    logger.log("No model selected — skipping AI analysis.");
-  } else {
-    let fullResponse = "";
-    try {
+  let fullResponse = "";
+  try {
       const excerpt = buildRelevantExcerpt(doc);
       const ragQuery = buildRagQuery(doc.languageId, excerpt);
       const cacheKey = `${doc.languageId}::${ragQuery}::${excerpt.length}`;
@@ -113,7 +116,8 @@ export async function analyseFileForPanel(
             logger.streamChunk(issueText);
           }
         },
-        SYSTEM_PROMPT
+        SYSTEM_PROMPT,
+        preset.id
       );
 
       logger.postMessage({ type: "streamEnd" });
@@ -135,7 +139,7 @@ export async function analyseFileForPanel(
           issues: rawIssues.map(ai => ({ title: ai.title, severity: ai.severity })),
         });
       }
-    } catch (e: any) {
+  } catch (e: any) {
       const msg = String(e?.message ?? e);
       logger.log(`\nERROR: ${msg}`);
 
@@ -150,20 +154,19 @@ export async function analyseFileForPanel(
       if (msg.includes("connection failed") || msg.includes("ECONNREFUSED")) {
         logger.log("  → Is Ollama running? Try: ollama serve");
       } else if (msg.includes("timed out")) {
-        logger.log("  → Model too slow — try a smaller one.");
+        logger.log("  → Model too slow — try the Quick profile preset.");
       } else if (msg.includes("ECONNRESET") || msg.includes("socket hang up")) {
         logger.log("  → Ollama closed the connection (likely OOM).");
       } else if (msg.includes("HTTP 404")) {
-        logger.log("  → Model not found. Select one first.");
+        logger.log(`  → Fixed model not found: ${model}`);
       } else if (msg.includes("HTTP 5")) {
         logger.log("  → Ollama server error. Check Ollama logs.");
       }
 
       logger.log("Continuing with baseline-only results.");
 
-      if (fullResponse.length > 0) {
-        logger.log(`  (received ${fullResponse.length} chars before error)`);
-      }
+    if (fullResponse.length > 0) {
+      logger.log(`  (received ${fullResponse.length} chars before error)`);
     }
   }
 

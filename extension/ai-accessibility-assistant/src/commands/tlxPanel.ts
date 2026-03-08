@@ -4,7 +4,11 @@
 // Used by: webview/AccessibilityPanel.ts
 
 import * as vscode from "vscode";
-import { ollamaGenerateStream } from "../utils/llm/ollama";
+import {
+  FIXED_MODEL,
+  ollamaGenerateStream,
+  resolveAnalysisPreset,
+} from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildTlxRagQuery } from "../utils/rag/ragQueryBuilder";
 import { TLX_SYSTEM_PROMPT, buildTlxPrompt } from "../utils/prompts/tlxPrompt";
@@ -23,20 +27,15 @@ export async function analyseFileForTlx(
 
   const doc = editor.document;
   const text = doc.getText();
-  const { ollamaHost, model, ragEndpoint } = getExtensionConfig();
+  const { ollamaHost, analysisPreset, ragEndpoint } = getExtensionConfig();
+  const model = FIXED_MODEL;
+  const preset = resolveAnalysisPreset(analysisPreset);
 
   logger.log("═══ NASA TLX Cognitive Workload Analysis ═══");
   logger.log(`File: ${doc.fileName}`);
   logger.log(`Language: ${doc.languageId}  |  Lines: ${doc.lineCount}  |  Chars: ${text.length}`);
-  logger.log(`Model: ${model || "(not set)"}  |  RAG: ${ragEndpoint}`);
+  logger.log(`Model: ${model}  |  Profile: ${preset.label} (${preset.id})  |  RAG: ${ragEndpoint}`);
   logger.log("");
-
-  // AI analysis
-  if (!model) {
-    logger.log("No model selected — cannot run TLX analysis.");
-    vscode.window.showErrorMessage("Select a model first to run TLX analysis.");
-    return;
-  }
 
   let fullResponse = "";
   try {
@@ -106,7 +105,8 @@ export async function analyseFileForTlx(
           logger.streamChunk(tlxText);
         }
       },
-      TLX_SYSTEM_PROMPT
+      TLX_SYSTEM_PROMPT,
+      preset.id
     );
 
     logger.postMessage({ type: "streamEnd" });
@@ -141,11 +141,11 @@ export async function analyseFileForTlx(
     if (msg.includes("connection failed") || msg.includes("ECONNREFUSED")) {
       logger.log("  → Is Ollama running? Try: ollama serve");
     } else if (msg.includes("timed out")) {
-      logger.log("  → Model too slow — try a smaller one.");
+      logger.log("  → Model too slow — try the Quick profile preset.");
     } else if (msg.includes("ECONNRESET") || msg.includes("socket hang up")) {
       logger.log("  → Ollama closed the connection (likely OOM).");
     } else if (msg.includes("HTTP 404")) {
-      logger.log("  → Model not found. Select one first.");
+      logger.log(`  → Fixed model not found: ${model}`);
     } else if (msg.includes("HTTP 5")) {
       logger.log("  → Ollama server error. Check Ollama logs.");
     }

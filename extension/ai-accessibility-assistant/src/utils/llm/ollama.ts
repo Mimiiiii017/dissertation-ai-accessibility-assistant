@@ -1,11 +1,13 @@
-// ollama.ts — sends prompts to the local Ollama server and streams the response back
-// All communication with the local Ollama server.
+// ollama.ts — sends prompts to the Ollama server and streams the response back
+// All communication with Ollama.
 // Exposes:
-//   ollamaListModels     — fetches available model names (/api/tags)
-//   ollamaWarmup         — pre-loads a model to reduce first-analysis latency
-//   ollamaGenerateStream — streams the chat response chunk-by-chunk (/api/chat)
-//   ANALYSIS_OPTIONS     — tuneable generation parameters (temperature, tokens, etc.)
-// Used by: commands/analyzeFile.ts, commands/selectModel.ts
+//   FIXED_MODEL                 — fixed model used for all analyses
+//   getAnalysisPresetSummaries  — preset list for the webview dropdown
+//   resolveAnalysisPreset       — resolves selected preset to generation options
+//   ollamaListModels            — fetches available model names (/api/tags)
+//   ollamaWarmup                — pre-loads a model to reduce first-analysis latency
+//   ollamaGenerateStream        — streams the chat response chunk-by-chunk (/api/chat)
+// Used by: commands/analysePanel.ts, commands/tlxPanel.ts, commands/selectModelPanel.ts
 
 type OllamaTagsResponse = { models: { name: string }[] };
 
@@ -30,6 +32,124 @@ export interface OllamaOptions {
   presence_penalty?: number; // Penalize if token appeared before. Range: 0.0-2.0
   seed?: number; // Random seed for reproducible results (useful for testing)
   mirostat?: number; // 0=disabled, 1=Mirostat v1, 2=Mirostat v2 (alternative sampling, usually leave at 0)
+}
+
+export const FIXED_MODEL = "qwen3-coder-next:cloud";
+
+export type AnalysisPresetId = "balanced" | "strict" | "thorough" | "quick";
+
+type AnalysisPreset = {
+  label: string;
+  description: string;
+  options: OllamaOptions;
+};
+
+export const DEFAULT_ANALYSIS_PRESET: AnalysisPresetId = "balanced";
+
+export const ANALYSIS_PRESETS: Record<AnalysisPresetId, AnalysisPreset> = {
+  balanced: {
+    label: "Balanced",
+    description: "General-purpose profile for most files.",
+    options: {
+      num_predict: 20000,
+      num_ctx: 32768,
+      temperature: 0.15,
+      top_p: 0.85,
+      top_k: 30,
+      repeat_penalty: 1.1,
+      repeat_last_n: 128,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+  strict: {
+    label: "Strict",
+    description: "More deterministic and conservative issue reporting.",
+    options: {
+      num_predict: 18000,
+      num_ctx: 32768,
+      temperature: 0.05,
+      top_p: 0.75,
+      top_k: 20,
+      repeat_penalty: 1.15,
+      repeat_last_n: 192,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+  thorough: {
+    label: "Thorough",
+    description: "Longer, deeper analysis with more detailed coverage.",
+    options: {
+      num_predict: 26000,
+      num_ctx: 32768,
+      temperature: 0.1,
+      top_p: 0.8,
+      top_k: 25,
+      repeat_penalty: 1.12,
+      repeat_last_n: 256,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+  quick: {
+    label: "Quick",
+    description: "Faster pass with shorter responses.",
+    options: {
+      num_predict: 8000,
+      num_ctx: 16384,
+      temperature: 0.2,
+      top_p: 0.9,
+      top_k: 40,
+      repeat_penalty: 1.05,
+      repeat_last_n: 96,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+};
+
+// Backward-compatible alias used in older code paths.
+export const ANALYSIS_OPTIONS: OllamaOptions = ANALYSIS_PRESETS[DEFAULT_ANALYSIS_PRESET].options;
+
+export function isAnalysisPresetId(value: string): value is AnalysisPresetId {
+  return value in ANALYSIS_PRESETS;
+}
+
+export function resolveAnalysisPreset(
+  presetId?: string
+): { id: AnalysisPresetId; label: string; description: string; options: OllamaOptions } {
+  const id = presetId && isAnalysisPresetId(presetId)
+    ? presetId
+    : DEFAULT_ANALYSIS_PRESET;
+
+  const preset = ANALYSIS_PRESETS[id];
+  return {
+    id,
+    label: preset.label,
+    description: preset.description,
+    options: preset.options,
+  };
+}
+
+export function getAnalysisPresetSummaries(): Array<{
+  id: AnalysisPresetId;
+  label: string;
+  description: string;
+}> {
+  return (Object.keys(ANALYSIS_PRESETS) as AnalysisPresetId[]).map((id) => ({
+    id,
+    label: ANALYSIS_PRESETS[id].label,
+    description: ANALYSIS_PRESETS[id].description,
+  }));
 }
 
 // Strip trailing slashes so URL construction never produces double-slashes
@@ -76,21 +196,6 @@ export async function ollamaWarmup(host: string, model: string): Promise<void> {
   }
 }
 
-// Analysis options - Changing these parameters will tune model behavior
-export const ANALYSIS_OPTIONS: OllamaOptions = {
-  num_predict: 20000,          // Max response length (includes /think tokens — leave headroom)
-  num_ctx: 32768,              // Must be large enough for RAG context + full file + instructions (~56k tokens total)
-  temperature: 0.15,           // Lower = more deterministic/consistent
-  top_p: 0.85,                 // Tighter nucleus sampling
-  top_k: 30,                   // Narrower token candidate pool
-  repeat_penalty: 1.1,         // Slightly lower — avoids penalising the repeated Issue block format
-  repeat_last_n: 128,          // Repetition lookback window
-  frequency_penalty: 0.0,     // Penalize frequent tokens (0 = disabled)
-  presence_penalty: 0.0,      // Penalize any repeated tokens (0 = disabled)
-  seed: 42,                    // Set a number for reproducible results
-  mirostat: 0,                // 0 = disabled (use temperature/top_p)
-};
-
 /** How long to wait for the full generation before giving up (ms). */
 const GENERATE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -111,12 +216,13 @@ export async function ollamaGenerateStream(
   model: string,
   prompt: string,
   onChunk: (text: string) => void,
-  systemPrompt?: string
+  systemPrompt?: string,
+  presetId?: string
 ): Promise<void> {
   const url = `${normalizeHost(host)}/api/chat`;
   
-  // Use the parameters defined at the top of this file
-  const modelOptions = ANALYSIS_OPTIONS;
+  // Resolve options from selected analysis profile preset.
+  const modelOptions = resolveAnalysisPreset(presetId).options;
 
   const messages: { role: string; content: string }[] = [];
   if (systemPrompt) {

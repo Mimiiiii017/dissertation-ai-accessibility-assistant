@@ -28,15 +28,15 @@ It runs as a sidebar panel in VS Code and writes issues to the Problems tab.
 		- Frustration
 	- Confidence scores and overall cognitive load summary card
 
-- **Model management:**
-	- Lists local Ollama models
-	- Lets you select and persist the active model
-	- Warms the selected model for faster first response
+- **Analysis profile presets:**
+	- Uses fixed model: `qwen3-coder-next:cloud`
+	- Lets you select and persist an analysis preset (`balanced`, `strict`, `thorough`, `quick`)
+	- Warms the fixed model for faster first response
 
 ## Requirements
 
 - VS Code `^1.108.0`
-- A local Ollama server with at least one installed model
+- An Ollama server that can run `qwen3-coder-next:cloud`
 - Python 3.10+ for the local RAG service
 - Knowledge base files in this repository (`knowledge-base/Accessibility-Analysis` and `knowledge-base/NASA-TLX`)
 
@@ -48,10 +48,10 @@ It runs as a sidebar panel in VS Code and writes issues to the Problems tab.
 ollama serve
 ```
 
-In another terminal, pull at least one model (example):
+In another terminal, verify the fixed model is available:
 
 ```bash
-ollama pull qwen2.5-coder:7b
+ollama run qwen3-coder-next:cloud
 ```
 
 ### 2) Start the RAG service
@@ -89,7 +89,7 @@ Then press `F5` in VS Code to launch an Extension Development Host window.
 
 1. Open any code file in VS Code.
 2. Open the **Accessibility Assistant** view from the Activity Bar.
-3. Select an Ollama model from the dropdown.
+3. Select an analysis profile preset from the dropdown.
 4. Click **Analyse File** for accessibility diagnostics.
 5. Click **TLX Analysis** for cognitive workload analysis.
 6. Review diagnostics in the **Problems** panel.
@@ -98,14 +98,15 @@ Then press `F5` in VS Code to launch an Extension Development Host window.
 
 - `Accessibility: Analyse Current File` (`ai-accessibility-assistant.analyseFile`)
 - `Accessibility: NASA TLX Analysis` (`ai-accessibility-assistant.tlxAnalysis`)
-- `Accessibility: Select Ollama Model` (`ai-accessibility-assistant.selectModel`)
+- `Accessibility: Select Analysis Profile` (`ai-accessibility-assistant.selectModel`)
 
 ## Extension Settings
 
 - `aiAccessibilityAssistant.ollamaHost` (default: `http://localhost:11434`)
 	- Base URL for Ollama
-- `aiAccessibilityAssistant.model` (default: empty)
-	- Selected Ollama model
+- Fixed model used for analysis: `qwen3-coder-next:cloud`
+- `aiAccessibilityAssistant.analysisPreset` (default: `balanced`)
+	- Selected analysis profile preset (`balanced`, `strict`, `thorough`, `quick`)
 - `aiAccessibilityAssistant.ragEndpoint` (default: `http://127.0.0.1:8000`)
 	- Base URL for the local RAG service
 
@@ -119,16 +120,16 @@ Then press `F5` in VS Code to launch an Extension Development Host window.
 
 ## Troubleshooting
 
-- **No models shown in dropdown**
-	- Confirm Ollama is running at `aiAccessibilityAssistant.ollamaHost`.
-	- Confirm at least one model is installed (`ollama list`).
+- **No presets shown in dropdown**
+	- Reload the extension host and reopen the panel.
+	- Confirm the extension compiled cleanly (`npm run compile`).
 
 - **RAG returns no context**
 	- Confirm RAG service is running at `aiAccessibilityAssistant.ragEndpoint`.
 	- Confirm both indexes were built (`/index?kb_type=accessibility` and `/index?kb_type=tlx`).
 
 - **Analysis fails or times out**
-	- Try a smaller model.
+	- Try the `quick` analysis profile preset.
 	- Verify local machine resources (RAM/CPU) are sufficient.
 
 ## Release Notes

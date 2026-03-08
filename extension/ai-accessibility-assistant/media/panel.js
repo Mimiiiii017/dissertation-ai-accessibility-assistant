@@ -6,7 +6,7 @@
   const spinner      = document.getElementById("spinner");
   const status       = document.getElementById("statusText");
   const modelName    = document.getElementById("modelName");
-  const modelSelect  = document.getElementById("modelSelect");
+  const presetSelect = document.getElementById("modelSelect");
   const btnAnalyse   = document.getElementById("btnAnalyse");
   const btnTlx       = document.getElementById("btnTlx");
   const btnClear     = document.getElementById("btnClear");
@@ -21,10 +21,10 @@
   btnTlx.addEventListener("click", () => {
     vscode.postMessage({ type: "tlxFile" });
   });
-  modelSelect.addEventListener("change", () => {
-    const selected = modelSelect.value;
+  presetSelect.addEventListener("change", () => {
+    const selected = presetSelect.value;
     if (selected) {
-      vscode.postMessage({ type: "selectModel", model: selected });
+      vscode.postMessage({ type: "selectPreset", preset: selected });
     }
   });
   btnClear.addEventListener("click", () => {
@@ -276,27 +276,28 @@
         status.textContent = "Idle";
         break;
 
-      case "setModels": {
-        // Populate the dropdown with available models
-        modelSelect.innerHTML = "";
-        if (msg.models.length === 0) {
+      case "setPresets": {
+        // Populate the dropdown with available profile presets
+        presetSelect.innerHTML = "";
+        if (msg.presets.length === 0) {
           const opt = document.createElement("option");
           opt.value = "";
           opt.disabled = true;
           opt.selected = true;
-          opt.textContent = "No models found";
-          modelSelect.appendChild(opt);
+          opt.textContent = "No presets found";
+          presetSelect.appendChild(opt);
         } else {
-          msg.models.forEach(function (m) {
+          msg.presets.forEach(function (preset) {
             const opt = document.createElement("option");
-            opt.value = m;
-            opt.textContent = m;
-            if (m === msg.current) { opt.selected = true; }
-            modelSelect.appendChild(opt);
+            opt.value = preset.id;
+            opt.textContent = preset.label;
+            opt.title = preset.description || "";
+            if (preset.id === msg.current) { opt.selected = true; }
+            presetSelect.appendChild(opt);
           });
-          // Update the badge to reflect the current selection
-          modelName.textContent = msg.current || msg.models[0];
         }
+        // Badge shows the fixed model used for every request
+        modelName.textContent = msg.fixedModel || modelName.textContent;
         break;
       }
 
@@ -332,10 +333,10 @@
         break;
       }
 
-      case "setModel":
-        modelName.textContent = msg.model || "(none)";
+      case "setPreset":
+        modelName.textContent = msg.fixedModel || modelName.textContent;
         // Sync the dropdown selection
-        if (msg.model) { modelSelect.value = msg.model; }
+        if (msg.preset) { presetSelect.value = msg.preset; }
         break;
 
       case "summary": {
@@ -357,10 +358,10 @@
         el.innerHTML = `
           <div class="summary-header">
             <span class="summary-label">Summary</span>
-            <span class="summary-count-badge">${escapeHtml(String(msg.aiCount))} AI issue${msg.aiCount !== 1 ? "s" : ""}</span>
+            <span class="summary-count-badge">AI issues</span>
           </div>
           ${rows}
-          ${msg.totalCount > 0 ? `<div class="summary-total">Total diagnostic issues: <strong>${escapeHtml(String(msg.totalCount))}</strong> &mdash; see Problems tab</div>` : ""}
+          ${msg.totalCount > 0 ? `<div class="summary-total">Total diagnostics &mdash; see Problems tab</div>` : ""}
         `;
         output.appendChild(el);
         output.scrollTop = output.scrollHeight;

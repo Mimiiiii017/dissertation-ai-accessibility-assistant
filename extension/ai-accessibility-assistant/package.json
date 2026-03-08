@@ -44,7 +44,7 @@
       },
       {
         "command": "ai-accessibility-assistant.selectModel",
-        "title": "Accessibility: Select Ollama Model"
+        "title": "Accessibility: Select Analysis Profile"
       }
     ],
     "configuration": {
@@ -55,10 +55,17 @@
           "default": "http://localhost:11434",
           "description": "Base URL for the Ollama server."
         },
-        "aiAccessibilityAssistant.model": {
+        "aiAccessibilityAssistant.analysisPreset": {
           "type": "string",
-          "default": "",
-          "description": "Selected Ollama model (set via 'Accessibility: Select Ollama Model')."
+          "default": "balanced",
+          "enum": ["balanced", "strict", "thorough", "quick"],
+          "enumDescriptions": [
+            "General-purpose profile for most files.",
+            "More deterministic and conservative issue reporting.",
+            "Longer, deeper analysis with more detailed coverage.",
+            "Faster pass with shorter responses."
+          ],
+          "description": "Selected analysis profile preset (set via 'Accessibility: Select Analysis Profile')."
         },
         "aiAccessibilityAssistant.ragEndpoint": {
         "type": "string",

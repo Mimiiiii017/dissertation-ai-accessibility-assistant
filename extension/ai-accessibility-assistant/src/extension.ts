@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const selectModelDisposable = vscode.commands.registerCommand(
     "ai-accessibility-assistant.selectModel",
-    () => panelProvider.selectModelFromCommand()
+    () => panelProvider.selectProfileFromCommand()
   );
 
   context.subscriptions.push(

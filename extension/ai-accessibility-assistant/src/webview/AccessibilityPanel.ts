@@ -1,14 +1,14 @@
 // AccessibilityPanel.ts — sidebar webview panel that hosts the extension's UI
 // Thin shell that wires the webview to the command handlers.
 // All analysis logic lives in commands/analysePanel.ts.
-// All model-selection logic lives in commands/selectModelPanel.ts.
+// All profile-selection logic lives in commands/selectModelPanel.ts.
 // Used by: extension.ts
 
 import * as vscode from "vscode";
 import { analyseFileForPanel } from "../commands/analysePanel";
 import { analyseFileForTlx } from "../commands/tlxPanel";
-import { fetchModelsForPanel, applyModelForPanel } from "../commands/selectModelPanel";
-import { getExtensionConfig } from "../utils/config";
+import { fetchPresetsForPanel, applyPresetForPanel } from "../commands/selectModelPanel";
+import { FIXED_MODEL } from "../utils/llm/ollama";
 import type { PanelLogger } from "./panelLogger";
 
 export const VIEW_ID = "aiAccessibilityAssistant.panel";
@@ -42,15 +42,15 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtml();
 
-    // Populate the model dropdown as soon as the panel is ready
-    this._sendModels();
+    // Populate the profile preset dropdown as soon as the panel is ready
+    this._sendPresets();
 
     webviewView.webview.onDidReceiveMessage(async (msg) => {
       switch (msg.type) {
         case "analyseFile":   await this._runAnalysis(); break;
         case "tlxFile":       await this._runTlxAnalysis(); break;
-        case "selectModel":   await this._applyModel(msg.model); break;
-        case "refreshModels": await this._sendModels(); break;
+        case "selectPreset":  await this._applyPreset(msg.preset); break;
+        case "refreshPresets": await this._sendPresets(); break;
         case "clear":         break; // handled client-side
       }
     });
@@ -68,9 +68,9 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
     await this._runTlxAnalysis();
   }
 
-  public async selectModelFromCommand(): Promise<void> {
+  public async selectProfileFromCommand(): Promise<void> {
     this._view?.show?.(true);
-    await this._sendModels();
+    await this._sendPresets();
   }
 
   // Private wrappers
@@ -105,13 +105,13 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async _sendModels(): Promise<void> {
-    await fetchModelsForPanel(this._logger());
+  private async _sendPresets(): Promise<void> {
+    await fetchPresetsForPanel(this._logger());
   }
 
-  private async _applyModel(model: string): Promise<void> {
-    if (!model) { return; }
-    await applyModelForPanel(this._logger(), model);
+  private async _applyPreset(preset: string): Promise<void> {
+    if (!preset) { return; }
+    await applyPresetForPanel(this._logger(), preset);
   }
 
   // Logger factory
@@ -156,12 +156,12 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
 <body>
   <div class="header">
     <div class="model-row">
-      <select id="modelSelect" title="Select the Ollama model to use">
-        <option value="" disabled selected>Loading models…</option>
+      <select id="modelSelect" title="Select the analysis profile preset to use">
+        <option value="" disabled selected>Loading presets…</option>
       </select>
       <span class="model-badge">
         <span class="dot"></span>
-        <span id="modelName">(none)</span>
+        <span id="modelName">${FIXED_MODEL}</span>
       </span>
     </div>
   </div>
