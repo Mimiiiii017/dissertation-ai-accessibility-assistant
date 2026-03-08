@@ -11,7 +11,6 @@ import { runBaselineChecks } from "../utils/analysis/baseline";
 import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompts/prompt";
 import { parseTextResponse, deduplicateIssues } from "../utils/analysis/parser";
 import { aiIssueToDiagnostic } from "../utils/analysis/diagnostics";
-import { getFileTypeContext } from "../utils/code/fileTypeContext";
 import { buildRelevantExcerpt } from "../utils/code/excerptBuilder";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
@@ -38,7 +37,6 @@ export async function analyseFileForPanel(
 
   diagnostics.delete(doc.uri);
   const issues: vscode.Diagnostic[] = [];
-  const fileTypeContext = getFileTypeContext(doc);
 
   // Baseline checks
   const baselineIssues = runBaselineChecks(doc);
@@ -53,7 +51,7 @@ export async function analyseFileForPanel(
   } else {
     let fullResponse = "";
     try {
-      const excerpt = buildRelevantExcerpt(doc, fileTypeContext.keywords);
+      const excerpt = buildRelevantExcerpt(doc);
       const ragQuery = buildRagQuery(doc.languageId, excerpt);
       const cacheKey = `${doc.languageId}::${ragQuery}::${excerpt.length}`;
 

@@ -78,16 +78,16 @@ export async function ollamaWarmup(host: string, model: string): Promise<void> {
 
 // Analysis options - Changing these parameters will tune model behavior
 export const ANALYSIS_OPTIONS: OllamaOptions = {
-  num_predict: 30000,          // Max response length
-  num_ctx: 8192,              // Context window
-  temperature: 0.3,           // Low = focused/consistent
-  top_p: 0.9,                 // Nucleus sampling
-  top_k: 40,                  // Top-k sampling
-  repeat_penalty: 1.1,        // Discourage repetition
-  repeat_last_n: 64,          // Repetition lookback window
+  num_predict: 20000,          // Max response length (includes /think tokens — leave headroom)
+  num_ctx: 32768,              // Must be large enough for RAG context + full file + instructions (~56k tokens total)
+  temperature: 0.15,           // Lower = more deterministic/consistent
+  top_p: 0.85,                 // Tighter nucleus sampling
+  top_k: 30,                   // Narrower token candidate pool
+  repeat_penalty: 1.1,         // Slightly lower — avoids penalising the repeated Issue block format
+  repeat_last_n: 128,          // Repetition lookback window
   frequency_penalty: 0.0,     // Penalize frequent tokens (0 = disabled)
   presence_penalty: 0.0,      // Penalize any repeated tokens (0 = disabled)
-  seed: undefined,            // Set a number for reproducible results
+  seed: 42,                    // Set a number for reproducible results
   mirostat: 0,                // 0 = disabled (use temperature/top_p)
 };
 

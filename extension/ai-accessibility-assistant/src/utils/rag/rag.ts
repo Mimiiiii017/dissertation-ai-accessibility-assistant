@@ -14,7 +14,6 @@ export const RAG_CONFIG = {
   topK: 100,                   // Number of knowledge base chunks to retrieve (100% coverage)
   maxExcerptChars: 20000,      // Max characters to extract from code
   cacheTimeMs: 60000,         // Cache RAG results for 60 seconds
-  contextLinesAround: 2,      // Lines of context around keyword matches
 };
 
 // Cache RAG results to avoid redundant API calls within the same session

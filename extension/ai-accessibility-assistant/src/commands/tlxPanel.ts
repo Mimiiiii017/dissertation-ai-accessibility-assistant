@@ -8,7 +8,6 @@ import { ollamaGenerateStream } from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildTlxRagQuery } from "../utils/rag/ragQueryBuilder";
 import { TLX_SYSTEM_PROMPT, buildTlxPrompt } from "../utils/prompts/tlxPrompt";
-import { getFileTypeContext } from "../utils/code/fileTypeContext";
 import { buildRelevantExcerpt } from "../utils/code/excerptBuilder";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
@@ -32,8 +31,6 @@ export async function analyseFileForTlx(
   logger.log(`Model: ${model || "(not set)"}  |  RAG: ${ragEndpoint}`);
   logger.log("");
 
-  const fileTypeContext = getFileTypeContext(doc);
-
   // AI analysis
   if (!model) {
     logger.log("No model selected — cannot run TLX analysis.");
@@ -43,7 +40,7 @@ export async function analyseFileForTlx(
 
   let fullResponse = "";
   try {
-    const excerpt = buildRelevantExcerpt(doc, fileTypeContext.keywords);
+    const excerpt = buildRelevantExcerpt(doc);
     const ragQuery = buildTlxRagQuery(doc.languageId, excerpt);
     const cacheKey = `tlx::${doc.languageId}::${ragQuery}::${excerpt.length}`;
 
