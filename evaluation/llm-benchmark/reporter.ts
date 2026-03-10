@@ -1,0 +1,395 @@
+/**
+ * reporter.ts  —  LLM Benchmark Reporter
+ *
+ * Renders three views:
+ *   1. OVERALL RANKING — composite score (80 % F1 + 20 % speed), plus raw metrics
+ *   2. DETAIL BY FIXTURE — how each model performed on each file
+ *   3. FALSE POSITIVE ANALYSIS — what each model hallucinated on clean files
+ *
+ * Also writes JSON (full data) and CSV (summary) to disk.
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+import {
+  ModelRunResult,
+  ModelAggregateStats,
+  aggregateByModel,
+  applyCompositeScores,
+  shortName,
+} from './benchmark';
+import { AnalysisPresetId, ANALYSIS_PRESETS } from
+  '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
+
+// ─── ANSI helpers ─────────────────────────────────────────────────────────
+
+const C = {
+  reset:  '\x1b[0m',
+  bold:   '\x1b[1m',
+  dim:    '\x1b[2m',
+  green:  '\x1b[32m',
+  yellow: '\x1b[33m',
+  red:    '\x1b[31m',
+  cyan:   '\x1b[36m',
+  magenta:'\x1b[35m',
+  white:  '\x1b[37m',
+};
+
+function pct(n: number): string {
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+function ms(n: number): string {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}s` : `${Math.round(n)}ms`;
+}
+
+function pad(s: string | number, w: number, left = false): string {
+  const str = String(s);
+  const diff = w - str.length;
+  if (diff <= 0) return str;
+  return left ? str + ' '.repeat(diff) : ' '.repeat(diff) + str;
+}
+
+function hr(char = '─', width = 90): string {
+  return char.repeat(width);
+}
+
+const MEDALS = ['🥇', '🥈', '🥉'];
+function medal(rank: number): string {
+  return MEDALS[rank] ?? ` ${rank + 1}.`;
+}
+
+function scoreBar(score: number, width = 20): string {
+  const filled = Math.round(score * width);
+  const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
+  const col = score >= 0.7 ? C.green : score >= 0.5 ? C.yellow : C.red;
+  return col + bar + C.reset;
+}
+
+// ─── Main report ──────────────────────────────────────────────────────────
+
+export function printReport(
+  results: ModelRunResult[],
+  models: string[],
+  presetId: AnalysisPresetId
+): void {
+  const rawStats = models.map(m => aggregateByModel(results, m, presetId));
+  const stats = applyCompositeScores(rawStats);
+  const ranked = [...stats].sort((a, b) => b.compositeScore - a.compositeScore);
+  const presetLabel = ANALYSIS_PRESETS[presetId]?.label ?? presetId;
+
+  // ── Header ────────────────────────────────────────────────────────
+  console.log('');
+  console.log(C.bold + hr('═') + C.reset);
+  console.log(C.bold + '  LLM MODEL BENCHMARK — Accessibility Auditing Quality' + C.reset);
+  console.log(`  Preset:  ${C.cyan}${presetLabel}${C.reset}  (fixed — only model differs)`);
+  console.log(`  Models:  ${models.length}`);
+  const runsPerCombo = results.filter(
+    r => r.modelId === models[0] && r.fixtureId === results[0]?.fixtureId
+  ).length;
+  console.log(`  Runs per combination: ${runsPerCombo}`);
+  console.log(`  Composite score = 80% F1  +  20% speed (higher = better)`);
+  console.log(C.bold + hr('═') + C.reset);
+  console.log('');
+
+  // ── Overall ranking ───────────────────────────────────────────────
+  console.log(C.bold + '  OVERALL RANKING' + C.reset);
+  console.log('');
+
+  const hdr = [
+    pad('',           4),
+    pad('Model',      30, true),
+    pad('Score',      7),
+    pad('',          20),   // bar
+    pad('F1',         7),
+    pad('Prec',       7),
+    pad('Recall',     8),
+    pad('TP', 4),
+    pad('FN', 4),
+    pad('FP', 4),
+    pad('AvgTime',    9),
+    pad('Errs',       5),
+  ].join(' ');
+  console.log('  ' + C.dim + hdr + C.reset);
+  console.log('  ' + hr('─', hdr.length));
+
+  for (let i = 0; i < ranked.length; i++) {
+    const s = ranked[i];
+    const name = shortName(s.modelId);
+    const f1Col = s.avgF1 >= 0.7 ? C.green : s.avgF1 >= 0.5 ? C.yellow : C.red;
+    const row = [
+      pad(medal(i), 4),
+      pad(name, 30, true),
+      pad(pct(s.compositeScore), 7),
+      scoreBar(s.compositeScore),
+      f1Col + pad(pct(s.avgF1), 7) + C.reset,
+      pad(pct(s.avgPrecision), 7),
+      pad(pct(s.avgRecall), 8),
+      pad(s.totalTP, 4),
+      pad(s.totalFN, 4),
+      pad(s.totalFP, 4),
+      pad(ms(s.avgResponseMs), 9),
+      pad(s.errorCount, 5),
+    ].join(' ');
+    console.log('  ' + row);
+  }
+
+  // ── Recommendation ────────────────────────────────────────────────
+  console.log('');
+  const best = ranked[0];
+  const bestF1 = ranked.reduce((a, b) => a.avgF1 > b.avgF1 ? a : b);
+  const bestSpeed = ranked.filter(s => s.avgResponseMs > 0)
+    .reduce((a, b) => a.avgResponseMs < b.avgResponseMs ? a : b);
+  const fewestFP = ranked.reduce((a, b) => a.totalFP < b.totalFP ? a : b);
+  const fewestFN = ranked.reduce((a, b) => a.totalFN < b.totalFN ? a : b);
+
+  console.log(C.bold + '  RECOMMENDATION' + C.reset);
+  console.log(`  Best overall (composite) : ${C.green}${C.bold}${shortName(best.modelId)}${C.reset}  [composite=${pct(best.compositeScore)}]`);
+  if (bestF1.modelId !== best.modelId)
+    console.log(`  Best F1 (most accurate)  : ${C.cyan}${shortName(bestF1.modelId)}${C.reset}  [F1=${pct(bestF1.avgF1)}]`);
+  if (bestSpeed.modelId !== best.modelId)
+    console.log(`  Fastest                  : ${C.cyan}${shortName(bestSpeed.modelId)}${C.reset}  [${ms(bestSpeed.avgResponseMs)} avg]`);
+  if (fewestFP.modelId !== best.modelId)
+    console.log(`  Fewest false positives   : ${C.cyan}${shortName(fewestFP.modelId)}${C.reset}  [${fewestFP.totalFP} FP total]`);
+  if (fewestFN.modelId !== best.modelId)
+    console.log(`  Fewest missed issues     : ${C.cyan}${shortName(fewestFN.modelId)}${C.reset}  [${fewestFN.totalFN} FN total]`);
+
+  // ── Per-fixture breakdown ─────────────────────────────────────────
+  const fixtureIds = [...new Set(results.map(r => r.fixtureId))];
+  console.log('');
+  console.log(C.bold + '  DETAIL BY FIXTURE' + C.reset);
+
+  for (const fixtureId of fixtureIds) {
+    const fixResults = results.filter(r => r.fixtureId === fixtureId);
+    const firstResult = fixResults[0];
+    const isClean = firstResult.tp === 0 && firstResult.fn === 0 && firstResult.fp >= 0;
+    // Better: check if fixture is clean by seeing if fn was 0 across all models even when 0 TP
+    const cleanLabel = firstResult && firstResult.missedIds.length === 0 && firstResult.fn === 0 &&
+                       !firstResult.issuesFound.length
+      ? ` ${C.dim}(false-positive test)${C.reset}`
+      : '';
+
+    console.log('');
+    console.log(`  ${C.cyan}${C.bold}${fixtureId}${C.reset}${cleanLabel}`);
+
+    const fHdr = [
+      pad('Model',     30, true),
+      pad('Found',     6),
+      pad('TP',  4),
+      pad('FN',  4),
+      pad('FP',  4),
+      pad('F1%',  8),
+      pad('Time',  9),
+      'Notes',
+    ].join('  ');
+    console.log('  ' + C.dim + fHdr + C.reset);
+    console.log('  ' + hr('─', 90));
+
+    // Sort by F1 descending for this fixture
+    const modelOrder = models
+      .map(m => {
+        const runs = fixResults.filter(r => r.modelId === m);
+        const avgF1 = runs.length
+          ? runs.reduce((s, r) => s + r.f1, 0) / runs.length
+          : 0;
+        return { modelId: m, avgF1 };
+      })
+      .sort((a, b) => b.avgF1 - a.avgF1);
+
+    for (const { modelId } of modelOrder) {
+      const runs = fixResults.filter(r => r.modelId === modelId && !r.errorOccurred);
+      if (runs.length === 0) {
+        const errRun = fixResults.find(r => r.modelId === modelId && r.errorOccurred);
+        const f1Col = C.red;
+        const row = [
+          pad(shortName(modelId), 30, true),
+          pad('-', 6),
+          pad('-', 4),
+          pad('-', 4),
+          pad('-', 4),
+          f1Col + pad('-', 8) + C.reset,
+          pad('-', 9),
+          `ERROR: ${errRun?.errorMessage ?? 'unknown'}`,
+        ].join('  ');
+        console.log('  ' + row);
+        continue;
+      }
+
+      const avgF1  = runs.reduce((s, r) => s + r.f1,          0) / runs.length;
+      const avgTP  = runs.reduce((s, r) => s + r.tp,          0) / runs.length;
+      const avgFN  = runs.reduce((s, r) => s + r.fn,          0) / runs.length;
+      const avgFP  = runs.reduce((s, r) => s + r.fp,          0) / runs.length;
+      const avgMs  = runs.reduce((s, r) => s + r.responseTimeMs, 0) / runs.length;
+      const found  = runs.reduce((s, r) => s + r.issuesFound.length, 0) / runs.length;
+
+      const firstRun = runs[0];
+      let notes = '';
+      if (firstRun.missedIds.length)  notes += `MISS:[${firstRun.missedIds.join(', ')}] `;
+      if (firstRun.fpTitles.length)   notes += `FP:[${firstRun.fpTitles.slice(0, 2).join(' | ')}${firstRun.fpTitles.length > 2 ? ` +${firstRun.fpTitles.length - 2} more` : ''}]`;
+      if (!notes && avgFP === 0 && avgFN === 0) notes = `${C.green}✓ perfect${C.reset}`;
+
+      const f1Col = avgF1 >= 0.8 ? C.green : avgF1 >= 0.5 ? C.yellow : C.red;
+      const row = [
+        pad(shortName(modelId), 30, true),
+        pad(Math.round(found),  6),
+        pad(avgTP.toFixed(1),   4),
+        pad(avgFN.toFixed(1),   4),
+        pad(avgFP.toFixed(1),   4),
+        f1Col + pad(pct(avgF1), 8) + C.reset,
+        pad(ms(avgMs),          9),
+        notes,
+      ].join('  ');
+      console.log('  ' + row);
+    }
+  }
+
+  // ── False positive analysis ────────────────────────────────────────
+  const fpResults = results.filter(r => r.fp > 0 && !r.errorOccurred);
+  console.log('');
+  console.log(C.bold + '  FALSE POSITIVE ANALYSIS' + C.reset);
+  console.log(`  ${C.dim}(issues found in "clean" fixtures — every issue here is a hallucination)${C.reset}`);
+  console.log('');
+
+  for (const modelId of models) {
+    const modelFPs = fpResults.filter(r => r.modelId === modelId);
+    const name = shortName(modelId);
+    if (modelFPs.length === 0) {
+      console.log(`  ${C.green}✓ ${name}: zero false positives on all clean fixtures${C.reset}`);
+      continue;
+    }
+    const totalFP = modelFPs.reduce((s, r) => s + r.fp, 0);
+    console.log(`  ${C.yellow}${name}${C.reset}  —  ${C.red}${totalFP} false positive(s)${C.reset}:`);
+    for (const r of modelFPs) {
+      for (const title of r.fpTitles) {
+        console.log(`    ${C.red}•${C.reset} [${r.fixtureId}] "${title}"`);
+      }
+    }
+  }
+
+  console.log('');
+  console.log(hr());
+}
+
+// ─── Save JSON ────────────────────────────────────────────────────────────
+
+export function saveJson(results: ModelRunResult[], outDir: string): string {
+  fs.mkdirSync(outDir, { recursive: true });
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const filePath = path.join(outDir, `llm-benchmark-${ts}.json`);
+  // Strip rawResponse to keep the file manageable — preserve everything else
+  const stripped = results.map(r => ({ ...r, rawResponse: undefined }));
+  fs.writeFileSync(filePath, JSON.stringify(stripped, null, 2), 'utf8');
+  return filePath;
+}
+
+// ─── Save CSV ─────────────────────────────────────────────────────────────
+
+export function saveCsv(
+  results: ModelRunResult[],
+  models: string[],
+  outDir: string
+): string {
+  fs.mkdirSync(outDir, { recursive: true });
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const filePath = path.join(outDir, `llm-summary-${ts}.csv`);
+
+  const rows: string[][] = [[
+    'model', 'short_name', 'fixture', 'preset', 'run',
+    'issues_found', 'tp', 'fn', 'fp',
+    'precision', 'recall', 'f1',
+    'response_ms', 'error',
+  ]];
+
+  for (const r of results) {
+    rows.push([
+      r.modelId,
+      shortName(r.modelId),
+      r.fixtureId,
+      r.presetId,
+      String(r.runIndex),
+      String(r.issuesFound.length),
+      String(r.tp),
+      String(r.fn),
+      String(r.fp),
+      r.precision.toFixed(4),
+      r.recall.toFixed(4),
+      r.f1.toFixed(4),
+      String(r.responseTimeMs),
+      r.errorOccurred ? 'true' : 'false',
+    ]);
+  }
+
+  // Append aggregate rows after a blank line
+  rows.push([]);
+  rows.push(['# AGGREGATE BY MODEL', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  rows.push(['model', 'short_name', 'preset', 'total_tp', 'total_fn', 'total_fp',
+             'avg_precision', 'avg_recall', 'avg_f1', 'avg_response_ms',
+             'composite_score', 'errors', '', '']);
+
+  const rawStats = models.map(m => aggregateByModel(results, m, results[0]?.presetId ?? 'balanced'));
+  const stats = applyCompositeScores(rawStats).sort((a, b) => b.compositeScore - a.compositeScore);
+  for (const s of stats) {
+    rows.push([
+      s.modelId,
+      shortName(s.modelId),
+      s.presetId,
+      String(s.totalTP),
+      String(s.totalFN),
+      String(s.totalFP),
+      s.avgPrecision.toFixed(4),
+      s.avgRecall.toFixed(4),
+      s.avgF1.toFixed(4),
+      s.avgResponseMs.toFixed(0),
+      s.compositeScore.toFixed(4),
+      String(s.errorCount),
+      '', '',
+    ]);
+  }
+
+  const csv = rows
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  fs.writeFileSync(filePath, csv, 'utf8');
+  return filePath;
+}
+
+// ─── Save plain-text report ───────────────────────────────────────────────
+
+/** Strip ANSI escape codes so the text file is readable in any editor. */
+function stripAnsi(str: string): string {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
+/**
+ * Capture the console output of printReport() and save it as a .txt file
+ * (ANSI codes stripped).  Returns the file path.
+ */
+export function saveReport(
+  results: ModelRunResult[],
+  models: string[],
+  presetId: AnalysisPresetId,
+  outDir: string
+): string {
+  fs.mkdirSync(outDir, { recursive: true });
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const filePath = path.join(outDir, `llm-report-${ts}.txt`);
+
+  // Capture stdout
+  const lines: string[] = [];
+  const origWrite = process.stdout.write.bind(process.stdout);
+  (process.stdout.write as any) = (chunk: string | Buffer) => {
+    lines.push(typeof chunk === 'string' ? chunk : chunk.toString());
+    return origWrite(chunk);   // still print to terminal
+  };
+
+  printReport(results, models, presetId);
+
+  // Restore stdout
+  (process.stdout.write as any) = origWrite;
+
+  const text = stripAnsi(lines.join(''));
+  fs.writeFileSync(filePath, text, 'utf8');
+  return filePath;
+}

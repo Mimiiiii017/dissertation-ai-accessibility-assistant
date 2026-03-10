@@ -5,6 +5,10 @@ node_modules/
 dist/
 out/
 *.vsix
+*.js.map
+
+# TypeScript incremental build info
+*.tsbuildinfo
 
 # VS Code
 .vscode-test/
@@ -24,15 +28,14 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+**/.env
+**/.env.local
 
 # IDE
 .idea/
 *.swp
 *.swo
 *~
-
-# Misc
-*.tsbuildinfo
 
 # Python
 __pycache__/
@@ -57,3 +60,4 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
