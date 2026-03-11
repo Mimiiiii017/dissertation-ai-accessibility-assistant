@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — Our Company</title>
+</head>
+<body>
+
+  <header>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <img src="/logo.png" alt="Our Company logo">
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact us</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <h1>About Our Company</h1>
+    <!-- Sufficient contrast: #333 on #fff ≈ 12.6:1 -->
+    <p style="color:#333; background:#fff">
+      We make high-quality, accessible products for everyone.
+    </p>
+
+    <h2>Our Mission</h2>
+    <p>To build tools that work for every person, regardless of ability.</p>
+
+    <h2>Contact Us</h2>
+    <form>
+      <div>
+        <label for="full-name">Full name</label>
+        <input type="text" id="full-name" name="full-name" autocomplete="name">
+      </div>
+      <div>
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" autocomplete="email">
+      </div>
+      <div>
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5"></textarea>
+      </div>
+      <button type="submit">Send message</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Our Company. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

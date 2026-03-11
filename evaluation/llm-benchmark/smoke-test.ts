@@ -35,8 +35,9 @@ const errResults: ModelRunResult[] = [{
   presetId: 'balanced',
   runIndex: 0,
   issuesFound: [],
-  tp: 0, fn: 5, fp: 0,
-  precision: 0, recall: 0, f1: 0,
+  tp: 0, tn: 10, fn: 5, fp: 0,
+  precision: 0, recall: 0, specificity: 1, npv: 0.667,
+  f1: 0, accuracy: 0.667, balancedAccuracy: 0.5, mcc: 0,
   responseTimeMs: 0,
   errorOccurred: true,
   errorMessage: 'Connection refused',
@@ -52,11 +53,15 @@ assert(errStats.avgF1 === 0,      'f1 = 0 on all-error run');
 console.log('\n── aggregateByModel: normal run ───────────────────────────');
 const goodResults: ModelRunResult[] = [
   { modelId: 'model-b', fixtureId: 'html-issues', presetId: 'balanced', runIndex: 0,
-    issuesFound: [], tp: 8, fn: 3, fp: 0, precision: 1.0, recall: 0.727, f1: 0.842,
+    issuesFound: [], tp: 8, tn: 5, fn: 3, fp: 0,
+    precision: 1.0, recall: 0.727, specificity: 1.0, npv: 0.625,
+    f1: 0.842, accuracy: 0.813, balancedAccuracy: 0.864, mcc: 0.726,
     responseTimeMs: 30000, errorOccurred: false, rawResponse: '', missedIds: ['x'], fpTitles: [] },
   { modelId: 'model-b', fixtureId: 'tsx-issues',  presetId: 'balanced', runIndex: 0,
-    issuesFound: [], tp: 6, fn: 0, fp: 0, precision: 1.0, recall: 1.0,   f1: 1.0,
-    responseTimeMs: 15000, errorOccurred: false, rawResponse: '', missedIds: [],  fpTitles: [] },
+    issuesFound: [], tp: 6, tn: 5, fn: 0, fp: 0,
+    precision: 1.0, recall: 1.0, specificity: 1.0, npv: 1.0,
+    f1: 1.0, accuracy: 1.0, balancedAccuracy: 1.0, mcc: 1.0,
+    responseTimeMs: 15000, errorOccurred: false, rawResponse: '', missedIds: [], fpTitles: [] },
 ];
 const good = aggregateByModel(goodResults, 'model-b', 'balanced');
 assert(good.totalTP === 14,                         'TP = 14');

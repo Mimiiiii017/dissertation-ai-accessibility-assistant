@@ -5,7 +5,7 @@
  *   npx ts-node run.ts [options]
  *
  * Options:
- *   --models   <csv>  Comma-separated model IDs to test  (default: all 9 installed)
+ *   --models   <csv>  Comma-separated model IDs to test  (default: all 11 installed)
  *   --fixtures <csv>  Comma-separated fixture IDs        (default: all 8)
  *   --preset   <id>   Analysis preset to use             (default: balanced)
  *   --host     <url>  Ollama base URL                    (default: http://localhost:11434)
@@ -37,6 +37,8 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 // ─── All installed models ──────────────────────────────────────────────────
 
 const ALL_MODELS: string[] = [
+  'gemma3:27b-cloud',
+  'mistral-large-3:675b-cloud',
   'qwen3-coder:480b-cloud',
   'gpt-oss:120b-cloud',
   'deepseek-v3.2:cloud',

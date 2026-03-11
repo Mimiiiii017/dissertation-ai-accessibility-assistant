@@ -1,0 +1,68 @@
+/* app.css */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Issue 1: focus indicator removed globally ───────────────────────────
+   Keyboard users cannot see which element is focused.           */
+*:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ── Issue 2: animation with no prefers-reduced-motion guard ─────────────
+   Users with vestibular disorders may experience nausea or
+   disorientation from this animation.                           */
+.hero-banner {
+  animation: slide-in 0.8s ease-out;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Issue 3: font size far too small for body text ──────────────────────
+   8 px is well below the 16 px (or equivalent) that most guidelines
+   recommend as a minimum for readable body text.                */
+.legal-text {
+  font-size: 8px;
+  line-height: 1.0;
+}
+
+/* ── Issue 4: very low contrast text ────────────────────────────────────
+   #ccc on #fff = contrast ratio ≈ 1.6:1, far below the 4.5:1
+   minimum required by WCAG 2.2 SC 1.4.3.                        */
+.card {
+  background: #ffffff;
+  color: #cccccc;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.btn {
+  background: #0d6efd;
+  color: #ffffff;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
