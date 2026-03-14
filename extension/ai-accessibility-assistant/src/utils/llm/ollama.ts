@@ -34,9 +34,9 @@ export interface OllamaOptions {
   mirostat?: number; // 0=disabled, 1=Mirostat v1, 2=Mirostat v2 (alternative sampling, usually leave at 0)
 }
 
-export const FIXED_MODEL = "qwen3-coder-next:cloud";
+export const FIXED_MODEL = "gpt-oss:120b-cloud";
 
-export type AnalysisPresetId = "balanced" | "strict" | "thorough" | "quick";
+export type AnalysisPresetId = "balanced" | "strict" | "thorough" | "quick" | "reasoning" | "performance";
 
 type AnalysisPreset = {
   label: string;
@@ -108,6 +108,40 @@ export const ANALYSIS_PRESETS: Record<AnalysisPresetId, AnalysisPreset> = {
       top_p: 0.9,
       top_k: 40,
       repeat_penalty: 1.05,
+      repeat_last_n: 96,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+  reasoning: {
+    label: "Reasoning",
+    description: "High-quality analysis for complex ARIA patterns and deep DOM structures.",
+    options: {
+      num_predict: 32000,
+      num_ctx: 32768,
+      temperature: 0.7,
+      top_p: 0.95,
+      top_k: 40,
+      repeat_penalty: 1.1,
+      repeat_last_n: 256,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      seed: 42,
+      mirostat: 0,
+    },
+  },
+  performance: {
+    label: "Performance",
+    description: "Speed-optimised using the top_k=100 GPT-OSS speed hack. Best for large files.",
+    options: {
+      num_predict: 10000,
+      num_ctx: 32768,
+      temperature: 0.3,
+      top_p: 0.9,
+      top_k: 100,
+      repeat_penalty: 1.1,
       repeat_last_n: 96,
       frequency_penalty: 0.0,
       presence_penalty: 0.0,
