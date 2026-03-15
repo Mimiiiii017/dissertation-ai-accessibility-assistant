@@ -11,7 +11,7 @@ type RagRetrieveResponse = { chunks: RagChunk[] };
 
 // RAG and code extraction configuration - Centralized settings for testing/tuning
 export const RAG_CONFIG = {
-  topK: 100,                   // Number of knowledge base chunks to retrieve (100% coverage)
+  topK: 10,                    // Number of knowledge base chunks to retrieve (top-10 most relevant)
   maxExcerptChars: 20000,      // Max characters to extract from code
   cacheTimeMs: 60000,         // Cache RAG results for 60 seconds
 };
