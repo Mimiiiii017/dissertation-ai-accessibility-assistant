@@ -1,5 +1,5 @@
 /**
- * benchmark.ts  —  LLM Model Benchmark
+ * benchmark.ts  —  Cloud-LLM-Preliminary
  *
  * For each (model × fixture × run):
  *   1. Read the fixture file
@@ -245,7 +245,7 @@ export async function runOnce(
   const userPrompt = buildAiPrompt(
     fixture.languageId,
     code,
-    '(no RAG context — llm-benchmark mode)'
+    '(no RAG context — Cloud-LLM-Preliminary mode)'
   );
 
   const t0 = Date.now();
@@ -481,8 +481,41 @@ export function applyCompositeScores(stats: ModelAggregateStats[]): ModelAggrega
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
 /** Strip `:cloud` / `:latest` suffixes for display */
+/** Approximate parameter-count label shown beside each model in all output. */
+const MODEL_SIZE_LABELS: Record<string, string> = {
+  // ── Smaller / faster (<30 B) ──────────────────────────────────────────
+  'gemma3:4b-cloud':            '~4B',
+  'ministral-3:3b-cloud':       '~3B',
+  'ministral-3:14b-cloud':      '~14B',
+  'gpt-oss:20b-cloud':          '~20B',
+  'devstral-small-2:24b-cloud': '~24B',
+  'nemotron-3-nano:30b-cloud':  '~30B',
+  // ── Mid-range (30–200 B) ──────────────────────────────────────────────
+  'gemma3:27b-cloud':               '~27B',
+  'gemini-3-flash-preview:cloud':   '~?B',
+  'minimax-m2:cloud':               '~456B MoE',
+  'minimax-m2.5:cloud':             '~456B MoE',
+  'nemotron-3-super:cloud':         '~253B',
+  'deepseek-v3.2:cloud':            '~671B MoE',
+  // ── Large (100–700 B) ─────────────────────────────────────────────────
+  'devstral-2:123b-cloud':      '~123B',
+  'gpt-oss:120b-cloud':         '~120B',
+  'cogito-2.1:671b-cloud':      '~671B',
+  'mistral-large-3:675b-cloud': '~675B',
+  // ── Very large / undisclosed ──────────────────────────────────────────
+  'qwen3.5:397b-cloud':         '~397B',
+  'qwen3-coder:480b-cloud':     '~480B',
+  'qwen3-vl:235b-cloud':        '~235B',
+  'qwen3.5:cloud':              '~397B',
+  'qwen3-coder-next:cloud':     '~?B',
+  'kimi-k2.5:cloud':            '~?B',
+  'glm-5:cloud':                '~?B',
+};
+
 export function shortName(modelId: string): string {
-  return modelId
+  const base = modelId
     .replace(/:cloud$/, '')
     .replace(/:latest$/, '');
+  const sizeLabel = MODEL_SIZE_LABELS[modelId];
+  return sizeLabel ? `${base} (${sizeLabel})` : base;
 }

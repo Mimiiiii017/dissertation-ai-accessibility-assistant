@@ -1,12 +1,12 @@
 /**
- * run.ts  —  CLI entry point for the LLM model benchmark
+ * run.ts  —  CLI entry point for Cloud-LLM-Preliminary
  *
  * Usage:
  *   npx ts-node run.ts [options]
  *
  * Options:
- *   --models   <csv>  Comma-separated model IDs to test  (default: all 11 installed)
- *   --fixtures <csv>  Comma-separated fixture IDs        (default: all 8)
+ *   --models   <csv>  Comma-separated model IDs to test  (default: all 23 installed)
+ *   --fixtures <csv>  Comma-separated fixture IDs        (default: all 4)
  *   --preset   <id>   Analysis preset to use             (default: balanced)
  *   --host     <url>  Ollama base URL                    (default: http://localhost:11434)
  *   --runs     <n>    Repetitions per model/fixture pair (default: 1)
@@ -37,17 +37,33 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 // ─── All installed models ──────────────────────────────────────────────────
 
 const ALL_MODELS: string[] = [
-  'gemma3:27b-cloud',
-  'mistral-large-3:675b-cloud',
-  'qwen3-coder:480b-cloud',
-  'gpt-oss:120b-cloud',
-  'deepseek-v3.2:cloud',
-  'devstral-2:123b-cloud',
-  'kimi-k2.5:cloud',
-  'glm-5:cloud',
-  'qwen3-vl:235b-cloud',
-  'qwen3-coder-next:cloud',
-  'qwen3.5:cloud',
+  // ── Smaller / faster (<30 B) ───────────────────────────────────────────
+  'gemma3:4b-cloud',            // ~4 B
+  'ministral-3:3b-cloud',       // ~3 B
+  'ministral-3:14b-cloud',      // ~14 B
+  'gpt-oss:20b-cloud',          // ~20 B
+  'devstral-small-2:24b-cloud', // ~24 B
+  'nemotron-3-nano:30b-cloud',  // ~30 B
+  // ── Mid-range (30–200 B) ──────────────────────────────────────────────
+  'gemma3:27b-cloud',                // ~27 B
+  'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
+  'minimax-m2:cloud',                // ~456 B MoE
+  'minimax-m2.5:cloud',              // ~456 B MoE (updated)
+  'nemotron-3-super:cloud',          // ~253 B
+  'deepseek-v3.2:cloud',             // ~671 B MoE
+  // ── Large (100–700 B) ─────────────────────────────────────────────────
+  'devstral-2:123b-cloud',      // ~123 B
+  'gpt-oss:120b-cloud',         // ~120 B
+  'cogito-2.1:671b-cloud',      // ~671 B
+  'mistral-large-3:675b-cloud', // ~675 B
+  // ── Very large / undisclosed (>235 B) ────────────────────────────────
+  'qwen3.5:397b-cloud',         // ~397 B
+  'qwen3-coder:480b-cloud',     // ~480 B
+  'qwen3-vl:235b-cloud',        // ~235 B (vision)
+  'qwen3.5:cloud',              // ~397 B (alias for qwen3.5:397b-cloud)
+  'qwen3-coder-next:cloud',     // ~undisclosed (next-gen Qwen coder)
+  'kimi-k2.5:cloud',            // ~undisclosed (Moonshot AI)
+  'glm-5:cloud',                // ~undisclosed (Zhipu AI)
 ];
 
 // ─── Argument parsing ──────────────────────────────────────────────────────
@@ -68,7 +84,7 @@ Usage: npx ts-node run.ts [options]
 Options:
   --models   <csv>  Models to test (default: all ${ALL_MODELS.length} installed)
              Available: ${ALL_MODELS.map(shortName).join(', ')}
-  --fixtures <csv>  Fixtures to test (default: all 8)
+  --fixtures <csv>  Fixtures to test (default: all 4)
              Available: ${ALL_FIXTURES.map(f => f.fixtureId).join(', ')}
   --preset   <id>   Fixed analysis preset (default: balanced)
              Choices: ${Object.keys(ANALYSIS_PRESETS).join(', ')}
@@ -144,7 +160,7 @@ async function main() {
 
   if (!opts.quiet) {
     console.log('');
-    console.log('  LLM Model Benchmark — starting');
+    console.log('  Cloud-LLM-Preliminary — starting');
     console.log(`  Ollama:   ${opts.host}`);
     console.log(`  Preset:   ${opts.presetId}`);
     console.log(`  Models:   ${opts.models.length}  →  ${opts.models.map(shortName).join(', ')}`);

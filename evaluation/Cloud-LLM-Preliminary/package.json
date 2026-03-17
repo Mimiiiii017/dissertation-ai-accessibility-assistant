@@ -1,5 +1,5 @@
 {
-  "name": "llm-benchmark",
+  "name": "cloud-llm-preliminary",
   "version": "1.0.0",
   "description": "Benchmarks installed LLM models to find the best fit: fewest mistakes, fastest, most thorough.",
   "private": true,

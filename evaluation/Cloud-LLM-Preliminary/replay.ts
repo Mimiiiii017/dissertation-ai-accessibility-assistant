@@ -3,7 +3,7 @@
  *
  * Usage:
  *   node_modules/.bin/ts-node replay.ts <path-to-json>
- *   node_modules/.bin/ts-node replay.ts results/llm-benchmark-xyz.json --save
+ *   node_modules/.bin/ts-node replay.ts results/cloud-llm-preliminary-xyz.json --save
  *
  * Options:
  *   --save    Also write llm-report-<ts>.txt to the same directory as the JSON

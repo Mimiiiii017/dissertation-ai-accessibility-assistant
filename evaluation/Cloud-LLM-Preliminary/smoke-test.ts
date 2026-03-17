@@ -17,13 +17,14 @@ function assert(cond: boolean, msg: string): void {
 
 // ─── shortName helper ─────────────────────────────────────────────────────
 console.log('\n── shortName helper ───────────────────────────────────────');
-assert(shortName('qwen3-coder-next:cloud') === 'qwen3-coder-next', 'strips :cloud suffix');
-assert(shortName('smollm:latest')          === 'smollm',           'strips :latest suffix');
-assert(shortName('deepseek-r1:1.5b')       === 'deepseek-r1:1.5b', 'keeps non-cloud tag');
+assert(shortName('qwen3-coder-next:cloud') === 'qwen3-coder-next (~?B)',       'appends size label for known cloud model');
+assert(shortName('gemma3:27b-cloud')       === 'gemma3:27b (~27B)',            'appends size label with known B count');
+assert(shortName('smollm:latest')          === 'smollm',                       'strips :latest suffix, no label for unknown');
+assert(shortName('deepseek-r1:1.5b')       === 'deepseek-r1:1.5b',            'keeps non-cloud tag, no label for unknown');
 
 // ─── Shared ground truth accessible ──────────────────────────────────────
 console.log('\n── Shared ground truth ────────────────────────────────────');
-assert(ALL_FIXTURES.length === 8, `8 fixtures reachable (got ${ALL_FIXTURES.length})`);
+assert(ALL_FIXTURES.length === 4, `4 fixtures reachable (got ${ALL_FIXTURES.length})`);
 assert(FIXTURE_MAP.has('html-issues'), 'html-issues fixture accessible');
 assert(FIXTURE_MAP.has('tsx-clean'),   'tsx-clean fixture accessible');
 
