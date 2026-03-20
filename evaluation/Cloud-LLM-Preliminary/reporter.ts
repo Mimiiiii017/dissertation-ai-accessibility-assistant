@@ -20,6 +20,8 @@ import {
   applyCompositeScores,
   percentile,
   shortName,
+  computeParetoFrontier,
+  computeVulnerabilityAnalysis,
 } from './benchmark';
 import { AnalysisPresetId, ANALYSIS_PRESETS } from
   '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
@@ -599,6 +601,449 @@ export function printReport(
     console.log(`  ${C.bgreen}${C.bold}All models found every expected issue on error-present fixtures.${C.reset}`);
   }
 
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  COMPLEXITY REGRESSION ANALYSIS                          ║
+  // ╚══════════════════════════════════════════════════════════╝
+
+  // Check if we have complexity tier data
+  const hasComplexityData = results.some(r => r.complexityTier !== undefined);
+
+  if (hasComplexityData) {
+    const complexSectionNum = hasMultipleRuns ? '⑨' : '⑧';
+    section(`${complexSectionNum} COMPLEXITY REGRESSION ANALYSIS`);
+    console.log(`  ${C.dim}Measures how model performance degrades as code complexity increases.${C.reset}`);
+    console.log(`  ${C.dim}Lower degradation slope = more robust model. Graceful degradation preferred over cliff drops.${C.reset}`);
+    console.log('');
+
+    // Calculate F1 for each (modelId, tier) pair
+    interface TierMetrics {
+      f1: number;
+      avgResponseMs: number;
+      count: number;
+    }
+
+    const tierMetrics = new Map<string, Map<string, TierMetrics>>();
+    for (const modelId of models) {
+      const tierMap = new Map<string, TierMetrics>();
+      for (const tier of ['low', 'medium', 'high']) {
+        const tierResults = results.filter(
+          r => r.modelId === modelId && r.complexityTier === tier && !r.errorOccurred
+        );
+        if (tierResults.length > 0) {
+          const f1Sum = tierResults.reduce((s, r) => s + r.f1, 0);
+          const timeSum = tierResults.reduce((s, r) => s + r.responseTimeMs, 0);
+          tierMap.set(tier, {
+            f1: f1Sum / tierResults.length,
+            avgResponseMs: timeSum / tierResults.length,
+            count: tierResults.length,
+          });
+        }
+      }
+      if (tierMap.size > 0) {
+        tierMetrics.set(modelId, tierMap);
+      }
+    }
+
+    // Calculate degradation slopes
+    interface DegradationData {
+      modelId: string;
+      f1Low: number;
+      f1Med: number;
+      f1High: number;
+      degradationSlope: number;
+      robustnessScore: number;
+    }
+
+    const degradations: DegradationData[] = [];
+    for (const [modelId, tierMap] of tierMetrics) {
+      const f1Low = tierMap.get('low')?.f1 ?? 0;
+      const f1High = tierMap.get('high')?.f1 ?? 0;
+      const f1Med = tierMap.get('medium')?.f1 ?? 0;
+
+      if (f1Low > 0) {
+        const degradationSlope = (f1Low - f1High) / f1Low;
+        const robustnessScore = 1 - Math.min(degradationSlope, 1);
+        degradations.push({
+          modelId,
+          f1Low, f1Med, f1High,
+          degradationSlope,
+          robustnessScore,
+        });
+      }
+    }
+
+    // Sort by robustness (lowest slope = best)
+    degradations.sort((a, b) => a.degradationSlope - b.degradationSlope);
+
+    // Print degradation table
+    const COMP = { rank: 4, name: 20 + C.bwhite.length, f1Low: 7, f1Med: 7, f1High: 7, slope: 10, robust: 8 };
+
+    const compHdr = [
+      pad('Rank', COMP.rank),
+      padAnsi(C.bwhite + 'Model' + C.reset, COMP.name, true),
+      pad('F1(Low)', COMP.f1Low),
+      pad('F1(Med)', COMP.f1Med),
+      pad('F1(High)', COMP.f1High),
+      pad('Degradation', COMP.slope),
+      pad('Robustness', COMP.robust),
+    ].join(' ');
+    console.log('  ' + C.dim + compHdr + C.reset);
+    rule('  ', '─');
+
+    for (let i = 0; i < degradations.length; i++) {
+      const d = degradations[i];
+      const name = shortName(d.modelId);
+      const slopeCol = d.degradationSlope <= 0.15 ? C.bgreen : d.degradationSlope <= 0.35 ? C.byellow : C.bred;
+      const robustScore = scoreBar(d.robustnessScore, 12);
+
+      const compRow = [
+        pad(`${i + 1}.`, COMP.rank),
+        padAnsi(C.bwhite + pad(name, COMP.name - C.bwhite.length, true) + C.reset, COMP.name, true),
+        pad(pct(d.f1Low), COMP.f1Low),
+        pad(pct(d.f1Med), COMP.f1Med),
+        pad(pct(d.f1High), COMP.f1High),
+        slopeCol + pad((d.degradationSlope * 100).toFixed(1) + '%', COMP.slope) + C.reset,
+        robustScore,
+      ].join(' ');
+      console.log('  ' + compRow);
+    }
+
+    console.log('');
+    console.log(`  ${C.dim}Interpretation: Slope = (F1_low - F1_high) / F1_low. Lower slope = graceful degradation. 0% = no degradation, 100% = complete failure on complex code.${C.reset}`);
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  STREAMING QUALITY ANALYSIS                             ║
+  // ╚══════════════════════════════════════════════════════════╝
+
+  // Check if we have streaming data
+  const hasStreamingData = results.some(r => r.streamingMetrics?.at50percent);
+
+  if (hasStreamingData) {
+    const streamingSectionNum = hasComplexityData ? '⑩' : '⑨';
+    section(`${streamingSectionNum} STREAMING QUALITY ANALYSIS`);
+    console.log(`  ${C.dim}Measures how model quality evolves as partial responses are generated.${C.reset}`);
+    console.log(`  ${C.dim}Early-stopping is viable if F1 plateaus before 100% token count.${C.reset}`);
+    console.log('');
+
+    // Aggregate streaming metrics by model
+    interface StreamingAgg {
+      modelId: string;
+      f1At25: number[];
+      f1At50: number[];
+      f1At75: number[];
+      f1At100: number[];
+      plateauPercent: number; // % at which F1 reaches 90% of final value
+    }
+
+    const streamingByModel = new Map<string, StreamingAgg>();
+    for (const modelId of models) {
+      const streamingByModel_data: StreamingAgg = {
+        modelId,
+        f1At25: [],
+        f1At50: [],
+        f1At75: [],
+        f1At100: [],
+        plateauPercent: 100,
+      };
+
+      const modelResults = results.filter(r => r.modelId === modelId && !r.errorOccurred && r.streamingMetrics);
+      for (const result of modelResults) {
+        const sm = result.streamingMetrics!;
+        if (sm.at25percent) streamingByModel_data.f1At25.push(sm.at25percent.f1);
+        if (sm.at50percent) streamingByModel_data.f1At50.push(sm.at50percent.f1);
+        if (sm.at75percent) streamingByModel_data.f1At75.push(sm.at75percent.f1);
+        streamingByModel_data.f1At100.push(sm.at100percent.f1);
+      }
+
+      if (streamingByModel_data.f1At100.length > 0) {
+        const avgF1At100 = streamingByModel_data.f1At100.reduce((a, b) => a + b, 0) / streamingByModel_data.f1At100.length;
+        const threshold90 = avgF1At100 * 0.9;
+
+        // Find earliest point where avg F1 >= 90% of final
+        if (streamingByModel_data.f1At25.length > 0) {
+          const avgF1At25 = streamingByModel_data.f1At25.reduce((a, b) => a + b, 0) / streamingByModel_data.f1At25.length;
+          if (avgF1At25 >= threshold90) {
+            streamingByModel_data.plateauPercent = 25;
+          }
+        }
+        if (streamingByModel_data.plateauPercent === 100 && streamingByModel_data.f1At50.length > 0) {
+          const avgF1At50 = streamingByModel_data.f1At50.reduce((a, b) => a + b, 0) / streamingByModel_data.f1At50.length;
+          if (avgF1At50 >= threshold90) {
+            streamingByModel_data.plateauPercent = 50;
+          }
+        }
+        if (streamingByModel_data.plateauPercent === 100 && streamingByModel_data.f1At75.length > 0) {
+          const avgF1At75 = streamingByModel_data.f1At75.reduce((a, b) => a + b, 0) / streamingByModel_data.f1At75.length;
+          if (avgF1At75 >= threshold90) {
+            streamingByModel_data.plateauPercent = 75;
+          }
+        }
+
+        streamingByModel.set(modelId, streamingByModel_data);
+      }
+    }
+
+    // Print streaming table
+    const SSC = { rank: 4, name: 20 + C.bwhite.length, f1_25: 7, f1_50: 7, f1_75: 7, f1_100: 7, plateau: 10 };
+
+    const streamingHdr = [
+      pad('Rank', SSC.rank),
+      padAnsi(C.bwhite + 'Model' + C.reset, SSC.name, true),
+      pad('F1@25%', SSC.f1_25),
+      pad('F1@50%', SSC.f1_50),
+      pad('F1@75%', SSC.f1_75),
+      pad('F1@100%', SSC.f1_100),
+      pad('Plateau', SSC.plateau),
+    ].join(' ');
+    console.log('  ' + C.dim + streamingHdr + C.reset);
+    rule('  ', '─');
+
+    let streamingRank = 1;
+    for (const [, streamingData] of streamingByModel) {
+      const name = shortName(streamingData.modelId);
+      const f1_25 = streamingData.f1At25.length > 0 ? streamingData.f1At25.reduce((a, b) => a + b, 0) / streamingData.f1At25.length : 0;
+      const f1_50 = streamingData.f1At50.length > 0 ? streamingData.f1At50.reduce((a, b) => a + b, 0) / streamingData.f1At50.length : 0;
+      const f1_75 = streamingData.f1At75.length > 0 ? streamingData.f1At75.reduce((a, b) => a + b, 0) / streamingData.f1At75.length : 0;
+      const f1_100 = streamingData.f1At100.reduce((a, b) => a + b, 0) / streamingData.f1At100.length;
+
+      const plateauCol = streamingData.plateauPercent < 100 ? C.bgreen : C.byellow;
+      const trajectoryBar = scoreBar(f1_100, 14);
+
+      const streamingRow = [
+        pad(`${streamingRank}.`, SSC.rank),
+        padAnsi(C.bwhite + pad(name, SSC.name - C.bwhite.length, true) + C.reset, SSC.name, true),
+        pad(pct(f1_25), SSC.f1_25),
+        pad(pct(f1_50), SSC.f1_50),
+        pad(pct(f1_75), SSC.f1_75),
+        pad(pct(f1_100), SSC.f1_100),
+        plateauCol + pad(streamingData.plateauPercent + '%', SSC.plateau) + C.reset,
+      ].join(' ');
+      console.log('  ' + streamingRow);
+      streamingRank++;
+    }
+
+    console.log('');
+    console.log(`  ${C.dim}Plateau = earliest % of tokens where F1 reaches 90% of final value.${C.reset}`);
+    console.log(`  ${C.dim}Green = early plateau (early stopping possible).${C.reset}`);
+    console.log(`  ${C.dim}Yellow = full response needed for optimal quality.${C.reset}`);
+  }
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  PARETO FRONTIER ANALYSIS                               ║
+  // ╚══════════════════════════════════════════════════════════╝
+
+  const paretoSectionNum = hasStreamingData ? (hasComplexityData ? '⑪' : '⑩') : (hasComplexityData ? '⑩' : '⑨');
+  section(`${paretoSectionNum} PARETO FRONTIER ANALYSIS  (Quality vs. Latency Tradeoff)`);
+  console.log(`  ${C.dim}Identifies optimal models on the F1 vs. latency tradeoff curve.${C.reset}`);
+  console.log(`  ${C.dim}Pareto-optimal models have no competitor that is both faster AND more accurate.${C.reset}`);
+  console.log('');
+
+  const paretoClassified = computeParetoFrontier(stats);
+  const paretoOptimal = paretoClassified.filter(p => p.isParetoOptimal);
+  const paretoNonOptimal = paretoClassified.filter(p => !p.isParetoOptimal);
+
+  // Print Pareto frontier table
+  const PC = { rank: 4, name: 20 + C.bwhite.length, f1: 7, latency: 9, status: 15 };
+
+  const paretoHdr = [
+    pad('Rank', PC.rank),
+    padAnsi(C.bwhite + 'Model' + C.reset, PC.name, true),
+    pad('F1', PC.f1),
+    pad('Latency', PC.latency),
+    pad('Status', PC.status),
+  ].join(' ');
+  console.log('  ' + C.dim + paretoHdr + C.reset);
+  rule('  ', '─');
+
+  // Print Pareto-optimal first (in green)
+  let rank = 1;
+  for (const p of paretoOptimal) {
+    const name = shortName(p.modelId);
+    const paretoRow = [
+      pad(`${rank}.`, PC.rank),
+      padAnsi(C.bwhite + pad(name, PC.name - C.bwhite.length, true) + C.reset, PC.name, true),
+      pad(pct(p.f1), PC.f1),
+      pad(ms(p.latencyMs), PC.latency),
+      C.bgreen + pad('⭐ PARETO-OPTIMAL', PC.status) + C.reset,
+    ].join(' ');
+    console.log('  ' + paretoRow);
+    rank++;
+  }
+
+  // Print non-optimal (in yellow/red with reason)
+  if (paretoNonOptimal.length > 0) {
+    rule('  ', '·');
+    for (const p of paretoNonOptimal) {
+      const name = shortName(p.modelId);
+      const domBy = p.dominatedBy?.map(m => shortName(m)).join(', ') ?? 'unknown';
+      const statusCol = C.byellow + 'Dominated by' + C.reset;
+      const paretoRow = [
+        pad(`${rank}.`, PC.rank),
+        padAnsi(C.bwhite + pad(name, PC.name - C.bwhite.length, true) + C.reset, PC.name, true),
+        pad(pct(p.f1), PC.f1),
+        pad(ms(p.latencyMs), PC.latency),
+        `${statusCol} ${C.dim}${domBy}${C.reset}`,
+      ].join(' ');
+      console.log('  ' + paretoRow);
+      rank++;
+    }
+  }
+
+  console.log('');
+
+  // ASCII scatter plot: F1 vs. Latency
+  console.log(`  ${C.dim}ASCII scatter: F1 (vertical) vs. Latency (horizontal)${C.reset}`);
+  console.log(`  Pareto optimal models marked with ${C.bgreen}●${C.reset}, others with ${C.dim}○${C.reset}`);
+  console.log('');
+
+  // Find bounds for the plot
+  const f1Values = paretoClassified.map(p => p.f1);
+  const latencyValues = paretoClassified.map(p => p.latencyMs);
+  const f1Min = Math.max(0, Math.min(...f1Values) - 0.05);
+  const f1Max = Math.min(1, Math.max(...f1Values) + 0.05);
+  const latencyMin = 0;
+  const latencyMax = Math.max(...latencyValues) * 1.1;
+
+  const plotWidth = 60;
+  const plotHeight = 15;
+
+  // Normalize coordinates for plot
+  const norm = (val: number, min: number, max: number) => 
+    (val - min) / (max - min);
+
+  // Create plot grid
+  const grid: string[][] = Array(plotHeight)
+    .fill(null)
+    .map(() => Array(plotWidth).fill(' '));
+
+  // Plot each model
+  for (const p of paretoClassified) {
+    const x = Math.round(norm(p.latencyMs, latencyMin, latencyMax) * (plotWidth - 1));
+    const y = Math.round((1 - norm(p.f1, f1Min, f1Max)) * (plotHeight - 1));
+
+    if (x >= 0 && x < plotWidth && y >= 0 && y < plotHeight) {
+      const marker = p.isParetoOptimal ? C.bgreen + '●' + C.reset : C.dim + '○' + C.reset;
+      grid[y][x] = marker;
+    }
+  }
+
+  // Print grid with axis labels
+  for (let y = 0; y < plotHeight; y++) {
+    const f1Label = (f1Max - (f1Max - f1Min) * (y / plotHeight)).toFixed(2);
+    const rowStr = grid[y].join('');
+    console.log(`  ${C.dim}${f1Label}${C.reset}  ${rowStr}`);
+  }
+
+  // X-axis
+  console.log(`  ${C.dim}0.00${C.reset}  ` + C.dim + '─'.repeat(plotWidth) + C.reset);
+  console.log(`        ${latencyMin.toFixed(0)}ms${' '.repeat(Math.max(0, plotWidth - 15))}${latencyMax.toFixed(0)}ms`);
+
+  console.log('');
+  console.log(`  ${C.dim}Conclusion: ${paretoOptimal.length} model${paretoOptimal.length !== 1 ? 's' : ''} on Pareto frontier.${C.reset}`);
+  if (paretoOptimal.length > 0) {
+    console.log(`  ${C.dim}Choose based on your needs: faster models (left) or more accurate (top).${C.reset}`);
+  }
+
+  console.log('');
+  console.log(C.dim + hr('═') + C.reset);
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  SECTION ⑫: VULNERABILITY ANALYSIS (Adversarial Tests)  ║
+  // ╚══════════════════════════════════════════════════════════╝
+
+  section(`⑫ ADVERSARIAL BLIND SPOTS  (Step 6: Vulnerability Analysis)`);
+
+  const vulnerabilityStats = models.map(m => computeVulnerabilityAnalysis(m, results));
+  const byStrength = vulnerabilityStats.sort((a, b) => {
+    // Sort by: fewest critical blind spots, then fewest weak areas, then strongest areas
+    if (a.criticalBlindSpots !== b.criticalBlindSpots) return a.criticalBlindSpots - b.criticalBlindSpots;
+    if (a.weakAreas !== b.weakAreas) return a.weakAreas - b.weakAreas;
+    return b.strongAreas - a.strongAreas;
+  });
+
+  // ── Summary table ────────────────────────────────────────────────────────
+
+  console.log(`  ${C.bold}Each model's known weak spots:${C.reset}`);
+  console.log('');
+  console.log(
+    `  ${C.bold}${pad('Model', 25)}${'Critical'.padEnd(11)}${'Weak'.padEnd(8)}${'Good'.padEnd(8)}${C.reset}`
+  );
+  console.log(`  ${C.dim}${hr('─', 55)}${C.reset}`);
+
+  for (const vuln of byStrength) {
+    const nameStr = shortName(vuln.modelId).substring(0, 25).padEnd(25);
+    const critCol =
+      vuln.criticalBlindSpots > 0
+        ? C.bred + vuln.criticalBlindSpots.toString().padEnd(11) + C.reset
+        : C.bgreen + vuln.criticalBlindSpots.toString().padEnd(11) + C.reset;
+    const weakCol =
+      vuln.weakAreas > 0
+        ? C.byellow + vuln.weakAreas.toString().padEnd(8) + C.reset
+        : C.bgreen + vuln.weakAreas.toString().padEnd(8) + C.reset;
+    const goodCol = C.bgreen + vuln.strongAreas.toString().padEnd(8) + C.reset;
+
+    console.log(`  ${nameStr}${critCol}${weakCol}${goodCol}`);
+  }
+  console.log('');
+
+  // ── Detailed blind spots ──────────────────────────────────────────────────
+
+  console.log(`  ${C.bold}Critical blind spots (< 25% detection):${C.reset}`);
+  console.log('');
+
+  const criticalByModel = new Map<string, string[]>();
+  for (const vuln of vulnerabilityStats) {
+    const critical = vuln.profiles.filter(p => p.blindSpot === 'critical');
+    if (critical.length > 0) {
+      criticalByModel.set(vuln.modelId, critical.map(c => c.violation));
+    }
+  }
+
+  if (criticalByModel.size === 0) {
+    console.log(`  ${C.bgreen}✓ No critical blind spots detected across any model.${C.reset}`);
+  } else {
+    for (const [modelId, violations] of criticalByModel) {
+      const name = shortName(modelId).substring(0, 40);
+      console.log(`  ${C.bred}${name}${C.reset}`);
+      for (const v of violations) {
+        console.log(`    • ${v}`);
+      }
+      console.log('');
+    }
+  }
+
+  // ── Conclusions ───────────────────────────────────────────────────────
+
+  console.log(`  ${C.bold}Summary:${C.reset}`);
+  console.log('');
+
+  const bestRobust = byStrength[0];
+  const worstRobust = byStrength[byStrength.length - 1];
+
+  console.log(`  ${C.bgreen}✓ Most robust model:${C.reset} ${shortName(bestRobust.modelId)}`);
+  console.log(`    • Catches ${bestRobust.strongAreas} violation types fully`);
+  if (bestRobust.weakAreas > 0) {
+    console.log(`    • Partially catches ${bestRobust.weakAreas} types`);
+  }
+  if (bestRobust.criticalBlindSpots > 0) {
+    console.log(`    • ${C.bred}Misses ${bestRobust.criticalBlindSpots} types entirely${C.reset}`);
+  }
+  console.log('');
+
+  console.log(`  ${C.bred}✗ Weakest robustness:${C.reset} ${shortName(worstRobust.modelId)}`);
+  console.log(`    • Catches ${worstRobust.strongAreas} violation types fully`);
+  if (worstRobust.weakAreas > 0) {
+    console.log(`    • Partially catches ${worstRobust.weakAreas} types`);
+  }
+  if (worstRobust.criticalBlindSpots > 0) {
+    console.log(`    • ${C.bred}Misses ${worstRobust.criticalBlindSpots} types entirely${C.reset}`);
+  }
+  console.log('');
+
+  console.log(`  ${C.cyan}💡 Key insight:${C.reset} No single model perfectly catches all violation types.`);
+  console.log(`     Combine results or use models in sequence to maximize coverage.`);
+
   console.log('');
   console.log(C.dim + hr('═') + C.reset);
   console.log('');
@@ -750,6 +1195,92 @@ export function saveCsv(
   heatRows.sort((a, b) => a[0].localeCompare(b[0]) || b[2] - a[2]);
   for (const [fixtureId, conceptId, count] of heatRows) {
     rows.push([fixtureId, conceptId, c(count), c(modelCount), ((count / modelCount) * 100).toFixed(1) + '%']);
+  }
+
+  // ── § 8  COMPLEXITY REGRESSION ────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# COMPLEXITY REGRESSION  (F1 degradation across low / medium / high fixtures)']);
+  rows.push(['model', 'short_name', 'f1_low', 'f1_medium', 'f1_high', 'degradation_slope', 'robustness_score']);
+  for (const s of stats) {
+    const runsLow    = results.filter(r => r.modelId === s.modelId && r.complexityTier === 'low'    && !r.errorOccurred);
+    const runsMedium = results.filter(r => r.modelId === s.modelId && r.complexityTier === 'medium' && !r.errorOccurred);
+    const runsHigh   = results.filter(r => r.modelId === s.modelId && r.complexityTier === 'high'   && !r.errorOccurred);
+    if (runsLow.length === 0 && runsMedium.length === 0 && runsHigh.length === 0) continue;
+    const avg = (arr: ModelRunResult[]) => arr.length ? arr.reduce((s, r) => s + r.f1, 0) / arr.length : NaN;
+    const f1Low    = avg(runsLow);
+    const f1Medium = avg(runsMedium);
+    const f1High   = avg(runsHigh);
+    const slope = (!isNaN(f1Low) && !isNaN(f1High) && f1Low > 0)
+      ? (f1Low - f1High) / f1Low : NaN;
+    rows.push([
+      s.modelId, shortName(s.modelId),
+      isNaN(f1Low)    ? 'N/A' : (f1Low    * 100).toFixed(1) + '%',
+      isNaN(f1Medium) ? 'N/A' : (f1Medium * 100).toFixed(1) + '%',
+      isNaN(f1High)   ? 'N/A' : (f1High   * 100).toFixed(1) + '%',
+      isNaN(slope)    ? 'N/A' : (slope     * 100).toFixed(1) + '%',
+      isNaN(slope)    ? 'N/A' : ((1 - slope) * 100).toFixed(1) + '%',
+    ]);
+  }
+
+  // ── § 9  STREAMING QUALITY ─────────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# STREAMING QUALITY  (F1 at partial token percentages — plateau = earliest % reaching 90% of final F1)']);
+  rows.push(['model', 'short_name', 'f1_at_25pct', 'f1_at_50pct', 'f1_at_75pct', 'f1_at_100pct', 'plateau_point']);
+  for (const s of stats) {
+    const withStreaming = results.filter(r => r.modelId === s.modelId && r.streamingMetrics && !r.errorOccurred);
+    if (withStreaming.length === 0) continue;
+    const avgPct = (getter: (m: NonNullable<ModelRunResult['streamingMetrics']>) => number | undefined) => {
+      const vals = withStreaming.map(r => getter(r.streamingMetrics!)).filter((v): v is number => v !== undefined);
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : NaN;
+    };
+    const f1at25  = avgPct(m => m.at25percent?.f1);
+    const f1at50  = avgPct(m => m.at50percent?.f1);
+    const f1at75  = avgPct(m => m.at75percent?.f1);
+    const f1at100 = avgPct(m => m.at100percent.f1);
+    let plateau = '100%';
+    if (!isNaN(f1at25) && f1at25 >= f1at100 * 0.9) plateau = '25%';
+    else if (!isNaN(f1at50) && f1at50 >= f1at100 * 0.9) plateau = '50%';
+    else if (!isNaN(f1at75) && f1at75 >= f1at100 * 0.9) plateau = '75%';
+    rows.push([
+      s.modelId, shortName(s.modelId),
+      isNaN(f1at25)  ? 'N/A' : (f1at25  * 100).toFixed(1) + '%',
+      isNaN(f1at50)  ? 'N/A' : (f1at50  * 100).toFixed(1) + '%',
+      isNaN(f1at75)  ? 'N/A' : (f1at75  * 100).toFixed(1) + '%',
+      isNaN(f1at100) ? 'N/A' : (f1at100 * 100).toFixed(1) + '%',
+      plateau,
+    ]);
+  }
+
+  // ── § 10  PARETO FRONTIER ─────────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# PARETO FRONTIER  (models where no competitor has both better F1 and lower latency)']);
+  rows.push(['model', 'short_name', 'f1', 'avg_latency_s', 'pareto_optimal', 'dominated_by']);
+  const paretoData = computeParetoFrontier(stats);
+  paretoData.sort((a, b) => b.f1 - a.f1).forEach(p => {
+    rows.push([
+      p.modelId, shortName(p.modelId),
+      (p.f1 * 100).toFixed(1) + '%',
+      (p.latencyMs / 1000).toFixed(1) + 's',
+      p.isParetoOptimal ? 'YES' : 'NO',
+      (p.dominatedBy ?? []).join(' | '),
+    ]);
+  });
+
+  // ── § 11  ADVERSARIAL VULNERABILITY ───────────────────────────────────
+  rows.push([]);
+  rows.push(['# ADVERSARIAL VULNERABILITY  (detection rate per violation type on adversarial fixtures)']);
+  rows.push(['model', 'short_name', 'violation', 'category', 'detected', 'total', 'detection_rate', 'blind_spot']);
+  for (const s of stats) {
+    const vuln = computeVulnerabilityAnalysis(s.modelId, results);
+    for (const p of vuln.profiles) {
+      rows.push([
+        s.modelId, shortName(s.modelId),
+        p.violation, p.category,
+        c(p.detectionCount), c(p.totalFixtures),
+        (p.detectionRate * 100).toFixed(1) + '%',
+        p.blindSpot,
+      ]);
+    }
   }
 
   const csv = rows

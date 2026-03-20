@@ -31,6 +31,8 @@ import {
   deduplicateIssues,
 } from '../../extension/ai-accessibility-assistant/src/utils/analysis/parser';
 import type { AiIssue } from '../../extension/ai-accessibility-assistant/src/utils/types';
+import { ragRetrieve, formatRagContext } from '../../extension/ai-accessibility-assistant/src/utils/rag/rag';
+import { buildRagQuery } from '../../extension/ai-accessibility-assistant/src/utils/rag/ragQueryBuilder';
 
 import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
 import { scoreRun } from '../preset-benchmark/benchmark';
@@ -38,11 +40,57 @@ import { scoreRun } from '../preset-benchmark/benchmark';
 // Re-export so reporter/run can use without importing preset-benchmark directly
 export type { IssueConcept, FixtureGroundTruth } from '../preset-benchmark/ground-truth';
 
+// ─── Helpers ──────────────────────────────────────────────────────────────
+
+/** Extract complexity tier from fixture ID (e.g., 'html-low' → 'low') */
+export function getComplexityTier(fixtureId: string): ComplexityTier {
+  if (fixtureId.includes('-low')) return 'low';
+  if (fixtureId.includes('-medium')) return 'medium';
+  if (fixtureId.includes('-high')) return 'high';
+  // Default if not found
+  return 'medium';
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────
+
+export type ComplexityTier = 'low' | 'medium' | 'high';
+
+/**
+ * Streaming quality metrics captured at different token percentages.
+ * Shows how F1/Precision/Recall evolve as more tokens are generated.
+ */
+export type StreamingQualityMetrics = {
+  /** Metrics at 25% of final token count */
+  at25percent?: { f1: number; precision: number; recall: number; tokenCount: number };
+  /** Metrics at 50% of final token count */
+  at50percent?: { f1: number; precision: number; recall: number; tokenCount: number };
+  /** Metrics at 75% of final token count */
+  at75percent?: { f1: number; precision: number; recall: number; tokenCount: number };
+  /** Metrics at final response (100%) */
+  at100percent: { f1: number; precision: number; recall: number; tokenCount: number };
+  /** Maximum F1 achieved before 100% (indicates potential early-stopping point) */
+  maxF1Before100?: number;
+};
+
+/**
+ * Pareto frontier analysis: identifies models that form the optimal tradeoff curve.
+ * A model is on the Pareto frontier if no other model has both better F1 AND
+ * equal/better latency (or vice versa).
+ */
+export type ParetoClassification = {
+  modelId: string;
+  f1: number;
+  latencyMs: number;
+  /** true if on Pareto frontier (no model dominates it) */
+  isParetoOptimal: boolean;
+  /** Reason for classification (if not optimal) */
+  dominatedBy?: string[]; // array of model IDs that dominate this one
+};
 
 export type ModelRunResult = {
   modelId: string;
   fixtureId: string;
+  complexityTier?: ComplexityTier;  // Optional for compatibility with tests
   presetId: AnalysisPresetId;
   runIndex: number;
   issuesFound: AiIssue[];
@@ -70,10 +118,14 @@ export type ModelRunResult = {
   missedIds: string[];
   /** FP title strings */
   fpTitles: string[];
+  /** Optional streaming quality metrics (when streaming capture is enabled) */
+  streamingMetrics?: StreamingQualityMetrics;
 };
 
 export type ModelBenchmarkConfig = {
   ollamaHost: string;
+  /** RAG service endpoint — defaults to http://127.0.0.1:8000 */
+  ragEndpoint?: string;
   /** Models to compare (Ollama model ids) */
   models: string[];
   /** Fixed preset applied to all models */
@@ -120,6 +172,17 @@ export type ModelAggregateStats = {
 };
 
 // ─── Maths helpers ───────────────────────────────────────────────────────
+
+/**
+ * Simple token counter: splits on whitespace and punctuation.
+ * Not perfect (e.g. contractions) but good enough for streaming % calculation.
+ */
+function countTokensApprox(text: string): number {
+  return text
+    .split(/\s+/)
+    .filter(t => t.length > 0)
+    .length;
+}
 
 /** Percentile of a numeric array (0–100). Array need not be pre-sorted. */
 export function percentile(values: number[], p: number): number {
@@ -235,6 +298,30 @@ async function streamOllama(
 
 // ─── Single run ───────────────────────────────────────────────────────────
 
+/**
+ * Scores a partial response and returns F1/Precision/Recall metrics.
+ * Used for streaming quality analysis.
+ */
+function scorePartialResponse(
+  responseText: string,
+  fixture: FixtureGroundTruth,
+  allConceptIds: string[] = []
+): { f1: number; precision: number; recall: number } {
+  if (!responseText.trim()) {
+    return { f1: 0, precision: 0, recall: 0 };
+  }
+
+  const rawIssues = parseTextResponse(responseText);
+  const issues = deduplicateIssues(rawIssues);
+  const scored = scoreRun(fixture, issues);
+
+  return {
+    f1: scored.f1,
+    precision: scored.precision,
+    recall: scored.recall,
+  };
+}
+
 export async function runOnce(
   config: ModelBenchmarkConfig,
   modelId: string,
@@ -250,10 +337,24 @@ export async function runOnce(
   const expectedConceptIds = new Set(fixture.expectedIssues.map(c => c.id));
   const negativeSpaceSize = allConceptIds.filter(id => !expectedConceptIds.has(id)).length;
   const code = fs.readFileSync(fixture.filePath, 'utf8');
+
+  // ── RAG context retrieval ───────────────────────────────────────────────
+  const ragEndpoint = config.ragEndpoint ?? 'http://127.0.0.1:8000';
+  let contextBlock = '(no RAG context)';
+  try {
+    const ragQuery = buildRagQuery(fixture.languageId, code);
+    const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 6, 'accessibility');
+    if (ragResult.chunks.length > 0) {
+      contextBlock = formatRagContext(ragResult.chunks);
+    }
+  } catch {
+    // RAG service not running — fall back to no context (benchmark still works)
+  }
+
   const userPrompt = buildAiPrompt(
     fixture.languageId,
     code,
-    '(no RAG context — Cloud-LLM-Preliminary mode)'
+    contextBlock
   );
 
   const t0 = Date.now();
@@ -272,6 +373,7 @@ export async function runOnce(
     return {
       modelId,
       fixtureId: fixture.fixtureId,
+      complexityTier: getComplexityTier(fixture.fixtureId),
       presetId: config.presetId,
       runIndex,
       issuesFound: [],
@@ -295,6 +397,9 @@ export async function runOnce(
       rawResponse: '',
       missedIds: fixture.expectedIssues.map(c => c.id),
       fpTitles: [],
+      streamingMetrics: {
+        at100percent: { f1: 0, precision: 0, recall: 0, tokenCount: 0 },
+      },
     };
   }
 
@@ -323,9 +428,58 @@ export async function runOnce(
   const balAccVal       = (scored.recall + specificityVal) / 2;
   const mccVal          = mcc(tp, tn, fp, fn);
 
+  // ── Capture streaming quality metrics (at intermediate token %s) ───────────
+  const streamingMetrics: StreamingQualityMetrics = {
+    at100percent: {
+      f1: scored.f1,
+      precision: scored.precision,
+      recall: scored.recall,
+      tokenCount: countTokensApprox(rawResponse),
+    },
+  };
+
+  // Calculate intermediate snapshots at 25%, 50%, 75% token count
+  const totalTokens = countTokensApprox(rawResponse);
+  if (totalTokens > 50) {
+    // Only compute if response is substantial enough
+    const tokens25 = Math.floor(totalTokens * 0.25);
+    const tokens50 = Math.floor(totalTokens * 0.50);
+    const tokens75 = Math.floor(totalTokens * 0.75);
+
+    // Truncate response at token percentages
+    const words = rawResponse.split(/\s+/).filter(w => w.length > 0);
+    const resp25 = words.slice(0, tokens25).join(' ');
+    const resp50 = words.slice(0, tokens50).join(' ');
+    const resp75 = words.slice(0, tokens75).join(' ');
+
+    if (resp25.length > 10) {
+      const metrics25 = scorePartialResponse(resp25, fixture, allConceptIds);
+      streamingMetrics.at25percent = { ...metrics25, tokenCount: tokens25 };
+    }
+    if (resp50.length > 10) {
+      const metrics50 = scorePartialResponse(resp50, fixture, allConceptIds);
+      streamingMetrics.at50percent = { ...metrics50, tokenCount: tokens50 };
+    }
+    if (resp75.length > 10) {
+      const metrics75 = scorePartialResponse(resp75, fixture, allConceptIds);
+      streamingMetrics.at75percent = { ...metrics75, tokenCount: tokens75 };
+    }
+
+    // Calculate max F1 before 100%
+    const preF1s = [
+      streamingMetrics.at25percent?.f1,
+      streamingMetrics.at50percent?.f1,
+      streamingMetrics.at75percent?.f1,
+    ].filter(f => f !== undefined) as number[];
+    if (preF1s.length > 0) {
+      streamingMetrics.maxF1Before100 = Math.max(...preF1s);
+    }
+  }
+
   return {
     modelId,
     fixtureId: fixture.fixtureId,
+    complexityTier: getComplexityTier(fixture.fixtureId),
     presetId: config.presetId,
     runIndex,
     issuesFound: issues,
@@ -346,6 +500,7 @@ export async function runOnce(
     rawResponse,
     missedIds,
     fpTitles,
+    streamingMetrics,
   };
 }
 
@@ -519,6 +674,159 @@ const MODEL_SIZE_LABELS: Record<string, string> = {
   'kimi-k2.5:cloud':            '~?B',
   'glm-5:cloud':                '~?B',
 };
+
+// ─── Vulnerability Analysis (Step 6) ──────────────────────────────────────
+
+/**
+ * Vulnerability profile: tracks which violation patterns a model catches/misses.
+ * Used to identify "blind spots" — accessibility issues the model consistently
+ * fails to detect.
+ */
+export type VulnerabilityProfile = {
+  modelId: string;
+  violation: string;           // e.g., "no-accessible-name", "missing-label"
+  category: string;            // e.g., "button", "form", "image"
+  totalFixtures: number;       // how many fixtures test this violation
+  detectionCount: number;      // how many it actually caught
+  detectionRate: number;       // 0-1, = detectionCount / totalFixtures
+  /** Typical blind spot if < 0.5; consistent weakness if 0.25-0.5; good if >= 0.75 */
+  blindSpot: 'critical' | 'weak' | 'fair' | 'good';
+};
+
+export type VulnerabilityAnalysis = {
+  modelId: string;
+  totalViolationTypes: number;
+  criticalBlindSpots: number;     // violations with < 25% detection
+  weakAreas: number;               // violations with 25%-75% detection
+  strongAreas: number;             // violations with >= 75% detection
+  profiles: VulnerabilityProfile[];
+};
+
+/**
+ * Compute vulnerability analysis for a model using adversarial fixtures.
+ * Identifies which specific violation patterns it struggles with.
+ */
+export function computeVulnerabilityAnalysis(
+  modelId: string,
+  results: ModelRunResult[]
+): VulnerabilityAnalysis {
+  // Group results by violation pattern
+  const byViolation = new Map<
+    string,
+    { category: string; fixtureCaught: string[]; fixtureTotal: string[] }
+  >();
+
+  for (const result of results) {
+    if (!result.fixtureId.startsWith('button-') && 
+        !result.fixtureId.startsWith('input-') &&
+        !result.fixtureId.startsWith('form-') &&
+        !result.fixtureId.startsWith('image-') &&
+        !result.fixtureId.startsWith('heading-') &&
+        !result.fixtureId.startsWith('link-') &&
+        !result.fixtureId.startsWith('aria-') &&
+        !result.fixtureId.startsWith('complex-')) {
+      continue; // Skip non-adversarial fixtures
+    }
+
+    // Extract violation from fixture ID (e.g., 'button-no-name' → 'button', 'no-name')
+    const parts = result.fixtureId.split('-');
+    const category = parts[0];
+    const violation = parts.slice(1).join('-');
+    const key = `${category}/${violation}`;
+
+    if (!byViolation.has(key)) {
+      byViolation.set(key, {
+        category,
+        fixtureCaught: [],
+        fixtureTotal: [],
+      });
+    }
+
+    const entry = byViolation.get(key)!;
+    entry.fixtureTotal.push(result.fixtureId);
+
+    // Consider it "caught" if it had > 0 TP or at least detected something
+    if (result.tp > 0 || result.issuesFound.length > 0) {
+      entry.fixtureCaught.push(result.fixtureId);
+    }
+  }
+
+  // Generate profiles
+  const profiles: VulnerabilityProfile[] = Array.from(
+    byViolation.entries()
+  ).map(([key, data]) => {
+    const detectionRate = data.fixtureTotal.length > 0 
+      ? data.fixtureCaught.length / data.fixtureTotal.length 
+      : 0;
+
+    let blindSpot: 'critical' | 'weak' | 'fair' | 'good';
+    if (detectionRate < 0.25) blindSpot = 'critical';
+    else if (detectionRate < 0.75) blindSpot = 'weak';
+    else if (detectionRate < 1.0) blindSpot = 'fair';
+    else blindSpot = 'good';
+
+    return {
+      modelId,
+      violation: key.split('/')[1] || key,
+      category: data.category,
+      totalFixtures: data.fixtureTotal.length,
+      detectionCount: data.fixtureCaught.length,
+      detectionRate,
+      blindSpot,
+    };
+  });
+
+  // Count by category
+  const criticalBlindSpots = profiles.filter(p => p.blindSpot === 'critical').length;
+  const weakAreas = profiles.filter(p => p.blindSpot === 'weak').length;
+  const strongAreas = profiles.filter(p => p.blindSpot === 'good').length;
+
+  return {
+    modelId,
+    totalViolationTypes: profiles.length,
+    criticalBlindSpots,
+    weakAreas,
+    strongAreas,
+    profiles: profiles.sort((a, b) => a.detectionRate - b.detectionRate),
+  };
+}
+
+/**
+ * Compute Pareto frontier for F1 vs. latency tradeoff.
+ * A model is Pareto-optimal if no other model has both:
+ *   - Higher F1 AND equal/better latency
+ *   - Equal/better latency AND higher F1
+ */
+export function computeParetoFrontier(
+  stats: ModelAggregateStats[]
+): ParetoClassification[] {
+  const classified: ParetoClassification[] = stats.map(s => ({
+    modelId: s.modelId,
+    f1: s.avgF1,
+    latencyMs: s.avgResponseMs,
+    isParetoOptimal: true,
+    dominatedBy: [],
+  }));
+
+  // Check each model against all others
+  for (let i = 0; i < classified.length; i++) {
+    const current = classified[i];
+    for (let j = 0; j < classified.length; j++) {
+      if (i === j) continue;
+      const other = classified[j];
+
+      // Check if 'other' dominates 'current' (better F1 AND faster or equal latency)
+      if (other.f1 > current.f1 && other.latencyMs <= current.latencyMs) {
+        current.isParetoOptimal = false;
+        if (!current.dominatedBy!.includes(other.modelId)) {
+          current.dominatedBy!.push(other.modelId);
+        }
+      }
+    }
+  }
+
+  return classified;
+}
 
 export function shortName(modelId: string): string {
   const base = modelId

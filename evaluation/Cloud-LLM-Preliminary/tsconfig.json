@@ -14,6 +14,7 @@
     "*.ts",
     "../preset-benchmark/ground-truth.ts",
     "../preset-benchmark/benchmark.ts",
+    "../preset-benchmark/validate-ground-truth.ts",
     "../../extension/ai-accessibility-assistant/src/utils/llm/ollama.ts",
     "../../extension/ai-accessibility-assistant/src/utils/prompts/prompt.ts",
     "../../extension/ai-accessibility-assistant/src/utils/analysis/parser.ts",

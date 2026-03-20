@@ -14,6 +14,9 @@ import * as path from 'path';
 const F = (subfolder: string, name: string) =>
   path.join(__dirname, 'fixtures', subfolder, name);
 
+const A = (name: string) =>
+  path.join(__dirname, 'adversarial-fixtures', name);
+
 // ─── Types ────────────────────────────────────────────────────────────────
 
 export type IssueConcept = {
@@ -418,6 +421,251 @@ const TSX_HIGH: FixtureGroundTruth = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Adversarial Edge-Case Fixtures  (Step 6 — Vulnerability Analysis)
+// Each fixture isolates a single accessibility violation
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
+  // ── Buttons ──────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'button-no-name',
+    filePath:  A('button-no-name.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'button-name-missing', keywords: ['button name', 'accessible name', 'empty button', 'no text'], description: 'Button has no accessible name' },
+    ],
+  },
+  {
+    fixtureId: 'button-icon-only',
+    filePath:  A('button-icon-only.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'button-icon-no-label', keywords: ['icon button', 'svg button', 'aria-label', 'accessible name'], description: 'Icon-only button with no aria-label' },
+    ],
+  },
+  {
+    fixtureId: 'button-aria-label-mismatch',
+    filePath:  A('button-aria-label-mismatch.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'button-label-mismatch', keywords: ['label mismatch', 'visible label', 'aria-label', 'accessible name mismatch'], description: 'aria-label differs from visible button text' },
+    ],
+  },
+  {
+    fixtureId: 'button-disabled-no-state',
+    filePath:  A('button-disabled-no-state.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'button-disabled-no-aria', keywords: ['aria-disabled', 'disabled state', 'disabled button', 'pointer-events'], description: 'Button styled disabled but aria-disabled not set' },
+    ],
+  },
+  {
+    fixtureId: 'complex-nested-buttons',
+    filePath:  A('complex-nested-buttons.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'nested-button', keywords: ['nested button', 'button inside button', 'interactive nesting', 'invalid nesting'], description: 'Button nested inside another button' },
+    ],
+  },
+
+  // ── Forms ─────────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'input-no-label',
+    filePath:  A('input-no-label.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'input-label-missing', keywords: ['input label', 'missing label', 'label element', 'form label'], description: 'Input field with no label element' },
+    ],
+  },
+  {
+    fixtureId: 'input-placeholder-as-label',
+    filePath:  A('input-placeholder-as-label.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'input-placeholder-only', keywords: ['placeholder', 'label missing', 'placeholder as label', 'no label'], description: 'Input uses only placeholder instead of a label' },
+    ],
+  },
+  {
+    fixtureId: 'form-no-submit-label',
+    filePath:  A('form-no-submit-label.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'submit-button-no-name', keywords: ['submit button', 'button name', 'accessible name', 'icon submit'], description: 'Submit button has no accessible name' },
+    ],
+  },
+  {
+    fixtureId: 'form-error-no-aria',
+    filePath:  A('form-error-no-aria.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'error-not-associated', keywords: ['aria-describedby', 'error message', 'error association', 'input error'], description: 'Error message not associated with input via aria-describedby' },
+    ],
+  },
+
+  // ── Images ────────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'image-no-alt',
+    filePath:  A('image-no-alt.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'image-alt-missing', keywords: ['alt text', 'missing alt', 'image alt', 'alt attribute'], description: 'Image with no alt attribute' },
+    ],
+  },
+  {
+    fixtureId: 'image-empty-alt',
+    filePath:  A('image-empty-alt.html'),
+    languageId: 'html',
+    isClean:   true,
+    expectedIssues: [],
+  },
+  {
+    fixtureId: 'image-link-no-alt',
+    filePath:  A('image-link-no-alt.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'image-link-no-name', keywords: ['image link', 'link alt', 'link accessible name', 'image alt'], description: 'Image inside link with no alt makes link inaccessible' },
+    ],
+  },
+  {
+    fixtureId: 'svg-no-title',
+    filePath:  A('svg-no-title.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'svg-no-title', keywords: ['svg title', 'svg accessible', 'svg aria', 'svg role img'], description: 'SVG missing title or aria-label' },
+    ],
+  },
+
+  // ── Headings ──────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'heading-skip-level',
+    filePath:  A('heading-skip-level.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'heading-skip', keywords: ['heading level', 'heading skip', 'skipped heading', 'h4'], description: 'Heading jumps from h2 to h4, skipping h3' },
+    ],
+  },
+  {
+    fixtureId: 'heading-styled-as-div',
+    filePath:  A('heading-styled-as-div.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'fake-heading', keywords: ['semantic heading', 'fake heading', 'div heading', 'heading element'], description: 'Div styled to look like heading but not semantic' },
+    ],
+  },
+  {
+    fixtureId: 'missing-page-title',
+    filePath:  A('missing-page-title.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'no-page-title',  keywords: ['page title', 'title element', 'empty title', 'missing title'], description: 'Page title is empty' },
+      { id: 'empty-title',    keywords: ['empty title', 'title empty', 'blank title'],                    description: '<title> element has no content' },
+    ],
+  },
+
+  // ── ARIA ──────────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'aria-hidden-focusable',
+    filePath:  A('aria-hidden-focusable.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'aria-hidden-focusable', keywords: ['aria-hidden', 'focusable', 'keyboard focus', 'hidden focusable'], description: 'aria-hidden element contains a focusable button' },
+    ],
+  },
+  {
+    fixtureId: 'invalid-aria-role',
+    filePath:  A('invalid-aria-role.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'invalid-role', keywords: ['invalid role', 'aria role', 'misspelled role', 'role value'], description: 'Element has invalid or misspelled ARIA role' },
+    ],
+  },
+  {
+    fixtureId: 'aria-label-with-image',
+    filePath:  A('aria-label-with-image.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'image-alt-missing',    keywords: ['alt text', 'missing alt', 'alt attribute'],          description: 'Image missing alt attribute' },
+      { id: 'aria-label-for-image', keywords: ['aria-label image', 'alt not aria-label', 'image label'], description: 'aria-label used instead of alt on img element' },
+    ],
+  },
+  {
+    fixtureId: 'aria-live-no-polite',
+    filePath:  A('aria-live-no-polite.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'aria-live-no-level', keywords: ['aria-live', 'polite', 'live region', 'assertive'], description: 'aria-live region missing politeness level' },
+    ],
+  },
+  {
+    fixtureId: 'complex-aria-modal',
+    filePath:  A('complex-aria-modal.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'modal-no-role',  keywords: ['dialog role', 'modal role', 'role dialog', 'aria-modal'], description: 'Modal missing role="dialog"' },
+      { id: 'modal-no-focus', keywords: ['focus management', 'modal focus', 'focus trap', 'dialog focus'], description: 'Modal missing focus management' },
+    ],
+  },
+
+  // ── Links ─────────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'link-non-descriptive',
+    filePath:  A('link-non-descriptive.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'link-text-generic', keywords: ['click here', 'link text', 'non-descriptive link', 'vague link'], description: 'Link uses non-descriptive "click here" text' },
+    ],
+  },
+  {
+    fixtureId: 'link-icon-only',
+    filePath:  A('link-icon-only.html'),
+    languageId: 'html',
+    isClean:   true,
+    expectedIssues: [],
+  },
+  {
+    fixtureId: 'link-opens-new-window',
+    filePath:  A('link-opens-new-window.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'link-new-tab-no-warning', keywords: ['new tab', 'target blank', 'opens new', 'new window warning'], description: 'Link opens in new tab without warning user' },
+    ],
+  },
+
+  // ── Tables ────────────────────────────────────────────────────────────────
+  {
+    fixtureId: 'complex-table-no-headers',
+    filePath:  A('complex-table-no-headers.html'),
+    languageId: 'html',
+    isClean:   false,
+    expectedIssues: [
+      { id: 'table-no-headers', keywords: ['table header', 'th element', 'table scope', 'thead', 'column header'], description: 'Data table missing header elements' },
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Exports
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -438,6 +686,7 @@ export const ALL_FIXTURES: FixtureGroundTruth[] = [
   TSX_LOW,
   TSX_MEDIUM,
   TSX_HIGH,
+  ...ADVERSARIAL_FIXTURES,
 ];
 
 export const FIXTURE_MAP = new Map<string, FixtureGroundTruth>(

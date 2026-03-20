@@ -99,6 +99,8 @@ Options:
              css  → css-clean, css-low, css-medium, css-high
              js   → js-clean, js-low, js-medium, js-high
              tsx  → tsx-clean, tsx-low, tsx-medium, tsx-high
+  --complexity <tier>  Complexity tier filter (default: all)
+                Choices: all | low | medium | high
   --fixtures <csv>   Exact fixture IDs — overrides --lang if provided
              Available: ${ALL_FIXTURES.map(f => f.fixtureId).join(', ')}
   --preset   <id>    Fixed analysis preset (default: balanced)
@@ -132,8 +134,24 @@ Options:
       process.exit(1);
     }
     const langId = langRaw !== 'all' ? LANG_MAP[langRaw] : undefined;
+    
+    // Apply complexity tier filter if provided
+    const complexityRaw = (opt('--complexity') ?? 'all').toLowerCase().trim();
+    const validComplexities = ['all', 'low', 'medium', 'high'];
+    if (!validComplexities.includes(complexityRaw)) {
+      console.error(`Unknown --complexity "${complexityRaw}". Valid: ${validComplexities.join(', ')}`);
+      process.exit(1);
+    }
+    
     fixtureIds = ALL_FIXTURES
       .filter(f => langId === undefined || f.languageId === langId)
+      .filter(f => {
+        if (complexityRaw === 'all') return true;
+        if (complexityRaw === 'low')    return f.fixtureId.includes('-low');
+        if (complexityRaw === 'medium') return f.fixtureId.includes('-medium');
+        if (complexityRaw === 'high')   return f.fixtureId.includes('-high');
+        return false;
+      })
       .map(f => f.fixtureId);
   }
 
