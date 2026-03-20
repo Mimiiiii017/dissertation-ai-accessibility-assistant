@@ -52,44 +52,45 @@ const HTML_CLEAN: FixtureGroundTruth = {
 /** Shared first 10 concepts reused in medium and high (cumulative set). */
 const HTML_LOW_ISSUES: IssueConcept[] = [
   { id: 'html-lang-missing',       keywords: ['lang attribute', 'missing lang', 'html lang'],              description: '<html> missing lang attribute' },
-  { id: 'search-btn-name',         keywords: ['submit button', 'search button', 'accessible name'],        description: 'Search submit button has no accessible name' },
+  { id: 'search-btn-name',         keywords: ['submit button', 'search button', 'accessible name', 'type="submit"', 'submit control'],        description: 'Search submit button has no accessible name' },
   { id: 'click-here-link',         keywords: ['click here', 'link text', 'non-descriptive'],               description: 'CTA link uses non-descriptive "Click here" text' },
-  { id: 'heading-level-skip-h5',   keywords: ['heading level', 'heading skip', 'skipped heading'],         description: '"Review and remediate" heading skips from h3 to h5' },
+  { id: 'heading-level-skip-h5',   keywords: ['heading level', 'heading skip', 'skipped heading', 'hierarchy skipped', 'h3 to h5'],         description: '"Review and remediate" heading skips from h3 to h5' },
   { id: 'axe-runner-alt-missing',  keywords: ['axe runner', 'missing alt', 'image alt', 'alt text'],       description: 'axe Runner product image missing alt attribute' },
   { id: 'th-col-scope-missing',    keywords: ['scope attribute', 'table header', 'th scope', 'col scope'], description: 'Comparison table <th> elements missing scope="col"' },
   { id: 'faq-id-wrong-section',   keywords: ['faq', 'section id', 'skip link target', 'id attribute'],    description: 'FAQ section given id="contact" breaking skip-link target' },
-  { id: 'newsletter-label-missing',keywords: ['newsletter email', 'email label', 'label element'],         description: 'Newsletter email input missing <label>' },
-  { id: 'footer-logo-alt-missing', keywords: ['footer logo', 'luminary logo', 'logo alt'],                 description: 'Footer logo image missing alt attribute' },
-  { id: 'twitter-link-name',       keywords: ['twitter', 'social link name', 'aria-label'],                description: 'Twitter social link has no accessible name' },
+  { id: 'newsletter-label-missing',keywords: ['newsletter email', 'newsletter-email', 'email label', 'label element', 'missing associated'],         description: 'Newsletter email input missing <label>' },
+  { id: 'footer-logo-alt-missing', keywords: ['footer logo', 'luminary logo', 'logo alt', 'luminary-logo-white'],                 description: 'Footer logo image missing alt attribute' },
+  { id: 'twitter-link-name',       keywords: ['twitter', 'social link name', 'aria-label', 'twitter.com', 'icon link'],                description: 'Twitter social link has no accessible name' },
 ];
 
 /** Additional 20 concepts unique to medium (errors 11–30). */
 const HTML_MEDIUM_EXTRA: IssueConcept[] = [
   { id: 'title-empty',             keywords: ['page title', 'empty title', 'title element'],               description: '<title> element is empty' },
-  { id: 'search-label-missing',    keywords: ['search input label', 'search label', 'label for search'],   description: 'Search input has no <label>' },
-  { id: 'hero-img-alt-missing',    keywords: ['hero image', 'hero alt', 'dashboard screenshot'],           description: 'Hero dashboard screenshot image missing alt' },
+  { id: 'search-label-missing',    keywords: ['search input label', 'search label', 'label for search', 'search-input', 'missing associated'],   description: 'Search input has no <label>' },
+  { id: 'hero-img-alt-missing',    keywords: ['hero image', 'hero alt', 'dashboard screenshot', 'hero-dashboard'],           description: 'Hero dashboard screenshot image missing alt' },
   { id: 'logo-bar-aria-label',     keywords: ['logo bar', 'companies section', 'section label'],           description: 'Logo bar section missing aria-label' },
-  { id: 'partner-logo-alt',        keywords: ['partner logo', 'nova health', 'logo image alt'],            description: 'Partner logos missing alt attributes' },
+  { id: 'partner-logo-alt',        keywords: ['partner logo', 'nova health', 'logo image alt', 'nova-health'],            description: 'Partner logos missing alt attributes' },
   { id: 'features-heading-id',     keywords: ['features heading', 'h2 id', 'aria-labelledby target'],      description: 'Features <h2> missing id, breaking aria-labelledby' },
   { id: 'learn-more-link',         keywords: ['learn more', 'non-descriptive link', 'vague link'],         description: '"Learn more" link text is non-descriptive' },
   { id: 'step1-heading-skip',      keywords: ['connect your project', 'step heading', 'h5'],               description: '"Connect your project" step heading skips to h5' },
-  { id: 'step1-img-alt-missing',   keywords: ['how it works', 'step image', 'cli connect'],                description: 'How-it-works step 1 image missing alt attribute' },
+  { id: 'step1-img-alt-missing',   keywords: ['how it works', 'step image', 'cli connect', 'step-1-connect', 'step-1'],    description: 'How-it-works step 1 image missing alt attribute' },
   { id: 'filter-btn-aria-pressed', keywords: ['filter button', 'aria-pressed', 'filter tab'],              description: 'Product filter buttons missing aria-pressed state' },
-  { id: 'contrast-studio-alt',     keywords: ['contrast studio', 'product image alt', 'missing alt'],      description: 'Contrast Studio product image missing alt attribute' },
+  { id: 'contrast-studio-alt',     keywords: ['contrast studio', 'product image alt', 'missing alt', 'contrast-studio'],   description: 'Contrast Studio product image missing alt attribute' },
   { id: 'contrast-studio-link',    keywords: ['contrast studio', 'click here', 'product link'],            description: 'Contrast Studio link uses non-descriptive "Click here"' },
   { id: 'pricing-toggle-role',     keywords: ['pricing toggle', 'role group', 'billing toggle'],           description: 'Pricing toggle div missing role="group"' },
   { id: 'featured-plan-label',     keywords: ['featured plan', 'recommended plan', 'aria-label'],          description: 'Featured pricing plan list item missing aria-label' },
-  { id: 'table-caption-missing',   keywords: ['table caption', 'caption element', 'table title'],          description: 'Comparison table missing <caption>' },
-  { id: 'th-row-scope-missing',    keywords: ['row header', 'scope row', 'th scope'],                      description: 'Table row header missing scope="row"' },
+  { id: 'table-caption-missing',   keywords: ['table caption', 'caption element', 'table title', 'no caption', 'missing caption'],          description: 'Comparison table missing <caption>' },
+  { id: 'th-row-scope-missing',    keywords: ['row header', 'scope row', 'th scope', 'scope="row"', 'missing scope'],                      description: 'Table row header missing scope="row"' },
   { id: 'td-icon-aria-label',      keywords: ['table cell', 'icon cell', 'aria-label', 'tick', 'dash'],   description: 'Icon table cells (✓/—) missing aria-label' },
-  { id: 'testimonial-avatar-alt',  keywords: ['testimonial avatar', 'avatar image', 'priya'],              description: 'Testimonial avatar image missing alt attribute' },
+  { id: 'testimonial-avatar-alt',  keywords: ['testimonial avatar', 'avatar image', 'priya', 'priya-k'],              description: 'Testimonial avatar image missing alt attribute' },
   { id: 'faq-aria-controls',       keywords: ['faq button', 'aria-controls', 'accordion trigger'],        description: 'FAQ accordion button missing aria-controls' },
   { id: 'faq-dd-region',           keywords: ['faq answer', 'role region', 'aria-labelledby'],             description: 'FAQ answer panel missing role="region" and aria-labelledby' },
+  { id: 'contact-label-missing',   keywords: ['contact-email', 'contact email', 'contact input label', 'missing associated'],  description: 'Contact email input missing <label>' },
 ];
 
 /** Additional 20 concepts unique to high (errors 31–50). */
 const HTML_HIGH_EXTRA: IssueConcept[] = [
-  { id: 'skip-links-removed',      keywords: ['skip link', 'skip navigation', 'skip to main'],             description: 'Skip navigation links block removed entirely' },
+  { id: 'skip-links-removed',      keywords: ['skip link', 'skip navigation', 'skip to main', 'no skip', 'skip-link missing'],             description: 'Skip navigation links block removed entirely' },
   { id: 'main-nav-aria-label',     keywords: ['main navigation', 'nav aria-label', 'primary nav'],         description: 'Main nav element missing aria-label' },
   { id: 'mobile-toggle-aria',      keywords: ['mobile toggle', 'hamburger', 'aria-expanded'],              description: 'Mobile nav toggle missing aria-expanded, aria-controls, aria-label' },
   { id: 'subnav-btn-aria',         keywords: ['subnav', 'submenu button', 'aria-haspopup'],                description: 'Submenu trigger button missing aria-expanded/controls/haspopup' },
@@ -101,14 +102,14 @@ const HTML_HIGH_EXTRA: IssueConcept[] = [
   { id: 'filter-group-label',      keywords: ['filter group', 'aria-labelledby', 'role group'],            description: 'Product filter group div missing aria-labelledby' },
   { id: 'product-grid-label',      keywords: ['product grid', 'ul aria-label', 'grid label'],              description: 'Product grid <ul> missing aria-label' },
   { id: 'row-scope-scans',         keywords: ['component scans', 'row scope', 'table row header'],         description: '"Component scans" table row header missing scope="row"' },
-  { id: 'marcus-avatar-alt',       keywords: ['marcus', 'testimonial avatar', 'avatar alt'],               description: 'Marcus Thornton testimonial avatar missing alt attribute' },
+  { id: 'marcus-avatar-alt',       keywords: ['marcus', 'testimonial avatar', 'avatar alt', 'marcus-t'],               description: 'Marcus Thornton testimonial avatar missing alt attribute' },
   { id: 'faq-q1-expanded',        keywords: ['faq item', 'aria-expanded', 'accordion button'],            description: 'First FAQ item button missing aria-expanded' },
   { id: 'faq-q2-expanded',        keywords: ['faq second', 'second question', 'aria-expanded'],           description: 'Second FAQ item button missing aria-expanded' },
   { id: 'contact-name-autocomplete',keywords:['autocomplete', 'given-name', 'name autocomplete'],          description: 'Contact name input missing autocomplete="given-name"' },
   { id: 'contact-aria-required',   keywords: ['aria-required', 'required attribute', 'contact form'],      description: 'Contact form inputs missing aria-required' },
   { id: 'contact-msg-describedby', keywords: ['aria-describedby', 'message hint', 'character count'],      description: 'Contact message textarea missing aria-describedby' },
   { id: 'products-nav-label',      keywords: ['products navigation', 'footer products nav', 'nav label'],  description: 'Products footer nav missing aria-label' },
-  { id: 'linkedin-link-name',      keywords: ['linkedin', 'linkedin link', 'social link'],                 description: 'LinkedIn social link has no accessible name' },
+  { id: 'linkedin-link-name',      keywords: ['linkedin', 'linkedin link', 'social link', 'linkedin.com', 'icon link'],                description: 'LinkedIn social link has no accessible name' },
 ];
 
 const HTML_LOW: FixtureGroundTruth = {
@@ -148,62 +149,62 @@ const CSS_CLEAN: FixtureGroundTruth = {
 };
 
 const CSS_LOW_ISSUES: IssueConcept[] = [
-  { id: 'secondary-text-contrast',  keywords: ['secondary text', 'colour-text-secondary', 'aaaaaa', 'contrast'],       description: '--colour-text-secondary set to #aaaaaa — insufficient contrast' },
-  { id: 'focus-ring-contrast',      keywords: ['focus ring colour', 'colour-focus-ring', 'focus color contrast'],       description: '--colour-focus-ring set to #aaaaaa — focus indicator low contrast' },
-  { id: 'font-size-px',             keywords: ['font-size', '12px', 'fixed font', 'user preference'],                  description: 'Root font-size set to 12px, overriding user browser preference' },
-  { id: 'line-height-tight',        keywords: ['line-height', 'line height', 'tight spacing', 'readability'],          description: 'Root line-height set to 1, insufficient for readability' },
+  { id: 'secondary-text-contrast',  keywords: ['secondary text', 'colour-text-secondary', 'aaaaaa', 'contrast', '--colour-text-secondary'],       description: '--colour-text-secondary set to #aaaaaa — insufficient contrast' },
+  { id: 'focus-ring-contrast',      keywords: ['focus ring colour', 'colour-focus-ring', 'focus color contrast', '--colour-focus-ring', 'aaaaaa'],       description: '--colour-focus-ring set to #aaaaaa — focus indicator low contrast' },
+  { id: 'font-size-px',             keywords: ['font-size', '12px', 'fixed font', 'user preference', 'user browser preference'],                  description: 'Root font-size set to 12px, overriding user browser preference' },
+  { id: 'line-height-tight',        keywords: ['line-height', 'line height', 'tight spacing', 'readability', 'set to 1'],          description: 'Root line-height set to 1, insufficient for readability' },
   { id: 'base-focus-outline-none',  keywords: ['focus-visible', 'outline none', 'focus indicator', 'focus outline'],   description: 'Base :focus-visible rule sets outline: none' },
   { id: 'sr-only-broken',           keywords: ['visually hidden', 'sr-only', 'screen reader', 'clip'],                 description: '.sr-only utility class broken — content no longer off-screen' },
   { id: 'reduced-motion-missing',   keywords: ['prefers-reduced-motion', 'motion', 'animation', 'transition'],         description: 'prefers-reduced-motion media query block removed' },
   { id: 'button-target-small',      keywords: ['min-height', 'touch target', 'button size', '32px'],                   description: 'Button min-height reduced from 44px to 32px' },
-  { id: 'btn-primary-outline-none', keywords: ['btn-primary', 'primary button focus', 'button outline'],               description: 'Primary button :focus rule sets outline: none' },
+  { id: 'btn-primary-outline-none', keywords: ['btn-primary', 'primary button focus', 'button outline', 'outline none'],               description: 'Primary button :focus rule sets outline: none' },
   { id: 'skip-link-transform',      keywords: ['skip link', 'translatey', 'skip to content', 'translate'],             description: 'Skip link transform removed — link never enters viewport on focus' },
 ];
 
 const CSS_MEDIUM_EXTRA: IssueConcept[] = [
-  { id: 'brand-primary-contrast',   keywords: ['brand primary', 'colour-brand-primary', 'primary colour contrast'],    description: '--colour-brand-primary changed to #5588bb — insufficient contrast' },
+  { id: 'brand-primary-contrast',   keywords: ['brand primary', 'colour-brand-primary', 'primary colour contrast', '5588bb'],    description: '--colour-brand-primary changed to #5588bb — insufficient contrast' },
   { id: 'negative-word-spacing',    keywords: ['word-spacing', 'letter-spacing', 'text spacing'],                      description: 'Negative word-spacing and letter-spacing hinder readability' },
   { id: 'link-no-underline',        keywords: ['text-decoration', 'link underline', 'underline', 'a {'],               description: 'Global rule removes underline from all links' },
-  { id: 'forced-colors-outline',    keywords: ['forced-color', 'high contrast', 'forced colors focus'],                description: 'Focus outline removed inside forced-color context' },
-  { id: 'mobile-trigger-small',     keywords: ['mobile trigger', 'nav trigger', 'mobile button size'],                 description: 'Mobile nav trigger min-height below 44px' },
-  { id: 'mobile-toggle-small',      keywords: ['mobile toggle', 'hamburger size', 'menu toggle size'],                 description: 'Mobile nav toggle min-height below 44px' },
-  { id: 'icon-btn-target-small',    keywords: ['icon button', 'icon btn size', 'icon button target'],                  description: 'Icon button min-width/height reduced below 44px' },
-  { id: 'close-btn-target-small',   keywords: ['close button', 'close btn size', 'dismiss button'],                    description: 'Close/dismiss button min-width/height reduced below 44px' },
-  { id: 'nav-item-outline-none',    keywords: ['nav item focus', 'nav link focus', 'navigation outline'],              description: 'Navigation item :focus rule sets outline: none' },
-  { id: 'search-btn-target-small',  keywords: ['search button size', 'search btn height', 'submit size'],              description: 'Search submit button min-height below 44px' },
-  { id: 'input-target-small',       keywords: ['input height', 'form input size', 'text input height'],                description: 'Text input min-height reduced below 44px' },
-  { id: 'card-btn-outline-none',    keywords: ['card button focus', 'product card focus', 'card outline'],             description: 'Product card button :focus rule sets outline: none' },
-  { id: 'tab-outline-none',         keywords: ['filter tab focus', 'tab button focus', 'tab outline'],                 description: 'Filter tab button :focus rule sets outline: none' },
-  { id: 'visually-hidden-display',  keywords: ['display none', 'visually-hidden', 'hidden from at', 'sr content'],    description: '.visually-hidden uses display:none — hides from assistive tech' },
-  { id: 'skip-link-target-small',   keywords: ['skip link height', 'skip link size', 'skip button'],                   description: 'Skip link min-height reduced below 44px' },
-  { id: 'pricing-btn-outline-none', keywords: ['pricing button focus', 'billing toggle focus', 'toggle outline'],      description: 'Pricing toggle button :focus rule sets outline: none' },
-  { id: 'faq-btn-target-small-m',   keywords: ['faq button height', 'accordion height', 'faq target'],                description: 'FAQ accordion button min-height reduced below 44px (first)' },
-  { id: 'form-btn-outline-none',    keywords: ['form button focus', 'submit focus', 'cta focus'],                      description: 'Form submit button :focus rule sets outline: none' },
-  { id: 'newsletter-input-small',   keywords: ['newsletter input', 'email input size', 'newsletter height'],           description: 'Newsletter email input min-height reduced below 44px' },
-  { id: 'contact-input-small',      keywords: ['contact input', 'contact form size', 'contact height'],               description: 'Contact form input min-height reduced below 44px' },
+  { id: 'forced-colors-outline',    keywords: ['forced-color', 'high contrast', 'forced colors focus', 'forced colors'],                description: 'Focus outline removed inside forced-color context' },
+  { id: 'mobile-trigger-small',     keywords: ['mobile trigger', 'nav trigger', 'mobile button size', 'mobile-trigger', 'nav-toggle', 'nav toggle'],                 description: 'Mobile nav trigger min-height below 44px' },
+  { id: 'mobile-toggle-small',      keywords: ['mobile toggle', 'hamburger size', 'menu toggle size', 'mobile-toggle', 'nav-toggle', 'nav toggle'],                 description: 'Mobile nav toggle min-height below 44px' },
+  { id: 'icon-btn-target-small',    keywords: ['icon button', 'icon btn size', 'icon button target', 'icon-btn', 'btn-icon', '.btn-icon', 'btn icon'],                  description: 'Icon button min-width/height reduced below 44px' },
+  { id: 'close-btn-target-small',   keywords: ['close button', 'close btn size', 'dismiss button', 'close-btn', 'modal-close', 'btn-close', 'btn close', 'search-input', '#search-input'],                    description: 'Close/dismiss button min-width/height reduced below 44px' },
+  { id: 'nav-item-outline-none',    keywords: ['nav item focus', 'nav link focus', 'navigation outline', 'nav-item', 'nav-menu', 'submenu', 'account navigation'],              description: 'Navigation item :focus rule sets outline: none' },
+  { id: 'search-btn-target-small',  keywords: ['search button size', 'search btn height', 'submit size', 'search-btn', 'site-search', 'search-input', 'search input'],              description: 'Search submit button min-height below 44px' },
+  { id: 'input-target-small',       keywords: ['input height', 'form input size', 'text input height', 'form-input', 'input control'],                description: 'Text input min-height reduced below 44px' },
+  { id: 'card-btn-outline-none',    keywords: ['card button focus', 'product card focus', 'card outline', 'card-btn', 'product-body', 'product body', 'feature-card', ':focus-visible', 'focus outline', 'btn:focus'],              description: 'Product card button :focus rule sets outline: none' },
+  { id: 'tab-outline-none',         keywords: ['filter tab focus', 'tab button focus', 'tab outline', 'filter-tab', 'tab-btn', 'filter-tabs button', 'filter tabs', ':focus-visible', 'focus outline'],              description: 'Filter tab button :focus rule sets outline: none' },
+  { id: 'visually-hidden-display',  keywords: ['display none', 'visually-hidden', 'hidden from at', 'sr content', 'display: none'],    description: '.visually-hidden uses display:none — hides from assistive tech' },
+  { id: 'skip-link-target-small',   keywords: ['skip link height', 'skip link size', 'skip button', 'skip-link', 'skip link'],                   description: 'Skip link min-height reduced below 44px' },
+  { id: 'pricing-btn-outline-none', keywords: ['pricing button focus', 'billing toggle focus', 'toggle outline', 'pricing-btn', 'billing-toggle', 'pricing-toggle', 'pricing toggle', ':focus-visible', 'focus outline'],      description: 'Pricing toggle button :focus rule sets outline: none' },
+  { id: 'faq-btn-target-small-m',   keywords: ['faq button height', 'accordion height', 'faq target', 'faq-accordion', 'faq-btn', 'faq-item', 'faq item', ':focus-visible', 'faq-item dt'],                description: 'FAQ accordion button min-height reduced below 44px (first)' },
+  { id: 'form-btn-outline-none',    keywords: ['form button focus', 'submit focus', 'cta focus', 'form-btn', 'form-submit', 'form-group', 'newsletter-form', ':focus-visible', 'focus outline', 'btn:focus', 'focus visible'],                      description: 'Form submit button :focus rule sets outline: none' },
+  { id: 'newsletter-input-small',   keywords: ['newsletter input', 'email input size', 'newsletter height', 'newsletter-email', 'newsletter-input', 'newsletter-form', 'newsletter section', 'newsletter-section', 'form-group input'],           description: 'Newsletter email input min-height reduced below 44px' },
+  { id: 'contact-input-small',      keywords: ['contact input', 'contact form size', 'contact height', 'contact-input', 'contact-email', 'contact-form', 'contact-section', 'form-group select', 'form-group textarea'],               description: 'Contact form input min-height reduced below 44px' },
 ];
 
 const CSS_HIGH_EXTRA: IssueConcept[] = [
-  { id: 'brand-secondary-contrast', keywords: ['brand secondary', 'colour-brand-secondary', 'purple contrast'],        description: '--colour-brand-secondary changed to #bb88ee — insufficient contrast' },
+  { id: 'brand-secondary-contrast', keywords: ['brand secondary', 'colour-brand-secondary', 'purple contrast', 'bb88ee'],        description: '--colour-brand-secondary changed to #bb88ee — insufficient contrast' },
   { id: 'neutral-900-contrast',     keywords: ['neutral-900', 'text colour', 'body text contrast', '555555'],          description: '--colour-neutral-900 changed to #555555 — body text insufficient contrast' },
   { id: 'error-colour-contrast',    keywords: ['error colour', 'colour-error', 'error text contrast', 'ee9999'],        description: '--colour-error changed to #ee9999 — error text insufficient contrast' },
-  { id: 'forced-color-adjust',      keywords: ['forced-color-adjust', 'windows high contrast', 'high contrast mode'],  description: 'forced-color-adjust: none removed — custom styles override system HC' },
-  { id: 'hero-link-outline-none',   keywords: ['hero link focus', 'cta link focus', 'hero button focus'],              description: 'Hero CTA link/button :focus rule sets outline: none' },
-  { id: 'badge-outline-none',       keywords: ['badge focus', 'trust badge focus', 'badge outline'],                   description: 'Badge element :focus rule sets outline: none' },
-  { id: 'stat-item-small',          keywords: ['stat item', 'stats button', 'stats height'],                           description: 'Stats bar item min-height reduced below 44px' },
-  { id: 'testimonial-outline-none', keywords: ['testimonial focus', 'carousel button', 'testimonial outline'],         description: 'Testimonial carousel button :focus rule sets outline: none' },
-  { id: 'pagination-small',         keywords: ['pagination', 'page button', 'pagination size'],                        description: 'Pagination button min-height reduced below 44px' },
-  { id: 'footer-text-contrast',     keywords: ['footer text colour', 'rgba 0.3', 'footer contrast'],                   description: 'Footer body text colour changed to rgba(255,255,255,0.3) — very low contrast' },
-  { id: 'social-icon-small',        keywords: ['social icon', 'social link height', 'social button'],                  description: 'Social icon link min-height reduced below 44px' },
-  { id: 'dropdown-outline-none',    keywords: ['dropdown focus', 'nav dropdown focus', 'dropdown outline'],            description: 'Dropdown menu item :focus rule sets outline: none' },
-  { id: 'modal-btn-outline-none',   keywords: ['modal focus', 'dialog focus', 'modal button outline'],                 description: 'Modal dialog button :focus rule sets outline: none' },
-  { id: 'faq-dt-outline-none',      keywords: ['faq item focus', 'faq dt button focus', 'accordion focus'],            description: 'FAQ accordion button focus-visible sets outline: none' },
-  { id: 'form-input-outline-none',  keywords: ['form input focus', 'text input focus', 'input outline'],              description: 'Form inputs focus-visible sets outline: none' },
-  { id: 'checkbox-outline-none',    keywords: ['checkbox focus', 'checkbox outline', 'input checkbox focus'],          description: 'Checkbox focus-visible sets outline: none' },
-  { id: 'footer-brand-outline',     keywords: ['footer brand focus', 'footer logo focus', 'footer link focus'],        description: 'Footer brand link focus-visible sets outline: none' },
-  { id: 'footer-nav-outline',       keywords: ['footer nav focus', 'footer navigation focus', 'footer link outline'],  description: 'Footer nav links focus-visible sets outline: none' },
-  { id: 'social-link-small-h',      keywords: ['social links min-height', 'social target', '28px social'],             description: 'Social links min-height reduced below 44px' },
-  { id: 'social-link-outline',      keywords: ['social link focus', 'social link outline', 'social a focus'],          description: 'Social links focus-visible sets outline: none' },
+  { id: 'forced-color-adjust',      keywords: ['forced-color-adjust', 'windows high contrast', 'high contrast mode', 'forced-color-adjust: none'],  description: 'forced-color-adjust: none removed — custom styles override system HC' },
+  { id: 'hero-link-outline-none',   keywords: ['hero link focus', 'cta link focus', 'hero button focus', 'hero-link', 'cta-link', 'hero-cta'],   description: 'Hero CTA link/button :focus rule sets outline: none' },
+  { id: 'badge-outline-none',       keywords: ['badge focus', 'trust badge focus', 'badge outline', 'badge'],                   description: 'Badge element :focus rule sets outline: none' },
+  { id: 'stat-item-small',          keywords: ['stat item', 'stats button', 'stats height', 'stat-item', 'stats-bar'],           description: 'Stats bar item min-height reduced below 44px' },
+  { id: 'testimonial-outline-none', keywords: ['testimonial focus', 'carousel button', 'testimonial outline', 'testimonial', 'carousel-btn'],         description: 'Testimonial carousel button :focus rule sets outline: none' },
+  { id: 'pagination-small',         keywords: ['pagination', 'page button', 'pagination size', 'pagination-btn'],                        description: 'Pagination button min-height reduced below 44px' },
+  { id: 'footer-text-contrast',     keywords: ['footer text colour', 'rgba 0.3', 'footer contrast', 'rgba(255,255,255,0.3)'],                   description: 'Footer body text colour changed to rgba(255,255,255,0.3) — very low contrast' },
+  { id: 'social-icon-small',        keywords: ['social icon', 'social link height', 'social button', 'social-icon', 'social-link'],                  description: 'Social icon link min-height reduced below 44px' },
+  { id: 'dropdown-outline-none',    keywords: ['dropdown focus', 'nav dropdown focus', 'dropdown outline', 'dropdown'],            description: 'Dropdown menu item :focus rule sets outline: none' },
+  { id: 'modal-btn-outline-none',   keywords: ['modal focus', 'dialog focus', 'modal button outline', 'modal-btn', 'dialog-btn'],                description: 'Modal dialog button :focus rule sets outline: none' },
+  { id: 'faq-dt-outline-none',      keywords: ['faq item focus', 'faq dt button focus', 'accordion focus', 'faq-accordion', 'faq-dt'],            description: 'FAQ accordion button focus-visible sets outline: none' },
+  { id: 'form-input-outline-none',  keywords: ['form input focus', 'text input focus', 'input outline', 'form-input', 'input-text'],              description: 'Form inputs focus-visible sets outline: none' },
+  { id: 'checkbox-outline-none',    keywords: ['checkbox focus', 'checkbox outline', 'input checkbox focus', 'checkbox'],          description: 'Checkbox focus-visible sets outline: none' },
+  { id: 'footer-brand-outline',     keywords: ['footer brand focus', 'footer logo focus', 'footer link focus', 'footer-brand', 'footer-logo'],        description: 'Footer brand link focus-visible sets outline: none' },
+  { id: 'footer-nav-outline',       keywords: ['footer nav focus', 'footer navigation focus', 'footer link outline', 'footer-nav'],  description: 'Footer nav links focus-visible sets outline: none' },
+  { id: 'social-link-small-h',      keywords: ['social links min-height', 'social target', '28px social', 'social-link', 'social link'],             description: 'Social links min-height reduced below 44px' },
+  { id: 'social-link-outline',      keywords: ['social link focus', 'social link outline', 'social a focus', 'social-a', 'social-link'],          description: 'Social links focus-visible sets outline: none' },
 ];
 
 const CSS_LOW: FixtureGroundTruth = {
@@ -422,8 +423,19 @@ const TSX_HIGH: FixtureGroundTruth = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Adversarial Edge-Case Fixtures  (Step 6 — Vulnerability Analysis)
-// Each fixture isolates a single accessibility violation
+// Each fixture isolates a single accessibility violation.
+//
+// ADVERSARIAL_BOILERPLATE: issues present in every minimal HTML snippet
+// (no <html lang>, no <title>, no <main>) — every adversarial fixture is a
+// bare code snippet so these are genuinely missing in each file.
 // ─────────────────────────────────────────────────────────────────────────────
+
+const ADVERSARIAL_BOILERPLATE: IssueConcept[] = [
+  { id: 'html-lang-missing',    keywords: ['lang attribute', 'missing lang', 'html lang'],              description: '<html> missing lang attribute' },
+  { id: 'title-empty',          keywords: ['page title', 'empty title', 'title element'],               description: '<title> element is empty or missing' },
+  { id: 'main-element-missing', keywords: ['main element', 'main landmark', 'main role', 'landmark'],  description: 'Page missing <main> landmark element' },
+  { id: 'skip-link-absent',     keywords: ['skip link', 'skip navigation', 'no skip', 'skip-link missing', 'bypass navigation'], description: 'Page has no skip link — keyboard users cannot bypass navigation' },
+];
 
 const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
   // ── Buttons ──────────────────────────────────────────────────────────────
@@ -433,6 +445,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'button-name-missing', keywords: ['button name', 'accessible name', 'empty button', 'no text'], description: 'Button has no accessible name' },
     ],
   },
@@ -442,6 +455,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'button-icon-no-label', keywords: ['icon button', 'svg button', 'aria-label', 'accessible name'], description: 'Icon-only button with no aria-label' },
     ],
   },
@@ -451,6 +465,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'button-label-mismatch', keywords: ['label mismatch', 'visible label', 'aria-label', 'accessible name mismatch'], description: 'aria-label differs from visible button text' },
     ],
   },
@@ -460,6 +475,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'button-disabled-no-aria', keywords: ['aria-disabled', 'disabled state', 'disabled button', 'pointer-events'], description: 'Button styled disabled but aria-disabled not set' },
     ],
   },
@@ -469,6 +485,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'nested-button', keywords: ['nested button', 'button inside button', 'interactive nesting', 'invalid nesting'], description: 'Button nested inside another button' },
     ],
   },
@@ -480,6 +497,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'input-label-missing', keywords: ['input label', 'missing label', 'label element', 'form label'], description: 'Input field with no label element' },
     ],
   },
@@ -489,6 +507,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'input-placeholder-only', keywords: ['placeholder', 'label missing', 'placeholder as label', 'no label'], description: 'Input uses only placeholder instead of a label' },
     ],
   },
@@ -498,6 +517,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'submit-button-no-name', keywords: ['submit button', 'button name', 'accessible name', 'icon submit'], description: 'Submit button has no accessible name' },
     ],
   },
@@ -507,7 +527,9 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'error-not-associated', keywords: ['aria-describedby', 'error message', 'error association', 'input error'], description: 'Error message not associated with input via aria-describedby' },
+      { id: 'input-label-missing',  keywords: ['input label', 'missing label', 'label element', 'label for email', 'missing associated', 'id="email"'], description: 'Email input has no associated <label> element' },
     ],
   },
 
@@ -518,15 +540,21 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'image-alt-missing', keywords: ['alt text', 'missing alt', 'image alt', 'alt attribute'], description: 'Image with no alt attribute' },
     ],
   },
   {
+    // image-empty-alt: alt="" with role="presentation" is correct for decorative
+    // images — the specific image pattern IS accessible. However the bare snippet
+    // still lacks lang, title and main, so it is not a fully clean page.
     fixtureId: 'image-empty-alt',
     filePath:  A('image-empty-alt.html'),
     languageId: 'html',
-    isClean:   true,
-    expectedIssues: [],
+    isClean:   false,
+    expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
+    ],
   },
   {
     fixtureId: 'image-link-no-alt',
@@ -534,7 +562,8 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
-      { id: 'image-link-no-name', keywords: ['image link', 'link alt', 'link accessible name', 'image alt'], description: 'Image inside link with no alt makes link inaccessible' },
+      ...ADVERSARIAL_BOILERPLATE,
+      { id: 'image-link-no-name', keywords: ['image link', 'link alt', 'link accessible name', 'image alt', 'missing alt'], description: 'Image inside link with no alt makes link inaccessible' },
     ],
   },
   {
@@ -543,6 +572,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'svg-no-title', keywords: ['svg title', 'svg accessible', 'svg aria', 'svg role img'], description: 'SVG missing title or aria-label' },
     ],
   },
@@ -554,6 +584,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'heading-skip', keywords: ['heading level', 'heading skip', 'skipped heading', 'h4'], description: 'Heading jumps from h2 to h4, skipping h3' },
     ],
   },
@@ -563,6 +594,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'fake-heading', keywords: ['semantic heading', 'fake heading', 'div heading', 'heading element'], description: 'Div styled to look like heading but not semantic' },
     ],
   },
@@ -572,8 +604,9 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
-      { id: 'no-page-title',  keywords: ['page title', 'title element', 'empty title', 'missing title'], description: 'Page title is empty' },
-      { id: 'empty-title',    keywords: ['empty title', 'title empty', 'blank title'],                    description: '<title> element has no content' },
+      ...ADVERSARIAL_BOILERPLATE,
+      { id: 'no-page-title',        keywords: ['page title', 'title element', 'empty title', 'missing title', 'is empty or missing'], description: 'Page title is empty' },
+      { id: 'empty-title',          keywords: ['empty title', 'title empty', 'blank title', 'title element', 'is empty or missing'], description: '<title> element has no content' },
     ],
   },
 
@@ -584,6 +617,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'aria-hidden-focusable', keywords: ['aria-hidden', 'focusable', 'keyboard focus', 'hidden focusable'], description: 'aria-hidden element contains a focusable button' },
     ],
   },
@@ -593,6 +627,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'invalid-role', keywords: ['invalid role', 'aria role', 'misspelled role', 'role value'], description: 'Element has invalid or misspelled ARIA role' },
     ],
   },
@@ -602,7 +637,8 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
-      { id: 'image-alt-missing',    keywords: ['alt text', 'missing alt', 'alt attribute'],          description: 'Image missing alt attribute' },
+      ...ADVERSARIAL_BOILERPLATE,
+      { id: 'image-alt-missing',    keywords: ['alt text', 'missing alt', 'alt attribute'],              description: 'Image missing alt attribute' },
       { id: 'aria-label-for-image', keywords: ['aria-label image', 'alt not aria-label', 'image label'], description: 'aria-label used instead of alt on img element' },
     ],
   },
@@ -612,6 +648,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'aria-live-no-level', keywords: ['aria-live', 'polite', 'live region', 'assertive'], description: 'aria-live region missing politeness level' },
     ],
   },
@@ -621,6 +658,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'modal-no-role',  keywords: ['dialog role', 'modal role', 'role dialog', 'aria-modal'], description: 'Modal missing role="dialog"' },
       { id: 'modal-no-focus', keywords: ['focus management', 'modal focus', 'focus trap', 'dialog focus'], description: 'Modal missing focus management' },
     ],
@@ -633,15 +671,20 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'link-text-generic', keywords: ['click here', 'link text', 'non-descriptive link', 'vague link'], description: 'Link uses non-descriptive "click here" text' },
     ],
   },
   {
+    // link-icon-only: the link itself is accessible (has aria-label) but the
+    // bare snippet still lacks lang, title and main.
     fixtureId: 'link-icon-only',
     filePath:  A('link-icon-only.html'),
     languageId: 'html',
-    isClean:   true,
-    expectedIssues: [],
+    isClean:   false,
+    expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
+    ],
   },
   {
     fixtureId: 'link-opens-new-window',
@@ -649,6 +692,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
+      ...ADVERSARIAL_BOILERPLATE,
       { id: 'link-new-tab-no-warning', keywords: ['new tab', 'target blank', 'opens new', 'new window warning'], description: 'Link opens in new tab without warning user' },
     ],
   },
@@ -660,7 +704,9 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
     languageId: 'html',
     isClean:   false,
     expectedIssues: [
-      { id: 'table-no-headers', keywords: ['table header', 'th element', 'table scope', 'thead', 'column header'], description: 'Data table missing header elements' },
+      ...ADVERSARIAL_BOILERPLATE,
+      { id: 'table-no-headers',       keywords: ['table header', 'th element', 'table scope', 'thead', 'column header'], description: 'Data table missing header elements' },
+      { id: 'table-caption-missing2', keywords: ['table caption', 'caption element', 'table title', 'no caption', 'missing caption', 'no accessible table'], description: 'Data table also missing <caption>' },
     ],
   },
 ];
