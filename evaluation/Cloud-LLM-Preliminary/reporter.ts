@@ -5,6 +5,7 @@
  *   1. OVERALL RANKING — composite score (80 % F1 + 20 % speed), plus raw metrics
  *   2. DETAIL BY FIXTURE — how each model performed on each file
  *   3. FALSE POSITIVE ANALYSIS — what each model hallucinated on clean files
+ *   4. FALSE NEGATIVE ANALYSIS — which real issues every model consistently missed
  *
  * Also writes JSON (full data) and CSV (summary) to disk.
  */
@@ -512,6 +513,92 @@ export function printReport(
     console.log(`  ${C.bgreen}${C.bold}All models produced zero hallucinations on clean fixtures.${C.reset}`);
   }
 
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  FALSE NEGATIVE ANALYSIS                                 ║
+  // ╚══════════════════════════════════════════════════════════╝
+  const fnSectionNum = hasMultipleRuns ? '⑧' : '⑦';
+  section(`${fnSectionNum} FALSE NEGATIVE ANALYSIS  (real issues missed on error-present fixtures)`);
+  console.log(`  ${C.dim}Every concept ID below was a real accessibility issue that the model failed to find (false negative).${C.reset}`);
+  console.log(`  ${C.dim}Part A ranks concepts by how many models missed them — the higher the bar, the harder the issue.${C.reset}`);
+  console.log(`  ${C.dim}Part B lists per-model breakdowns identical in style to the FP section above.${C.reset}`);
+  console.log('');
+
+  const modelCount = models.length;
+
+  // ── Part A: hardest concepts (missed by most models) ─────────────────
+  // Build a map: "fixtureId::conceptId" -> set of model IDs that missed it
+  const missMap = new Map<string, Set<string>>();
+  for (const r of results.filter(rr => !rr.errorOccurred)) {
+    for (const id of r.missedIds) {
+      const key = `${r.fixtureId}::${id}`;
+      if (!missMap.has(key)) missMap.set(key, new Set());
+      missMap.get(key)!.add(r.modelId);
+    }
+  }
+
+  // Group by fixture, sort within each fixture by miss count desc
+  const byFixtureFN = new Map<string, { id: string; count: number }[]>();
+  for (const [key, modelSet] of missMap) {
+    const sep = key.indexOf('::');
+    const fixtureId = key.slice(0, sep);
+    const conceptId = key.slice(sep + 2);
+    if (!byFixtureFN.has(fixtureId)) byFixtureFN.set(fixtureId, []);
+    byFixtureFN.get(fixtureId)!.push({ id: conceptId, count: modelSet.size });
+  }
+
+  // Print fixture-by-fixture heatmap
+  let anyFNIssues = false;
+  for (const [fixtureId, concepts] of byFixtureFN) {
+    concepts.sort((a, b) => b.count - a.count);
+    console.log(`  ${C.bcyan}${fixtureId}${C.reset}`);
+    console.log(`  ${C.dim}${'concept-id'.padEnd(42)} missed-by   bar${C.reset}`);
+    console.log(`  ${C.dim}${hr('─', W - 2)}${C.reset}`);
+    for (const { id, count } of concepts) {
+      anyFNIssues = true;
+      const ratio     = count / modelCount;
+      const barLen    = Math.round(ratio * 20);
+      const bar       = '█'.repeat(barLen) + '░'.repeat(20 - barLen);
+      const colour    = count === modelCount
+        ? C.bred
+        : ratio >= 0.75 ? C.byellow
+        : ratio >= 0.5  ? C.yellow
+        : C.dim;
+      const label     = `${count}/${modelCount}  ${pct(ratio)}`;
+      console.log(`    ${colour}${id.padEnd(42)}${C.reset}  ${colour}${label.padEnd(12)} ${bar}${C.reset}`);
+    }
+    console.log('');
+  }
+  if (!anyFNIssues) {
+    console.log(`  ${C.bgreen}${C.bold}All models found every expected issue — no false negatives.${C.reset}`);
+    console.log('');
+  }
+
+  // ── Part B: per-model breakdown ───────────────────────────────────────
+  rule('per model');
+  console.log('');
+
+  let anyFN = false;
+  for (const modelId of models) {
+    const modelMisses = results.filter(r => r.modelId === modelId && !r.errorOccurred && r.missedIds.length > 0);
+    const name = shortName(modelId);
+    if (modelMisses.length === 0) {
+      console.log(`  ${C.bgreen}✓${C.reset}  ${name}`);
+      continue;
+    }
+    anyFN = true;
+    const totalFN = modelMisses.reduce((s, r) => s + r.missedIds.length, 0);
+    console.log(`  ${C.bred}✖${C.reset}  ${C.bwhite}${name}${C.reset}  ${C.bred}${totalFN} missed issue${totalFN !== 1 ? 's' : ''}${C.reset}`);
+    for (const r of modelMisses) {
+      for (const id of r.missedIds) {
+        console.log(`      ${C.dim}[${r.fixtureId}]${C.reset}  ${C.red}${id}${C.reset}`);
+      }
+    }
+  }
+  if (!anyFN) {
+    console.log('');
+    console.log(`  ${C.bgreen}${C.bold}All models found every expected issue on error-present fixtures.${C.reset}`);
+  }
+
   console.log('');
   console.log(C.dim + hr('═') + C.reset);
   console.log('');
@@ -530,6 +617,9 @@ export function saveJson(results: ModelRunResult[], outDir: string): string {
 }
 
 // ─── Save CSV ─────────────────────────────────────────────────────────────
+// Mirrors every section of the .txt report but in structured CSV format.
+// Sections are separated by a blank row + a "# SECTION NAME" comment row so
+// the file can be imported into Excel / pandas and filtered by section.
 
 export function saveCsv(
   results: ModelRunResult[],
@@ -540,86 +630,130 @@ export function saveCsv(
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
   const filePath = path.join(outDir, `cloud-llm-preliminary-summary-${ts}.csv`);
 
-  // Per-run detail rows
-  const perRunHeader = [
-    'model', 'short_name', 'fixture', 'preset', 'run',
-    'issues_found',
-    'tp', 'tn', 'fp', 'fn',
-    'precision', 'recall', 'specificity', 'npv',
-    'f1', 'accuracy', 'balanced_accuracy', 'mcc',
-    'response_ms', 'error',
-  ];
-  const rows: string[][] = [perRunHeader];
-
-  for (const r of results) {
-    rows.push([
-      r.modelId,
-      shortName(r.modelId),
-      r.fixtureId,
-      r.presetId,
-      String(r.runIndex),
-      String(r.issuesFound.length),
-      String(r.tp),
-      String(r.tn),
-      String(r.fp),
-      String(r.fn),
-      r.precision.toFixed(4),
-      r.recall.toFixed(4),
-      r.specificity.toFixed(4),
-      r.npv.toFixed(4),
-      r.f1.toFixed(4),
-      r.accuracy.toFixed(4),
-      r.balancedAccuracy.toFixed(4),
-      r.mcc.toFixed(4),
-      String(r.responseTimeMs),
-      r.errorOccurred ? 'true' : 'false',
-    ]);
-  }
-
-  // Aggregate rows
-  rows.push([]);
-  rows.push(['# AGGREGATE BY MODEL']);
-  rows.push([
-    'model', 'short_name', 'preset',
-    'total_tp', 'total_tn', 'total_fp', 'total_fn',
-    'avg_precision', 'avg_recall', 'avg_specificity', 'avg_npv',
-    'avg_f1', 'avg_accuracy', 'avg_balanced_accuracy', 'avg_mcc',
-    'avg_issues_found',
-    'avg_response_ms', 'p50_response_ms', 'p95_response_ms',
-    'f1_std_dev', 'composite_score', 'errors',
-  ]);
+  const rows: string[][] = [];
+  const c = (v: string | number) => String(v);
 
   const rawStats = models.map(m => aggregateByModel(results, m, results[0]?.presetId ?? 'balanced'));
   const stats = applyCompositeScores(rawStats).sort((a, b) => b.compositeScore - a.compositeScore);
-  for (const s of stats) {
+
+  // ── § 1  OVERALL RANKING ───────────────────────────────────────────────
+  rows.push(['# OVERALL RANKING  (80% F1 + 20% speed composite score)']);
+  rows.push(['rank', 'model', 'short_name', 'composite_score', 'f1', 'precision', 'recall', 'total_tp', 'total_fn', 'total_fp', 'avg_response_s', 'errors']);
+  stats.forEach((s, i) => {
     rows.push([
-      s.modelId,
-      shortName(s.modelId),
-      s.presetId,
-      String(s.totalTP),
-      String(s.totalTN),
-      String(s.totalFP),
-      String(s.totalFN),
-      s.avgPrecision.toFixed(4),
-      s.avgRecall.toFixed(4),
-      s.avgSpecificity.toFixed(4),
-      s.avgNPV.toFixed(4),
-      s.avgF1.toFixed(4),
-      s.avgAccuracy.toFixed(4),
-      s.avgBalancedAccuracy.toFixed(4),
-      s.avgMCC.toFixed(4),
-      s.avgIssuesFound.toFixed(2),
-      s.avgResponseMs.toFixed(0),
-      s.p50ResponseMs.toFixed(0),
-      s.p95ResponseMs.toFixed(0),
-      s.f1StdDev.toFixed(4),
-      s.compositeScore.toFixed(4),
-      String(s.errorCount),
+      c(i + 1), s.modelId, shortName(s.modelId),
+      (s.compositeScore * 100).toFixed(1) + '%',
+      (s.avgF1 * 100).toFixed(1) + '%',
+      (s.avgPrecision * 100).toFixed(1) + '%',
+      (s.avgRecall * 100).toFixed(1) + '%',
+      c(s.totalTP), c(s.totalFN), c(s.totalFP),
+      (s.avgResponseMs / 1000).toFixed(1) + 's',
+      c(s.errorCount),
     ]);
+  });
+
+  // ── § 2  EXTENDED METRICS ──────────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# EXTENDED METRICS  (full confusion-matrix detail)']);
+  rows.push(['rank', 'model', 'short_name', 'accuracy', 'balanced_accuracy', 'mcc', 'specificity', 'npv', 'total_tp', 'total_tn', 'total_fp', 'total_fn']);
+  stats.forEach((s, i) => {
+    rows.push([
+      c(i + 1), s.modelId, shortName(s.modelId),
+      (s.avgAccuracy * 100).toFixed(1) + '%',
+      (s.avgBalancedAccuracy * 100).toFixed(1) + '%',
+      s.avgMCC.toFixed(3),
+      (s.avgSpecificity * 100).toFixed(1) + '%',
+      (s.avgNPV * 100).toFixed(1) + '%',
+      c(s.totalTP), c(s.totalTN), c(s.totalFP), c(s.totalFN),
+    ]);
+  });
+
+  // ── § 3  RESPONSE TIME ─────────────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# RESPONSE TIME']);
+  rows.push(['rank', 'model', 'short_name', 'avg_s', 'p50_s', 'p95_s', 'avg_issues_per_run']);
+  [...stats].sort((a, b) => a.avgResponseMs - b.avgResponseMs).forEach((s, i) => {
+    rows.push([
+      c(i + 1), s.modelId, shortName(s.modelId),
+      (s.avgResponseMs / 1000).toFixed(1) + 's',
+      (s.p50ResponseMs / 1000).toFixed(1) + 's',
+      (s.p95ResponseMs / 1000).toFixed(1) + 's',
+      s.avgIssuesFound.toFixed(1),
+    ]);
+  });
+
+  // ── § 4  DETAIL BY FIXTURE ─────────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# DETAIL BY FIXTURE']);
+  rows.push(['fixture', 'model', 'short_name', 'issues_found', 'tp', 'tn', 'fp', 'fn', 'f1', 'accuracy', 'mcc', 'response_s', 'hallucinated_titles', 'missed_concept_ids']);
+  // Group per fixture, sorted by fixture then by F1 desc
+  const fixtures = [...new Set(results.map(r => r.fixtureId))];
+  for (const fixtureId of fixtures) {
+    for (const modelId of models) {
+      const runs = results.filter(r => r.fixtureId === fixtureId && r.modelId === modelId && !r.errorOccurred);
+      if (runs.length === 0) continue;
+      const r = runs[0]; // single run per combo
+      rows.push([
+        fixtureId, r.modelId, shortName(r.modelId),
+        c(r.issuesFound.length),
+        c(r.tp), c(r.tn), c(r.fp), c(r.fn),
+        (r.f1 * 100).toFixed(1) + '%',
+        (r.accuracy * 100).toFixed(1) + '%',
+        r.mcc.toFixed(2),
+        (r.responseTimeMs / 1000).toFixed(1) + 's',
+        r.fpTitles.join(' | '),
+        r.missedIds.join(' | '),
+      ]);
+    }
+  }
+
+  // ── § 5  FALSE POSITIVE DETAIL ────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# FALSE POSITIVE DETAIL  (hallucinated issues on fixtures with no real problems)']);
+  rows.push(['model', 'short_name', 'fixture', 'hallucinated_title']);
+  for (const r of results.filter(rr => !rr.errorOccurred && rr.fp > 0)) {
+    for (const title of r.fpTitles) {
+      rows.push([r.modelId, shortName(r.modelId), r.fixtureId, title]);
+    }
+  }
+
+  // ── § 6  FALSE NEGATIVE DETAIL ────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# FALSE NEGATIVE DETAIL  (real issues the model failed to detect)']);
+  rows.push(['model', 'short_name', 'fixture', 'missed_concept_id']);
+  for (const modelId of models) {
+    for (const r of results.filter(rr => rr.modelId === modelId && !rr.errorOccurred && rr.missedIds.length > 0)) {
+      for (const id of r.missedIds) {
+        rows.push([r.modelId, shortName(r.modelId), r.fixtureId, id]);
+      }
+    }
+  }
+
+  // ── § 7  CONCEPT MISS HEATMAP ─────────────────────────────────────────
+  rows.push([]);
+  rows.push(['# CONCEPT MISS HEATMAP  (how many models missed each expected issue — higher = harder to detect)']);
+  rows.push(['fixture', 'concept_id', 'models_that_missed', 'total_models', 'miss_rate_pct']);
+  const missMap = new Map<string, Set<string>>();
+  for (const r of results.filter(rr => !rr.errorOccurred)) {
+    for (const id of r.missedIds) {
+      const key = `${r.fixtureId}::${id}`;
+      if (!missMap.has(key)) missMap.set(key, new Set());
+      missMap.get(key)!.add(r.modelId);
+    }
+  }
+  const modelCount = models.length;
+  const heatRows: [string, string, number][] = [];
+  for (const [key, modelSet] of missMap) {
+    const sep = key.indexOf('::');
+    heatRows.push([key.slice(0, sep), key.slice(sep + 2), modelSet.size]);
+  }
+  heatRows.sort((a, b) => a[0].localeCompare(b[0]) || b[2] - a[2]);
+  for (const [fixtureId, conceptId, count] of heatRows) {
+    rows.push([fixtureId, conceptId, c(count), c(modelCount), ((count / modelCount) * 100).toFixed(1) + '%']);
   }
 
   const csv = rows
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
     .join('\n');
   fs.writeFileSync(filePath, csv, 'utf8');
   return filePath;

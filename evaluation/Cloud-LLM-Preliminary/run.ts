@@ -5,20 +5,21 @@
  *   npx ts-node run.ts [options]
  *
  * Options:
- *   --models   <csv>  Comma-separated model IDs to test  (default: all 23 installed)
- *   --fixtures <csv>  Comma-separated fixture IDs        (default: all 4)
- *   --preset   <id>   Analysis preset to use             (default: balanced)
- *   --host     <url>  Ollama base URL                    (default: http://localhost:11434)
- *   --runs     <n>    Repetitions per model/fixture pair (default: 1)
- *   --output   <dir>  Directory for JSON/CSV output      (default: ./results)
- *   --no-save         Skip saving result files
- *   --quiet           Suppress progress output
+ *   --lang     <name>  Language filter: all | html | css | js | tsx  (default: all)
+ *   --fixtures <csv>   Comma-separated fixture IDs — overrides --lang if provided
+ *   --preset   <id>    Analysis preset to use             (default: balanced)
+ *   --host     <url>   Ollama base URL                    (default: http://localhost:11434)
+ *   --runs     <n>     Repetitions per model/fixture pair (default: 1)
+ *   --output   <dir>   Directory for JSON/CSV output      (default: ./results)
+ *   --no-save          Skip saving result files
+ *   --quiet            Suppress progress output
  *   --help
  *
  * Examples:
- *   npx ts-node run.ts
- *   npx ts-node run.ts --models qwen3-coder-next:cloud,gpt-oss:120b-cloud
- *   npx ts-node run.ts --fixtures html-issues,tsx-issues --runs 2
+ *   npx ts-node run.ts                                     # all fixtures, all models
+ *   npx ts-node run.ts --lang html                         # only HTML fixtures
+ *   npx ts-node run.ts --lang tsx --runs 2                 # only TSX, 2 runs each
+ *   npx ts-node run.ts --fixtures html-low,html-medium     # exact fixture IDs
  *   npx ts-node run.ts --preset strict --no-save
  */
 
@@ -66,6 +67,15 @@ const ALL_MODELS: string[] = [
   'glm-5:cloud',                // ~undisclosed (Zhipu AI)
 ];
 
+// ─── Language → languageId mapping ───────────────────────────────────────
+
+const LANG_MAP: Record<string, string> = {
+  html: 'html',
+  css:  'css',
+  js:   'javascript',
+  tsx:  'typescriptreact',
+};
+
 // ─── Argument parsing ──────────────────────────────────────────────────────
 
 function parseArgs(argv: string[]) {
@@ -82,39 +92,49 @@ function parseArgs(argv: string[]) {
 Usage: npx ts-node run.ts [options]
 
 Options:
-  --models   <csv>  Models to test (default: all ${ALL_MODELS.length} installed)
-             Available: ${ALL_MODELS.map(shortName).join(', ')}
-  --fixtures <csv>  Fixtures to test (default: all 4)
+  --lang     <name>  Language filter — selects fixtures by language (default: all)
+             Choices: all | html | css | js | tsx
+             all  → all 16 fixtures (4 clean + 12 error)
+             html → html-clean, html-low, html-medium, html-high
+             css  → css-clean, css-low, css-medium, css-high
+             js   → js-clean, js-low, js-medium, js-high
+             tsx  → tsx-clean, tsx-low, tsx-medium, tsx-high
+  --fixtures <csv>   Exact fixture IDs — overrides --lang if provided
              Available: ${ALL_FIXTURES.map(f => f.fixtureId).join(', ')}
-  --preset   <id>   Fixed analysis preset (default: balanced)
+  --preset   <id>    Fixed analysis preset (default: balanced)
              Choices: ${Object.keys(ANALYSIS_PRESETS).join(', ')}
-  --host     <url>  Ollama base URL (default: http://localhost:11434)
-  --runs     <n>    Repetitions per combination (default: 1)
-  --output   <dir>  Output directory (default: ./results)
-  --no-save         Skip writing JSON/CSV files
-  --quiet           Suppress progress output
-  --help            Show this help
+  --host     <url>   Ollama base URL (default: http://localhost:11434)
+  --runs     <n>     Repetitions per combination (default: 1)
+  --output   <dir>   Output directory (default: ./results)
+  --no-save          Skip writing JSON/CSV files
+  --quiet            Suppress progress output
+  --help             Show this help
     `);
     process.exit(0);
   }
 
-  // Models
-  const modelsRaw = opt('--models');
-  const models = modelsRaw
-    ? modelsRaw.split(',').map(s => s.trim())
-    : ALL_MODELS;
-
-  // Fixtures
+  // Fixtures — --fixtures wins; otherwise apply --lang filter
   const fixturesRaw = opt('--fixtures');
-  const fixtureIds = fixturesRaw
-    ? fixturesRaw.split(',').map(s => s.trim())
-    : ALL_FIXTURES.map(f => f.fixtureId);
+  let fixtureIds: string[];
 
-  for (const id of fixtureIds) {
-    if (!FIXTURE_MAP.has(id)) {
-      console.error(`Unknown fixture "${id}". Valid: ${ALL_FIXTURES.map(f => f.fixtureId).join(', ')}`);
+  if (fixturesRaw) {
+    fixtureIds = fixturesRaw.split(',').map(s => s.trim());
+    for (const id of fixtureIds) {
+      if (!FIXTURE_MAP.has(id)) {
+        console.error(`Unknown fixture "${id}". Valid: ${ALL_FIXTURES.map(f => f.fixtureId).join(', ')}`);
+        process.exit(1);
+      }
+    }
+  } else {
+    const langRaw = (opt('--lang') ?? 'all').toLowerCase().trim();
+    if (langRaw !== 'all' && !(langRaw in LANG_MAP)) {
+      console.error(`Unknown --lang "${langRaw}". Valid: all, ${Object.keys(LANG_MAP).join(', ')}`);
       process.exit(1);
     }
+    const langId = langRaw !== 'all' ? LANG_MAP[langRaw] : undefined;
+    fixtureIds = ALL_FIXTURES
+      .filter(f => langId === undefined || f.languageId === langId)
+      .map(f => f.fixtureId);
   }
 
   // Preset
@@ -131,9 +151,9 @@ Options:
   }
 
   return {
-    models,
     fixtureIds,
-    presetId: presetRaw as AnalysisPresetId,
+    lang:      opt('--lang') ?? 'all',
+    presetId:  presetRaw as AnalysisPresetId,
     host:      opt('--host')   ?? 'http://localhost:11434',
     runs,
     outputDir: opt('--output') ?? path.join(__dirname, 'results'),
@@ -147,11 +167,11 @@ Options:
 async function main() {
   const opts = parseArgs(process.argv);
   const fixtures = opts.fixtureIds.map(id => FIXTURE_MAP.get(id)!);
-  const totalCalls = opts.models.length * fixtures.length * opts.runs;
+  const totalCalls = ALL_MODELS.length * fixtures.length * opts.runs;
 
   const config: ModelBenchmarkConfig = {
     ollamaHost: opts.host,
-    models:     opts.models,
+    models:     ALL_MODELS,
     presetId:   opts.presetId,
     fixtures,
     runsPerCombination: opts.runs,
@@ -159,11 +179,13 @@ async function main() {
   };
 
   if (!opts.quiet) {
+    const langLabel = opts.lang === 'all' ? 'all languages' : `${opts.lang} only`;
     console.log('');
     console.log('  Cloud-LLM-Preliminary — starting');
     console.log(`  Ollama:   ${opts.host}`);
     console.log(`  Preset:   ${opts.presetId}`);
-    console.log(`  Models:   ${opts.models.length}  →  ${opts.models.map(shortName).join(', ')}`);
+    console.log(`  Language: ${langLabel}`);
+    console.log(`  Models:   ${ALL_MODELS.length}  →  ${ALL_MODELS.map(shortName).join(', ')}`);
     console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
     console.log(`  Runs:     ${opts.runs} per combination`);
     console.log(`  Total:    ${totalCalls} LLM calls`);
@@ -190,12 +212,12 @@ async function main() {
     console.log(`  Completed ${results.length} runs in ${(elapsed / 1000).toFixed(1)}s`);
   }
 
-  printReport(results, opts.models, opts.presetId);
+  printReport(results, ALL_MODELS, opts.presetId);
 
   if (opts.save) {
     const jsonPath    = saveJson(results, opts.outputDir);
-    const csvPath     = saveCsv(results, opts.models, opts.outputDir);
-    const reportPath  = saveReport(results, opts.models, opts.presetId, opts.outputDir);
+    const csvPath     = saveCsv(results, ALL_MODELS, opts.outputDir);
+    const reportPath  = saveReport(results, ALL_MODELS, opts.presetId, opts.outputDir);
     console.log(`  JSON   saved → ${jsonPath}`);
     console.log(`  CSV    saved → ${csvPath}`);
     console.log(`  Report saved → ${reportPath}`);

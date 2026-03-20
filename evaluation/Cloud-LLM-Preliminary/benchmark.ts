@@ -21,10 +21,11 @@ import {
   AnalysisPresetId,
   DEFAULT_ANALYSIS_PRESET,
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
+import { CLOUD_BENCHMARK_OPTIONS, CLOUD_SAFE_OPTIONS } from './benchmark-params';
 import {
-  SYSTEM_PROMPT,
+  BENCHMARK_SYSTEM_PROMPT as SYSTEM_PROMPT,
   buildAiPrompt,
-} from '../../extension/ai-accessibility-assistant/src/utils/prompts/prompt';
+} from './benchmark-prompt';
 import {
   parseTextResponse,
   deduplicateIssues,
@@ -156,7 +157,14 @@ async function streamOllama(
   presetId: AnalysisPresetId
 ): Promise<string> {
   const url = `${ollamaHost.replace(/\/$/, '')}/api/chat`;
-  const options = ANALYSIS_PRESETS[presetId].options;
+  const rawOptions = ANALYSIS_PRESETS[presetId].options;
+  // Cloud-routed models reject local Ollama options (num_ctx, seed, mirostat,
+  // top_k, repeat_* etc.) and return HTTP 500.  For cloud models we send only
+  // the three cloud-safe fields derived from CLOUD_BENCHMARK_OPTIONS.  Local
+  // models receive the full CLOUD_BENCHMARK_OPTIONS so all params are exercised.
+  // Neither path touches the extension's ANALYSIS_PRESETS.
+  const isCloudModel = model.endsWith(':cloud') || model.includes(':cloud');
+  const options = isCloudModel ? CLOUD_SAFE_OPTIONS : CLOUD_BENCHMARK_OPTIONS;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
