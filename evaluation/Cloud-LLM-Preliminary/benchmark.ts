@@ -139,6 +139,11 @@ export type ModelBenchmarkConfig = {
    * Defaults to 1 (fully sequential, original behaviour).
    */
   concurrency?: number;
+  /**
+   * When true, skip RAG retrieval and pass '(no RAG context)' to the prompt.
+   * Use for ablation testing: compare RAG vs no-RAG F1 on the same fixtures.
+   */
+  noRag?: boolean;
 };
 
 export type ModelAggregateStats = {
@@ -345,16 +350,18 @@ export async function runOnce(
   const code = fs.readFileSync(fixture.filePath, 'utf8');
 
   // ── RAG context retrieval ───────────────────────────────────────────────
-  const ragEndpoint = config.ragEndpoint ?? 'http://127.0.0.1:8000';
   let contextBlock = '(no RAG context)';
-  try {
-    const ragQuery = buildRagQuery(fixture.languageId, code);
-    const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 6, 'accessibility');
-    if (ragResult.chunks.length > 0) {
-      contextBlock = formatRagContext(ragResult.chunks);
+  if (!config.noRag) {
+    const ragEndpoint = config.ragEndpoint ?? 'http://127.0.0.1:8000';
+    try {
+      const ragQuery = buildRagQuery(fixture.languageId, code);
+      const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 6, 'accessibility');
+      if (ragResult.chunks.length > 0) {
+        contextBlock = formatRagContext(ragResult.chunks);
+      }
+    } catch {
+      // RAG service not running — fall back to no context (benchmark still works)
     }
-  } catch {
-    // RAG service not running — fall back to no context (benchmark still works)
   }
 
   const userPrompt = buildAiPrompt(

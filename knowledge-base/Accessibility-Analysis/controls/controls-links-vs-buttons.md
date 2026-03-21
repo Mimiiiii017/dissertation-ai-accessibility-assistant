@@ -3,6 +3,36 @@
 ## Tags
 Tags: #controls #links #buttons #semantic-html #aria #wcag
 
+## Quick reference
+Common control violations to flag in code reviews:
+
+- **Icon-only button with no accessible name** — `<button>` containing only an `<svg>`, `<img alt="">`, or icon font glyph with no `aria-label`, no `title`, and no visible text fails WCAG 4.1.2. Screen readers announce it as an unlabelled button. This includes search buttons, close/dismiss buttons, send buttons, and hamburger menu toggles.
+- **`<div>` or `<span>` used as a button** — a non-interactive element with `onclick` but no `role="button"`, no `tabindex`, and no keyboard handler fails WCAG 2.1.1 and 4.1.2.
+- **`<a href="#">` used to trigger an action** — anchor with `href="#"` used for a form action, toggle, or dismiss (not navigation) fails 4.1.2 because `<a>` only activates properly on Enter, not Space like a button.
+- **Button with no visible text tested by name** — `<button><span class="sr-only">Search</span></button>` where the sr-only text is the only label is acceptable, but `<button></button>` (no content at all) has no accessible name.
+
+Violation code patterns:
+```html
+<!-- VIOLATION: icon-only search button, no accessible name -->
+<button><svg viewBox="0 0 24 24"><path d="..."/></svg></button>
+<button><i class="fa fa-search"></i></button>
+
+<!-- FIXED -->
+<button aria-label="Search"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="..."/></svg></button>
+
+<!-- VIOLATION: div used as button -->
+<div onclick="submitForm()" class="btn">Submit</div>
+
+<!-- FIXED -->
+<button type="submit">Submit</button>
+
+<!-- VIOLATION: <a href="#"> as action -->
+<a href="#" onclick="openModal()">Open dialog</a>
+
+<!-- FIXED -->
+<button type="button" onclick="openModal()">Open dialog</button>
+```
+
 ## Purpose
 Ensure links and buttons are used correctly according to their function, so users of assistive technologies can predict behavior and interact with controls effectively.
 

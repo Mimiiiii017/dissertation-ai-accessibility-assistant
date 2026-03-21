@@ -3,6 +3,37 @@
 ## Tags
 Tags: #navigation #links #link-purpose #link-text #wcag #2.4.4
 
+## Quick reference
+Common link violations to flag in code reviews:
+
+- **Non-descriptive link text** — `<a>` with text like "click here", "read more", "here", "more", "learn more" with no `aria-label` override fails WCAG 2.4.4.
+- **Icon-only link** — `<a>` containing only an `<svg>`, `<img alt="">`, or icon font character (e.g. `<i class="fa fa-twitter">`) with no visible text, no `aria-label`, and no `aria-labelledby` fails WCAG 2.4.4 and 4.1.2. Screen readers announce the link as unlabelled or read the URL.
+- **Linked logo with empty alt** — `<a href="/"><img src="logo.png" alt=""></a>`: when the image IS the link, `alt=""` removes its name entirely. The `alt` must describe the link destination.
+- **Links that open in new tab with no warning** — `<a target="_blank">` with no visible indicator and no `aria-label` mentioning "opens in new tab".
+- **Duplicate non-descriptive links** — multiple `<a>Read more</a>` links on the same page pointing to different destinations each need unique `aria-label` values.
+
+Violation code patterns:
+```html
+<!-- VIOLATION: non-descriptive -->
+<a href="/policy">Click here</a>
+
+<!-- FIXED -->
+<a href="/policy">Read our accessibility policy</a>
+
+<!-- VIOLATION: icon-only link (Twitter/social) -->
+<a href="https://twitter.com/acme"><svg>...</svg></a>
+<a href="https://twitter.com/acme"><i class="fab fa-twitter"></i></a>
+
+<!-- FIXED -->
+<a href="https://twitter.com/acme" aria-label="Acme on Twitter (opens in new tab)"><svg aria-hidden="true">...</svg></a>
+
+<!-- VIOLATION: linked logo with empty alt -->
+<a href="/"><img src="footer-logo.png" alt=""></a>
+
+<!-- FIXED -->
+<a href="/"><img src="footer-logo.png" alt="Acme Corp — go to homepage"></a>
+```
+
 ## Purpose
 Ensure link text clearly describes the destination or action of the link, so users of screen readers and other assistive technologies can understand links without needing surrounding context.
 

@@ -3,6 +3,34 @@
 ## Tags
 Tags: #headings #structure #semantic-html #aria #wcag #1.3.1 #2.4.6
 
+## Quick reference
+Common heading hierarchy violations to flag in code reviews:
+
+- **Heading level skipped** — jumping from `<h2>` to `<h4>`, `<h2>` to `<h5>`, or `<h1>` to `<h3>` (skipping a level) fails WCAG 1.3.1. Every heading level must appear in sequence before a deeper level.
+- **No `<h1>` on the page** — a page without any `<h1>` element fails WCAG 1.3.1. There must be exactly one `<h1>` per page identifying the main topic.
+- **Multiple `<h1>` elements** — more than one `<h1>` creates an ambiguous document outline.
+- **Visual heading that is not a heading element** — a `<div>` or `<p>` styled large/bold to look like a heading but using no `<h1>`–`<h6>` element and no `role="heading"` fails WCAG 1.3.1.
+- **Heading element used only for visual size** — `<h4>` applied to a label or caption purely for font-size effect breaks the document outline.
+
+Violation code patterns:
+```html
+<!-- VIOLATION: heading level skip (h2 → h5, missing h3 and h4) -->
+<h2>Features</h2>
+<h5>Core features</h5>
+
+<!-- VIOLATION: heading level skip (h2 → h4, missing h3) -->
+<h2>Pricing</h2>
+<h4>Monthly plan</h4>
+
+<!-- FIXED -->
+<h2>Pricing</h2>
+<h3>Monthly plan</h3>
+
+<!-- VIOLATION: page starts at h2, no h1 -->
+<h2>Welcome to Acme</h2>
+<h3>Our services</h3>
+```
+
 ## Purpose
 Ensure headings create a logical, thorough page structure so users (especially screen reader users) can understand content and navigate efficiently.
 

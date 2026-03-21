@@ -3,6 +3,29 @@
 ## Tags
 Tags: #tables #data-tables #semantic-html #wcag #1.3.1
 
+## Quick reference
+Common violations to flag in code reviews:
+
+- **`<th>` without `scope`** — every header cell in a data table must have `scope="col"` (column header) or `scope="row"` (row header). A `<th>` with no `scope` attribute fails WCAG 1.3.1.
+- **`<td>` used as a header** — if the first cell of every row or the first row contains heading text but uses `<td>` instead of `<th>`, that is a WCAG 1.3.1 violation.
+- **No `<caption>` or `aria-label`** — a data table with no accessible name fails to identify its purpose to screen reader users.
+- **`<table>` used for layout** — a table containing no data (used only for two-column layout, etc.) must have `role="presentation"` to suppress table semantics.
+
+Violation code patterns:
+```html
+<!-- VIOLATION: th without scope -->
+<table><thead><tr><th>Name</th><th>Score</th></tr></thead></table>
+
+<!-- FIXED -->
+<table><thead><tr><th scope="col">Name</th><th scope="col">Score</th></tr></thead></table>
+
+<!-- VIOLATION: td used as row header -->
+<tr><td>January</td><td>€10,000</td></tr>
+
+<!-- FIXED -->
+<tr><th scope="row">January</th><td>€10,000</td></tr>
+```
+
 ## Purpose
 Ensure data tables are structured so users of assistive technologies can understand relationships between headers and data cells.
 

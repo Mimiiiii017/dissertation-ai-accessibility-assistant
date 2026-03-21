@@ -2,7 +2,34 @@
 
 ## Tags
 Tags: #structure #language #lang-attribute #wcag #3.1.1 #3.1.2
+## Quick reference
+Common language attribute violations to flag in code reviews:
 
+- **`<html>` with no `lang` attribute** — `<html>` without a `lang` attribute fails WCAG 3.1.1. Screen readers cannot select the correct voice/pronunciation without it.
+- **Empty `lang` attribute** — `<html lang="">` is invalid, treated as missing, and fails WCAG 3.1.1.
+- **Invalid `lang` value** — `<html lang="english">` or `<html lang="en_US">` (underscore, not hyphen) are not valid BCP 47 tags and fail WCAG 3.1.1. Use `lang="en"` or `lang="en-US"`.
+- **Inline content in a different language with no `lang` override** — a French phrase, Spanish sentence, or Arabic text in an otherwise English page without `lang="fr"` / `lang="es"` / `lang="ar"` on the containing element fails WCAG 3.1.2.
+
+Violation code patterns:
+```html
+<!-- VIOLATION: missing lang -->
+<html>
+<head><title>My page</title></head>
+
+<!-- VIOLATION: invalid lang value -->
+<html lang="english">
+<html lang="en_US">
+
+<!-- FIXED -->
+<html lang="en">
+<html lang="en-US">
+
+<!-- VIOLATION: inline foreign text with no lang override -->
+<p>The French word for tree is arbre.</p>
+
+<!-- FIXED -->
+<p>The French word for tree is <span lang="fr">arbre</span>.</p>
+```
 ## Purpose
 Ensure the default human language of each page and any language changes within the content are programmatically identified, so screen readers and other assistive technologies can switch pronunciation and processing rules correctly.
 

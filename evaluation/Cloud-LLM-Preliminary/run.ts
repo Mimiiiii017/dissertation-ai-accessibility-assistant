@@ -111,7 +111,10 @@ Options:
   --output   <dir>   Output directory (default: ./results)
   --no-save          Skip writing JSON/CSV files
   --quiet            Suppress progress output
+  --no-rag           Disable RAG context injection (useful for ablation testing)
   --concurrency <n>  Max parallel fixture calls per model (default: 4)
+  --model    <csv>   Comma-separated model shortNames to run (default: all)
+             e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
   --help             Show this help
     `);
     process.exit(0);
@@ -188,6 +191,8 @@ Options:
     save:      !flag('--no-save'),
     quiet:     flag('--quiet'),
     concurrency,
+    noRag:     flag('--no-rag'),
+    models:    opt('--model'),
   };
 }
 
@@ -196,16 +201,33 @@ Options:
 async function main() {
   const opts = parseArgs(process.argv);
   const fixtures = opts.fixtureIds.map(id => FIXTURE_MAP.get(id)!);
-  const totalCalls = ALL_MODELS.length * fixtures.length * opts.runs;
+
+  const requestedModels = opts.models
+    ? opts.models.split(',').map((s: string) => s.trim())
+    : null;
+  const models = requestedModels
+    ? ALL_MODELS.filter(m => requestedModels.some((r: string) => m.includes(r)))
+    : ALL_MODELS;
+  if (requestedModels && models.length === 0) {
+    console.error(`No models matched: ${requestedModels.join(', ')}`);
+    console.error(`Available: ${ALL_MODELS.join(', ')}`);
+    process.exit(1);
+  }
+  if (requestedModels && !opts.quiet) {
+    console.log(`  Models filtered to: ${models.map(shortName).join(', ')}`);
+  }
+
+  const totalCalls = models.length * fixtures.length * opts.runs;
 
   const config: ModelBenchmarkConfig = {
     ollamaHost: opts.host,
-    models:     ALL_MODELS,
+    models,
     presetId:   opts.presetId,
     fixtures,
     runsPerCombination: opts.runs,
     verbose: !opts.quiet,
     concurrency: opts.concurrency,
+    noRag: opts.noRag,
   };
 
   if (!opts.quiet) {
@@ -215,7 +237,7 @@ async function main() {
     console.log(`  Ollama:   ${opts.host}`);
     console.log(`  Preset:   ${opts.presetId}`);
     console.log(`  Language: ${langLabel}`);
-    console.log(`  Models:   ${ALL_MODELS.length}  →  ${ALL_MODELS.map(shortName).join(', ')}`);
+    console.log(`  Models:   ${models.length}  →  ${models.map(shortName).join(', ')}`);
     console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
     console.log(`  Runs:     ${opts.runs} per combination`);
     console.log(`  Total:    ${totalCalls} LLM calls`);
@@ -244,12 +266,12 @@ async function main() {
     console.log(`  Completed ${results.length} runs in ${(elapsed / 1000).toFixed(1)}s`);
   }
 
-  printReport(results, ALL_MODELS, opts.presetId);
+  printReport(results, models, opts.presetId);
 
   if (opts.save) {
     const jsonPath    = saveJson(results, opts.outputDir);
-    const csvPath     = saveCsv(results, ALL_MODELS, opts.outputDir);
-    const reportPath  = saveReport(results, ALL_MODELS, opts.presetId, opts.outputDir);
+    const csvPath     = saveCsv(results, models, opts.outputDir);
+    const reportPath  = saveReport(results, models, opts.presetId, opts.outputDir);
     console.log(`  JSON   saved → ${jsonPath}`);
     console.log(`  CSV    saved → ${csvPath}`);
     console.log(`  Report saved → ${reportPath}`);

@@ -10,6 +10,10 @@ import { type AiIssue } from "../types";
 export function parseTextResponse(text: string): AiIssue[] {
   const issues: AiIssue[] = [];
 
+  // Strip chain-of-thought thinking blocks emitted by reasoning models (Qwen3, kimi, DeepSeek etc.)
+  // These appear as <think>...</think> before the actual output and must not be parsed as issues.
+  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
   // Strip duplicate "Final Answer:" sections that some models append
   const finalAnswerIdx = text.search(/\bFinal\s+Answer\s*:/i);
   if (finalAnswerIdx >= 0) {
