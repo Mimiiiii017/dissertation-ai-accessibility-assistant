@@ -24,9 +24,9 @@ assert(shortName('deepseek-r1:1.5b')       === 'deepseek-r1:1.5b',            'k
 
 // ─── Shared ground truth accessible ──────────────────────────────────────
 console.log('\n── Shared ground truth ────────────────────────────────────');
-assert(ALL_FIXTURES.length === 4, `4 fixtures reachable (got ${ALL_FIXTURES.length})`);
-assert(FIXTURE_MAP.has('html-issues'), 'html-issues fixture accessible');
-assert(FIXTURE_MAP.has('tsx-clean'),   'tsx-clean fixture accessible');
+assert(ALL_FIXTURES.length === 41, `41 fixtures reachable (got ${ALL_FIXTURES.length})`);
+assert(FIXTURE_MAP.has('html-low'),  'html-low fixture accessible');
+assert(FIXTURE_MAP.has('tsx-clean'), 'tsx-clean fixture accessible');
 
 // ─── aggregateByModel - empty (all errors) ────────────────────────────────
 console.log('\n── aggregateByModel: all-error run ────────────────────────');

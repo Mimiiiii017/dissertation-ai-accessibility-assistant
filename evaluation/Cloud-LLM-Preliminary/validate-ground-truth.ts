@@ -17,8 +17,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
-import { ALL_FIXTURES } from '../preset-benchmark/ground-truth';
+import { FixtureGroundTruth, ALL_FIXTURES } from '../preset-benchmark/ground-truth';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -1615,6 +1614,85 @@ function printReport(validations: FixtureValidation[]): void {
   console.log('');
 }
 
+// ─── Plain-text report builder ────────────────────────────────────────────
+
+function buildTextReport(validations: FixtureValidation[]): string {
+  const lines: string[] = [];
+
+  lines.push('═'.repeat(80));
+  lines.push('  Ground-Truth Validation Report');
+  lines.push('═'.repeat(80));
+  lines.push('');
+
+  let totalCorrect = 0;
+  let totalExpected = 0;
+
+  for (const v of validations) {
+    totalExpected += v.groundTruthIssues.length;
+    totalCorrect += v.correctlyDefined.length;
+
+    lines.push(`${v.fixtureId}`);
+    lines.push(`  Language: ${v.languageId} | Issues: ${v.groundTruthIssues.length} defined`);
+    lines.push(`  Accuracy: ${(v.accuracy * 100).toFixed(1)}% (${v.correctlyDefined.length} correct, ${v.overDefined.length} over, ${v.underDefined.length} under)`);
+    lines.push('');
+
+    if (v.correctlyDefined.length > 0) {
+      lines.push('  ✓ Correctly Defined');
+      for (const id of v.correctlyDefined as string[]) {
+        lines.push(`    • ${id}`);
+      }
+      lines.push('');
+    }
+
+    if (v.overDefined.length > 0) {
+      lines.push('  ⚠ Over-Defined (ground-truth expected but not detected)');
+      for (const id of v.overDefined as string[]) {
+        const issue = v.groundTruthIssues.find((i: any) => i.id === id);
+        if (issue) lines.push(`    • ${id} — ${issue.description}`);
+      }
+      lines.push('');
+    }
+
+    if (v.underDefined.length > 0) {
+      lines.push('  ✗ Under-Defined (automated found but ground-truth missed)');
+      for (const issue of v.underDefined) {
+        lines.push(`    • ${issue.id} (confidence: ${(issue.confidence * 100).toFixed(0)}%) — ${issue.description}`);
+      }
+      lines.push('');
+    }
+
+    lines.push('─'.repeat(80));
+    lines.push('');
+  }
+
+  lines.push('SUMMARY');
+  lines.push(`  Total fixtures validated:     ${validations.length}`);
+  lines.push(`  Total issues in ground-truth: ${totalExpected}`);
+  lines.push(`  Correctly defined:            ${totalCorrect}`);
+  lines.push(`  Over-defined:                 ${validations.reduce((s, v) => s + v.overDefined.length, 0)}`);
+  lines.push(`  Under-defined:                ${validations.reduce((s, v) => s + v.underDefined.length, 0)}`);
+
+  const summary = (lang: string, id: string) => {
+    const vs = validations.filter(v => v.languageId === id);
+    const c = vs.reduce((s, v) => s + v.correctlyDefined.length, 0);
+    const o = vs.reduce((s, v) => s + v.overDefined.length, 0);
+    const u = vs.reduce((s, v) => s + v.underDefined.length, 0);
+    const acc = c + o + u === 0 ? 1 : c / (c + o + u);
+    return `  ${lang}: ${(acc * 100).toFixed(1)}%`;
+  };
+  lines.push(summary('HTML accuracy', 'html'));
+  lines.push(summary('CSS accuracy ', 'css'));
+  lines.push(summary('JS accuracy  ', 'javascript'));
+  lines.push(summary('TSX accuracy ', 'typescriptreact'));
+
+  const totalErrors = validations.reduce((s, v) => s + v.overDefined.length + v.underDefined.length, 0);
+  const overall = totalExpected + totalErrors === 0 ? 1 : totalCorrect / (totalCorrect + totalErrors);
+  lines.push(`  Overall accuracy:             ${(overall * 100).toFixed(1)}%`);
+  lines.push('');
+
+  return lines.join('\n');
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────
 
 function main(): void {
@@ -1622,9 +1700,12 @@ function main(): void {
   const validations = ALL_FIXTURES.map(validateFixture);
   printReport(validations);
 
-  // Save JSON report
-  const reportPath = path.join(__dirname, 'validation-results.json');
-  fs.writeFileSync(reportPath, JSON.stringify(validations, null, 2), 'utf8');
+  // Save plain-text report to results/
+  const resultsDir = path.join(__dirname, 'results');
+  if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
+
+  const reportPath = path.join(resultsDir, 'validation-results.txt');
+  fs.writeFileSync(reportPath, buildTextReport(validations), 'utf8');
   console.log(`${C.dim}Full report saved to: ${reportPath}${C.reset}`);
 }
 

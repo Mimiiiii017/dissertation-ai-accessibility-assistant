@@ -133,6 +133,12 @@ export type ModelBenchmarkConfig = {
   fixtures: FixtureGroundTruth[];
   runsPerCombination: number;
   verbose: boolean;
+  /**
+   * Max number of fixture calls to run in parallel per model.
+   * Set > 1 for cloud models (remote endpoints tolerate concurrency).
+   * Defaults to 1 (fully sequential, original behaviour).
+   */
+  concurrency?: number;
 };
 
 export type ModelAggregateStats = {
@@ -360,15 +366,33 @@ export async function runOnce(
   const t0 = Date.now();
   let rawResponse = '';
 
-  try {
-    rawResponse = await streamOllama(
-      config.ollamaHost,
-      modelId,
-      SYSTEM_PROMPT,
-      userPrompt,
-      config.presetId
-    );
-  } catch (err: any) {
+  // Retry up to 2 times on transient "terminated" errors from the cloud relay.
+  const MAX_RETRIES = 2;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      rawResponse = await streamOllama(
+        config.ollamaHost,
+        modelId,
+        SYSTEM_PROMPT,
+        userPrompt,
+        config.presetId
+      );
+      lastErr = undefined;
+      break;
+    } catch (e: any) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+      const isTerminated = lastErr.message.includes('terminated');
+      if (isTerminated && attempt < MAX_RETRIES) {
+        // Exponential back-off: 2 s, 4 s
+        await new Promise(r => setTimeout(r, 2_000 * (attempt + 1)));
+        continue;
+      }
+      break;
+    }
+  }
+
+  if (lastErr) {
     const fnCount = fixture.expectedIssues.length;
     return {
       modelId,
@@ -383,7 +407,7 @@ export async function runOnce(
       fp: 0,
       precision: 0,
       recall: 0,
-      specificity: negativeSpaceSize > 0 ? 1 : 0, // nothing found → no FPs → perfect specificity
+      specificity: negativeSpaceSize > 0 ? 1 : 0,
       npv: (negativeSpaceSize + fnCount) > 0 ? negativeSpaceSize / (negativeSpaceSize + fnCount) : 0,
       f1: 0,
       accuracy: (negativeSpaceSize + fnCount) > 0
@@ -393,7 +417,7 @@ export async function runOnce(
       mcc: 0,
       responseTimeMs: Date.now() - t0,
       errorOccurred: true,
-      errorMessage: String(err?.message ?? err),
+      errorMessage: lastErr.message,
       rawResponse: '',
       missedIds: fixture.expectedIssues.map(c => c.id),
       fpTitles: [],
@@ -506,10 +530,25 @@ export async function runOnce(
 
 // ─── Full benchmark ───────────────────────────────────────────────────────
 
+/** Run at most `limit` async tasks concurrently. */
+async function runConcurrent<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let next = 0;
+  async function worker(): Promise<void> {
+    while (next < tasks.length) {
+      const idx = next++;
+      results[idx] = await tasks[idx]();
+    }
+  }
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
 export async function runBenchmark(
   config: ModelBenchmarkConfig
 ): Promise<ModelRunResult[]> {
-  const results: ModelRunResult[] = [];
+  const concurrency = Math.max(1, config.concurrency ?? 1);
   const total =
     config.models.length *
     config.fixtures.length *
@@ -522,31 +561,38 @@ export async function runBenchmark(
     ...new Set(config.fixtures.flatMap(f => f.expectedIssues.map(c => c.id))),
   ];
 
+  const allResults: ModelRunResult[] = [];
+
   for (const modelId of config.models) {
+    // Build a flat list of tasks for this model across all fixtures × runs.
+    const tasks: (() => Promise<ModelRunResult>)[] = [];
     for (const fixture of config.fixtures) {
       for (let run = 0; run < config.runsPerCombination; run++) {
-        if (config.verbose) {
-          const pct = Math.round((done / total) * 100);
-          process.stdout.write(
-            `\r[${pct.toString().padStart(3)}%] model=${shortName(modelId).padEnd(28)}  fixture=${fixture.fixtureId.padEnd(14)}  run=${run + 1}/${config.runsPerCombination}   `
-          );
-        }
-
-        const result = await runOnce(config, modelId, fixture, run, allConceptIds);
-        results.push(result);
-
-        if (config.verbose && result.errorOccurred) {
-          console.error(`\n  ERROR (${shortName(modelId)} / ${fixture.fixtureId}): ${result.errorMessage}`);
-        }
-
-        done++;
+        const capturedFixture = fixture;
+        const capturedRun = run;
+        tasks.push(async () => {
+          if (config.verbose) {
+            const pct = Math.round((done / total) * 100);
+            process.stdout.write(
+              `\r[${pct.toString().padStart(3)}%] model=${shortName(modelId).padEnd(28)}  fixture=${capturedFixture.fixtureId.padEnd(14)}  run=${capturedRun + 1}/${config.runsPerCombination}   `
+            );
+          }
+          const result = await runOnce(config, modelId, capturedFixture, capturedRun, allConceptIds);
+          done++;
+          if (config.verbose && result.errorOccurred) {
+            console.error(`\n  ERROR (${shortName(modelId)} / ${capturedFixture.fixtureId}): ${result.errorMessage}`);
+          }
+          return result;
+        });
       }
     }
+    const modelResults = await runConcurrent(tasks, concurrency);
+    allResults.push(...modelResults);
   }
 
   if (config.verbose) process.stdout.write('\r' + ' '.repeat(100) + '\r');
 
-  return results;
+  return allResults;
 }
 
 // ─── Aggregate ────────────────────────────────────────────────────────────
@@ -831,6 +877,7 @@ export function computeParetoFrontier(
 export function shortName(modelId: string): string {
   const base = modelId
     .replace(/:cloud$/, '')
+    .replace(/-cloud$/, '')
     .replace(/:latest$/, '');
   const sizeLabel = MODEL_SIZE_LABELS[modelId];
   return sizeLabel ? `${base} (${sizeLabel})` : base;

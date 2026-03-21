@@ -13,6 +13,7 @@
  *   --output   <dir>   Directory for JSON/CSV output      (default: ./results)
  *   --no-save          Skip saving result files
  *   --quiet            Suppress progress output
+ *   --concurrency <n>  Parallel fixture calls per model (default: 4)
  *   --help
  *
  * Examples:
@@ -31,7 +32,7 @@ import {
   DEFAULT_ANALYSIS_PRESET,
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
 
-import { ALL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
+import { ALL_FIXTURES, CORE_FIXTURES, ADVERSARIAL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
 import { ModelBenchmarkConfig, runBenchmark, shortName } from './benchmark';
 import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
@@ -110,6 +111,7 @@ Options:
   --output   <dir>   Output directory (default: ./results)
   --no-save          Skip writing JSON/CSV files
   --quiet            Suppress progress output
+  --concurrency <n>  Max parallel fixture calls per model (default: 4)
   --help             Show this help
     `);
     process.exit(0);
@@ -143,7 +145,9 @@ Options:
       process.exit(1);
     }
     
-    fixtureIds = ALL_FIXTURES
+    const adversarial = flag('--adversarial');
+    const fixturePool = adversarial ? ADVERSARIAL_FIXTURES : CORE_FIXTURES;
+    fixtureIds = fixturePool
       .filter(f => langId === undefined || f.languageId === langId)
       .filter(f => {
         if (complexityRaw === 'all') return true;
@@ -168,6 +172,12 @@ Options:
     process.exit(1);
   }
 
+  const concurrency = parseInt(opt('--concurrency') ?? '4', 10);
+  if (isNaN(concurrency) || concurrency < 1) {
+    console.error('--concurrency must be a positive integer');
+    process.exit(1);
+  }
+
   return {
     fixtureIds,
     lang:      opt('--lang') ?? 'all',
@@ -177,6 +187,7 @@ Options:
     outputDir: opt('--output') ?? path.join(__dirname, 'results'),
     save:      !flag('--no-save'),
     quiet:     flag('--quiet'),
+    concurrency,
   };
 }
 
@@ -194,6 +205,7 @@ async function main() {
     fixtures,
     runsPerCombination: opts.runs,
     verbose: !opts.quiet,
+    concurrency: opts.concurrency,
   };
 
   if (!opts.quiet) {
@@ -209,8 +221,10 @@ async function main() {
     console.log(`  Total:    ${totalCalls} LLM calls`);
     console.log('');
 
-    // Rough estimate: cloud models vary wildly; use a conservative 2 min/call
-    const estMins = Math.ceil(totalCalls * 2);
+    // Rough estimate: cloud models vary wildly; use a conservative 2 min/call,
+    // divided by concurrency since fixtures run in parallel within each model.
+    const estMins = Math.ceil((totalCalls * 2) / opts.concurrency);
+    console.log(`  Concurrency: ${opts.concurrency} fixtures in parallel per model`);
     console.log(`  Estimated time: ~${estMins} min (varies significantly by model)`);
     console.log('');
     console.log('  Running… (Ctrl+C to abort)');

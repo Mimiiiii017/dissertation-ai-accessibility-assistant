@@ -715,7 +715,7 @@ const ADVERSARIAL_FIXTURES: FixtureGroundTruth[] = [
 // Exports
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const ALL_FIXTURES: FixtureGroundTruth[] = [
+export const CORE_FIXTURES: FixtureGroundTruth[] = [
   HTML_CLEAN,
   HTML_LOW,
   HTML_MEDIUM,
@@ -732,8 +732,14 @@ export const ALL_FIXTURES: FixtureGroundTruth[] = [
   TSX_LOW,
   TSX_MEDIUM,
   TSX_HIGH,
+];
+
+export const ALL_FIXTURES: FixtureGroundTruth[] = [
+  ...CORE_FIXTURES,
   ...ADVERSARIAL_FIXTURES,
 ];
+
+export { ADVERSARIAL_FIXTURES };
 
 export const FIXTURE_MAP = new Map<string, FixtureGroundTruth>(
   ALL_FIXTURES.map(f => [f.fixtureId, f])

@@ -97,7 +97,7 @@ function section(title: string): void {
 function rule(label = '', char = '─'): void {
   if (!label) { console.log(C.dim + hr(char) + C.reset); return; }
   const side = Math.max(0, Math.floor((W - label.length - 2) / 2));
-  console.log(C.dim + char.repeat(side) + ' ' + label + ' ' + char.repeat(W - side - label.length - 2) + C.reset);
+  console.log(C.dim + char.repeat(side) + ' ' + label + ' ' + char.repeat(Math.max(0, W - side - label.length - 2)) + C.reset);
 }
 
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -106,7 +106,7 @@ function medal(rank: number): string {
 }
 
 function scoreBar(score: number, width = 16): string {
-  const filled = Math.round(score * width);
+  const filled = Math.max(0, Math.min(width, Math.round(score * width)));
   const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
   const col = score >= 0.7 ? C.bgreen : score >= 0.5 ? C.byellow : C.bred;
   return col + bar + C.reset;
@@ -662,7 +662,9 @@ export function printReport(
 
       if (f1Low > 0) {
         const degradationSlope = (f1Low - f1High) / f1Low;
-        const robustnessScore = 1 - Math.min(degradationSlope, 1);
+        // Clamp slope to [0, 1]: negative means model improves on harder fixtures
+        // (best case = 0 slope); cap at 1 so robustnessScore never goes below 0.
+        const robustnessScore = 1 - Math.min(Math.max(degradationSlope, 0), 1);
         degradations.push({
           modelId,
           f1Low, f1Med, f1High,
