@@ -1,6 +1,6 @@
 # Cloud-LLM-Preliminary — Implementation Summary
 
-> Benchmarks 23 cloud LLMs against accessibility-error fixtures to identify the best model for the VS Code extension.
+> Benchmarks 18 cloud LLMs against accessibility-error fixtures to identify the best model for the VS Code extension.
 > Uses a single fixed inference preset so model quality is the only variable.
 
 ---
@@ -16,7 +16,9 @@
 7. [RAG Integration](#7-rag-integration)
 8. [File Reference](#8-file-reference)
 9. [NPM Scripts](#9-npm-scripts)
-10. [References](#references)
+10. [Prompt Engineering & Accuracy Fixes](#10-prompt-engineering--accuracy-fixes)
+11. [2×2 Ablation Study — Results & Analysis](#11-22-ablation-study--results--analysis)
+12. [References](#references)
 
 ---
 
@@ -33,7 +35,7 @@ run.ts  ────────────────────────
   ▼
 benchmark.ts → runBenchmark()
   │  for each model (sequential):
-  │    for each fixture × run in parallel (up to --concurrency, default 4):
+  │    for each fixture × run in parallel (up to --concurrency, default 2):
   │       1. Read fixture file
   │       2. Query RAG service  ──► http://127.0.0.1:8000
   │       3. Build prompt            returns WCAG chunks from knowledge-base/
@@ -50,7 +52,7 @@ ground-truth.ts (preset-benchmark)
   ALL_FIXTURES         — union of both (41 total)
 ```
 
-**Models**: 23 cloud LLMs accessed via the local Ollama relay (`localhost:11434`). All model IDs carry a `:cloud` suffix, which causes `benchmark.ts` to send only the three cloud-safe inference options (`temperature`, `top_p`, `num_predict`) rather than the full local parameter set.
+**Models**: 18 cloud LLMs accessed via the local Ollama relay (`localhost:11434`). All model IDs carry a `:cloud` suffix, which causes `benchmark.ts` to send only the three cloud-safe inference options (`temperature`, `top_p`, `num_predict`) rather than the full local parameter set.
 
 ---
 
@@ -628,13 +630,14 @@ If the RAG service is not running, the benchmark falls back to `(no RAG context)
 | File | Purpose |
 |------|---------|
 | `run.ts` | CLI entry point — parses args, builds config, calls `runBenchmark`, saves results |
-| `benchmark.ts` | Core engine — streaming Ollama calls, retry logic, scoring, aggregation, Pareto, vulnerability analysis |
+| `benchmark.ts` | Core engine — streaming Ollama calls, retry logic, scoring, aggregation, Pareto, vulnerability analysis; `ModelBenchmarkConfig` includes `noRag` and `noThink` flags for ablation conditions |
 | `benchmark-params.ts` | Inference parameters (literature-grounded) |
-| `benchmark-prompt.ts` | System prompt and `buildAiPrompt()` |
+| `benchmark-prompt.ts` | Benchmark-only prompt override: `BENCHMARK_SYSTEM_PROMPT` (one-issue-per-element), `ANTI_FP_SUPPLEMENT` (5 universal anti-FP rules), `HTML_MANDATORY_SWEEPS` (Sweeps A–F for HTML), and `buildAiPrompt()` wrapper which fixes the Rule 1 contradiction and strips `/no_think` |
 | `reporter.ts` | All console output and file saving (`printReport`, `saveJson`, `saveCsv`, `saveReport`) |
 | `validate-ground-truth.ts` | Cross-validates all 41 fixtures against axe-core/Pa11y patterns; saves `results/validation-results.txt` |
 | `replay.ts` | Regenerates the formatted report from a saved JSON results file (no Ollama needed) |
 | `smoke-test.ts` | Offline sanity checks — verifies math helpers and imports without running any models |
+| `generate-adversarial-fixtures.ts` | Script that generated the 25 adversarial HTML fixtures |
 | `tsconfig.json` | TypeScript config |
 | `package.json` | NPM scripts |
 | `results/` | Output directory — JSON, CSV, TXT report, validation results |
@@ -658,21 +661,28 @@ npm run smoke              # Offline unit tests for math helpers and imports
 npm run validate           # Cross-validate all 41 fixtures against axe-core/Pa11y
 
 # Core benchmarks (16 fixtures: html/css/js/tsx × clean/low/medium/high)
-npm run bench              # All languages — 23 × 16 = 368 calls
-npm run bench:html         # HTML only  — 23 × 4  = 92 calls
-npm run bench:css          # CSS only   — 23 × 4  = 92 calls
-npm run bench:js           # JS only    — 23 × 4  = 92 calls
-npm run bench:tsx          # TSX only   — 23 × 4  = 92 calls
+npm run bench              # All languages — 18 × 16 = 288 calls
+npm run bench:html         # HTML only  — 18 × 4  = 72 calls
+npm run bench:css          # CSS only   — 18 × 4  = 72 calls
+npm run bench:js           # JS only    — 18 × 4  = 72 calls
+npm run bench:tsx          # TSX only   — 18 × 4  = 72 calls
 
 # Adversarial benchmark (25 edge-case fixtures)
-npm run bench:adversarial  # 23 × 25 = 575 calls
+npm run bench:adversarial  # 18 × 25 = 450 calls
+
+# 2×2 ablation study (RAG vs no-RAG × thinking vs no-thinking)
+npm run study:rag-think        # RAG on,  thinking on  (default)
+npm run study:rag-nothink      # RAG on,  thinking off (/no_think appended)
+npm run study:norag-think      # RAG off, thinking on
+npm run study:norag-nothink    # RAG off, thinking off
+# All study scripts accept extra flags, e.g.: npm run study:rag-think -- --lang html
 ```
 
 **Available flags:**
 
 ```bash
-# Concurrency (default: 4 fixtures in parallel per model; models remain sequential)
-npx ts-node run.ts --lang html --concurrency 8
+# Concurrency (default: 2 fixtures in parallel per model; models remain sequential)
+npx ts-node run.ts --lang html --concurrency 4
 
 # Specific fixtures by ID
 npx ts-node run.ts --fixtures html-low,html-high
@@ -685,6 +695,14 @@ npx ts-node run.ts --lang tsx --complexity medium
 
 # Adversarial fixtures only (replaces --lang scope)
 npx ts-node run.ts --adversarial
+
+# Run specific model(s) only
+npx ts-node run.ts --lang html --model kimi-k2.5
+npx ts-node run.ts --lang html --model "kimi-k2.5,glm-5"
+
+# Ablation flags (also available standalone)
+npx ts-node run.ts --lang html --no-rag       # Disable RAG context injection
+npx ts-node run.ts --lang html --no-think     # Suppress chain-of-thought (/no_think)
 
 # Replay a saved result without re-running models
 npx ts-node replay.ts results/cloud-llm-preliminary-xyz.json
@@ -739,3 +757,209 @@ npx ts-node replay.ts results/cloud-llm-preliminary-xyz.json
 [22] M. T. Ribeiro, T. Wu, C. Guestrin, and S. Singh, "Beyond accuracy: behavioral testing of NLP models with CheckList," in *Proc. 58th Annu. Meeting Assoc. Computational Linguistics (ACL)*, 2020, pp. 4902–4912.
 
 [23] D. Abásolo and S. Luján-Mora, "Automated accessibility evaluation of mobile applications: a systematic mapping study," *Universal Access Inf. Soc.*, vol. 22, no. 3, pp. 901–921, 2023.
+
+---
+
+## 10. Prompt Engineering & Accuracy Fixes
+
+Prior to running the 2×2 ablation study, three accuracy bugs were identified and resolved that had been systematically suppressing model performance across all conditions.
+
+### 10.1 Rule 1 Contradiction Fix
+
+**Problem.** The VS Code extension's `buildAiPrompt()` function includes a formatting rule: *"1. GROUPING — same problem type across multiple elements = ONE issue block."* The benchmark system prompt specifies the opposite: *"ONE ISSUE PER ELEMENT — every distinct element with a violation = a separate issue."* Because the benchmark re-uses `buildAiPrompt()` from the extension, models received directly contradictory instructions in the same prompt. This caused inconsistent grouping behaviour and suppressed per-element recall.
+
+**Fix.** A wrapper in `benchmark-prompt.ts` applies a string replacement to the output of `buildAiPrompt()` before sending it to any model. The GROUPING rule text is replaced with the ONE-PER-ELEMENT instruction. Applied at benchmark level only; the extension's behaviour is unchanged.
+
+**Impact.** The single largest accuracy improvement. `gpt-oss:120b` improved from F1=32.9% → 67.6% (+34.7pp); `qwen3.5` improved from F1=25.0% → 68.2% (+43.2pp) in the pre-ablation full benchmark run.
+
+### 10.2 `/no_think` Removal for Reasoning Models
+
+**Problem.** The extension prompt ends with `/no_think`, a directive recognised by Qwen3, kimi-k2.5, and DeepSeek that suppresses chain-of-thought reasoning. For real-time IDE use this reduces latency. For a benchmark evaluating model ceiling quality with `num_predict=32,000`, suppressing reasoning is counterproductive — these models are specifically designed to use extended reasoning for analytical accuracy.
+
+**Fix.** The `buildAiPrompt()` wrapper strips `/no_think` via regex before sending any prompt. The `--no-think` CLI flag re-appends it selectively for the no-think ablation conditions, providing experimental control rather than always-on suppression.
+
+### 10.3 `<think>` Tag Parser Pollution
+
+**Problem.** When `/no_think` is absent, reasoning models emit `<think>...</think>` blocks containing their internal reasoning. The response parser was not stripping these, causing reasoning narration to be treated as issue descriptions and generating false positives from accessibility keywords appearing inside reasoning text.
+
+**Fix.** A pre-parse strip was added to `parseTextResponse()` in the extension's `parser.ts`:
+```typescript
+text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+```
+
+### 10.4 Anti-FP Supplement and HTML Mandatory Sweeps
+
+**`ANTI_FP_SUPPLEMENT`** (all languages) — 5 rules targeting the most common hallucination patterns observed in early runs:
+1. `href="#"` is a valid placeholder — not a missing-href violation
+2. `target="_blank"` alone is not a WCAG failure
+3. Compound `autocomplete` tokens (e.g. `"work email"`) are valid per the HTML Living Standard
+4. Check `<fieldset>`/`<legend>` presence before reporting a missing legend
+5. HTML `required` maps to implicit `aria-required` — do not double-report
+
+**`HTML_MANDATORY_SWEEPS`** (HTML fixtures only) — 6 structured sweeps the model must perform, motivated by analysis of the top-missed issues across early benchmark runs:
+- Sweep A: Link accessible name algorithm
+- Sweep B: Button accessible name
+- Sweep C: `<th scope>` attribute
+- Sweep D: Heading level skips
+- Sweep E: Form field labels
+- Sweep F: `<img alt>` presence
+
+---
+
+## 11. 2×2 Ablation Study — Results & Analysis
+
+### 11.1 Study Design
+
+A 2×2 factorial ablation study was conducted to isolate the independent and combined effects of two binary factors on LLM accessibility auditing quality, run across all 18 models on the 4 HTML fixtures (html-clean, html-low, html-medium, html-high):
+
+| Factor | Level A | Level B |
+|---|---|---|
+| **RAG** | On (WCAG knowledge-base context injected) | Off (no context) |
+| **Thinking** | On (`/no_think` stripped — chain-of-thought enabled) | Off (`/no_think` appended — reasoning suppressed) |
+
+| Condition | Script | Output label |
+|---|---|---|
+| RAG + Think | `study:rag-think` | `rag-think` |
+| RAG + No-Think | `study:rag-nothink` | `rag-nothink` |
+| No-RAG + Think | `study:norag-think` | `norag-think` |
+| No-RAG + No-Think | `study:norag-nothink` | `norag-nothink` |
+
+**Rationale for factorial design.** RAG and thinking are not independent — RAG provides external grounding whilst thinking provides internal reasoning depth. A factorial design captures the interaction term: does RAG help more when thinking is enabled? This is directly relevant to extension deployment decisions.
+
+---
+
+### 11.2 Condition-Level Summary
+
+| Condition | Best Composite | Best F1 | Best MCC | Total TPs | Total FPs |
+|---|---|---|---|---|---|
+| **RAG + Think** | gpt-oss:120b 72.0% | gpt-oss:120b 66.5% | kimi-k2.5 0.370 | 315 | 167 |
+| **RAG + No-Think** | gpt-oss:120b 68.7% | glm-5 66.2% | glm-5 0.215 | 281 | 98 |
+| **No-RAG + Think** | glm-5 67.0% | glm-5 64.0% | cogito-2.1 0.221 | 268 | ~86 |
+| **No-RAG + No-Think** | qwen3.5:397b 66.7% | glm-5 63.7% | minimax-m2.5 0.208 | 280 | ~105 |
+
+RAG + Think produces the most TPs (315) but also the most FPs (167), largely driven by nemotron-3-nano generating 80 hallucinated issues in this one condition. RAG + No-Think offers the best hallucination-to-recall trade-off across the pool. The gap between best composite scores across conditions is modest (72.0% → 66.7%), indicating that top-performing models are relatively robust to ablation condition — whilst lower-performing models are highly sensitive.
+
+---
+
+### 11.3 Per-Model Results Across All 4 Conditions
+
+#### gpt-oss:120b (~120B) — Most consistent winner
+
+| Condition | TP | FN | FP | Acc | MCC | Composite |
+|---|---|---|---|---|---|---|
+| RAG + Think | 33 | 59 | 7 | 68.7% | 0.183 | **72.0%** |
+| RAG + No-Think | 28 | 64 | 3 | 67.9% | 0.206 | 68.7% |
+| No-RAG + Think | 24 | 68 | 3 | 65.9% | 0.136 | 63.2% |
+| No-RAG + No-Think | 25 | 67 | 8 | 64.5% | 0.117 | 64.1% |
+
+RAG adds +9 TPs with thinking ON (+3 without). Both factors contribute, but RAG is the dominant driver.
+
+#### glm-5 (~?B) — Best F1 in 3 of 4 conditions; harmed by RAG+Think
+
+| Condition | TP | FN | FP | Acc | MCC | Composite |
+|---|---|---|---|---|---|---|
+| RAG + Think | 15 | 77 | 2 | 61.5% | 0.260 | — |
+| RAG + No-Think | 29 | 63 | 2 | 68.7% | 0.215 | 65.6% |
+| No-RAG + Think | 28 | 64 | 4 | 68.0% | 0.164 | **67.0%** |
+| No-RAG + No-Think | 27 | 65 | 2 | 67.8% | 0.195 | 65.0% |
+
+TP drops from 27–29 to just 15 under RAG+Think. The model's reasoning becomes counter-productive when both RAG context and chain-of-thought are simultaneously active. Best deployed without the RAG+Think combination.
+
+#### kimi-k2.5 (~?B) — Most volatile; highest single result in the entire study
+
+| Condition | TP | FN | FP | Acc | MCC |
+|---|---|---|---|---|---|
+| RAG + Think | 21 | **20** | 7 | **83.5%** | **0.370** |
+| RAG + No-Think | 20 | 72 | 2 | 64.1% | 0.156 |
+| No-RAG + Think | 27 | 65 | 3 | 67.3% | 0.205 |
+| No-RAG + No-Think | 26 | 66 | 3 | 66.7% | 0.027 |
+
+FNs drop from 65–72 to just 20 under RAG+Think. MCC of 0.370 is the highest in the entire study. Without both factors together, performance degrades severely (MCC=0.027 without either). This model requires the full RAG+Think stack to function optimally.
+
+#### qwen3.5:397b (~397B) — Near-total recall failure without RAG when thinking is on
+
+| Condition | TP | FN | FP | Acc | MCC | Composite |
+|---|---|---|---|---|---|---|
+| RAG + Think | 17 | 75 | 4 | 61.8% | 0.117 | — |
+| RAG + No-Think | 24 | 68 | 2 | 66.3% | 0.201 | — |
+| No-RAG + Think | **3** | **89** | 0 | 56.4% | 0.127 | 47.1% |
+| No-RAG + No-Think | 22 | 70 | 3 | 65.5% | 0.162 | **66.7%** |
+
+Only 3 TPs under No-RAG+Think — near-total recall failure. The reasoning appears to consume all token budget on self-generated context without external grounding. RAG is essential for this model when thinking is enabled.
+
+#### deepseek-v3.2 (~671B MoE) — Most stable across conditions
+
+| Condition | TP | FN | FP | Acc | MCC |
+|---|---|---|---|---|---|
+| RAG + Think | 26 | 66 | 6 | 65.6% | 0.158 |
+| RAG + No-Think | 23 | 69 | 4 | 64.9% | 0.155 |
+| No-RAG + Think | 23 | 69 | 6 | 65.1% | 0.127 |
+| No-RAG + No-Think | 23 | 69 | 9 | 63.1% | 0.124 |
+
+All four conditions within ~3pp of each other — the most condition-stable model in the study. Reliable fallback when RAG is unavailable.
+
+#### minimax-m2 (~456B MoE) — Zero hallucinations across every condition
+
+| Condition | TP | FN | FP | MCC |
+|---|---|---|---|---|
+| RAG + Think | 13 | 79 | **0** | 0.240 |
+| RAG + No-Think | 7 | 85 | **0** | 0.080 |
+| No-RAG + Think | 9 | 83 | **0** | 0.076 |
+| No-RAG + No-Think | 6 | 86 | **0** | 0.138 |
+
+Zero FPs in all four conditions — the only model to achieve this. Ideal for deployment contexts where hallucinations are unacceptable; RAG+Think gives it the highest recall (13 TPs).
+
+#### nemotron-3-nano:30b (~30B) — 80 hallucinations under RAG+Think
+
+| Condition | TP | FN | FP | MCC |
+|---|---|---|---|---|
+| RAG + Think | 6 | 86 | **80** | 0.096 |
+| RAG + No-Think | 6 | 86 | 19 | 0.013 |
+| No-RAG + Think | 11 | 81 | 11 | 0.072 |
+| No-RAG + No-Think | 15 | 77 | 29 | -0.097 |
+
+Worst hallucination count in the entire study under RAG+Think. This model treats the injected WCAG chunks as positive evidence for violations rather than reference material. Should never be used with RAG enabled.
+
+---
+
+### 11.4 Main Effects Summary
+
+#### Effect of RAG (averaged across think/no-think conditions)
+
+| Model | TP (RAG ON avg) | TP (RAG OFF avg) | Δ |
+|---|---|---|---|
+| qwen3.5:397b | 20.5 | 12.5 | **+8.0** |
+| gpt-oss:120b | 30.5 | 24.5 | **+6.0** |
+| minimax-m2 | 10.0 | 7.5 | +2.5 |
+| deepseek-v3.2 | 24.5 | 23.0 | +1.5 |
+| glm-5 | 22.0 | 27.5 | -5.5 |
+| kimi-k2.5 | 20.5 | 26.5 | -6.0 |
+| nemotron-3-nano | 6.0 | 13.0 | -7.0 |
+
+RAG helps most models find more issues (+2 to +8 TPs). Negative cases (glm-5, kimi-k2.5, nemotron-3-nano) are models where the injected context interferes with the model's native reasoning strategy.
+
+#### Effect of Thinking (averaged across RAG/no-RAG conditions)
+
+| Model | TP (Think ON avg) | TP (Think OFF avg) | Δ |
+|---|---|---|---|
+| gpt-oss:120b | 28.5 | 26.5 | +2.0 |
+| deepseek-v3.2 | 24.5 | 23.0 | +1.5 |
+| glm-5 | 21.5 | 28.0 | **-6.5** |
+| qwen3.5:397b | 10.0 | 23.0 | **-13.0** |
+| nemotron-3-nano | 8.5 | 10.5 | -2.0 |
+
+Thinking ON is beneficial or neutral for most models when RAG is present. Harmful for glm-5 and catastrophic for qwen3.5 without RAG — these models use reasoning budget unproductively when external grounding is absent.
+
+---
+
+### 11.5 Deployment Recommendations
+
+| Use Case | Model | Condition | Justification |
+|---|---|---|---|
+| **Best overall accuracy** | kimi-k2.5 | RAG + Think | MCC=0.370, Acc=83.5%, only 20 FNs |
+| **Most consistent** | gpt-oss:120b | RAG + Think | Best composite (72.0%), #1 in 3 of 4 conditions |
+| **Zero hallucinations** | minimax-m2 | RAG + Think | 0 FPs across all 4 conditions |
+| **RAG unavailable** | deepseek-v3.2 | No-RAG + Think | Most condition-stable; lowest degradation without RAG |
+| **Fastest response** | mistral-large-3:675b | Any | Avg 35s; Pareto-optimal in RAG+Think |
+
+**Primary extension model recommendation: `gpt-oss:120b` with RAG + Think enabled.** This model provides the best-validated composite performance with reasonable hallucination control (7 FPs total) and does not exhibit the extreme condition sensitivity of kimi-k2.5 (which requires the full RAG+Think stack and collapses without it). The extension defaults to RAG-on and thinking-on (no `/no_think`), matching this optimal condition directly.

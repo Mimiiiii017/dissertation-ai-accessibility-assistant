@@ -12,10 +12,10 @@
     "bench:js":             "ts-node run.ts --lang js",
     "bench:tsx":            "ts-node run.ts --lang tsx",
     "bench:adversarial":    "ts-node run.ts --adversarial",
-    "study:rag-think":      "ts-node run.ts --lang html",
-    "study:rag-nothink":    "ts-node run.ts --lang html --no-think",
-    "study:norag-think":    "ts-node run.ts --lang html --no-rag",
-    "study:norag-nothink":  "ts-node run.ts --lang html --no-rag --no-think"
+    "study:rag-think":      "ts-node run.ts",
+    "study:rag-nothink":    "ts-node run.ts --no-think",
+    "study:norag-think":    "ts-node run.ts --no-rag",
+    "study:norag-nothink":  "ts-node run.ts --no-rag --no-think"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -13,7 +13,7 @@
  *   --output   <dir>   Directory for JSON/CSV output      (default: ./results)
  *   --no-save          Skip saving result files
  *   --quiet            Suppress progress output
- *   --concurrency <n>  Parallel fixture calls per model (default: 1)
+ *   --concurrency <n>  Parallel fixture calls per model (default: 2)
  *   --help
  *
  * Examples:
@@ -40,10 +40,7 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
-  'gemma3:4b-cloud',            // ~4 B
-  'ministral-3:3b-cloud',       // ~3 B
   'ministral-3:14b-cloud',      // ~14 B
-  'gpt-oss:20b-cloud',          // ~20 B
   'devstral-small-2:24b-cloud', // ~24 B
   'nemotron-3-nano:30b-cloud',  // ~30 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
@@ -61,8 +58,6 @@ const ALL_MODELS: string[] = [
   // ── Very large / undisclosed (>235 B) ────────────────────────────────
   'qwen3.5:397b-cloud',         // ~397 B
   'qwen3-coder:480b-cloud',     // ~480 B
-  'qwen3-vl:235b-cloud',        // ~235 B (vision)
-  'qwen3.5:cloud',              // ~397 B (alias for qwen3.5:397b-cloud)
   'qwen3-coder-next:cloud',     // ~undisclosed (next-gen Qwen coder)
   'kimi-k2.5:cloud',            // ~undisclosed (Moonshot AI)
   'glm-5:cloud',                // ~undisclosed (Zhipu AI)
@@ -115,7 +110,7 @@ Options:
   --no-think         Re-enable /no_think directive — suppresses chain-of-thought
                      for reasoning models (Qwen3, kimi, DeepSeek). Use for the
                      no-think vs think ablation condition.
-  --concurrency <n>  Max parallel fixture calls per model (default: 1 — sequential, safe for cloud gateway rate limits; use 4 for local-only Ollama)
+  --concurrency <n>  Max parallel fixture calls per model (default: 1 — safe for cloud gateway; use 4 for local-only Ollama)
   --model    <csv>   Comma-separated model shortNames to run (default: all)
              e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
   --help             Show this help
@@ -178,7 +173,7 @@ Options:
     process.exit(1);
   }
 
-  const concurrency = parseInt(opt('--concurrency') ?? '1', 10);
+  const concurrency = parseInt(opt('--concurrency') ?? '2', 10);
   if (isNaN(concurrency) || concurrency < 1) {
     console.error('--concurrency must be a positive integer');
     process.exit(1);
