@@ -1053,10 +1053,11 @@ export function printReport(
 
 // ─── Save JSON ────────────────────────────────────────────────────────────
 
-export function saveJson(results: ModelRunResult[], outDir: string): string {
+export function saveJson(results: ModelRunResult[], outDir: string, label?: string): string {
   fs.mkdirSync(outDir, { recursive: true });
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
-  const filePath = path.join(outDir, `cloud-llm-preliminary-${ts}.json`);
+  const suffix = label ? `-${label}` : '';
+  const filePath = path.join(outDir, `cloud-llm-preliminary${suffix}-${ts}.json`);
   // Strip rawResponse to keep the file manageable — preserve everything else
   const stripped = results.map(r => ({ ...r, rawResponse: undefined }));
   fs.writeFileSync(filePath, JSON.stringify(stripped, null, 2), 'utf8');
@@ -1071,11 +1072,13 @@ export function saveJson(results: ModelRunResult[], outDir: string): string {
 export function saveCsv(
   results: ModelRunResult[],
   models: string[],
-  outDir: string
+  outDir: string,
+  label?: string
 ): string {
   fs.mkdirSync(outDir, { recursive: true });
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
-  const filePath = path.join(outDir, `cloud-llm-preliminary-summary-${ts}.csv`);
+  const suffix = label ? `-${label}` : '';
+  const filePath = path.join(outDir, `cloud-llm-preliminary-summary${suffix}-${ts}.csv`);
 
   const rows: string[][] = [];
   const c = (v: string | number) => String(v);
@@ -1308,11 +1311,13 @@ export function saveReport(
   results: ModelRunResult[],
   models: string[],
   presetId: AnalysisPresetId,
-  outDir: string
+  outDir: string,
+  label?: string
 ): string {
   fs.mkdirSync(outDir, { recursive: true });
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
-  const filePath = path.join(outDir, `cloud-llm-preliminary-report-${ts}.txt`);
+  const suffix = label ? `-${label}` : '';
+  const filePath = path.join(outDir, `cloud-llm-preliminary-report${suffix}-${ts}.txt`);
 
   // Capture stdout
   const lines: string[] = [];

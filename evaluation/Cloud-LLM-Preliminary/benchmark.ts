@@ -144,6 +144,12 @@ export type ModelBenchmarkConfig = {
    * Use for ablation testing: compare RAG vs no-RAG F1 on the same fixtures.
    */
   noRag?: boolean;
+  /**
+   * When true, append /no_think to the user prompt, suppressing chain-of-thought
+   * for reasoning-capable models (Qwen3, kimi-k2.5, DeepSeek, etc.).
+   * Use for the think vs no-think ablation condition.
+   */
+  noThink?: boolean;
 };
 
 export type ModelAggregateStats = {
@@ -364,11 +370,16 @@ export async function runOnce(
     }
   }
 
-  const userPrompt = buildAiPrompt(
+  let userPrompt = buildAiPrompt(
     fixture.languageId,
     code,
     contextBlock
   );
+  // Ablation: restore /no_think to suppress reasoning tokens for models that
+  // support it (Qwen3, kimi-k2.5, DeepSeek). Default (no flag) leaves thinking enabled.
+  if (config.noThink) {
+    userPrompt = userPrompt.trimEnd() + '\n\n/no_think';
+  }
 
   const t0 = Date.now();
   let rawResponse = '';

@@ -13,7 +13,7 @@
  *   --output   <dir>   Directory for JSON/CSV output      (default: ./results)
  *   --no-save          Skip saving result files
  *   --quiet            Suppress progress output
- *   --concurrency <n>  Parallel fixture calls per model (default: 4)
+ *   --concurrency <n>  Parallel fixture calls per model (default: 1)
  *   --help
  *
  * Examples:
@@ -112,7 +112,10 @@ Options:
   --no-save          Skip writing JSON/CSV files
   --quiet            Suppress progress output
   --no-rag           Disable RAG context injection (useful for ablation testing)
-  --concurrency <n>  Max parallel fixture calls per model (default: 4)
+  --no-think         Re-enable /no_think directive — suppresses chain-of-thought
+                     for reasoning models (Qwen3, kimi, DeepSeek). Use for the
+                     no-think vs think ablation condition.
+  --concurrency <n>  Max parallel fixture calls per model (default: 1 — sequential, safe for cloud gateway rate limits; use 4 for local-only Ollama)
   --model    <csv>   Comma-separated model shortNames to run (default: all)
              e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
   --help             Show this help
@@ -175,7 +178,7 @@ Options:
     process.exit(1);
   }
 
-  const concurrency = parseInt(opt('--concurrency') ?? '4', 10);
+  const concurrency = parseInt(opt('--concurrency') ?? '1', 10);
   if (isNaN(concurrency) || concurrency < 1) {
     console.error('--concurrency must be a positive integer');
     process.exit(1);
@@ -192,6 +195,7 @@ Options:
     quiet:     flag('--quiet'),
     concurrency,
     noRag:     flag('--no-rag'),
+    noThink:   flag('--no-think'),
     models:    opt('--model'),
   };
 }
@@ -227,7 +231,8 @@ async function main() {
     runsPerCombination: opts.runs,
     verbose: !opts.quiet,
     concurrency: opts.concurrency,
-    noRag: opts.noRag,
+    noRag:       opts.noRag,
+    noThink:     opts.noThink,
   };
 
   if (!opts.quiet) {
@@ -269,9 +274,10 @@ async function main() {
   printReport(results, models, opts.presetId);
 
   if (opts.save) {
-    const jsonPath    = saveJson(results, opts.outputDir);
-    const csvPath     = saveCsv(results, models, opts.outputDir);
-    const reportPath  = saveReport(results, models, opts.presetId, opts.outputDir);
+    const label = `${opts.noRag ? 'norag' : 'rag'}-${opts.noThink ? 'nothink' : 'think'}`;
+    const jsonPath    = saveJson(results, opts.outputDir, label);
+    const csvPath     = saveCsv(results, models, opts.outputDir, label);
+    const reportPath  = saveReport(results, models, opts.presetId, opts.outputDir, label);
     console.log(`  JSON   saved → ${jsonPath}`);
     console.log(`  CSV    saved → ${csvPath}`);
     console.log(`  Report saved → ${reportPath}`);
