@@ -41,14 +41,11 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
   'ministral-3:14b-cloud',      // ~14 B
-  'devstral-small-2:24b-cloud', // ~24 B
   'nemotron-3-nano:30b-cloud',  // ~30 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
-  'gemma3:27b-cloud',                // ~27 B
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
   'minimax-m2:cloud',                // ~456 B MoE
   'minimax-m2.5:cloud',              // ~456 B MoE (updated)
-  'nemotron-3-super:cloud',          // ~253 B
   'deepseek-v3.2:cloud',             // ~671 B MoE
   // ── Large (100–700 B) ─────────────────────────────────────────────────
   'devstral-2:123b-cloud',      // ~123 B
