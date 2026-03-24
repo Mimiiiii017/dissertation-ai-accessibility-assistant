@@ -714,6 +714,7 @@ const MODEL_SIZE_LABELS: Record<string, string> = {
   'gemma3:4b-cloud':            '~4B',
   'ministral-3:3b-cloud':       '~3B',
   'ministral-3:14b-cloud':      '~14B',
+  'phi4-reasoning:14b':         '~14B',
   'gpt-oss:20b-cloud':          '~20B',
   'devstral-small-2:24b-cloud': '~24B',
   'nemotron-3-nano:30b-cloud':  '~30B',

@@ -41,6 +41,7 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
   'ministral-3:14b-cloud',      // ~14 B
+  'phi4-reasoning:14b',         // ~14 B — Microsoft Phi-4 Reasoning (local); text-primary, strong CoT
   'nemotron-3-nano:30b-cloud',  // ~30 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)

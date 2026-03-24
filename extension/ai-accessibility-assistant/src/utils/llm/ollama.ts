@@ -22,7 +22,7 @@ type OllamaGenerateResponse = {
 // Ollama model parameters for fine-tuning generation behavior
 export interface OllamaOptions {
   num_predict?: number; // Max tokens to generate (higher = more complete but slower). Range: 100-50000
-  num_ctx?: number; // Context window size (higher = better memory but more RAM). Range: 512-32768
+  num_ctx?: number; // Context window size (higher = better memory but more RAM). Range: 512-131072. Note: cloud models ignore this and use their native context window.
   temperature?: number; // Randomness (0.0=deterministic, 2.0=creative). Lower for consistency. Range: 0.0-2.0
   top_p?: number; // Nucleus sampling (considers top% probability). Range: 0.0-1.0
   top_k?: number; // Sample from top K tokens. Range: 1-100
@@ -86,7 +86,7 @@ export const ANALYSIS_PRESETS: Record<AnalysisPresetId, AnalysisPreset> = {
     description: "Longer, deeper analysis with more detailed coverage.",
     options: {
       num_predict: 26000,
-      num_ctx: 32768,
+      num_ctx: 65536,
       temperature: 0.1,
       top_p: 0.8,
       top_k: 25,
@@ -120,7 +120,7 @@ export const ANALYSIS_PRESETS: Record<AnalysisPresetId, AnalysisPreset> = {
     description: "High-quality analysis for complex ARIA patterns and deep DOM structures.",
     options: {
       num_predict: 32000,
-      num_ctx: 32768,
+      num_ctx: 131072,
       temperature: 0.7,
       top_p: 0.95,
       top_k: 40,
