@@ -1,4 +1,5 @@
 {
+    "aiAccessibilityAssistant.ollamaHost": "http://localhost:11434",
     "chat.tools.terminal.autoApprove": {
         "/^node << 'EOF'\nconst fs = require\\('fs'\\);\nconst content = fs\\.readFileSync\\('/home/mcast/Desktop/Dissertation/dissertation-ai-accessibility-assistant/evaluation/preset-benchmark/fixtures/tsx/tsx-medium\\.tsx', 'utf8'\\);\n\nconst m = new RegExp\\('\\(\\?:function\\|const\\)\\\\\\\\s\\+SkipLinks\\\\\\\\s\\*\\(\\?:\\[=:\\(\\]\\)', 'i'\\)\\.exec\\(content\\);\nconsole\\.log\\('SkipLinks match:', m \\? 'found: ' \\+ JSON\\.stringify\\(m\\[0\\]\\) \\+ ' at line ' \\+ content\\.slice\\(0,m\\.index\\)\\.split\\('\\\\n'\\)\\.length : 'NOT FOUND'\\);\nif \\(m\\) \\{\n  const body = content\\.slice\\(m\\.index \\+ m\\[0\\]\\.length\\)\\.split\\('\\\\n'\\)\\.slice\\(0, 40\\)\\.join\\('\\\\n'\\);\n  console\\.log\\('body:'\\);\n  console\\.log\\(body\\);\n\\}\nEOF$/": {
             "approve": true,
