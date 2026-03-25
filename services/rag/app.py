@@ -29,8 +29,9 @@ class IndexResponse(BaseModel):
 
 class RetrieveRequest(BaseModel):
     query: str
-    top_k: int = 6
+    top_k: int = 3
     kb_type: str = "accessibility"  # accessibility or tlx
+    distance_threshold: float = 0.65  # cosine distance; chunks above this are too dissimilar
 
 class Chunk(BaseModel):
     id: str
@@ -50,23 +51,47 @@ def iter_kb_files(kb_type: str):
         if p.is_file() and p.suffix.lower() in exts:
             yield p
 
-def chunk_text(text: str, chunk_size: int = 900, overlap: int = 120):
-    chunks = []
-    i = 0
-    while i < len(text):
-        chunks.append(text[i : i + chunk_size])
-        i += chunk_size - overlap
-    return chunks
+def chunk_by_sections(text: str, file_title: str = "", min_chars: int = 80) -> list[str]:
+    """
+    Split a markdown document on ## headings so each chunk = one violation/topic section.
+    Short sections below min_chars are merged with the previous chunk.
+    The file-level # title is prepended to every chunk for context.
+    """
+    import re
+    # Extract the top-level # title if present
+    title_match = re.match(r"^#\s+(.+)", text.strip())
+    doc_title = title_match.group(1).strip() if title_match else file_title
+
+    # Split on ## (and ###) headings, keeping the heading with its body
+    parts = re.split(r"\n(?=#{1,3} )", text)
+    chunks: list[str] = []
+
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        # Skip the top-level # heading-only line (already captured in doc_title)
+        if re.match(r"^# ", part) and "\n" not in part:
+            continue
+        # Prepend doc title so every chunk is self-contained
+        chunk = f"{doc_title}\n\n{part}" if doc_title and not part.startswith(doc_title) else part
+        if len(chunk) < min_chars and chunks:
+            # Merge tiny sections into the previous chunk
+            chunks[-1] = chunks[-1] + "\n\n" + chunk
+        else:
+            chunks.append(chunk)
+
+    return chunks if chunks else [text.strip()]
+
 
 @app.post("/index", response_model=IndexResponse)
 def index_kb(kb_type: str = Query("accessibility")):
     """Index knowledge base files into ChromaDB collection."""
     if kb_type not in KB_PATHS:
         raise ValueError(f"Unknown kb_type: {kb_type}")
-    
+
     collection_name = COLLECTION_NAMES[kb_type]
-    
-    # Delete and recreate collection for this kb_type
+
     try:
         client.delete_collection(collection_name)
     except Exception:
@@ -79,17 +104,17 @@ def index_kb(kb_type: str = Query("accessibility")):
     indexed = 0
     for fpath in iter_kb_files(kb_type):
         text = fpath.read_text(encoding="utf-8", errors="ignore")
-        chunks = chunk_text(text)
+        chunks = chunk_by_sections(text, file_title=fpath.stem)
         ids, docs, metas = [], [], []
 
         for i, c in enumerate(chunks):
             c = c.strip()
             if not c:
                 continue
-            cid = f"{fpath.as_posix()}::chunk{i}"
+            cid = f"{fpath.as_posix()}::sec{i}"
             ids.append(cid)
             docs.append(c)
-            metas.append({"source": fpath.as_posix()})
+            metas.append({"source": fpath.as_posix(), "section": i})
 
         if docs:
             collection.add(ids=ids, documents=docs, metadatas=metas)
@@ -108,13 +133,18 @@ def retrieve(req: RetrieveRequest):
         name=collection_name, embedding_function=embed_fn
     )
     
-    res = collection.query(query_texts=[req.query], n_results=req.top_k)
+    res = collection.query(query_texts=[req.query], n_results=req.top_k,
+                           include=["documents", "metadatas", "distances"])
     ids = res.get("ids", [[]])[0]
     docs = res.get("documents", [[]])[0]
     metas = res.get("metadatas", [[]])[0]
+    distances = res.get("distances", [[]])[0]
 
     chunks = []
-    for cid, doc, meta in zip(ids, docs, metas):
+    for cid, doc, meta, dist in zip(ids, docs, metas, distances):
+        if dist > req.distance_threshold:
+            # Chunk is too dissimilar to the query — skip to avoid noise
+            continue
         chunks.append(
             Chunk(id=str(cid), source=str(meta.get("source", "")), text=str(doc))
         )

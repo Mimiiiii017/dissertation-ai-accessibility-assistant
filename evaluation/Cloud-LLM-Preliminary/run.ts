@@ -25,6 +25,22 @@
  */
 
 import * as path from 'path';
+import * as fs from 'fs';
+
+// ─── Read ollamaHost from workspace VS Code settings (shared with extension) ──
+function getDefaultHost(): string {
+  try {
+    const settingsPath = path.join(__dirname, '../../.vscode/settings.json');
+    const raw = fs.readFileSync(settingsPath, 'utf8');
+    // Use regex extraction — avoids JSON.parse issues with literal newlines in
+    // other settings values (e.g. chat.tools.terminal.autoApprove patterns).
+    const m = raw.match(/"aiAccessibilityAssistant\.ollamaHost"\s*:\s*"([^"]+)"/);
+    if (m) return m[1].replace(/\/$/, '');
+  } catch { /* fall through to default */ }
+  return 'http://localhost:11434';
+}
+
+const DEFAULT_HOST = getDefaultHost();
 
 import {
   ANALYSIS_PRESETS,
@@ -40,9 +56,13 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
-  'ministral-3:14b-cloud',      // ~14 B
-  'phi4-reasoning:14b',         // ~14 B — Microsoft Phi-4 Reasoning (local); text-primary, strong CoT
-  'nemotron-3-nano:30b-cloud',  // ~30 B
+  'ministral-3:3b-cloud',        // ~3 B
+  'gemma3:4b-cloud',             // ~4 B
+  'gpt-oss:20b-cloud',           // ~20 B
+  'devstral-small-2:24b-cloud',  // ~24 B
+  'gemma3:27b-cloud',            // ~27 B
+  'nemotron-3-nano:30b-cloud',   // ~30 B
+  'ministral-3:14b-cloud',       // ~14 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
   'minimax-m2:cloud',                // ~456 B MoE
@@ -51,9 +71,11 @@ const ALL_MODELS: string[] = [
   // ── Large (100–700 B) ─────────────────────────────────────────────────
   'devstral-2:123b-cloud',      // ~123 B
   'gpt-oss:120b-cloud',         // ~120 B
+  'nemotron-3-super:cloud',     // ~undisclosed (Nemotron super-class)
   'cogito-2.1:671b-cloud',      // ~671 B
   'mistral-large-3:675b-cloud', // ~675 B
   // ── Very large / undisclosed (>235 B) ────────────────────────────────
+  'qwen3-vl:235b-cloud',        // ~235 B (vision-language)
   'qwen3.5:397b-cloud',         // ~397 B
   'qwen3-coder:480b-cloud',     // ~480 B
   'qwen3-coder-next:cloud',     // ~undisclosed (next-gen Qwen coder)
@@ -171,7 +193,7 @@ Options:
     process.exit(1);
   }
 
-  const concurrency = parseInt(opt('--concurrency') ?? '2', 10);
+  const concurrency = parseInt(opt('--concurrency') ?? '1', 10);
   if (isNaN(concurrency) || concurrency < 1) {
     console.error('--concurrency must be a positive integer');
     process.exit(1);
@@ -181,7 +203,7 @@ Options:
     fixtureIds,
     lang:      opt('--lang') ?? 'all',
     presetId:  presetRaw as AnalysisPresetId,
-    host:      opt('--host')   ?? 'http://localhost:11434',
+    host:      opt('--host')   ?? DEFAULT_HOST,
     runs,
     outputDir: opt('--output') ?? path.join(__dirname, 'results'),
     save:      !flag('--no-save'),
