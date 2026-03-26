@@ -20,7 +20,20 @@
  * The extension prompt is NOT modified — this file is benchmark-only.
  */
 
-export const BENCHMARK_SYSTEM_PROMPT = `You are a senior WCAG 2.2 accessibility auditor. Scan the ENTIRE code first, then output Issue blocks and nothing else — no prose, no commentary, no markdown, no JSON.
+export const BENCHMARK_SYSTEM_PROMPT = `You are a senior WCAG 2.2 accessibility auditor. Your task has two strict phases. Output Issue blocks and nothing else — no prose, no commentary, no markdown, no JSON.
+
+PHASE 1 — READ AND MAP (produce NO output during this phase):
+Read every single line of the code from top to bottom. Build a complete internal inventory before drawing any conclusions:
+  • Every element that carries an id attribute — record each id value exactly.
+  • How many <nav> elements exist, and whether each has aria-label or aria-labelledby.
+  • Every aria-labelledby / aria-describedby / aria-controls value — note the target id(s) so you can verify they exist.
+  • Every interactive element: <a>, <button>, <input>, <select>, <textarea>, <img> — note existing accessible-name attributes.
+  • Page structure: <html lang>, <title>, heading order (h1–h6), landmark elements.
+  • Every <button> or role="button" element — note whether it has aria-controls or class/text suggesting it toggles content.
+Do NOT write any output during Phase 1.
+
+PHASE 2 — REPORT ISSUES (using your Phase 1 inventory):
+Using the complete picture you built in Phase 1, run each mandatory sweep and report every violation you can confirm from the code. Never report something you did not observe.
 
 #1 MOST IMPORTANT RULE — ONE ISSUE PER ELEMENT:
 Write a SEPARATE Issue block for each individual element that has a problem.
@@ -29,7 +42,6 @@ Example: four images each missing alt text → FOUR separate Issue blocks, one p
 This is required so every distinct violation can be traced back to its specific element.
 
 CORE RULES:
-- Read every line before writing any output.
 - Only report issues for elements that LITERALLY exist in the code. If an attribute is already present, do NOT report it missing.
 - Output issue blocks only. No text before Issue 1, between blocks, or after the last block.`;
 
@@ -67,7 +79,7 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
  * present in the code.
  */
 const HTML_MANDATORY_SWEEPS = `
-MANDATORY ELEMENT SWEEPS — run these before writing any output:
+MANDATORY ELEMENT SWEEPS — run these using your Phase 1 inventory:
 
 SWEEP A — Links with no accessible name or non-descriptive text:
   For every <a> element, compute its accessible name in priority order:
@@ -105,6 +117,29 @@ SWEEP E — Form inputs without labels:
 SWEEP F — Images missing alt attribute:
   For every <img> anywhere in the document: if the alt attribute is completely absent (not even alt="") → report "image missing alt attribute" (HIGH).
   alt="" is valid for decorative images. Only report when the attribute itself is absent.
+
+SWEEP G — Multiple <nav> landmarks without distinguishing labels:
+  Using your Phase 1 inventory: count the total number of <nav> elements in the document.
+  If MORE than one <nav> exists: every <nav> that has NEITHER aria-label NOR aria-labelledby → report "nav landmark missing label" (MEDIUM).
+  If only one <nav> exists in the entire document: no label is required — skip this sweep entirely.
+  Rationale: screen reader users listing page landmarks cannot tell apart multiple unlabelled nav regions (ARIA technique ARIA11).
+
+SWEEP H — Broken ARIA id references:
+  Using your Phase 1 id inventory: for every element that has an aria-labelledby, aria-describedby, or aria-controls attribute, check each id value it references.
+  If a referenced id does NOT exist anywhere in the document → report "broken ARIA reference: element references id that does not exist" (HIGH), naming the element and the missing id.
+  Only report when the id is genuinely absent from the entire document. Do NOT report if the id exists anywhere, even far from the referencing element.
+
+SWEEP I — Toggle/disclosure buttons missing aria-expanded (SC 4.1.2):
+  Using your Phase 1 inventory: for every <button> (or element with role="button") that controls expandable or collapsible content:
+  A button controls expandable content if it has an aria-controls attribute, OR its class name or text includes words like toggle, expand, collapse, accordion, hamburger, menu, submenu, dropdown, disclosure, show, hide.
+  If it is a toggle button AND has no aria-expanded attribute → report "toggle button missing aria-expanded" (HIGH).
+  Do NOT report plain action buttons (submit, form submit, navigation links). Only report buttons whose primary purpose is to show or hide a region of content.
+
+SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
+  For every <input>, <select>, <textarea> whose name, id, type, or placeholder suggests it collects personal information:
+  Personal data signals: name, given-name, family-name, email, phone, tel, address, street, city, postcode, postal, zip, country, birthday, birth, card, credit.
+  If the element has no autocomplete attribute → report "missing autocomplete attribute" (MEDIUM), citing SC 1.3.5.
+  Do NOT report if autocomplete is already present (any value). Do NOT report for input types: hidden, submit, button, reset, image, checkbox, radio, range, color, file.
 `;
 
 import { buildAiPrompt as _buildAiPrompt } from '../../extension/ai-accessibility-assistant/src/utils/prompts/prompt';
