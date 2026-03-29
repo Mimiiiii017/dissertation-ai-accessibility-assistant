@@ -65,8 +65,8 @@ const ALL_MODELS: string[] = [
   'ministral-3:14b-cloud',       // ~14 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
-  'minimax-m2:cloud',                // ~456 B MoE
-  'minimax-m2.5:cloud',              // ~456 B MoE (updated)
+  // 'minimax-m2:cloud',                // ~456 B MoE        — BROKEN: cloud API returns HTTP 500 on every request
+  // 'minimax-m2.5:cloud',              // ~456 B MoE (updated) — BROKEN: cloud API returns HTTP 500 on every request
   'deepseek-v3.2:cloud',             // ~671 B MoE
   // ── Large (100–700 B) ─────────────────────────────────────────────────
   'devstral-2:123b-cloud',      // ~123 B
