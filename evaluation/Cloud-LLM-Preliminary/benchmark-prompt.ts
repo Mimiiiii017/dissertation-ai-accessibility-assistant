@@ -68,6 +68,12 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 [iv] Only flag a <fieldset> as "missing legend" when there is genuinely NO <legend> element as a direct child. If a <legend> exists inside the fieldset, do NOT report it as missing.
 
 [v]  Do NOT flag missing aria-required on a native <input>, <select>, or <textarea> that already has the HTML required attribute. Assistive technologies map HTML required to aria-required automatically.
+
+[vi] CONFIDENCE GATE — Only report an issue if you can point to the exact element from your Phase 1 inventory. "It is likely", "it may be", or "it possibly" are not grounds for reporting. If you did not observe the specific element in Phase 1, skip it. An omitted issue scores 0; a hallucinated one scores −1 against you.
+
+[vii] SWEEP J (autocomplete) — Only flag an <input> if you confirmed during Phase 1 that its name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card). If the signal is ambiguous or absent, skip the element entirely. Do NOT flag inputs whose purpose is clearly non-personal (search, query, message, subject, comment, username, password, coupon, promo).
+
+[viii] SWEEP H (broken ARIA references) — Only report a broken aria-labelledby / aria-describedby / aria-controls reference if you built a complete id inventory in Phase 1 AND that id is absent from your inventory. If you did not record every id in Phase 1, do NOT report any broken references — incomplete inventories produce false positives.
 `;
 
 /**
@@ -174,9 +180,9 @@ export function buildAiPrompt(languageId: string, code: string, contextBlock: st
 
   if (lang === 'html') {
     const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${HTML_MANDATORY_SWEEPS.trim()}`;
-    return base.replace('WCAG REFERENCE CONTEXT:', `${injection}\n\nWCAG REFERENCE CONTEXT:`);
+    return base.replace('SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):', `${injection}\n\nSUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):`);
   }
 
   // All other languages: anti-FP supplement only (no HTML element sweeps)
-  return base.replace('WCAG REFERENCE CONTEXT:', `${ANTI_FP_SUPPLEMENT.trim()}\n\nWCAG REFERENCE CONTEXT:`);
+  return base.replace('SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):', `${ANTI_FP_SUPPLEMENT.trim()}\n\nSUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):`);
 }

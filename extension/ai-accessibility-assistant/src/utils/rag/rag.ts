@@ -24,14 +24,20 @@ export async function ragRetrieve(
   endpoint: string,
   query: string,
   topK: number,
-  kbType: "accessibility" | "tlx" = "accessibility"
+  kbType: "accessibility" | "tlx" = "accessibility",
+  distanceThreshold?: number
 ): Promise<RagRetrieveResponse> {
   const url = `${endpoint.replace(/\/$/, "")}/retrieve`;
+
+  const body: Record<string, unknown> = { query, top_k: topK, kb_type: kbType };
+  if (distanceThreshold !== undefined) {
+    body.distance_threshold = distanceThreshold;
+  }
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, top_k: topK, kb_type: kbType }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {

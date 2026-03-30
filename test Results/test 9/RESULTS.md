@@ -318,3 +318,57 @@ minimax models (marked †) ran all 4 conditions in Test 8 but only rag-think an
 | **deepseek-v3.2** | 58.9% | 39.0% | 37.3% | 43.9% | 63.9% | 56.1% | 25.4% | 16.7% | −7.5 pp |
 | **minimax-m2** † | 34.0% | 28.4% | 60.7% | 50.5% | 38.2% | N/A | 40.3% | N/A | −7.9 pp† |
 | **kimi-k2.5** | 41.4% | 29.8% | 33.0% | 35.8% | 74.9% | 52.1% | 46.8% | 38.9% | −9.8 pp |
+
+---
+
+## 8. What to Change for Test 10
+
+The goal of these changes is not to improve benchmark scores in isolation — it is to make the tool more useful to a real developer auditing a real production page. The benchmark fixtures are proxies for real-world HTML; the failure modes observed in Test 9 are the same ones that would frustrate a developer using the extension on their own code.
+
+### 8.1 RAG Pipeline — Per-Sweep Multi-Query Retrieval
+
+**Real-world problem:** A developer's HTML file typically contains issues spread across several accessibility categories at once — unlabelled form inputs, missing nav labels, broken ARIA references, and images without alt text could all appear in the same file. The current RAG pipeline fires a single generic WCAG query. That query cannot simultaneously retrieve relevant guidance for all of those categories. The chunks it returns are broad enough to cover something, but too shallow to give the model the specific rule details it needs to accurately detect (for example) SC 1.3.5 autocomplete requirements versus ARIA11 landmark labelling.
+
+The result in practice: the model gets vague context, applies it imprecisely, and either misses the specific violation or reports a false positive because the retrieved text loosely matched the pattern without confirming the actual condition.
+
+**Change implemented:** Five targeted queries — one per sweep group — are run in parallel, deduplicated, and injected as a clean context block. A stricter retrieval threshold (cosine distance 0.50 vs 0.65) ensures only directly relevant chunks are included.
+
+| Setting | Test 9 | Test 10 |
+|---|---|---|
+| Queries per fixture | 1 (generic) | 5 (one per sweep group) |
+| Chunks per query | 6 | 2 |
+| Max unique chunks injected | 6 | 8 (after deduplication) |
+| Cosine distance threshold | 0.65 | 0.50 (stricter) |
+| Non-HTML top_k | 6 | 3 |
+
+The five queries target: (1) links and nav landmark labels, (2) buttons and aria-expanded on toggles, (3) form inputs, labels, and autocomplete on personal data fields, (4) images alt text, heading hierarchy, and table header scope, (5) broken ARIA id references. A developer's real page will hit multiple of these simultaneously; the model now receives useful, specific guidance for each.
+
+### 8.2 Prompt — Three New Anti-Hallucination Rules
+
+**Real-world problem:** False positives are more damaging in real-world use than in benchmarking. When a developer sees 15 reported issues and 8 of them are wrong, they lose confidence in the tool and start ignoring its output — including the real issues. The 204 false positives from ministral-3:3b on a single fixture, or the 79 from nemotron-3-super, represent the kind of noise that makes an accessibility assistant worse than useless: it creates work without creating value.
+
+Three specific false-positive patterns were identified from the Test 9 output:
+
+**Pattern 1 — Autocomplete over-reporting:** Models flagged inputs like `<input name="search">` or `<input name="username">` as missing autocomplete for personal data, despite these inputs not collecting personal information. In a real page with a search box and a login form, this produces a flood of reports that the developer must manually check and dismiss.
+
+**Pattern 2 — Speculative broken ARIA references:** Models reported broken `aria-labelledby` references without having completed the full id inventory required by Phase 1. On a long production page, a referenced id might appear 200 lines below the element — a model that gives up on Phase 1 early will incorrectly flag it as missing.
+
+**Pattern 3 — Hedged reporting:** Models emitted issue blocks with language like "this may be missing" or "it is possible that...". In a real audit, a hedged report is not actionable. A developer cannot fix something that "may" be wrong.
+
+**Change implemented (`ANTI_FP_SUPPLEMENT` rules vi–viii):**
+
+| New rule | What it prevents in real use |
+|---|---|
+| [vi] Confidence gate | Hedged or speculative issues are dropped before output — every reported issue must be traceable to a specific element the model observed in Phase 1 |
+| [vii] Sweep J strictness | Autocomplete is only flagged when the input's name, id, type, or placeholder contains a clear personal data signal (name, email, tel, address, etc.); search, username, comment, coupon and similar are explicitly excluded |
+| [viii] Sweep H gating | Broken ARIA references are only reported if the Phase 1 id inventory covers the whole document — a partial scan cannot produce reliable broken-ref reports |
+
+### 8.3 What Was Not Changed and Why
+
+| Area | Decision | Rationale |
+|---|---|---|
+| Inference parameters (temperature, top_p, top_k) | Unchanged | These are literature-grounded and appropriate for a deterministic code-analysis task; the false positive and miss rates observed are caused by retrieval noise and prompt ambiguity, not sampling randomness |
+| Phase 1 / Phase 2 prompt structure | Unchanged | The two-phase read-then-audit structure is the right approach for real pages where ARIA references, heading order, and landmark counts require whole-document awareness before any issue can be confirmed |
+| Sweep definitions A–J | Unchanged | The sweeps represent real WCAG 2.2 violations that real auditors check; the problem is model compliance with the sweep instructions, not the sweep logic itself |
+| Ground truth fixtures | Unchanged | The fixtures model real production pages; adjusting ground truth to chase F1 would decouple the benchmark from real-world validity |
+| Model roster | No models added or removed | The priority for Test 10 is to confirm whether the prompt and RAG changes improve real-world detection accuracy before expanding the roster further |

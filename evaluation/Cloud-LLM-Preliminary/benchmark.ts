@@ -34,6 +34,63 @@ import type { AiIssue } from '../../extension/ai-accessibility-assistant/src/uti
 import { ragRetrieve, formatRagContext } from '../../extension/ai-accessibility-assistant/src/utils/rag/rag';
 import { buildRagQuery } from '../../extension/ai-accessibility-assistant/src/utils/rag/ragQueryBuilder';
 
+// ─── HTML multi-query RAG ─────────────────────────────────────────────────
+
+/**
+ * Five targeted queries — one per HTML sweep group (A+G, B+I, E+J, C+D+F, H).
+ *
+ * WHY: A single generic query retrieves broad WCAG chunks that are only loosely
+ * related to the specific sweep being run. Test 9 showed RAG had a net negative
+ * effect (−2.4 pp no-think) because retrieved chunks added noise without adding
+ * sweep-specific knowledge. Per-sweep queries retrieve chunks that are directly
+ * relevant to what each sweep is checking, reducing noise while keeping signal.
+ */
+const HTML_SWEEP_QUERIES = [
+  // Sweeps A + G — links & nav landmarks
+  'link accessible name aria-label non-descriptive text "click here" "read more" nav landmark multiple label ARIA11',
+  // Sweeps B + I — buttons & toggle state
+  'button accessible name aria-expanded toggle disclosure accordion hamburger menu show hide',
+  // Sweeps E + J — forms, labels, autocomplete
+  'form input label accessible name autocomplete personal data given-name email tel address SC 1.3.5',
+  // Sweeps C + D + F — images, headings, table headers
+  'image alt attribute missing non-text content table header scope heading level skip hierarchy WCAG 1.1.1 1.3.1',
+  // Sweep H — broken ARIA id references
+  'aria-labelledby aria-describedby aria-controls broken reference id does not exist SC 4.1.2',
+];
+
+/** Max unique chunks to inject per fixture — caps context size regardless of dedup yield. */
+const RAG_HTML_MAX_CHUNKS = 8;
+/** Stricter cosine distance threshold for HTML multi-query (vs default 0.65). */
+const RAG_HTML_DISTANCE_THRESHOLD = 0.5;
+
+type RagChunk = { id: string; source: string; text: string };
+
+/**
+ * Run one RAG query per HTML sweep group, deduplicate by chunk id, and return
+ * at most RAG_HTML_MAX_CHUNKS unique chunks ordered by query priority.
+ */
+async function retrieveHtmlMultiQueryRag(ragEndpoint: string): Promise<RagChunk[]> {
+  const seen = new Set<string>();
+  const allChunks: RagChunk[] = [];
+
+  for (const q of HTML_SWEEP_QUERIES) {
+    if (allChunks.length >= RAG_HTML_MAX_CHUNKS) break;
+    try {
+      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', RAG_HTML_DISTANCE_THRESHOLD);
+      for (const chunk of res.chunks) {
+        if (allChunks.length >= RAG_HTML_MAX_CHUNKS) break;
+        if (!seen.has(chunk.id)) {
+          seen.add(chunk.id);
+          allChunks.push(chunk);
+        }
+      }
+    } catch {
+      // This sweep query failed — continue with remaining queries
+    }
+  }
+  return allChunks;
+}
+
 import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
 import { scoreRun } from '../preset-benchmark/benchmark';
 
@@ -360,10 +417,19 @@ export async function runOnce(
   if (!config.noRag) {
     const ragEndpoint = config.ragEndpoint ?? 'http://127.0.0.1:8000';
     try {
-      const ragQuery = buildRagQuery(fixture.languageId, code);
-      const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 6, 'accessibility');
-      if (ragResult.chunks.length > 0) {
-        contextBlock = formatRagContext(ragResult.chunks);
+      let chunks: RagChunk[];
+      if (fixture.languageId === 'html') {
+        // HTML: per-sweep multi-query with stricter threshold — reduces noise
+        // from generic WCAG chunks that distracted models in Test 9.
+        chunks = await retrieveHtmlMultiQueryRag(ragEndpoint);
+      } else {
+        // Other languages: single query, lower top_k (3 vs old 6) to reduce noise.
+        const ragQuery = buildRagQuery(fixture.languageId, code);
+        const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 3, 'accessibility');
+        chunks = ragResult.chunks;
+      }
+      if (chunks.length > 0) {
+        contextBlock = formatRagContext(chunks);
       }
     } catch {
       // RAG service not running — fall back to no context (benchmark still works)

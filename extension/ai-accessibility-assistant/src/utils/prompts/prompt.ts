@@ -6,14 +6,24 @@
 // Used by: commands/analyzeFile.ts
 
 // System message that locks the model into the accessibility auditor role
-export const SYSTEM_PROMPT = `You are a senior WCAG 2.2 accessibility auditor. Scan the ENTIRE code first, then output Issue blocks and nothing else — no prose, no commentary, no markdown, no JSON.
+export const SYSTEM_PROMPT = `You are a senior WCAG 2.2 accessibility auditor. Your task has two strict phases. Output Issue blocks and nothing else — no prose, no commentary, no markdown, no JSON.
 
-#1 MOST IMPORTANT RULE — GROUPING:
-If the SAME type of problem appears on multiple lines, you MUST write ONE single Issue block listing all affected line numbers. NEVER write a separate Issue block for each line. Example: four progress bars all missing role="progressbar" → ONE Issue block with "Line: 85, 101, 111, 121", not four separate blocks.
+PHASE 1 — READ AND MAP (produce NO output during this phase):
+Read every single line of the code from top to bottom. Build a complete internal inventory before drawing any conclusions:
+  - Every element that carries an id attribute — record each id value exactly.
+  - How many <nav> elements exist, and whether each has aria-label or aria-labelledby.
+  - Every aria-labelledby / aria-describedby / aria-controls value — note the target id(s) so you can verify they exist.
+  - Every interactive element: <a>, <button>, <input>, <select>, <textarea>, <img> — note existing accessible-name attributes.
+  - Page structure: <html lang>, <title>, heading order (h1–h6), landmark elements.
+  - Every <button> or role="button" element — note whether it has aria-controls or class/text suggesting it toggles content.
+Do NOT write any output during Phase 1.
+
+PHASE 2 — REPORT ISSUES (using your Phase 1 inventory):
+Using the complete picture you built in Phase 1, report every violation you can confirm from the code. Never report something you did not observe.
 
 CORE RULES:
-- Read every line before writing any output.
 - Only report issues for elements that LITERALLY exist in the code. If an attribute is already present, do NOT report it missing.
+- CONFIDENCE GATE: Only report an issue if you can point to the exact element from your Phase 1 inventory. If you cannot name the specific element, skip it. Hedged language ("may be", "possibly", "it is likely") means skip.
 - Output issue blocks only. No text before Issue 1, between blocks, or after the last block.`;
 
 // Returns language-specific rules to append to the main rule set.
@@ -135,6 +145,7 @@ function getLangSpecificChecks(languageId: string): string {
 export function buildAiPrompt(languageId: string, code: string, contextBlock: string): string {
   const langRules = getLangSpecificRules(languageId);
   const langChecks = getLangSpecificChecks(languageId);
+  const lang = languageId.toLowerCase();
 
   return `Perform a thorough WCAG 2.2 accessibility audit of the ${languageId} code below.
 
@@ -162,6 +173,11 @@ RULES:
 8. Only add aria-hidden="true" to purely decorative content. Never hide numbers, labels, status text, or any content that conveys information. If an <img> already has an alt attribute (even alt=""), do NOT suggest adding aria-label — alt fully provides the accessible name for images and is not missing.
 9. lang: ONLY report a lang issue if lang is completely absent, or if the majority of visible body text sentences are in a different language. A brand name, site title, or single word in another language does NOT qualify — do not report it.
 10. Fix must be in the same language as the audited file. If the fix requires an external file, write "(fix requires changes in external stylesheet/script)" in the Fix field.
+11. href="#" is a VALID href value. Do NOT flag it as invalid. Only flag an <a> as misused when it has NO href attribute at all.
+12. target="_blank" is NOT a WCAG 2.2 failure. Do not report it.
+13. autocomplete compound values (e.g. "work email", "home tel") are valid per WHATWG spec. Do not flag them. Only flag autocomplete for personal data inputs (name, email, tel, address, birthday, card) when autocomplete is completely absent. Do NOT flag search, username, password, comment, subject, coupon, or promo inputs.
+14. Only report a broken aria-labelledby / aria-describedby / aria-controls reference if you confirmed in Phase 1 that the referenced id is absent from the entire document. If your Phase 1 id inventory is incomplete, skip all broken-reference reports.
+15. Do NOT flag missing aria-required on an <input> that already has the HTML required attribute.
 ${langRules}
 
 WHAT TO CHECK — only for elements that actually appear in the code:
@@ -178,11 +194,25 @@ WHAT TO CHECK — only for elements that actually appear in the code:
 - Timing: setTimeout/setInterval/meta refresh without user control or warning
 - Touch & pointer: drag operations without single-pointer alternative; target size below 24×24 px when explicit width/height is set inline${langChecks}
 
-WCAG REFERENCE CONTEXT:
-${contextBlock}
+${lang === 'html' ? `
+MANDATORY HTML SWEEPS — run these using your Phase 1 inventory before reporting anything else:
+
+SWEEP A — Links: for every <a>, compute accessible name (aria-label > aria-labelledby > visible text excluding aria-hidden children). No name → report HIGH. Name is only "click here", "here", "read more", "learn more", or "more" → report MEDIUM.
+SWEEP B — Buttons: for every <button>, compute accessible name (aria-label > aria-labelledby > visible text including .sr-only > title). SVG aria-hidden contributes nothing. No name → report HIGH.
+SWEEP C — Table headers: for every <th> without scope → report MEDIUM.
+SWEEP D — Heading skips: list headings in document order; a jump of 2+ levels (h2→h4) with no intermediate heading → report MEDIUM.
+SWEEP E — Form inputs: for every <input>/<select>/<textarea> (excluding hidden/submit/button/reset/image/checkbox/radio/range/color/file): no <label for>, no wrapping <label>, no aria-label, no aria-labelledby → report HIGH.
+SWEEP F — Image alt: for every <img> with no alt attribute at all (alt="" is fine) → report HIGH.
+SWEEP G — Nav labels: if MORE than one <nav> exists and any <nav> has neither aria-label nor aria-labelledby → report MEDIUM. If only one <nav> exists, skip.
+SWEEP H — Broken ARIA refs: for every aria-labelledby / aria-describedby / aria-controls value, check your Phase 1 id inventory. If the referenced id is absent from your complete inventory → report HIGH. Only report if Phase 1 inventory is complete.
+SWEEP I — Toggle buttons: for every <button> (or role="button") whose class/text/aria-controls suggests it shows or hides content (toggle, expand, collapse, accordion, hamburger, menu, dropdown, disclosure, show, hide) and that has no aria-expanded → report HIGH.
+SWEEP J — Autocomplete: for every <input>/<select>/<textarea> whose name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card) and that has no autocomplete attribute → report MEDIUM citing SC 1.3.5. Skip if signal is ambiguous.` : ''}
 
 CODE TO AUDIT (${languageId}):
 ${code}
+
+SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):
+${contextBlock}
 
 /no_think`;
 }

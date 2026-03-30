@@ -11,6 +11,39 @@ import {
 } from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildRagQuery } from "../utils/rag/ragQueryBuilder";
+
+// Per-sweep targeted queries for HTML — one per sweep group.
+// A single generic query cannot simultaneously surface guidance for link names,
+// toggle buttons, autocomplete, image alt, and ARIA id references all at once.
+// Running five focused queries and deduplicating gives the model relevant, specific
+// context for whichever issues are actually present in the developer's file.
+const HTML_SWEEP_QUERIES = [
+  'link accessible name aria-label non-descriptive text nav landmark multiple label ARIA11',
+  'button accessible name aria-expanded toggle disclosure accordion hamburger menu show hide',
+  'form input label accessible name autocomplete personal data given-name email tel address SC 1.3.5',
+  'image alt attribute missing non-text content table header scope heading level skip hierarchy WCAG 1.1.1 1.3.1',
+  'aria-labelledby aria-describedby aria-controls broken reference id does not exist SC 4.1.2',
+];
+const HTML_RAG_MAX_CHUNKS = 8;
+const HTML_RAG_DISTANCE_THRESHOLD = 0.5;
+
+async function retrieveHtmlRag(
+  ragEndpoint: string
+): Promise<{ id: string; source: string; text: string }[]> {
+  const seen = new Set<string>();
+  const all: { id: string; source: string; text: string }[] = [];
+  for (const q of HTML_SWEEP_QUERIES) {
+    if (all.length >= HTML_RAG_MAX_CHUNKS) { break; }
+    try {
+      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', HTML_RAG_DISTANCE_THRESHOLD);
+      for (const chunk of res.chunks) {
+        if (all.length >= HTML_RAG_MAX_CHUNKS) { break; }
+        if (!seen.has(chunk.id)) { seen.add(chunk.id); all.push(chunk); }
+      }
+    } catch { /* individual query failed — continue */ }
+  }
+  return all;
+}
 import { runBaselineChecks } from "../utils/analysis/baseline";
 import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompts/prompt";
 import { parseTextResponse, deduplicateIssues } from "../utils/analysis/parser";
@@ -66,10 +99,18 @@ export async function analyseFileForPanel(
         logger.log("RAG: cache hit");
       } else {
         const t0 = Date.now();
-        const rag = await ragRetrieve(ragEndpoint, ragQuery, RAG_CONFIG.topK, "accessibility");
-        contextBlock = formatRagContext(rag.chunks);
+        let chunks: { id: string; source: string; text: string }[];
+        if (doc.languageId === 'html') {
+          // HTML: five sweep-targeted queries, deduped, stricter threshold.
+          // Gives the model specific guidance per category rather than generic WCAG chunks.
+          chunks = await retrieveHtmlRag(ragEndpoint);
+        } else {
+          const rag = await ragRetrieve(ragEndpoint, ragQuery, 3, "accessibility");
+          chunks = rag.chunks;
+        }
+        contextBlock = formatRagContext(chunks);
         ragCache.set(cacheKey, { at: Date.now(), context: contextBlock });
-        logger.log(`RAG: ${rag.chunks.length} chunk(s) in ${Date.now() - t0} ms`);
+        logger.log(`RAG: ${chunks.length} chunk(s) in ${Date.now() - t0} ms`);
       }
 
       if (!contextBlock || contextBlock === "(no context)") {
