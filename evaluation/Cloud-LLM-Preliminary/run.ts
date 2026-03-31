@@ -57,11 +57,11 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
   'ministral-3:3b-cloud',        // ~3 B
-  'gemma3:4b-cloud',             // ~4 B
+  // 'gemma3:4b-cloud',          // ~4 B          — REMOVED T12: avg 13.6% F1, no response to prompt changes
   'gpt-oss:20b-cloud',           // ~20 B
   'devstral-small-2:24b-cloud',  // ~24 B
   'gemma3:27b-cloud',            // ~27 B
-  'nemotron-3-nano:30b-cloud',   // ~30 B
+  // 'nemotron-3-nano:30b-cloud',// ~30 B         — REMOVED T12: avg 17.3% F1, extreme instability (7% rt vs 32% rn same test)
   'ministral-3:14b-cloud',       // ~14 B
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
@@ -69,7 +69,7 @@ const ALL_MODELS: string[] = [
   // 'minimax-m2.5:cloud',              // ~456 B MoE (updated) — BROKEN: cloud API returns HTTP 500 on every request
   'deepseek-v3.2:cloud',             // ~671 B MoE
   // ── Large (100–700 B) ─────────────────────────────────────────────────
-  'devstral-2:123b-cloud',      // ~123 B
+  // 'devstral-2:123b-cloud',    // ~123 B        — REMOVED T12: avg 18.7% F1, flat across all 3 tests, large model behaving like a small one
   'gpt-oss:120b-cloud',         // ~120 B
   'nemotron-3-super:cloud',     // ~undisclosed (Nemotron super-class)
   'cogito-2.1:671b-cloud',      // ~671 B
