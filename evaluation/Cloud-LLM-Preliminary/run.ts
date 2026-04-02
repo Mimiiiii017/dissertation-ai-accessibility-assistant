@@ -56,13 +56,13 @@ import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 const ALL_MODELS: string[] = [
   // ── Smaller / faster (<30 B) ───────────────────────────────────────────
-  'ministral-3:3b-cloud',        // ~3 B
+  // 'ministral-3:3b-cloud',        // ~3 B         — REMOVED T14: FP=225 across T13 conditions; chronic hallucinator across all tests; avg F1=24.3%
   // 'gemma3:4b-cloud',          // ~4 B          — REMOVED T12: avg 13.6% F1, no response to prompt changes
-  'gpt-oss:20b-cloud',           // ~20 B
-  'devstral-small-2:24b-cloud',  // ~24 B
-  'gemma3:27b-cloud',            // ~27 B
+  // 'gpt-oss:20b-cloud',           // ~20 B        — REMOVED T14: TP≈0 in 3/4 conditions across all tests; effectively non-functional as an accessibility auditor
+  // 'devstral-small-2:24b-cloud',  // ~24 B        — REMOVED T15: rt=7.5% rn=7.5%; complete collapse under RAG in both conditions; worst RAG performance series-wide
+  // 'gemma3:27b-cloud',            // ~27 B        — REMOVED T15: avg F1=16.2% T14; four conditions no improvement trajectory; underperforms models half its size
   // 'nemotron-3-nano:30b-cloud',// ~30 B         — REMOVED T12: avg 17.3% F1, extreme instability (7% rt vs 32% rn same test)
-  'ministral-3:14b-cloud',       // ~14 B
+  // 'ministral-3:14b-cloud',       // ~14 B        — REMOVED T15: rn FP=129 across 3 runs (avg 43 FP/run); hallucination flood undermines precision
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
   // 'minimax-m2:cloud',                // ~456 B MoE        — BROKEN: cloud API returns HTTP 500 on every request
@@ -71,14 +71,14 @@ const ALL_MODELS: string[] = [
   // ── Large (100–700 B) ─────────────────────────────────────────────────
   // 'devstral-2:123b-cloud',    // ~123 B        — REMOVED T12: avg 18.7% F1, flat across all 3 tests, large model behaving like a small one
   'gpt-oss:120b-cloud',         // ~120 B
-  'nemotron-3-super:cloud',     // ~undisclosed (Nemotron super-class)
+  // 'nemotron-3-super:cloud',     // ~undisclosed  — REMOVED T14: catastrophic failures in rn (FP=39) and nt (F1=7.6%); avg F1=17.6%; incoherent condition variance
   'cogito-2.1:671b-cloud',      // ~671 B
   'mistral-large-3:675b-cloud', // ~675 B
   // ── Very large / undisclosed (>235 B) ────────────────────────────────
   'qwen3-vl:235b-cloud',        // ~235 B (vision-language)
   'qwen3.5:397b-cloud',         // ~397 B
   'qwen3-coder:480b-cloud',     // ~480 B
-  'qwen3-coder-next:cloud',     // ~undisclosed (next-gen Qwen coder)
+  // 'qwen3-coder-next:cloud',     // ~undisclosed  — REMOVED T14: extreme condition variance (7.6%–35.7%); nt dropped 32.5 pp T12→T13; avg F1=18.8%
   'kimi-k2.5:cloud',            // ~undisclosed (Moonshot AI)
   'glm-5:cloud',                // ~undisclosed (Zhipu AI)
 ];

@@ -15,6 +15,7 @@ Read every single line of the code from top to bottom. Build a complete internal
   - Every aria-labelledby / aria-describedby / aria-controls value — note the target id(s) so you can verify they exist.
   - Every interactive element: <a>, <button>, <input>, <select>, <textarea>, <img> — note existing accessible-name attributes.
   - Page structure: <html lang>, <title>, heading order (h1–h6), landmark elements.
+  - Whether the <main> element has an id attribute — skip links and in-page anchors require it.
   - Every <button> or role="button" element — note whether it has aria-controls or class/text suggesting it toggles content.
 Do NOT write any output during Phase 1.
 
@@ -206,7 +207,10 @@ SWEEP F — Image alt: for every <img> with no alt attribute at all (alt="" is f
 SWEEP G — Landmark labels: for each of the types <nav>, <section>, <aside> — count how many of that type exist in the document. If MORE than one of the same type exists, any instance without aria-label or aria-labelledby → report MEDIUM. If only one of a given type exists, skip that type entirely (a unique landmark needs no distinguishing label). Do not apply to <main>, <header>, or <footer>.
 SWEEP H — Broken ARIA refs: for every aria-labelledby / aria-describedby / aria-controls value, check your Phase 1 id inventory. If the referenced id is absent from your complete inventory → report HIGH. Only report if Phase 1 inventory is complete.
 SWEEP I — Toggle buttons: for every <button> (or role="button") whose class/text/aria-controls suggests it shows or hides content (toggle, expand, collapse, accordion, hamburger, menu, dropdown, disclosure, show, hide) and that has no aria-expanded → report HIGH.
-SWEEP J — Autocomplete: for every <input>/<select>/<textarea> whose name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card) and that has no autocomplete attribute → report MEDIUM citing SC 1.3.5. Skip if signal is ambiguous.` : ''}
+SWEEP J — Autocomplete: for every <input>/<select>/<textarea> whose name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card) and that has no autocomplete attribute → report MEDIUM citing SC 1.3.5. Skip if signal is ambiguous.
+SWEEP K — Table captions: for every <table> element, check whether it has a <caption> as a direct child. If no <caption> exists → report LOW: "table missing caption" (WCAG SC 1.3.1 — a caption conveys the table's purpose to screen reader users navigating by table).
+SWEEP L — Search form landmark: for every <form> element that contains an <input type="search"> or any <input> whose name, id, or placeholder contains "search" or "query": check whether the <form> has role="search". If not → report LOW: "search form missing role=\\"search\\"" (ARIA landmark best practice, SC 1.3.6 — screen reader users navigating by landmarks will not find the search region).
+SWEEP M — Main landmark id: if a <main> element exists in the document and has no id attribute → report LOW: "main landmark missing id — skip links and in-page anchors cannot target the main content area without an explicit id" (SC 2.4.1).` : ''}
 
 CODE TO AUDIT (${languageId}):
 ${code}

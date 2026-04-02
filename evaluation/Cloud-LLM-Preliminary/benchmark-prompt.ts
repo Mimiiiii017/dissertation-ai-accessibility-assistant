@@ -29,6 +29,7 @@ Read every single line of the code from top to bottom. Build a complete internal
   • Every aria-labelledby / aria-describedby / aria-controls value — note the target id(s) so you can verify they exist.
   • Every interactive element: <a>, <button>, <input>, <select>, <textarea>, <img> — note existing accessible-name attributes.
   • Page structure: <html lang>, <title>, heading order (h1–h6), landmark elements.
+  • Whether the <main> element has an id attribute — skip links and in-page anchors require it.
   • Every <button> or role="button" element — note whether it has aria-controls or class/text suggesting it toggles content.
 Do NOT write any output during Phase 1.
 
@@ -149,6 +150,23 @@ SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
   Personal data signals: name, given-name, family-name, email, phone, tel, address, street, city, postcode, postal, zip, country, birthday, birth, card, credit.
   If the element has no autocomplete attribute → report "missing autocomplete attribute" (MEDIUM), citing SC 1.3.5.
   Do NOT report if autocomplete is already present (any value). Do NOT report for input types: hidden, submit, button, reset, image, checkbox, radio, range, color, file.
+
+SWEEP K — Tables missing caption:
+  For every <table> element: check whether it has a <caption> as a direct child element.
+  If no <caption> exists → report "table missing caption" (LOW), citing SC 1.3.1.
+  Rationale: screen reader users navigating by table hear the caption as the table's title before entering it; without it they have no context for what the table contains.
+  Do NOT report if a <caption> is already present.
+
+SWEEP L — Search form missing role="search":
+  For every <form> element: check whether it contains an <input type="search"> or any <input> whose name, id, or placeholder contains "search" or "query".
+  If such an input exists AND the <form> itself has no role="search" attribute → report "search form missing role=\\"search\\"" (LOW), citing SC 1.3.6.
+  Rationale: role="search" creates a named landmark so screen reader users can jump directly to the search functionality; without it the form is reached only by sequential navigation.
+  Do NOT report if role="search" is already present on the form.
+
+SWEEP M — Main landmark missing id:
+  If a <main> element exists anywhere in the document and it has no id attribute → report "main landmark missing id" (LOW), citing SC 2.4.1.
+  Rationale: skip-navigation links (e.g. "Skip to main content") require a matching id on the target element; without an id the skip link's href has nothing to anchor to.
+  Do NOT report if <main> already has an id, or if no <main> element exists.
 `;
 
 import { buildAiPrompt as _buildAiPrompt } from '../../extension/ai-accessibility-assistant/src/utils/prompts/prompt';
