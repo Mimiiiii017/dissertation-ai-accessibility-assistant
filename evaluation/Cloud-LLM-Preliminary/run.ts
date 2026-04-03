@@ -70,17 +70,17 @@ const ALL_MODELS: string[] = [
   'deepseek-v3.2:cloud',             // ~671 B MoE
   // ── Large (100–700 B) ─────────────────────────────────────────────────
   // 'devstral-2:123b-cloud',    // ~123 B        — REMOVED T12: avg 18.7% F1, flat across all 3 tests, large model behaving like a small one
-  'gpt-oss:120b-cloud',         // ~120 B
+  'gpt-oss:120b-cloud',         // ~120 B  — T15 #1: avg F1=50.6%, best rn=61.6%
   // 'nemotron-3-super:cloud',     // ~undisclosed  — REMOVED T14: catastrophic failures in rn (FP=39) and nt (F1=7.6%); avg F1=17.6%; incoherent condition variance
-  'cogito-2.1:671b-cloud',      // ~671 B
-  'mistral-large-3:675b-cloud', // ~675 B
+  // 'cogito-2.1:671b-cloud',   // ~671 B        — REMOVED T16: T15 avg F1=24.1%; zero FP all conditions (predicts no issues); 671B size with bottom-3 performance
+  'mistral-large-3:675b-cloud', // ~675 B  — T15 #7: avg F1=28.0%
   // ── Very large / undisclosed (>235 B) ────────────────────────────────
-  'qwen3-vl:235b-cloud',        // ~235 B (vision-language)
-  'qwen3.5:397b-cloud',         // ~397 B
-  'qwen3-coder:480b-cloud',     // ~480 B
+  // 'qwen3-vl:235b-cloud',     // ~235 B        — REMOVED T16: T15 avg F1=25.5%; vision-language model; nt worst at 17.9%; not suited to pure-text HTML analysis
+  'qwen3.5:397b-cloud',         // ~397 B  — T15 #3: avg F1=39.9%; most stable model
+  // 'qwen3-coder:480b-cloud',  // ~480 B        — REMOVED T16: T15 avg F1=20.9%; declining trend T12→T15; worst of large models
   // 'qwen3-coder-next:cloud',     // ~undisclosed  — REMOVED T14: extreme condition variance (7.6%–35.7%); nt dropped 32.5 pp T12→T13; avg F1=18.8%
-  'kimi-k2.5:cloud',            // ~undisclosed (Moonshot AI)
-  'glm-5:cloud',                // ~undisclosed (Zhipu AI)
+  'kimi-k2.5:cloud',            // ~undisclosed  — T15 #2: avg F1=42.4%, best nt=54.6%
+  'glm-5:cloud',                // ~undisclosed  — T15 #5: avg F1=31.9%
 ];
 
 // ─── Language → languageId mapping ───────────────────────────────────────

@@ -115,16 +115,37 @@ export interface ModelParamOverride {
  * Falls back to CLOUD_SAFE_OPTIONS when no match is found.
  *
  * Sources:
- *   Qwen3 series  — Alibaba Qwen3 model card (HuggingFace)
- *                   https://huggingface.co/Qwen/Qwen3-235B-A22B
- *   DeepSeek-V3   — DeepSeek API docs, parameter settings guide
- *                   https://api-docs.deepseek.com/quick_start/parameter_settings
+ *   GPT-OSS class  — OpenAI Platform docs, Prompt Engineering guide:
+ *                    temperature=0 for deterministic / structured-output tasks
+ *   Kimi-K2.5      — Moonshot AI API docs: temperature=0.6 for extended-thinking
+ *                    (aligned with Qwen3/DeepSeek-R1 CoT community consensus)
+ *   Qwen3 series   — Alibaba Qwen3 model card (HuggingFace)
+ *                    https://huggingface.co/Qwen/Qwen3-235B-A22B
+ *   DeepSeek-V3    — DeepSeek API docs, parameter settings guide
+ *                    https://api-docs.deepseek.com/quick_start/parameter_settings
+ *   GLM-5          — Zhipu AI API docs: lower temperature for structured/factual tasks
+ *   Gemini         — Google AI API docs: temperature=0 for factual/precise/structured tasks
+ *   Mistral Large  — Mistral AI docs + cookbook: temperature=0.3 for focused analytical tasks
  */
 export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
-  // ── Qwen3 family (qwen3-coder, qwen3.5, qwen3-vl) ───────────────────────
+  // ── GPT-OSS class (gpt-oss:120b) ────────────────────────────────────────
+  // OpenAI-style architecture. Per OpenAI API guidance, temperature=0 / top_p=1
+  // gives the most deterministic output for structured extraction and classification.
+  // Accessibility detection is fact-finding, not generation — determinism first.
+  'gpt-oss': {
+    think:   { temperature: 0.0, top_p: 1.0 },
+    noThink: { temperature: 0.0, top_p: 1.0 },
+  },
+  // ── Kimi-K2.5 (Moonshot AI) ──────────────────────────────────────────────
+  // Extended-thinking model. Moonshot AI recommends temperature=0.6 in reasoning
+  // mode — consistent with Qwen3 and DeepSeek-R1 CoT model community consensus.
+  // No-think mode gets tighter temperature for deterministic structured output.
+  'kimi': {
+    think:   { temperature: 0.6, top_p: 0.95 },
+    noThink: { temperature: 0.3, top_p: 0.9  },
+  },
+  // ── Qwen3 family (qwen3.5:397b) ─────────────────────────────────────────
   // Manufacturer recommended: temp 0.6/top_p 0.95 for think, temp 0.7/top_p 0.8 for no-think.
-  // Current uniform temp=0.2 is significantly below the recommended range and
-  // is the suspected cause of qwen3-coder:480b's persistent underperformance.
   'qwen3': {
     think:   { temperature: 0.6, top_p: 0.95 },
     noThink: { temperature: 0.7, top_p: 0.8  },
@@ -136,6 +157,28 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   'deepseek': {
     think:   { temperature: 0.0, top_p: 1.0 },
     noThink: { temperature: 0.0, top_p: 1.0 },
+  },
+  // ── GLM-5 (Zhipu AI) ─────────────────────────────────────────────────────
+  // GLM family default is 0.95; Zhipu's API guide recommends lower values for
+  // structured/factual tasks. GLM-5 has no dedicated thinking mode.
+  'glm': {
+    think:   { temperature: 0.2, top_p: 0.9 },
+    noThink: { temperature: 0.2, top_p: 0.9 },
+  },
+  // ── Gemini (Google) ──────────────────────────────────────────────────────
+  // Google AI API docs explicitly recommend temperature=0 for factual, precise,
+  // and structured-output tasks. top_p=1.0 avoids nucleus truncation side-effects
+  // at such low temperature (distribution is already very peaked).
+  'gemini': {
+    think:   { temperature: 0.0, top_p: 1.0 },
+    noThink: { temperature: 0.0, top_p: 1.0 },
+  },
+  // ── Mistral Large ────────────────────────────────────────────────────────
+  // Mistral AI docs and cookbook examples recommend temperature=0.3 for focused
+  // analytical tasks and structured extraction workflows.
+  'mistral': {
+    think:   { temperature: 0.3, top_p: 0.9 },
+    noThink: { temperature: 0.3, top_p: 0.9 },
   },
 };
 
