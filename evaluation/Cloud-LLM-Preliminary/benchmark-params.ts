@@ -4,81 +4,84 @@
  * Inference parameters for the benchmark, kept separate from the extension's
  * ANALYSIS_PRESETS so benchmark tuning never affects user-facing behaviour.
  *
- * Parameter choices are grounded in the following literature (IEEE):
+ * !! IMPORTANT — CLOUD vs LOCAL PARAMS !!
+ * Cloud-routed models (model IDs ending in ':cloud') can only receive three
+ * parameters from Ollama's /api/chat options object:
  *
- * [1] A. Holtzman, J. Buys, L. Du, M. Forbes, and Y. Choi, "The Curious Case
- *     of Neural Text Degeneration," in Proc. ICLR, 2020.
- *     arXiv:1904.09751  →  top_p = 0.95
+ *   num_predict  — max output tokens
+ *   temperature  — sampling temperature
+ *   top_p        — nucleus sampling cutoff
  *
- * [2] A. Fan, M. Lewis, and Y. Dauphin, "Hierarchical Neural Story
- *     Generation," in Proc. ACL, 2018, pp. 889–898.
- *     doi:10.18653/v1/P18-1082  →  top_k = 40
+ * All other options (num_ctx, top_k, repeat_penalty, seed, mirostat etc.) cause
+ * the cloud gateway to return HTTP 500 and are therefore stripped before the
+ * request is sent.  They DO apply to local Ollama models.
  *
- * [3] M. Renze and E. Guven, "The Effect of Sampling Temperature on Problem
- *     Solving in Large Language Models," in Findings EMNLP, 2024,
- *     pp. 7346–7356. doi:10.18653/v1/2024.findings-emnlp.432  →  temperature = 0.2
+ * Parameter values below are tuned for accessibility auditing specifically:
+ * this is a structured detection task (find real issues, skip non-issues),
+ * not creative text generation.  That means:
+ *   - Low temperature: determinism beats variety for fact-finding
+ *   - Tighter top_p: reduce stochastic noise on structured JSON output
+ *   - Mild repeat penalty: ARIA attributes and WCAG references legitimately repeat
  *
- * [4] C. Meister, T. Pimentel, G. Wiher, and R. Cotterell, "Locally Typical
- *     Sampling," TACL, vol. 11, pp. 102–121, 2023.
- *     doi:10.1162/tacl_a_00536  →  repeat_penalty, frequency_penalty, presence_penalty
- *
- * [5] S. Welleck et al., "Neural Text Generation with Unlikelihood Training,"
- *     in Proc. ICLR, 2020. arXiv:1908.04319
- *     →  frequency_penalty = 0, presence_penalty = 0
- *
- * [6] M. Chen et al., "Evaluating Large Language Models Trained on Code,"
- *     arXiv:2107.03374, 2021.  →  top_p = 0.95, num_predict ceiling
- *
- * [7] J. Pineau et al., "Improving Reproducibility in Machine Learning
- *     Research," JMLR, vol. 22, no. 164, 2021. arXiv:2003.12206  →  seed = 42
+ * Literature references:
+ * [1] A. Holtzman et al., "Neural Text Degeneration", ICLR 2020 — top_p
+ * [2] A. Fan et al., "Hierarchical Neural Story Generation", ACL 2018 — top_k
+ * [3] M. Renze & E. Guven, "Effect of Sampling Temperature", EMNLP 2024 — temperature
+ * [4] C. Meister et al., "Locally Typical Sampling", TACL 2023 — repeat params
+ * [5] S. Welleck et al., "Unlikelihood Training", ICLR 2020 — penalty=0 for technical vocab
+ * [6] M. Chen et al., "Evaluating LLMs on Code", arXiv:2107.03374 — num_predict ceiling
+ * [7] J. Pineau et al., "Reproducibility in ML", JMLR 2021 — seed
  */
 
 export interface CloudBenchmarkOptions {
   // ── Output length ────────────────────────────────────────────────────────
-  /** Max tokens the model may generate. */
+  /** Max tokens the model may generate. CLOUD: applies. */
   num_predict: number;
-  /** Context window size (local Ollama only — ignored by cloud APIs). */
+  /** Context window size. LOCAL ONLY — ignored by cloud APIs. */
   num_ctx: number;
-  // ── Sampling ─────────────────────────────────────────────────────────────
-  /** Randomness: 0 = deterministic, higher = more creative. */
+  // ── Sampling — CLOUD: temperature and top_p apply; top_k is LOCAL ONLY ──
+  /** Randomness: 0 = deterministic, higher = more creative. CLOUD: applies. */
   temperature: number;
-  /** Nucleus sampling — cumulative probability cutoff. */
+  /** Nucleus sampling — cumulative probability cutoff. CLOUD: applies. */
   top_p: number;
-  /** Top-K sampling — sample from the K most likely next tokens. */
+  /** Top-K sampling. LOCAL ONLY — cloud gateway rejects this field (HTTP 500). */
   top_k: number;
-  // ── Repetition control ───────────────────────────────────────────────────
-  /** Penalise repeated tokens (higher = less repetition). */
+  // ── Repetition control — LOCAL ONLY (all fields below) ──────────────────
+  /** Penalise repeated tokens. LOCAL ONLY. */
   repeat_penalty: number;
-  /** How many tokens back to check for repetition. */
+  /** How many tokens back to check for repetition. LOCAL ONLY. */
   repeat_last_n: number;
-  /** Penalise tokens proportional to how often they have appeared. */
+  /** Penalise tokens proportional to frequency. LOCAL ONLY. */
   frequency_penalty: number;
-  /** Penalise any token that has appeared at all. */
+  /** Penalise any token that has appeared. LOCAL ONLY. */
   presence_penalty: number;
-  // ── Reproducibility ──────────────────────────────────────────────────────
-  /** Random seed — gives deterministic results for local Ollama models. */
+  // ── Reproducibility — LOCAL ONLY ─────────────────────────────────────────
+  /** Random seed. LOCAL ONLY — cloud models use server-side seeding. */
   seed: number;
-  /** Mirostat adaptive sampling (0 = off, 1 = v1, 2 = v2). */
+  /** Mirostat adaptive sampling. LOCAL ONLY. */
   mirostat: number;
 }
 
-/**
- * The single set of inference parameters applied to every model in the
- * Cloud-LLM-Preliminary benchmark.  All models receive exactly these values —
- * no model-specific overrides — so that only model quality differs.
- */
 export const CLOUD_BENCHMARK_OPTIONS: CloudBenchmarkOptions = {
-  num_predict:       32000,  // [6] Chen et al. — complete output required for valid scoring; pilot run showed truncation at 20k
-  num_ctx:           32768,  // local Ollama only
-  temperature:       0.2,    // [3] Renze & Guven — no sig. accuracy effect 0.0–1.0; 0.2 for slight determinism
-  top_p:             0.95,   // [1] Holtzman et al. — canonical nucleus threshold; also used in [6]
-  top_k:             40,     // [2] Fan et al. — community standard for focused/non-creative generation
-  repeat_penalty:    1.1,    // [4][5] Meister et al. + Welleck et al. — mild deterrent to degenerate repetition
-  repeat_last_n:     128,    // [4] spans ~2-3 issue blocks; avoids penalising recurrent ARIA/WCAG terms
-  frequency_penalty: 0.0,    // [5] Welleck et al. — non-zero suppresses correct high-freq technical vocab
-  presence_penalty:  0.0,    // [5] same reasoning as frequency_penalty
-  seed:              42,     // [7] Pineau et al. — fixed seed required for reproducible ML evaluation
-  mirostat:          0,      // off (local Ollama only)
+  // ── CLOUD-APPLICABLE params ───────────────────────────────────────────────
+  num_predict:       32000,  // [6] Must be high — 51-issue fixture produces verbose structured output;
+                             //     pilot runs showed truncation below 20k tokens
+  temperature:       0.1,    // [3] Accessibility detection is fact-finding, not generation;
+                             //     lower temp = more deterministic issue identification;
+                             //     0.1 preferred over 0.2 for structured extraction tasks
+  top_p:             0.9,    // [1] Tightened from 0.95 — nucleus at 0.9 reduces stochastic noise
+                             //     on structured JSON output without cutting off valid phrasings
+  // ── LOCAL ONLY params — not sent to cloud models ──────────────────────────
+  num_ctx:           32768,  // Local Ollama only
+  top_k:             40,     // [2] Local Ollama only
+  repeat_penalty:    1.05,   // [4] Mild — ARIA attributes and WCAG criterion numbers legitimately
+                             //     repeat across issues; 1.1 over-penalises correct technical vocab
+  repeat_last_n:     64,     // [4] Shorter lookback than default (128) — 64 tokens avoids treating
+                             //     structured issue blocks as repetition of each other
+  frequency_penalty: 0.0,    // [5] Zero — non-zero suppresses correct high-freq WCAG/ARIA terms
+  presence_penalty:  0.0,    // [5] Zero — same reasoning as frequency_penalty
+  seed:              42,     // [7] Fixed seed for reproducible local runs
+  mirostat:          0,      // Off — local Ollama only
 };
 
 /**
@@ -92,3 +95,67 @@ export const CLOUD_SAFE_OPTIONS = {
   temperature: CLOUD_BENCHMARK_OPTIONS.temperature,
   top_p:       CLOUD_BENCHMARK_OPTIONS.top_p,
 } as const;
+
+export interface CloudSafeOptions {
+  num_predict: number;
+  temperature: number;
+  top_p: number;
+}
+
+export interface ModelParamOverride {
+  /** Options to apply when thinking is enabled (default CoT mode). */
+  think?: Partial<CloudSafeOptions>;
+  /** Options to apply when /no_think directive is in use. */
+  noThink?: Partial<CloudSafeOptions>;
+}
+
+/**
+ * Per-model parameter overrides for cloud-routed models.
+ * Key is matched as a case-insensitive substring of the model ID.
+ * Falls back to CLOUD_SAFE_OPTIONS when no match is found.
+ *
+ * Sources:
+ *   Qwen3 series  — Alibaba Qwen3 model card (HuggingFace)
+ *                   https://huggingface.co/Qwen/Qwen3-235B-A22B
+ *   DeepSeek-V3   — DeepSeek API docs, parameter settings guide
+ *                   https://api-docs.deepseek.com/quick_start/parameter_settings
+ */
+export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
+  // ── Qwen3 family (qwen3-coder, qwen3.5, qwen3-vl) ───────────────────────
+  // Manufacturer recommended: temp 0.6/top_p 0.95 for think, temp 0.7/top_p 0.8 for no-think.
+  // Current uniform temp=0.2 is significantly below the recommended range and
+  // is the suspected cause of qwen3-coder:480b's persistent underperformance.
+  'qwen3': {
+    think:   { temperature: 0.6, top_p: 0.95 },
+    noThink: { temperature: 0.7, top_p: 0.8  },
+  },
+  // ── DeepSeek-V3 ─────────────────────────────────────────────────────────
+  // Manufacturer recommended: temperature=0.0 for deterministic/structured output.
+  // DeepSeek-V3 is sensitive to temperature; even 0.2 introduces variation that
+  // compounds across the 51-issue fixture.
+  'deepseek': {
+    think:   { temperature: 0.0, top_p: 1.0 },
+    noThink: { temperature: 0.0, top_p: 1.0 },
+  },
+};
+
+/**
+ * Returns the cloud-safe options for a given model and think/no-think condition.
+ * Applies per-model overrides from MODEL_CLOUD_OVERRIDES when available;
+ * otherwise falls back to the uniform CLOUD_SAFE_OPTIONS baseline.
+ */
+export function getCloudOptions(model: string, noThink: boolean): CloudSafeOptions {
+  const base: CloudSafeOptions = {
+    num_predict: CLOUD_BENCHMARK_OPTIONS.num_predict,
+    temperature: CLOUD_BENCHMARK_OPTIONS.temperature,
+    top_p:       CLOUD_BENCHMARK_OPTIONS.top_p,
+  };
+  const modelLower = model.toLowerCase();
+  for (const [key, override] of Object.entries(MODEL_CLOUD_OVERRIDES)) {
+    if (modelLower.includes(key.toLowerCase())) {
+      const mode = noThink ? override.noThink : override.think;
+      return mode ? { ...base, ...mode } : base;
+    }
+  }
+  return base;
+}
