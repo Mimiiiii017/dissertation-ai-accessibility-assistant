@@ -204,18 +204,12 @@ The 3-run averaging produced notably stable scores. Key evidence:
 | **devstral-small-2:24b** | rt/rn F1=7.5% both; complete RAG collapse; avg F1=17.5% |
 | **gemma3:27b** | Avg F1=16.2%; four tests of no improvement; rn=8.6% |
 
-### 6.2 Sweep Additions for 100% Miss Issues
+### 6.2 Sweep Additions: Considered and Reverted
 
-Seven issues were missed by all 39 runs in T14. Three are addressable with new sweep rules:
-
-| Issue | Fix |
-|---|---|
-| `table-caption-missing` | Add to Sweep F (tables): check every `<table>` has a `<caption>` child |
-| `search-form-role` | Add to Sweep B (forms): check `<form>` containing search input has `role="search"` |
-| `main-id-missing` | Add to Phase 1 inventory: flag if `<main>` has no `id` attribute |
-
-The others (`subnav-btn-aria`, `live-region-removed`, `product-grid-label`, `account-nav-label`) require dynamic ARIA state reasoning that static sweeps cannot reliably address.
+Sweeps K/L/M were drafted to address three of the seven universally-missed issues (`table-caption-missing`, `search-form-role`, `main-id-missing`) but were removed before T15. Decision: adding explicit sweep instructions for known gaps would test whether models follow instructions, not whether they can identify real violations independently. The benchmark should measure real-world capability without guided hints.
 
 ### 6.3 Continue html-high, 3 runs
 
 Keep `--fixtures html-high --runs 3` for T15. The multi-run averaging is working — scores are more stable and FP spikes are properly exposed rather than hidden by lucky single-run results.
+
+
