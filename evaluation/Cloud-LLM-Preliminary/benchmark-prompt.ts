@@ -74,6 +74,8 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 [vii] SWEEP J (autocomplete) — Only flag an <input> if you confirmed during Phase 1 that its name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card). If the signal is ambiguous or absent, skip the element entirely. Do NOT flag inputs whose purpose is clearly non-personal (search, query, message, subject, comment, username, password, coupon, promo).
 
 [viii] SWEEP H (broken ARIA references) — Only report a broken aria-labelledby / aria-describedby / aria-controls reference if you built a complete id inventory in Phase 1 AND that id is absent from your inventory. If you did not record every id in Phase 1, do NOT report any broken references — incomplete inventories produce false positives.
+
+[ix]  TABLE HEADER SCOPE — A <th> element does NOT require a scope attribute when its position alone unambiguously identifies its axis. Specifically: if a row contains only ONE <th> at the start of the row, screen readers infer row scope. If a column contains only ONE <th> in the header row, screen readers infer col scope. Only flag a <th> as "missing scope" if (a) the scope attribute is literally absent AND (b) there are multiple <th> elements in the same row (ambiguous row headers) or multiple <th> elements in the same column position across rows (ambiguous col headers). Do NOT flag every <th> in a simple table where position is unambiguous.
 `;
 
 /**
@@ -108,8 +110,11 @@ SWEEP B — Buttons with no accessible name:
   Do NOT report buttons that satisfy any of 1–4.
 
 SWEEP C — Table headers without scope:
-  For every <th>: if it has no scope attribute → report "table header missing scope" (MEDIUM).
-  Only report for <th> elements that literally lack a scope attribute.
+  For every <th>: apply BOTH conditions before reporting:
+  (a) The scope attribute is literally absent from that element.
+  (b) The table is ambiguous — i.e. the header row contains more than one <th>, OR multiple <th> elements appear in the same column position across rows.
+  If a table has a single header row with clearly distinct column <th> elements AND no row <th> elements, position is unambiguous and scope is NOT required.
+  Only report "table header missing scope" when BOTH (a) and (b) are true.
 
 SWEEP D — Heading level skips:
   List headings (h1–h6) in document order. A skip is when the level jumps by 2 or more (h2→h4, h2→h5, h3→h5, etc.) with no intermediate level between them.

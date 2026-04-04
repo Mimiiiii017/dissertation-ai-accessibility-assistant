@@ -129,11 +129,14 @@ export interface ModelParamOverride {
  */
 export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // ── GPT-OSS class (gpt-oss:120b) ────────────────────────────────────────
-  // OpenAI-style architecture. Per OpenAI API guidance, temperature=0 / top_p=1
-  // gives the most deterministic output for structured extraction and classification.
-  // Accessibility detection is fact-finding, not generation — determinism first.
+  // OpenAI-style architecture. temperature=0 / top_p=1 for deterministic
+  // structured extraction per OpenAI API guidance.
+  // T16 finding: think=0.0 caused 12 FP in rag-think (all "table header missing
+  // scope" — deterministic hallucination on clean fixture at zero temperature).
+  // Think mode raised to 0.1 to allow slight sampling variation that breaks the
+  // locked hallucination cycle while remaining low enough for structured output.
   'gpt-oss': {
-    think:   { temperature: 0.0, top_p: 1.0 },
+    think:   { temperature: 0.1, top_p: 1.0 },
     noThink: { temperature: 0.0, top_p: 1.0 },
   },
   // ── Kimi-K2.5 (Moonshot AI) ──────────────────────────────────────────────
