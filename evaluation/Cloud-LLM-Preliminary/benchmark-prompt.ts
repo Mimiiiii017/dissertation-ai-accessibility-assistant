@@ -156,6 +156,151 @@ SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
   Do NOT report if autocomplete is already present (any value). Do NOT report for input types: hidden, submit, button, reset, image, checkbox, radio, range, color, file.
 `;
 
+/**
+ * Mandatory element sweeps for CSS — mirrors HTML_MANDATORY_SWEEPS in structure.
+ *
+ * T17 showed CSS F1 average ~31% vs HTML ~36%. The gap is not fundamental;
+ * models lack a scanning algorithm for CSS patterns equivalent to the HTML sweeps.
+ * These sweeps target the most common missed issues observed in T17 FN analysis.
+ */
+const CSS_MANDATORY_SWEEPS = `
+MANDATORY CSS ACCESSIBILITY SWEEPS — run these using your Phase 1 inventory:
+
+PHASE 1 CSS — before any sweep, build this inventory:
+  • Every rule containing outline: none, outline: 0, or outline: transparent — record its selector.
+  • Every selector targeting a potentially interactive element (button, a, input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"]) that sets an explicit height or width value in px.
+  • Every @media (prefers-reduced-motion) block — record which selectors and properties it covers.
+  • Every @media (forced-colors: active) block — note whether it exists.
+  • The sr-only / visually-hidden / screen-reader-text utility class declaration (if present) — record every property it sets.
+  • Every word-spacing or letter-spacing value that is negative.
+  • Every rule that sets text-decoration: none on a, a:link, or a:visited selectors.
+
+SWEEP CSS-A — Focus indicator removed without replacement (HIGH):
+  For every selector in your outline-removal inventory: check whether that same selector (or its :focus / :focus-visible variant) provides a visible alternative focus style — box-shadow, border with a colour distinct from the background, or outline with a value other than none/0/transparent.
+  If no visible alternative exists on a paired :focus or :focus-visible rule → report "focus indicator removed without replacement on <selector>" (HIGH).
+  Do NOT report if a visible box-shadow, border, or replacement outline is present on the same or a paired rule.
+
+SWEEP CSS-B — Touch target too small (MEDIUM):
+  For every interactive-element selector in your height/width inventory: if the explicitly-set height OR width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
+  If height/width is 24–43px, also report as a potential violation — "touch target may be below 44px recommended size: <selector>" (MEDIUM) — unless surrounding margin or padding of ≥8px on each side compensates.
+  Do NOT report elements that have no explicit height or width rule.
+
+SWEEP CSS-C — Broken visually-hidden utility (HIGH):
+  Inspect the sr-only / visually-hidden / screen-reader-text utility rule. A correct implementation uses: position: absolute, very small dimensions (1px × 1px or equivalent), clip or clip-path, and does NOT use display: none or visibility: hidden.
+  If the utility uses display: none or visibility: hidden → report "visually-hidden utility removes content from screen readers" (HIGH).
+
+SWEEP CSS-D — Motion animation without prefers-reduced-motion override (MEDIUM):
+  For every transition or animation that causes spatial movement (transition: transform ..., animation: slide/fade-in/bounce, transform with translate/scale/rotate): if no @media (prefers-reduced-motion: reduce) rule disables or overrides that specific motion for that selector → report "motion animation missing prefers-reduced-motion override: <selector>" (MEDIUM).
+  Do NOT report opacity-only or colour-only transitions. Do NOT report if the selector is already covered by a reduced-motion override.
+
+SWEEP CSS-E — Negative word-spacing (MEDIUM):
+  If any rule sets word-spacing to a negative value → report "negative word-spacing impairs readability: <selector>" (MEDIUM).
+
+SWEEP CSS-F — Colour contrast failure — only when both values confirmed (HIGH):
+  Only report a colour contrast issue when you can find BOTH the foreground colour value AND the background colour value from the CSS in the same file (literal hex, rgb(), or a custom property whose value is defined in the same file). Do NOT estimate from colour names alone.
+  If both values are present and their contrast ratio is clearly below 4.5:1 for normal text or below 3:1 for large text (18px+ or 14px+ bold) → report "insufficient colour contrast: foreground <value> / background <value> ratio <ratio>:1" (HIGH).
+
+SWEEP CSS-G — No forced-colors/high-contrast support (MEDIUM):
+  If the stylesheet sets colour or background-color on interactive elements (buttons, links, focus rings) AND there is NO @media (forced-colors: active) block anywhere in the file → report "no forced-colors/high-contrast-mode override present" (MEDIUM).
+
+SWEEP CSS-H — Link underlines removed with no alternative (MEDIUM):
+  If any rule explicitly removes underlines from body-text links (text-decoration: none on a, a:link, a:visited) AND no other non-colour visual differentiator (font-weight increase, border-bottom, background highlight on :hover) is provided → report "link underline removed — colour alone distinguishes links from surrounding text" (MEDIUM), SC 1.4.1.
+`;
+
+/**
+ * Mandatory element sweeps for JavaScript — mirrors HTML_MANDATORY_SWEEPS.
+ *
+ * T17 showed JS F1 average ~9% across all models. The primary cause is that
+ * models have no scanning algorithm for dynamic ARIA patterns. The ground truth
+ * issues are STATIC code patterns (toggle functions that do not set aria-expanded,
+ * validation logic that does not set aria-invalid) — fully observable from source.
+ * These sweeps give models the same step-by-step scanning approach as HTML sweeps.
+ */
+const JS_MANDATORY_SWEEPS = `
+MANDATORY JAVASCRIPT ARIA SWEEPS — run these using your Phase 1 inventory:
+
+PHASE 1 JS — before any sweep, build this inventory:
+  • Every function whose name or body suggests toggling or showing/hiding content: names containing toggle, open, close, expand, collapse, show, hide, activate, deactivate, openNav, closeMenu, toggleAccordion, etc.
+    For each such function: does it call setAttribute('aria-expanded', ...) or assign .ariaExpanded anywhere in that function body (or a clearly paired companion open/close function)?
+  • Every button-like element reference (querySelector, getElementById, etc.) in a toggle function. Does the function call setAttribute('aria-pressed', ...) or assign .ariaPressed?
+  • Every block of code that updates visible content in reaction to user input (innerHTML assignment, textContent assignment, insertAdjacentHTML, classList changes that switch display/visibility): is there a companion aria-live region (role="status", role="alert", aria-live="polite" or "assertive") whose content is also updated immediately after?
+  • Every form validation function: does it call setAttribute('aria-invalid', 'true') on invalid inputs and setAttribute('aria-invalid', 'false') (or removeAttribute) on valid inputs?
+  • Every interactive widget (accordion, nav drawer, dropdown, combobox) that is closed/hidden on initial page load: does any DOMContentLoaded / init function set aria-expanded="false" on its trigger?
+
+SWEEP JS-A — Toggle functions not updating aria-expanded (HIGH):
+  For every function in your toggle inventory that changes the visible state of a panel, menu, accordion, drawer, or combobox suggestion list: if no setAttribute('aria-expanded', ...) or .ariaExpanded = ... assignment exists in that function (or its directly paired open/close counterpart) → report "toggle function does not update aria-expanded on trigger element" (HIGH), naming the function and the trigger element selector.
+
+SWEEP JS-B — Toggle buttons not updating aria-pressed (HIGH):
+  For every button that acts as a two-state toggle (on/off, active/inactive) — indicated by names like filter-btn, view-toggle, billing-toggle, play-pause, or any toggle cycling between two modes — if no setAttribute('aria-pressed', ...) or .ariaPressed = ... assignment → report "toggle button does not update aria-pressed" (HIGH), naming the element selector and function.
+
+SWEEP JS-C — Dynamic content updates not announced via live region (MEDIUM):
+  For every code path that changes visible content in response to user action (filter/search results count, view mode label, step/wizard advancement, scroll-to-top status, billing period label) AND no companion aria-live region is written to immediately after → report "dynamic content update not announced to screen readers" (MEDIUM), naming the update type and function.
+  A live-region write means: assigning .textContent or .innerHTML to an element with role="status", role="alert", aria-live="polite", or aria-live="assertive".
+
+SWEEP JS-D — Form validation errors not reflected in aria-invalid (HIGH):
+  For every validation function that marks an input as invalid (adds error class, inserts error message): if no setAttribute('aria-invalid', 'true') call is made for that same input → report "form validation error not reflected in aria-invalid" (HIGH), naming the input element.
+  If valid-state resets do not clear aria-invalid to 'false' → report "aria-invalid not cleared on valid input" (MEDIUM).
+
+SWEEP JS-E — aria-expanded not initialised at page load (MEDIUM):
+  For every toggle widget (nav, accordion, dropdown, combobox) that is closed/hidden on load: if no DOMContentLoaded / module-init code sets aria-expanded="false" on the trigger element → report "aria-expanded not initialised on page load" (MEDIUM), naming the element.
+`;
+
+/**
+ * Mandatory element sweeps for TypeScript/React (TSX/JSX) — mirrors HTML_MANDATORY_SWEEPS.
+ *
+ * T17 showed TSX F1 average ~25% overall (kimi outlier at 46%). The main missed
+ * issues are consistently: missing aria-expanded on disclosure toggles, decorative
+ * icons lacking aria-hidden, missing aria-invalid/aria-required on form fields,
+ * and missing aria-selected/aria-pressed on state-bearing interactive components.
+ * These sweeps provide the scanning algorithm that drives detection.
+ */
+const TSX_MANDATORY_SWEEPS = `
+MANDATORY TSX/JSX ARIA SWEEPS — run these using your Phase 1 inventory:
+
+PHASE 1 TSX — before any sweep, build this inventory:
+  • Every component with a boolean state variable that shows or hides content: state variables named isOpen, isExpanded, isMenuOpen, showDropdown, open, expanded, visible, isDialogOpen, etc.
+    For each: does the trigger element (button, or element with role="button") receive an aria-expanded={stateVar} prop?
+  • Every <svg> element or named icon component (<ChevronIcon>, <CloseIcon>, <ArrowIcon>, <StarIcon>, <SpinnerIcon>, <SearchIcon>, etc.): does it have aria-hidden={true} or a role="img" + aria-label?
+  • Every form field component (<input>, <textarea>, <select>, or custom Input/TextInput/Select): does it have (a) a <label htmlFor={id}> or aria-label, (b) an aria-invalid prop when in error state, (c) aria-required or the HTML required attribute when required?
+  • Every tab, filter pill, pricing plan card, or toggle button whose active/selected state is tracked (isSelected, isActive, activeTab, currentPlan, selectedFilter, isChecked): does the element receive aria-selected, aria-pressed, or aria-checked matching that state?
+  • Every navigation list: do active/current-page links receive aria-current="page"?
+  • Every button with a loading/submitting state (isLoading, isSubmitting, isSaving): does it receive aria-busy={isLoading}?
+  • Every spinner component rendered during loading: does it have aria-hidden={true}?
+  • Every <section>, <nav>, <aside> appearing more than once — does each have aria-label or aria-labelledby?
+
+SWEEP TSX-A — Disclosure toggle components missing aria-expanded (HIGH):
+  For every component using a boolean to control a show/hide region: if the trigger element does NOT receive aria-expanded={stateVariable} → report "toggle component trigger missing aria-expanded prop" (HIGH), naming the component, the trigger element, and the state variable.
+
+SWEEP TSX-B — Decorative icon components not hidden from assistive technology (MEDIUM):
+  For every <svg> or named icon component rendered inside an element that already has text content or an aria-label: if the icon has no aria-hidden={true} prop → report "decorative icon missing aria-hidden={true}" (MEDIUM), naming the icon and its parent context.
+  Do NOT report icon components that ARE the sole accessible name of their parent (those need an aria-label instead).
+
+SWEEP TSX-C — Icon-only interactive elements missing accessible names (HIGH):
+  For every button, link, or role="button"/"link" element whose only content is an icon (no visible text, no aria-label, no aria-labelledby, no title): report "icon-only interactive element missing accessible name" (HIGH), naming the component.
+
+SWEEP TSX-D — Form fields missing label, aria-invalid, or aria-required (HIGH):
+  For every form input component:
+  (1) No <label htmlFor={id}>, aria-label, or aria-labelledby → report "form field missing accessible label" (HIGH).
+  (2) Component has an error/invalid state AND no aria-invalid prop → report "form field missing aria-invalid state" (HIGH).
+  (3) Field is required AND neither required nor aria-required is passed → report "required field not programmatically marked as required" (HIGH).
+  (4) Error message is rendered AND no aria-describedby links it to the input → report "form field error message not connected via aria-describedby" (MEDIUM).
+
+SWEEP TSX-E — Interactive state not communicated to assistive technology (HIGH):
+  For every tab, filter button, pricing plan card, or two-state toggle whose state is tracked by a boolean: if no aria-selected, aria-pressed, or aria-checked prop mirrors that state variable → report "interactive state not communicated to assistive technology" (HIGH), naming the component and state variable.
+
+SWEEP TSX-F — Landmark regions missing accessible names (MEDIUM):
+  For every <section>, <nav>, or <aside> that appears more than once: if neither aria-label nor aria-labelledby is present → report "repeated landmark region missing accessible name" (MEDIUM), naming the element and approximate location.
+
+SWEEP TSX-G — Required-field markers not properly managed (MEDIUM):
+  If a required-field visual marker (<span>*</span>) is rendered: (a) without aria-hidden={true} → report "required-field marker announces bare asterisk to AT — add aria-hidden" (LOW); (b) with aria-hidden={true} but the input has neither aria-required nor required → report "required field marked visually only — add aria-required or required attr" (HIGH).
+
+SWEEP TSX-H — Loading state not communicated (MEDIUM):
+  For every button with isLoading/isSubmitting state: if no aria-busy={isLoading} prop → report "loading button missing aria-busy" (MEDIUM). For every spinner rendered during loading without aria-hidden={true} → report "spinner icon missing aria-hidden" (MEDIUM).
+
+SWEEP TSX-I — Active navigation items missing aria-current (MEDIUM):
+  For every navigation link with an active/current-page indicator (isActive prop, className containing 'active'/'current'/'selected'): if no aria-current="page" prop is applied → report "active navigation link missing aria-current" (MEDIUM).
+`;
+
 import { buildAiPrompt as _buildAiPrompt } from '../../extension/ai-accessibility-assistant/src/utils/prompts/prompt';
 
 // The extension's Rule 1 says GROUPING; the benchmark system prompt says ONE PER ELEMENT.
@@ -186,11 +331,28 @@ export function buildAiPrompt(languageId: string, code: string, contextBlock: st
     .replace(GROUPING_RULE_TEXT, ONE_PER_ELEMENT_RULE_TEXT)  // fix Rule 1 contradiction
     .replace(/\n+\/no_think\s*$/, '');                        // allow reasoning models to think
 
+  const ANCHOR = 'SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):';
+
   if (lang === 'html') {
     const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${HTML_MANDATORY_SWEEPS.trim()}`;
-    return base.replace('SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):', `${injection}\n\nSUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):`);
+    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
   }
 
-  // All other languages: anti-FP supplement only (no HTML element sweeps)
-  return base.replace('SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):', `${ANTI_FP_SUPPLEMENT.trim()}\n\nSUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):`);
+  if (lang === 'css') {
+    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${CSS_MANDATORY_SWEEPS.trim()}`;
+    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
+  }
+
+  if (lang === 'javascript') {
+    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${JS_MANDATORY_SWEEPS.trim()}`;
+    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
+  }
+
+  if (lang === 'typescriptreact') {
+    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${TSX_MANDATORY_SWEEPS.trim()}`;
+    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
+  }
+
+  // All other languages: anti-FP supplement only
+  return base.replace(ANCHOR, `${ANTI_FP_SUPPLEMENT.trim()}\n\n${ANCHOR}`);
 }

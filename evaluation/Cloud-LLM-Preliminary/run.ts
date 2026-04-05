@@ -14,6 +14,7 @@
  *   --no-save          Skip saving result files
  *   --quiet            Suppress progress output
  *   --concurrency <n>  Parallel fixture calls per model (default: 2)
+ *   --all-conditions   Run all 4 RAG×Think conditions simultaneously
  *   --help
  *
  * Examples:
@@ -22,6 +23,7 @@
  *   npx ts-node run.ts --lang tsx --runs 2                 # only TSX, 2 runs each
  *   npx ts-node run.ts --fixtures html-low,html-medium     # exact fixture IDs
  *   npx ts-node run.ts --preset strict --no-save
+ *   npx ts-node run.ts --fixtures html-high,css-high,js-high,tsx-high --runs 3 --all-conditions
  */
 
 import * as path from 'path';
@@ -142,6 +144,8 @@ Options:
   --concurrency <n>  Max parallel fixture calls per model (default: 1 — safe for cloud gateway; use 4 for local-only Ollama)
   --model    <csv>   Comma-separated model shortNames to run (default: all)
              e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
+  --all-conditions   Run all 4 RAG×Think conditions simultaneously and save
+                     separate result files for each. Ignores --no-rag / --no-think.
   --help             Show this help
     `);
     process.exit(0);
@@ -218,13 +222,58 @@ Options:
     save:      !flag('--no-save'),
     quiet:     flag('--quiet'),
     concurrency,
-    noRag:     flag('--no-rag'),
-    noThink:   flag('--no-think'),
-    models:    opt('--model'),
+    noRag:         flag('--no-rag'),
+    noThink:       flag('--no-think'),
+    allConditions: flag('--all-conditions'),
+    models:        opt('--model'),
   };
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────
+
+async function runCondition(
+  noRag: boolean,
+  noThink: boolean,
+  opts: ReturnType<typeof parseArgs>,
+  models: string[],
+  fixtures: ReturnType<typeof FIXTURE_MAP.get>[],
+): Promise<void> {
+  const label = `${noRag ? 'norag' : 'rag'}-${noThink ? 'nothink' : 'think'}`;
+  const config: ModelBenchmarkConfig = {
+    ollamaHost: opts.host,
+    models,
+    presetId:   opts.presetId,
+    fixtures:   fixtures as any,
+    runsPerCombination: opts.runs,
+    verbose:     false,   // suppress per-run output when running in parallel
+    concurrency: opts.concurrency,
+    noRag,
+    noThink,
+  };
+
+  console.log(`  [${label}] Starting…`);
+  const t0 = Date.now();
+  let results;
+  try {
+    results = await runBenchmark(config);
+  } catch (err: any) {
+    console.error(`  [${label}] Fatal error: ${err.message ?? err}`);
+    return;
+  }
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  console.log(`  [${label}] Completed ${results.length} runs in ${elapsed}s`);
+
+  printReport(results, models, opts.presetId);
+
+  if (opts.save) {
+    const jsonPath   = saveJson(results, opts.outputDir, label);
+    const csvPath    = saveCsv(results, models, opts.outputDir, label);
+    const reportPath = saveReport(results, models, opts.presetId, opts.outputDir, label);
+    console.log(`  [${label}] JSON   saved → ${jsonPath}`);
+    console.log(`  [${label}] CSV    saved → ${csvPath}`);
+    console.log(`  [${label}] Report saved → ${reportPath}`);
+  }
+}
 
 async function main() {
   const opts = parseArgs(process.argv);
@@ -245,6 +294,39 @@ async function main() {
     console.log(`  Models filtered to: ${models.map(shortName).join(', ')}`);
   }
 
+  if (opts.allConditions) {
+    // Run all 4 RAG×Think conditions simultaneously
+    const conditions: Array<[boolean, boolean]> = [
+      [true,  true ],  // norag-nothink
+      [true,  false],  // norag-think
+      [false, true ],  // rag-nothink
+      [false, false],  // rag-think
+    ];
+    const totalCalls = models.length * fixtures.length * opts.runs * 4;
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — ALL CONDITIONS mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${models.length}  →  ${models.map(shortName).join(', ')}`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per combination × 4 conditions`);
+      console.log(`  Total:    ${totalCalls} LLM calls across all conditions`);
+      console.log(`  Concurrency: ${opts.concurrency} fixtures in parallel per model per condition`);
+      console.log('');
+      console.log('  All 4 conditions running simultaneously:');
+      console.log('    norag-nothink  |  norag-think  |  rag-nothink  |  rag-think');
+      console.log('');
+    }
+    const t0 = Date.now();
+    await Promise.all(
+      conditions.map(([noRag, noThink]) => runCondition(noRag, noThink, opts, models, fixtures))
+    );
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  All conditions finished in ${elapsed}s total`);
+    return;
+  }
+
+  // Single-condition path (original behaviour)
   const totalCalls = models.length * fixtures.length * opts.runs;
 
   const config: ModelBenchmarkConfig = {
