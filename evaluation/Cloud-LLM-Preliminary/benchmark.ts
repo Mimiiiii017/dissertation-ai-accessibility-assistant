@@ -63,6 +63,54 @@ const RAG_HTML_MAX_CHUNKS = 8;
 /** Stricter cosine distance threshold for HTML multi-query (vs default 0.65). */
 const RAG_HTML_DISTANCE_THRESHOLD = 0.5;
 
+/** Max unique chunks for non-HTML multi-query (3–4 queries × top_k=2 = up to 6 deduped). */
+const RAG_NONHTML_MAX_CHUNKS = 6;
+/** Distance threshold for non-HTML — matches the existing single-query default. */
+const RAG_NONHTML_DISTANCE_THRESHOLD = 0.65;
+
+/**
+ * CSS sweep queries — one per sweep group.
+ * Mirrors HTML_SWEEP_QUERIES so RAG retrieval aligns with CSS_MANDATORY_SWEEPS.
+ */
+const CSS_SWEEP_QUERIES = [
+  // Sweep 1 — focus indicators
+  'outline none focus indicator removed keyboard accessibility CSS visible focus ring replacement',
+  // Sweep 2 — touch targets & visually-hidden patterns
+  'touch target minimum size 44px interactive element visually hidden sr-only clip screen reader CSS',
+  // Sweep 3 — motion, forced-colors, contrast, word-spacing, link underlines
+  'prefers-reduced-motion animation transition forced-colors high contrast word-spacing contrast ratio link underline',
+];
+
+/**
+ * JS sweep queries — one per sweep group.
+ * Aligned to JS_MANDATORY_SWEEPS categories in benchmark-prompt.ts.
+ */
+const JS_SWEEP_QUERIES = [
+  // Sweep 1 — aria-expanded toggle functions
+  'aria-expanded toggle function setAttribute open close menu nav JavaScript handler',
+  // Sweep 2 — aria-pressed buttons / filter tabs
+  'aria-pressed toggle button filter tab switch pressed state JavaScript',
+  // Sweep 3 — aria-invalid validation callbacks
+  'aria-invalid validation error form field clear reset JavaScript callback',
+  // Sweep 4 — aria-live live-region announcements
+  'aria-live polite status region announce dynamic content inject text JavaScript',
+];
+
+/**
+ * TSX sweep queries — one per sweep group.
+ * Aligned to TSX_MANDATORY_SWEEPS categories in benchmark-prompt.ts.
+ */
+const TSX_SWEEP_QUERIES = [
+  // Sweep 1 — form field association & error state
+  'htmlFor label association controlled input aria-invalid aria-describedby error message React TypeScript',
+  // Sweep 2 — decorative icons & image ARIA
+  'aria-hidden decorative icon button svg image accessible name React JSX prop',
+  // Sweep 3 — disclosure / hamburger / mobile nav
+  'aria-expanded hamburger mobile nav disclosure toggle button React component prop',
+  // Sweep 4 — landmark names & aria-current
+  'aria-label landmark accessible name nav main region navigation aria-current React',
+];
+
 type RagChunk = { id: string; source: string; text: string };
 
 /**
@@ -90,6 +138,39 @@ async function retrieveHtmlMultiQueryRag(ragEndpoint: string): Promise<RagChunk[
   }
   return allChunks;
 }
+
+/**
+ * Generic multi-query deduplication helper used by CSS / JS / TSX retrieve functions.
+ * Fires one RAG query per sweep-group string, deduplicates by chunk id, and returns
+ * at most RAG_NONHTML_MAX_CHUNKS unique chunks ordered by query priority.
+ */
+async function retrieveMultiQueryRag(
+  ragEndpoint: string,
+  queries: string[],
+): Promise<RagChunk[]> {
+  const seen = new Set<string>();
+  const allChunks: RagChunk[] = [];
+  for (const q of queries) {
+    if (allChunks.length >= RAG_NONHTML_MAX_CHUNKS) break;
+    try {
+      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', RAG_NONHTML_DISTANCE_THRESHOLD);
+      for (const chunk of res.chunks) {
+        if (allChunks.length >= RAG_NONHTML_MAX_CHUNKS) break;
+        if (!seen.has(chunk.id)) {
+          seen.add(chunk.id);
+          allChunks.push(chunk);
+        }
+      }
+    } catch {
+      // This sweep query failed — continue with remaining queries
+    }
+  }
+  return allChunks;
+}
+
+const retrieveCssMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, CSS_SWEEP_QUERIES);
+const retrieveJsMultiQueryRag  = (ep: string) => retrieveMultiQueryRag(ep, JS_SWEEP_QUERIES);
+const retrieveTsxMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, TSX_SWEEP_QUERIES);
 
 import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
 import { scoreRun } from '../preset-benchmark/benchmark';
@@ -421,8 +502,14 @@ export async function runOnce(
         // HTML: per-sweep multi-query with stricter threshold — reduces noise
         // from generic WCAG chunks that distracted models in Test 9.
         chunks = await retrieveHtmlMultiQueryRag(ragEndpoint);
+      } else if (fixture.languageId === 'css') {
+        chunks = await retrieveCssMultiQueryRag(ragEndpoint);
+      } else if (fixture.languageId === 'javascript') {
+        chunks = await retrieveJsMultiQueryRag(ragEndpoint);
+      } else if (fixture.languageId === 'typescriptreact') {
+        chunks = await retrieveTsxMultiQueryRag(ragEndpoint);
       } else {
-        // Other languages: single query, lower top_k (3 vs old 6) to reduce noise.
+        // Fallback for any other language — keep original single-query path.
         const ragQuery = buildRagQuery(fixture.languageId, code);
         const ragResult = await ragRetrieve(ragEndpoint, ragQuery, 3, 'accessibility');
         chunks = ragResult.chunks;
