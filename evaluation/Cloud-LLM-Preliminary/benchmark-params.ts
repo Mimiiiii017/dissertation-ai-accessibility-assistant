@@ -172,8 +172,12 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // Google AI API docs explicitly recommend temperature=0 for factual, precise,
   // and structured-output tasks. top_p=1.0 avoids nucleus truncation side-effects
   // at such low temperature (distribution is already very peaked).
+  // T21 finding: temperature=0.0 in think mode causes pathological under-reporting
+  // on TSX/HTML — gemini reasons itself out of reporting obvious violations (2 TP
+  // on tsx-rt vs 7 TP in no-think). Raising think temperature to 0.15 restores
+  // stochastic sweep coverage across 3 runs without inflating precision loss.
   'gemini': {
-    think:   { temperature: 0.0, top_p: 1.0 },
+    think:   { temperature: 0.15, top_p: 0.95 },
     noThink: { temperature: 0.0, top_p: 1.0 },
   },
   // ── Mistral Large ────────────────────────────────────────────────────────

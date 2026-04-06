@@ -65,8 +65,9 @@ const RAG_HTML_DISTANCE_THRESHOLD = 0.5;
 
 /** Max unique chunks for non-HTML multi-query (3–4 queries × top_k=2 = up to 6 deduped). */
 const RAG_NONHTML_MAX_CHUNKS = 6;
-/** T21: JS cap reduced to 4 — fewer chunks prevent context dilution in deepseek/gpt. */
-const RAG_JS_MAX_CHUNKS = 4;
+/** T21: JS cap reduced to 4 — fewer chunks prevent context dilution in deepseek/gpt.
+ *  T22: raised to 5 — third aria-live query needs a slot alongside the 2 existing queries. */
+const RAG_JS_MAX_CHUNKS = 5;
 /** Distance threshold for non-HTML — matches the existing single-query default. */
 const RAG_NONHTML_DISTANCE_THRESHOLD = 0.65;
 /** T21: JS uses a tighter threshold (0.70) — more selective retrieval to reduce noise. */
@@ -96,6 +97,10 @@ const JS_SWEEP_QUERIES = [
   'aria-expanded toggle function setAttribute open close menu nav accordion JavaScript handler',
   // Sweep 2 — aria-pressed state & validation (consolidated from 4 → 2 queries)
   'aria-pressed toggle button filter tab pressed state aria-invalid validation JavaScript',
+  // Sweep 3 (T22 §6.1) — aria-live announcement patterns: covers 30+ JS ground-truth
+  // issues about missing live-region writes (scroll-top-announce, faq-open-announce,
+  // filter-result-announce, billing-period-announce, etc.) that no model caught in T21.
+  'aria-live polite assertive announce textContent innerHTML scroll top search results count filter billing period live region',
 ];
 
 /**

@@ -69,7 +69,7 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 
 [v]  Do NOT flag missing aria-required on a native <input>, <select>, or <textarea> that already has the HTML required attribute. Assistive technologies map HTML required to aria-required automatically.
 
-[vi] CONFIDENCE GATE — Only report an issue if you can point to the exact element from your Phase 1 inventory. "It is likely", "it may be", or "it possibly" are not grounds for reporting. If you did not observe the specific element in Phase 1, skip it. An omitted issue scores 0; a hallucinated one scores −1 against you.
+[vi] CONFIDENCE GATE — Only report an issue if you can point to the exact element from your Phase 1 inventory. "It is likely", "it may be", or "it possibly" are not grounds for reporting. If you did not observe the specific element in Phase 1, skip it. A missed real issue and a hallucinated issue cost equally — prioritise thorough coverage of every element in your Phase 1 inventory over silence.
 
 [vii] SWEEP J (autocomplete) — Only flag an <input> if you confirmed during Phase 1 that its name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card). If the signal is ambiguous or absent, skip the element entirely. Do NOT flag inputs whose purpose is clearly non-personal (search, query, message, subject, comment, username, password, coupon, promo).
 
