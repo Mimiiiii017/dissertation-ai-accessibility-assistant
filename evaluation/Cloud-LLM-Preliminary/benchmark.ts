@@ -65,8 +65,12 @@ const RAG_HTML_DISTANCE_THRESHOLD = 0.5;
 
 /** Max unique chunks for non-HTML multi-query (3–4 queries × top_k=2 = up to 6 deduped). */
 const RAG_NONHTML_MAX_CHUNKS = 6;
+/** T21: JS cap reduced to 4 — fewer chunks prevent context dilution in deepseek/gpt. */
+const RAG_JS_MAX_CHUNKS = 4;
 /** Distance threshold for non-HTML — matches the existing single-query default. */
 const RAG_NONHTML_DISTANCE_THRESHOLD = 0.65;
+/** T21: JS uses a tighter threshold (0.70) — more selective retrieval to reduce noise. */
+const RAG_JS_DISTANCE_THRESHOLD = 0.70;
 
 /**
  * CSS sweep queries — one per sweep group.
@@ -86,14 +90,12 @@ const CSS_SWEEP_QUERIES = [
  * Aligned to JS_MANDATORY_SWEEPS categories in benchmark-prompt.ts.
  */
 const JS_SWEEP_QUERIES = [
-  // Sweep 1 — aria-expanded toggle functions
-  'aria-expanded toggle function setAttribute open close menu nav JavaScript handler',
-  // Sweep 2 — aria-pressed buttons / filter tabs
-  'aria-pressed toggle button filter tab switch pressed state JavaScript',
-  // Sweep 3 — aria-invalid validation callbacks
-  'aria-invalid validation error form field clear reset JavaScript callback',
-  // Sweep 4 — aria-live live-region announcements
-  'aria-live polite status region announce dynamic content inject text JavaScript',
+  // Sweep 1 — aria-expanded toggle functions (nav, accordions, dropdowns)
+  // T21: dropped Sweep 3 (aria-invalid) and Sweep 4 (aria-live) — they caused context
+  // dilution in deepseek (−12.6pp) and gpt (−6.7pp) in T20.
+  'aria-expanded toggle function setAttribute open close menu nav accordion JavaScript handler',
+  // Sweep 2 — aria-pressed state & validation (consolidated from 4 → 2 queries)
+  'aria-pressed toggle button filter tab pressed state aria-invalid validation JavaScript',
 ];
 
 /**
@@ -101,14 +103,16 @@ const JS_SWEEP_QUERIES = [
  * Aligned to TSX_MANDATORY_SWEEPS categories in benchmark-prompt.ts.
  */
 const TSX_SWEEP_QUERIES = [
-  // Sweep 1 — form field association & error state
-  'htmlFor label association controlled input aria-invalid aria-describedby error message React TypeScript',
-  // Sweep 2 — decorative icons & image ARIA
-  'aria-hidden decorative icon button svg image accessible name React JSX prop',
-  // Sweep 3 — disclosure / hamburger / mobile nav
-  'aria-expanded hamburger mobile nav disclosure toggle button React component prop',
-  // Sweep 4 — landmark names & aria-current
-  'aria-label landmark accessible name nav main region navigation aria-current React',
+  // T21 redesign: 4 → 3 queries, rewritten to target T20 false-negative clusters.
+  // Sweep 1 — form fields, error state, broken ARIA references (unchanged from T20,
+  //            still the highest-value query for TSX fixture)
+  'htmlFor aria-invalid aria-describedby error message accessible label React form controlled input TypeScript',
+  // Sweep 2 — hidden/decorative elements & toggle state (merged T20 sweeps 2+3):
+  //            carousel slides, spinner rings, cloned lists, billing/filter aria-pressed
+  'aria-hidden decorative spinner carousel slide clone aria-pressed toggle billing filter hidden conditional render React',
+  // Sweep 3 — landmarks, aria-current, dialog/modal patterns (replaces T20 sweep 4):
+  //            adds aria-modal/role=dialog because TSX fixture has modal backdrop patterns
+  'aria-label landmark nav region aria-current aria-modal role dialog hamburger accessible name React',
 ];
 
 type RagChunk = { id: string; source: string; text: string };
@@ -147,15 +151,17 @@ async function retrieveHtmlMultiQueryRag(ragEndpoint: string): Promise<RagChunk[
 async function retrieveMultiQueryRag(
   ragEndpoint: string,
   queries: string[],
+  maxChunks = RAG_NONHTML_MAX_CHUNKS,
+  distanceThreshold = RAG_NONHTML_DISTANCE_THRESHOLD,
 ): Promise<RagChunk[]> {
   const seen = new Set<string>();
   const allChunks: RagChunk[] = [];
   for (const q of queries) {
-    if (allChunks.length >= RAG_NONHTML_MAX_CHUNKS) break;
+    if (allChunks.length >= maxChunks) break;
     try {
-      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', RAG_NONHTML_DISTANCE_THRESHOLD);
+      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', distanceThreshold);
       for (const chunk of res.chunks) {
-        if (allChunks.length >= RAG_NONHTML_MAX_CHUNKS) break;
+        if (allChunks.length >= maxChunks) break;
         if (!seen.has(chunk.id)) {
           seen.add(chunk.id);
           allChunks.push(chunk);
@@ -169,7 +175,8 @@ async function retrieveMultiQueryRag(
 }
 
 const retrieveCssMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, CSS_SWEEP_QUERIES);
-const retrieveJsMultiQueryRag  = (ep: string) => retrieveMultiQueryRag(ep, JS_SWEEP_QUERIES);
+// T21: JS uses tighter threshold (0.70) and smaller cap (4 chunks) to prevent context dilution
+const retrieveJsMultiQueryRag  = (ep: string) => retrieveMultiQueryRag(ep, JS_SWEEP_QUERIES, RAG_JS_MAX_CHUNKS, RAG_JS_DISTANCE_THRESHOLD);
 const retrieveTsxMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, TSX_SWEEP_QUERIES);
 
 import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
