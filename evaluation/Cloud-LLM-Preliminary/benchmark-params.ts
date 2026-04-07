@@ -159,7 +159,7 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // compounds across the 51-issue fixture.
   'deepseek': {
     think:   { temperature: 0.0, top_p: 1.0 },
-    noThink: { temperature: 0.0, top_p: 1.0 },
+    noThink: { temperature: 0.1, top_p: 0.95 },  // T23: raised from 0.0 — greedy decoding in noThink suppressed ~85 TP vs think mode
   },
   // ── GLM-5 (Zhipu AI) ─────────────────────────────────────────────────────
   // GLM family default is 0.95; Zhipu's API guide recommends lower values for

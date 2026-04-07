@@ -69,7 +69,7 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 
 [v]  Do NOT flag missing aria-required on a native <input>, <select>, or <textarea> that already has the HTML required attribute. Assistive technologies map HTML required to aria-required automatically.
 
-[vi] CONFIDENCE GATE — Only report an issue if you can point to the exact element from your Phase 1 inventory. "It is likely", "it may be", or "it possibly" are not grounds for reporting. If you did not observe the specific element in Phase 1, skip it. A missed real issue and a hallucinated issue cost equally — prioritise thorough coverage of every element in your Phase 1 inventory over silence.
+[vi] CONFIDENCE GATE — Only report an issue if you can point to the exact element from your Phase 1 inventory. "It is likely", "it may be", or "it possibly" are not grounds for reporting. If you did not observe the specific element in Phase 1, skip it. Failing to identify a real accessibility barrier is more harmful to users than reporting a debatable case — report every concern you can directly observe from your Phase 1 inventory, but always cite the specific selector, line number, or id from your Phase 1 scan.
 
 [vii] SWEEP J (autocomplete) — Only flag an <input> if you confirmed during Phase 1 that its name, id, type, or placeholder contains a clear personal data signal (given-name, family-name, name, email, phone, tel, address, street, city, postcode, zip, country, birthday, card). If the signal is ambiguous or absent, skip the element entirely. Do NOT flag inputs whose purpose is clearly non-personal (search, query, message, subject, comment, username, password, coupon, promo).
 
@@ -154,6 +154,11 @@ SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
   Personal data signals: name, given-name, family-name, email, phone, tel, address, street, city, postcode, postal, zip, country, birthday, birth, card, credit.
   If the element has no autocomplete attribute → report "missing autocomplete attribute" (MEDIUM), citing SC 1.3.5.
   Do NOT report if autocomplete is already present (any value). Do NOT report for input types: hidden, submit, button, reset, image, checkbox, radio, range, color, file.
+
+COMPLETION CHECK — before finalising output:
+  Verify you executed every sweep above (A through J) using your Phase 1 inventory.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  Return to the sweep list and run each one explicitly before writing output.
 `;
 
 /**
@@ -205,6 +210,11 @@ SWEEP CSS-G — No forced-colors/high-contrast support (MEDIUM):
 
 SWEEP CSS-H — Link underlines removed with no alternative (MEDIUM):
   If any rule explicitly removes underlines from body-text links (text-decoration: none on a, a:link, a:visited) AND no other non-colour visual differentiator (font-weight increase, border-bottom, background highlight on :hover) is provided → report "link underline removed — colour alone distinguishes links from surrounding text" (MEDIUM), SC 1.4.1.
+
+COMPLETION CHECK — before finalising output:
+  Verify you executed every sweep above (CSS-A through CSS-H) using your Phase 1 inventory.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  Return to the sweep list and run each one explicitly before writing output.
 `;
 
 /**
@@ -243,6 +253,11 @@ SWEEP JS-D — Form validation errors not reflected in aria-invalid (HIGH):
 
 SWEEP JS-E — aria-expanded not initialised at page load (MEDIUM):
   For every toggle widget (nav, accordion, dropdown, combobox) that is closed/hidden on load: if no DOMContentLoaded / module-init code sets aria-expanded="false" on the trigger element → report "aria-expanded not initialised on page load" (MEDIUM), naming the element.
+
+COMPLETION CHECK — before finalising output:
+  Verify you executed every sweep above (JS-A through JS-E) using your Phase 1 inventory.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  Return to the sweep list and run each one explicitly before writing output.
 `;
 
 /**
@@ -299,6 +314,11 @@ SWEEP TSX-H — Loading state not communicated (MEDIUM):
 
 SWEEP TSX-I — Active navigation items missing aria-current (MEDIUM):
   For every navigation link with an active/current-page indicator (isActive prop, className containing 'active'/'current'/'selected'): if no aria-current="page" prop is applied → report "active navigation link missing aria-current" (MEDIUM).
+
+COMPLETION CHECK — before finalising output:
+  Verify you executed every sweep above (TSX-A through TSX-I) using your Phase 1 inventory.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  Return to the sweep list and run each one explicitly before writing output.
 `;
 
 import { buildAiPrompt as _buildAiPrompt } from '../../extension/ai-accessibility-assistant/src/utils/prompts/prompt';
