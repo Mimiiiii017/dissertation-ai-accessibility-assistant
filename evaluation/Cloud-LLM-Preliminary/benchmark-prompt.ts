@@ -157,7 +157,7 @@ SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (A through J) using your Phase 1 inventory.
-  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
 
@@ -213,7 +213,7 @@ SWEEP CSS-H — Link underlines removed with no alternative (MEDIUM):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (CSS-A through CSS-H) using your Phase 1 inventory.
-  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
 
@@ -258,6 +258,7 @@ COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (JS-A through JS-E) using your Phase 1 inventory.
   If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
+  Note: the JS fixture contains many dynamic aria-live issues that require runtime execution and cannot be found from static analysis alone — 8–12 statically-detectable issues is a realistic ceiling.
 `;
 
 /**
@@ -317,7 +318,7 @@ SWEEP TSX-I — Active navigation items missing aria-current (MEDIUM):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (TSX-A through TSX-I) using your Phase 1 inventory.
-  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
 

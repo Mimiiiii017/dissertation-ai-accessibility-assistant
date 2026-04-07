@@ -81,7 +81,7 @@ const ALL_MODELS: string[] = [
   'gpt-oss:120b-cloud',              // ~120 B  — T15 #1: avg F1=50.6%, best rn=61.6%
   // 'nemotron-3-super:cloud',       // ~undisclosed  — removed after T13: catastrophic failures in rn (FP=39) and nt (F1=7.6%); avg F1=17.6%; incoherent condition variance
   // 'cogito-2.1:671b-cloud',        // ~671 B        — removed after T15: avg F1=24.1%; zero FP all conditions (predicts no issues); 671B size with bottom-3 performance
-  'mistral-large-3:675b-cloud',      // ~675 B  — T15 #7: avg F1=28.0%
+  // 'mistral-large-3:675b-cloud',   // ~675 B        — removed after T23: 0/4 conditions ≥80% accuracy; 116 FPs in nn (recall-bias catastrophe); structurally recall-limited
   
   
   // ── Very large / undisclosed (>235 B) ────────────────────────────────
@@ -91,7 +91,7 @@ const ALL_MODELS: string[] = [
   // 'qwen3-coder:480b-cloud',       // ~480 B        — removed after T15: avg F1=20.9%; declining trend T12→T15; worst of large models
   // 'qwen3-coder-next:cloud',       // ~undisclosed  — removed after T13: extreme condition variance (7.6%–35.7%); nt dropped 32.5 pp T12→T13; avg F1=18.8%
   'kimi-k2.5:cloud',                 // ~undisclosed  — T15 #2: avg F1=42.4%, best nt=54.6%
-  'glm-5:cloud',                     // ~undisclosed  — T15 #5: avg F1=31.9%
+  // 'glm-5:cloud',                  // ~undisclosed  — removed after T23: 2/4 conditions ≥80%; rn regressed −2pp to 79.9%; slow (236–343s avg); replaced by stronger models
 ];
 
 // ─── Language → languageId mapping ───────────────────────────────────────

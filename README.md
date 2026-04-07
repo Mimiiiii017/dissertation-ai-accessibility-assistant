@@ -135,3 +135,44 @@ Then press `F5` in VS Code to launch an Extension Development Host window.
 ## Release Notes
 
 See [CHANGELOG.md](./CHANGELOG.md).
+
+---
+
+## Benchmark Evaluation (`evaluation/Cloud-LLM-Preliminary`)
+
+The `evaluation/Cloud-LLM-Preliminary` directory contains a repeatable benchmark that measures accessibility auditing accuracy across cloud LLMs using four high-complexity fixtures (HTML, CSS, JS, TSX — 201 ground-truth issues, 1 797 true-negative slots per condition).
+
+**Accuracy target:** ≥80% `(TP+TN)/(TP+TN+FP+FN)` in all four conditions (RAG+Think, RAG+noThink, noRAG+Think, noRAG+noThink).
+
+### Active models (T24)
+
+| Model | Conditions ≥80% (T23) | Notes |
+|---|---|---|
+| kimi-k2.5 | 4/4 ✅ | Best recall; highest FP count |
+| gpt-oss:120b | 4/4 ✅ | Most consistent across conditions |
+| qwen3.5:397b | 3/4 | rt=79.8% (−6 gap) |
+| gemini-3-flash-preview | 1/4 | Precision excellent; recall limited without RAG |
+| deepseek-v3.2 | 1/4 | Think+RAG passes; noThink conditions under-report |
+
+Previously removed: `glm-5` (T23, rn regressed), `mistral-large-3:675b` (T23, 116 FPs in nn), and earlier models documented in `run.ts`.
+
+### T24 changes (current)
+
+**`benchmark-params.ts`**
+- deepseek think: `temperature 0.0 → 0.1` — deterministic think+noRAG suppresses output; nt needs +32 TP
+- deepseek noThink: `temperature 0.1 → 0.2` — extends T23 step that gained +18 TP in nn
+- gemini think: `temperature 0.15 → 0.2` — think mode still over-conservative
+- gemini noThink: `temperature 0.0 → 0.1` — gemini-nn had only 2 FPs; large headroom for recall
+
+**`benchmark-prompt.ts`**
+- Completion check threshold raised **8 → 12** for HTML, CSS, TSX sweeps — gemini produces 9–11 issues/run and was clearing the 8-block check without re-scanning; 12 forces another pass
+- JS completion check retains threshold of 8 and adds a note that 8–12 is the realistic static-analysis ceiling (≈30/50 JS issues require runtime aria-live observation)
+
+### Running the benchmark
+
+```bash
+cd evaluation/Cloud-LLM-Preliminary
+npx ts-node run.ts --fixtures html-high,css-high,js-high,tsx-high --runs 3 --all-conditions
+```
+
+Results are written to `test Results/test N/`. Per-test RESULTS.md files document deltas and analysis.

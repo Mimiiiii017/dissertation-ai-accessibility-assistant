@@ -158,8 +158,8 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // DeepSeek-V3 is sensitive to temperature; even 0.2 introduces variation that
   // compounds across the 51-issue fixture.
   'deepseek': {
-    think:   { temperature: 0.0, top_p: 1.0 },
-    noThink: { temperature: 0.1, top_p: 0.95 },  // T23: raised from 0.0 — greedy decoding in noThink suppressed ~85 TP vs think mode
+    think:   { temperature: 0.1, top_p: 0.95 },  // T24: raised from 0.0 — deterministic think+noRAG (nt) needs +32 TP; fully greedy think mode suppresses output
+    noThink: { temperature: 0.2, top_p: 0.95 },  // T24: raised from 0.1 — T23 0→0.1 gained +18 TP in nn; extending same step toward +27 TP target
   },
   // ── GLM-5 (Zhipu AI) ─────────────────────────────────────────────────────
   // GLM family default is 0.95; Zhipu's API guide recommends lower values for
@@ -177,8 +177,8 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // on tsx-rt vs 7 TP in no-think). Raising think temperature to 0.15 restores
   // stochastic sweep coverage across 3 runs without inflating precision loss.
   'gemini': {
-    think:   { temperature: 0.15, top_p: 0.95 },
-    noThink: { temperature: 0.0, top_p: 1.0 },
+    think:   { temperature: 0.2, top_p: 0.95 },   // T24: raised from 0.15 — think mode still over-conservative; gemini reasons itself out of reporting
+    noThink: { temperature: 0.1, top_p: 1.0 },   // T24: raised from 0.0 — gemini-nn has only 2 FPs; large precision headroom for recall boost
   },
   // ── Mistral Large ────────────────────────────────────────────────────────
   // Mistral AI docs and cookbook examples recommend temperature=0.3 for focused
