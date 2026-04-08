@@ -87,7 +87,9 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
  * present in the code.
  */
 const HTML_MANDATORY_SWEEPS = `
-MANDATORY ELEMENT SWEEPS — run these using your Phase 1 inventory:
+MANDATORY ELEMENT SWEEPS — run ALL sweeps A–J against your Phase 1 inventory:
+
+Execute every sweep below fully and independently. The supplementary WCAG guidance that follows is reference-only — it does not replace, reduce, or skip any sweep. In particular, do not skip the basic visual sweeps (F: images, A: links, G: landmarks) regardless of what the retrieved context covers.
 
 SWEEP A — Links with no accessible name or non-descriptive text:
   For every <a> element, compute its accessible name in priority order:
@@ -169,7 +171,9 @@ COMPLETION CHECK — before finalising output:
  * These sweeps target the most common missed issues observed in T17 FN analysis.
  */
 const CSS_MANDATORY_SWEEPS = `
-MANDATORY CSS ACCESSIBILITY SWEEPS — run these using your Phase 1 inventory:
+MANDATORY CSS ACCESSIBILITY SWEEPS — run ALL sweeps CSS-A through CSS-H against your Phase 1 inventory:
+
+Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
 PHASE 1 CSS — before any sweep, build this inventory:
   • Every rule containing outline: none, outline: 0, or outline: transparent — record its selector. Do NOT limit this to :focus or :focus-visible rules; base component rules (e.g. .btn { outline: none }, .tab { outline: 0 }) count equally and each is a separate inventory entry.
@@ -181,9 +185,20 @@ PHASE 1 CSS — before any sweep, build this inventory:
   • Every rule that sets text-decoration: none on a, a:link, or a:visited selectors.
 
 SWEEP CSS-A — Focus indicator removed without replacement (HIGH):
-  For every selector in your outline-removal inventory: check whether that same selector (or its :focus / :focus-visible variant) provides a visible alternative focus style — box-shadow, border with a colour distinct from the background, or outline with a value other than none/0/transparent.
-  If no visible alternative exists on a paired :focus or :focus-visible rule → report "focus indicator removed without replacement on <selector>" (HIGH).
-  Do NOT report if a visible box-shadow, border, or replacement outline is present on the same or a paired rule.
+  Process your Phase 1 outline inventory in TWO passes:
+
+  CSS-A (i) — Base selector rules (selector does NOT contain :focus / :focus-visible / :focus-within):
+    For each inventory entry whose selector has NO :focus pseudo-class (e.g. .btn-primary, .hero-link, .badge, .card-btn, .tab, .nav-item, a, input, button):
+    Search the stylesheet for a PAIRED :focus or :focus-visible rule for that same base selector that sets a VISIBLE replacement — box-shadow, outline with a non-zero value, or a visually distinct border.
+    If NO such paired rule exists → report "focus indicator removed without replacement on <selector>" (HIGH) for that selector individually.
+
+  CSS-A (ii) — Focus-pseudo-class rules (selector CONTAINS :focus / :focus-visible):
+    For each inventory entry whose selector IS a :focus or :focus-visible rule:
+    Only report if that rule sets outline: none/0 AND provides NO visible replacement on the SAME rule-block (no box-shadow, no visible border, no non-zero outline).
+    Do NOT report a :focus-visible rule as a violation if its rule-block also sets box-shadow, a visible border, or any other visible focus indicator — that IS the replacement style.
+    Do NOT report if a separate :focus rule for the same base selector provides a visible alternative.
+
+  Skip outline removal on non-interactive structural containers (<div>, <p>, <section>, <article>, <ul>, <li>) where keyboard focus is not expected.
 
 SWEEP CSS-B — Touch target too small (MEDIUM):
   For every interactive-element selector in your height/width inventory: if the explicitly-set height OR width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
@@ -228,7 +243,9 @@ COMPLETION CHECK — before finalising output:
  * These sweeps give models the same step-by-step scanning approach as HTML sweeps.
  */
 const JS_MANDATORY_SWEEPS = `
-MANDATORY JAVASCRIPT ARIA SWEEPS — run these using your Phase 1 inventory:
+MANDATORY JAVASCRIPT ARIA SWEEPS — run ALL sweeps JS-A through JS-E against your Phase 1 inventory:
+
+Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
 PHASE 1 JS — before any sweep, build this inventory:
   • Every function whose name or body suggests toggling or showing/hiding content: names containing toggle, open, close, expand, collapse, show, hide, activate, deactivate, openNav, closeMenu, toggleAccordion, etc.
@@ -272,7 +289,9 @@ COMPLETION CHECK — before finalising output:
  * These sweeps provide the scanning algorithm that drives detection.
  */
 const TSX_MANDATORY_SWEEPS = `
-MANDATORY TSX/JSX ARIA SWEEPS — run these using your Phase 1 inventory:
+MANDATORY TSX/JSX ARIA SWEEPS — run ALL sweeps TSX-A through TSX-I against your Phase 1 inventory:
+
+Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
 PHASE 1 TSX — before any sweep, build this inventory:
   • Every component with a boolean state variable that shows or hides content: state variables named isOpen, isExpanded, isMenuOpen, showDropdown, open, expanded, visible, isDialogOpen, etc.
