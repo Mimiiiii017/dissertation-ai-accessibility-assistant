@@ -27,7 +27,19 @@ A CSS rule that sets `outline: 0` or `outline: none` on an interactive element (
 * { outline: none; }
 *:focus { outline: 0; }
 
-/* ❌ Removes focus ring on a specific component without replacement */
+/* ❌ Base component rule (no :focus pseudo-class) — equally a violation.
+   Setting outline:none on the base class removes the focus ring for all
+   states including keyboard focus, even if no :focus rule exists. */
+.btn           { outline: none; }   /* base button class — removes all outlines */
+.tab           { outline: 0; }      /* tab component — focus ring gone */
+.card-btn      { outline: none; }   /* card CTA buton */
+.nav-item      { outline: 0; }      /* navigation item */
+.footer-nav a  { outline: none; }   /* footer links */
+.social-link   { outline: none; }   /* icon-only social link */
+.pagination-btn { outline: none; }  /* pagination control */
+.badge         { outline: 0; }      /* badge / pill */
+
+/* ❌ Removes focus ring on a :focus or :focus-visible rule without replacement */
 .btn:focus { outline: none; }
 a:focus { outline: 0; }
 .nav-item:focus-visible { outline: none; }
@@ -38,6 +50,19 @@ a:focus { outline: 0; }
   box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 ```
+
+### Important: base-class rules vs :focus rules
+
+Both of the following are violations — the absence of `:focus` does NOT make a rule safe:
+
+| Selector pattern | Violation? |
+|---|---|
+| `.btn:focus { outline: none }` | ✅ Yes — classic :focus removal |
+| `.btn:focus-visible { outline: none }` | ✅ Yes — removes keyboard-only ring |
+| `.btn { outline: none }` | ✅ Yes — base rule prevents outline in ALL states including focus |
+| `.btn { outline: none } .btn:focus-visible { outline: 2px solid blue }` | ❌ No — base rule overridden by visible :focus-visible replacement |
+
+When scanning a stylesheet, inventory EVERY occurrence of `outline: none` or `outline: 0`, regardless of whether the selector includes a pseudo-class. Each distinct selector that sets outline removal without a compensating visible focus style in a paired rule is a separate violation.
 
 ### WCAG reference
 SC 2.4.7 (Focus Visible, AA), SC 2.4.11 (Focus Appearance, AA 2.2).

@@ -157,7 +157,7 @@ SWEEP J — Personal data inputs missing autocomplete (SC 1.3.5):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (A through J) using your Phase 1 inventory.
-  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
 
@@ -172,8 +172,8 @@ const CSS_MANDATORY_SWEEPS = `
 MANDATORY CSS ACCESSIBILITY SWEEPS — run these using your Phase 1 inventory:
 
 PHASE 1 CSS — before any sweep, build this inventory:
-  • Every rule containing outline: none, outline: 0, or outline: transparent — record its selector.
-  • Every selector targeting a potentially interactive element (button, a, input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"]) that sets an explicit height or width value in px.
+  • Every rule containing outline: none, outline: 0, or outline: transparent — record its selector. Do NOT limit this to :focus or :focus-visible rules; base component rules (e.g. .btn { outline: none }, .tab { outline: 0 }) count equally and each is a separate inventory entry.
+  • Every selector targeting a potentially interactive element (button, a, input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"]) that sets an explicit height or width value in px. Include class-based selectors for button-like components (.btn, .tab, .badge, .pill, .icon-btn, .social-link, .pagination-btn) even when applied via class rather than element selector.
   • Every @media (prefers-reduced-motion) block — record which selectors and properties it covers.
   • Every @media (forced-colors: active) block — note whether it exists.
   • The sr-only / visually-hidden / screen-reader-text utility class declaration (if present) — record every property it sets.
@@ -213,8 +213,9 @@ SWEEP CSS-H — Link underlines removed with no alternative (MEDIUM):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (CSS-A through CSS-H) using your Phase 1 inventory.
-  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
+  Note: each distinct selector in your Phase 1 outline inventory (CSS-A) and each distinct selector below the size threshold (CSS-B) is a separate Issue block — a stylesheet applying outline: none across 15 component selectors is 15 separate issues.
 `;
 
 /**
@@ -283,6 +284,7 @@ PHASE 1 TSX — before any sweep, build this inventory:
   • Every button with a loading/submitting state (isLoading, isSubmitting, isSaving): does it receive aria-busy={isLoading}?
   • Every spinner component rendered during loading: does it have aria-hidden={true}?
   • Every <section>, <nav>, <aside> appearing more than once — does each have aria-label or aria-labelledby?
+  • Every <article> element used in a repeated card or grid context (pricing plans, feature cards, testimonial cards): does each have aria-labelledby referencing a heading or title inside it?
 
 SWEEP TSX-A — Disclosure toggle components missing aria-expanded (HIGH):
   For every component using a boolean to control a show/hide region: if the trigger element does NOT receive aria-expanded={stateVariable} → report "toggle component trigger missing aria-expanded prop" (HIGH), naming the component, the trigger element, and the state variable.
@@ -304,8 +306,9 @@ SWEEP TSX-D — Form fields missing label, aria-invalid, or aria-required (HIGH)
 SWEEP TSX-E — Interactive state not communicated to assistive technology (HIGH):
   For every tab, filter button, pricing plan card, or two-state toggle whose state is tracked by a boolean: if no aria-selected, aria-pressed, or aria-checked prop mirrors that state variable → report "interactive state not communicated to assistive technology" (HIGH), naming the component and state variable.
 
-SWEEP TSX-F — Landmark regions missing accessible names (MEDIUM):
+SWEEP TSX-F — Landmark and card regions missing accessible names (MEDIUM):
   For every <section>, <nav>, or <aside> that appears more than once: if neither aria-label nor aria-labelledby is present → report "repeated landmark region missing accessible name" (MEDIUM), naming the element and approximate location.
+  For every <article> component in a repeated card/grid context (pricing plans, feature cards, testimonials): if no aria-labelledby references a heading inside it → report "card article missing accessible name via aria-labelledby" (MEDIUM), naming the component and location.
 
 SWEEP TSX-G — Required-field markers not properly managed (MEDIUM):
   If a required-field visual marker (<span>*</span>) is rendered: (a) without aria-hidden={true} → report "required-field marker announces bare asterisk to AT — add aria-hidden" (LOW); (b) with aria-hidden={true} but the input has neither aria-required nor required → report "required field marked visually only — add aria-required or required attr" (HIGH).
@@ -318,7 +321,7 @@ SWEEP TSX-I — Active navigation items missing aria-current (MEDIUM):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (TSX-A through TSX-I) using your Phase 1 inventory.
-  If you have produced fewer than 12 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
 
