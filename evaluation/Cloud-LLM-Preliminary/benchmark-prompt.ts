@@ -76,6 +76,8 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 [viii] SWEEP H (broken ARIA references) — Only report a broken aria-labelledby / aria-describedby / aria-controls reference if you built a complete id inventory in Phase 1 AND that id is absent from your inventory. If you did not record every id in Phase 1, do NOT report any broken references — incomplete inventories produce false positives.
 
 [ix]  TABLE HEADER SCOPE — A <th> element does NOT require a scope attribute when its position alone unambiguously identifies its axis. Specifically: if a row contains only ONE <th> at the start of the row, screen readers infer row scope. If a column contains only ONE <th> in the header row, screen readers infer col scope. Only flag a <th> as "missing scope" if (a) the scope attribute is literally absent AND (b) there are multiple <th> elements in the same row (ambiguous row headers) or multiple <th> elements in the same column position across rows (ambiguous col headers). Do NOT flag every <th> in a simple table where position is unambiguous.
+
+[x]   FOCUS INDICATOR REPLACEMENT — A CSS rule that sets outline: none or outline: 0 AND provides a visible alternative in the SAME rule-block is NOT a violation. A visible alternative means: box-shadow with non-zero spread and visible colour, a visually distinct border, or a non-zero outline value. Example: ".btn:focus-visible { outline: none; box-shadow: 0 0 0 3px blue; }" is valid — do NOT report it. Only report when NO visible alternative exists anywhere for that selector or its paired base selector.
 `;
 
 /**
@@ -185,20 +187,12 @@ PHASE 1 CSS — before any sweep, build this inventory:
   • Every rule that sets text-decoration: none on a, a:link, or a:visited selectors.
 
 SWEEP CSS-A — Focus indicator removed without replacement (HIGH):
-  Process your Phase 1 outline inventory in TWO passes:
-
-  CSS-A (i) — Base selector rules (selector does NOT contain :focus / :focus-visible / :focus-within):
-    For each inventory entry whose selector has NO :focus pseudo-class (e.g. .btn-primary, .hero-link, .badge, .card-btn, .tab, .nav-item, a, input, button):
-    Search the stylesheet for a PAIRED :focus or :focus-visible rule for that same base selector that sets a VISIBLE replacement — box-shadow, outline with a non-zero value, or a visually distinct border.
-    If NO such paired rule exists → report "focus indicator removed without replacement on <selector>" (HIGH) for that selector individually.
-
-  CSS-A (ii) — Focus-pseudo-class rules (selector CONTAINS :focus / :focus-visible):
-    For each inventory entry whose selector IS a :focus or :focus-visible rule:
-    Only report if that rule sets outline: none/0 AND provides NO visible replacement on the SAME rule-block (no box-shadow, no visible border, no non-zero outline).
-    Do NOT report a :focus-visible rule as a violation if its rule-block also sets box-shadow, a visible border, or any other visible focus indicator — that IS the replacement style.
-    Do NOT report if a separate :focus rule for the same base selector provides a visible alternative.
-
-  Skip outline removal on non-interactive structural containers (<div>, <p>, <section>, <article>, <ul>, <li>) where keyboard focus is not expected.
+  For every selector in your Phase 1 outline inventory — whether a base component selector (e.g. .btn, .btn-primary, .hero-link, .badge, .card-btn, .tab, .nav-item, .social-link, .pagination-btn, .dropdown-btn, .modal-btn, .form-input) OR a :focus / :focus-visible pseudo-class rule:
+  Check whether that selector — or a paired rule for the same base selector — provides a visible alternative: box-shadow, border with a visually distinct colour, or outline with a non-zero value.
+  If no visible alternative exists → report "focus indicator removed without replacement on <selector>" (HIGH), one Issue block per selector.
+  Do NOT skip base-class selectors because they lack a :focus pseudo-class — a base rule setting outline: none removes the focus ring in ALL states including keyboard focus.
+  Do NOT report a :focus or :focus-visible rule if its own rule-block also sets box-shadow, a visible border, or a non-zero outline — that IS the replacement style, not a violation.
+  Skip outline removal on non-interactive structural containers (div, p, section, article, ul, li) where keyboard focus is not expected.
 
 SWEEP CSS-B — Touch target too small (MEDIUM):
   For every interactive-element selector in your height/width inventory: if the explicitly-set height OR width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
