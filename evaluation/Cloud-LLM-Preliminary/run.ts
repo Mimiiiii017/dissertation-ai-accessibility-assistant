@@ -73,6 +73,7 @@ const ALL_MODELS: string[] = [
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
   // 'minimax-m2.5:cloud',           // ~456 B MoE (updated) — BROKEN: cloud API returns HTTP 500 on every request
   'deepseek-v3.2:cloud',             // ~671 B MoE
+  'gemma4:31b-cloud',                // ~31 B (Google Gemma 4)
 
 
   // ── Large (100–700 B) ─────────────────────────────────────────────────

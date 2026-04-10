@@ -187,6 +187,15 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
     think:   { temperature: 0.3, top_p: 0.9 },
     noThink: { temperature: 0.3, top_p: 0.9 },
   },
+  // ── Gemma 4 (Google) ─────────────────────────────────────────────────────
+  // Gemma 4 is an instruction-tuned model, not a reasoning/thinking model.
+  // temperature=0.1 for structured detection; top_p=1.0 avoids nucleus
+  // truncation at low temperature. Think/noThink use identical params since
+  // Gemma 4 does not have a dedicated chain-of-thought mode.
+  'gemma4': {
+    think:   { temperature: 0.1, top_p: 1.0 },
+    noThink: { temperature: 0.1, top_p: 1.0 },
+  },
 };
 
 /**
