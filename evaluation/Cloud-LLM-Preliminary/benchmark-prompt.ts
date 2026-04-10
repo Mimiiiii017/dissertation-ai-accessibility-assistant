@@ -179,7 +179,7 @@ Execute every sweep below fully and independently. Supplementary WCAG guidance t
 
 PHASE 1 CSS — before any sweep, build this inventory:
   • Every rule containing outline: none, outline: 0, or outline: transparent — record its selector. Do NOT limit this to :focus or :focus-visible rules; base component rules (e.g. .btn { outline: none }, .tab { outline: 0 }) count equally and each is a separate inventory entry.
-  • Every selector targeting a potentially interactive element (button, a, input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"]) that sets an explicit height or width value in px. Include class-based selectors for button-like components (.btn, .tab, .badge, .pill, .icon-btn, .social-link, .pagination-btn) even when applied via class rather than element selector.
+  • Every selector targeting a potentially interactive element (button, a, input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"]) that sets an explicit height, width, min-height, or min-width value in px. Include class-based selectors for button-like components (.btn, .tab, .badge, .pill, .icon-btn, .social-link, .pagination-btn, .skip-link, .stat-item, .checkbox) and form controls (.form-input, .input, input[type="text"], input[type="checkbox"], input[type="radio"]) even when applied via class rather than element selector.
   • Every @media (prefers-reduced-motion) block — record which selectors and properties it covers.
   • Every @media (forced-colors: active) block — note whether it exists.
   • The sr-only / visually-hidden / screen-reader-text utility class declaration (if present) — record every property it sets.
@@ -187,17 +187,18 @@ PHASE 1 CSS — before any sweep, build this inventory:
   • Every rule that sets text-decoration: none on a, a:link, or a:visited selectors.
 
 SWEEP CSS-A — Focus indicator removed without replacement (HIGH):
-  For every selector in your Phase 1 outline inventory — whether a base component selector (e.g. .btn, .btn-primary, .hero-link, .badge, .card-btn, .tab, .nav-item, .social-link, .pagination-btn, .dropdown-btn, .modal-btn, .form-input) OR a :focus / :focus-visible pseudo-class rule:
+  For every selector in your Phase 1 outline inventory — whether a base component selector (e.g. .btn, .btn-primary, .hero-link, .badge, .card-btn, .tab, .nav-item, .social-link, .pagination-btn, .dropdown-btn, .modal-btn, .form-input, .testimonial-card, .footer-brand, .faq-item dt button, .checkbox, input[type="checkbox"], .stat-item) OR a :focus / :focus-visible pseudo-class rule:
   Check whether that selector — or a paired rule for the same base selector — provides a visible alternative: box-shadow, border with a visually distinct colour, or outline with a non-zero value.
   If no visible alternative exists → report "focus indicator removed without replacement on <selector>" (HIGH), one Issue block per selector.
   Do NOT skip base-class selectors because they lack a :focus pseudo-class — a base rule setting outline: none removes the focus ring in ALL states including keyboard focus.
+  ⚠ CRITICAL: outline-offset is NOT a visible focus ring. A rule that sets only "outline: none; outline-offset: Xpx" and nothing else is a VIOLATION — the offset applies to a zero-width outline and renders nothing. Only skip reporting if the same rule-block also contains box-shadow, a non-transparent border, or a non-zero outline value.
   Do NOT report a :focus or :focus-visible rule if its own rule-block also sets box-shadow, a visible border, or a non-zero outline — that IS the replacement style, not a violation.
   Skip outline removal on non-interactive structural containers (div, p, section, article, ul, li) where keyboard focus is not expected.
 
 SWEEP CSS-B — Touch target too small (MEDIUM):
-  For every interactive-element selector in your height/width inventory: if the explicitly-set height OR width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
-  If height/width is 24–43px, also report as a potential violation — "touch target may be below 44px recommended size: <selector>" (MEDIUM) — unless surrounding margin or padding of ≥8px on each side compensates.
-  Do NOT report elements that have no explicit height or width rule.
+  For every interactive-element selector in your height/width/min-height/min-width inventory: if the explicitly-set height, width, min-height, OR min-width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
+  If the value is 24–43px, also report as a potential violation — "touch target may be below 44px recommended size: <selector>" (MEDIUM) — unless surrounding margin or padding of ≥8px on each side compensates.
+  Do NOT report elements that have no explicit height, width, min-height, or min-width rule.
 
 SWEEP CSS-C — Broken visually-hidden utility (HIGH):
   Inspect the sr-only / visually-hidden / screen-reader-text utility rule. A correct implementation uses: position: absolute, very small dimensions (1px × 1px or equivalent), clip or clip-path, and does NOT use display: none or visibility: hidden.
@@ -222,9 +223,10 @@ SWEEP CSS-H — Link underlines removed with no alternative (MEDIUM):
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (CSS-A through CSS-H) using your Phase 1 inventory.
-  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
   Note: each distinct selector in your Phase 1 outline inventory (CSS-A) and each distinct selector below the size threshold (CSS-B) is a separate Issue block — a stylesheet applying outline: none across 15 component selectors is 15 separate issues.
+  A dense stylesheet (css-high) typically yields 15–35 separate issues across all sweeps; if you have fewer than 15, return to CSS-A and ensure you reported every :focus-visible rule that sets outline: none without a box-shadow/border replacement.
 `;
 
 /**
@@ -237,7 +239,7 @@ COMPLETION CHECK — before finalising output:
  * These sweeps give models the same step-by-step scanning approach as HTML sweeps.
  */
 const JS_MANDATORY_SWEEPS = `
-MANDATORY JAVASCRIPT ARIA SWEEPS — run ALL sweeps JS-A through JS-E against your Phase 1 inventory:
+MANDATORY JAVASCRIPT ARIA SWEEPS — run ALL sweeps JS-A through JS-F against your Phase 1 inventory:
 
 Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
@@ -248,6 +250,7 @@ PHASE 1 JS — before any sweep, build this inventory:
   • Every block of code that updates visible content in reaction to user input (innerHTML assignment, textContent assignment, insertAdjacentHTML, classList changes that switch display/visibility): is there a companion aria-live region (role="status", role="alert", aria-live="polite" or "assertive") whose content is also updated immediately after?
   • Every form validation function: does it call setAttribute('aria-invalid', 'true') on invalid inputs and setAttribute('aria-invalid', 'false') (or removeAttribute) on valid inputs?
   • Every interactive widget (accordion, nav drawer, dropdown, combobox) that is closed/hidden on initial page load: does any DOMContentLoaded / init function set aria-expanded="false" on its trigger?
+  • Every element whose visibility is toggled dynamically (scroll-to-top button appearing/disappearing, mobile nav opening/closing, suggestion list showing/hiding, sticky header toggling): does the code that changes CSS display or visibility also update aria-hidden (aria-hidden="true" when invisible, aria-hidden="false" or removeAttribute when visible)?
 
 SWEEP JS-A — Toggle functions not updating aria-expanded (HIGH):
   For every function in your toggle inventory that changes the visible state of a panel, menu, accordion, drawer, or combobox suggestion list: if no setAttribute('aria-expanded', ...) or .ariaExpanded = ... assignment exists in that function (or its directly paired open/close counterpart) → report "toggle function does not update aria-expanded on trigger element" (HIGH), naming the function and the trigger element selector.
@@ -265,12 +268,18 @@ SWEEP JS-D — Form validation errors not reflected in aria-invalid (HIGH):
 
 SWEEP JS-E — aria-expanded not initialised at page load (MEDIUM):
   For every toggle widget (nav, accordion, dropdown, combobox) that is closed/hidden on load: if no DOMContentLoaded / module-init code sets aria-expanded="false" on the trigger element → report "aria-expanded not initialised on page load" (MEDIUM), naming the element.
+  Also check: does any init function set aria-controls on the trigger to point to the controlled region's id? If the trigger has no aria-controls and the region has an id → report "toggle trigger missing aria-controls" (MEDIUM).
+
+SWEEP JS-F — Dynamically-hidden elements not removed from accessibility tree (MEDIUM):
+  For every element in your Phase 1 visibility-toggle inventory (scroll-to-top button, mobile nav, suggestion list, sticky header, loading overlay, toast notification): if the function that hides it (sets display:none, visibility:hidden, removes a show-class) does NOT also set aria-hidden="true" on that element → report "dynamically-hidden element not updated in accessibility tree" (MEDIUM), naming the element and function.
+  Conversely, if the function that reveals the element does not remove aria-hidden or set it to "false" → same report.
+  Do NOT report elements that are hidden with aria-hidden from the start and never shown dynamically.
 
 COMPLETION CHECK — before finalising output:
-  Verify you executed every sweep above (JS-A through JS-E) using your Phase 1 inventory.
-  If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
+  Verify you executed every sweep above (JS-A through JS-F) using your Phase 1 inventory.
+  If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
-  Note: the JS fixture contains many dynamic aria-live issues that require runtime execution and cannot be found from static analysis alone — 8–12 statically-detectable issues is a realistic ceiling.
+  A medium-density JS fixture typically yields 12–20 statically-detectable issues; a high-density fixture typically yields 18–30. Each unique function or element is a separate Issue block.
 `;
 
 /**
