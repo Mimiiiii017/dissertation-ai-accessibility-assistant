@@ -275,10 +275,51 @@ An `<article>`, `<section>`, or element with `role="region"` that lacks `aria-la
 
 ---
 
+---
+
+## Card CTA Buttons — Context-aware Labels
+
+In repeated card grids (pricing plans, product cards, team member cards, feature cards), each card's primary call-to-action link or button must have an `aria-label` that includes the name of the item the card represents. Without this, a screen reader user navigating by button announces N identical "Buy now" or "Learn more" labels with no way to distinguish them.
+
+```tsx
+// ❌ Broken — three cards, three identical CTA labels
+<article aria-labelledby="plan-heading-starter">
+  <h3 id="plan-heading-starter">Starter</h3>
+  <button>Buy now</button>      {/* announced: "Buy now" */}
+</article>
+<article aria-labelledby="plan-heading-pro">
+  <h3 id="plan-heading-pro">Pro</h3>
+  <button>Buy now</button>      {/* announced: "Buy now" */}
+</article>
+<article aria-labelledby="plan-heading-enterprise">
+  <h3 id="plan-heading-enterprise">Enterprise</h3>
+  <button>Buy now</button>      {/* announced: "Buy now" */}
+</article>
+
+// ✅ Correct — aria-label provides item-specific context
+<article aria-labelledby="plan-heading-starter">
+  <h3 id="plan-heading-starter">Starter</h3>
+  <button aria-label="Buy Starter plan">Buy now</button>
+</article>
+<article aria-labelledby="plan-heading-pro">
+  <h3 id="plan-heading-pro">Pro</h3>
+  <button aria-label="Buy Pro plan">Buy now</button>
+</article>
+```
+
+### Detection rule
+
+In any repeated card component where the card body contains a heading or title and a CTA button or link:
+- If multiple cards share the same visible button/link text (e.g. "Buy now", "Learn more", "View details", "Read more", "Get started") and the button has no `aria-label` that includes the item-specific name → violation.
+- The `aria-label` on the button must include the item name from the card heading (e.g. `aria-label="Buy Starter plan"` not just `aria-label="Buy now"`).
+
+---
+
 ## WCAG References
 
 - SC 1.1.1 Non-text Content — decorative images and icons must be hidden (`aria-hidden`)
 - SC 1.3.1 Info and Relationships — programmatic label associations (`htmlFor`, `aria-labelledby`)
 - SC 4.1.2 Name, Role, Value — custom widgets must expose name, role, and state
 - SC 1.4.13 Content on Hover or Focus — dynamic content accessibility
+- SC 2.4.6 Headings and Labels — labels must describe purpose
 - ARIA 1.2 Authoring Practices Guide — Toggle Button, Disclosure, Navigation Landmark patterns

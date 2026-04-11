@@ -50,3 +50,41 @@ Ensure form errors and validation feedback are clearly communicated to all users
   </ul>
 </div>
 ```
+
+---
+
+## Focus management on dynamic form submission
+
+When a form is submitted without a page reload (SPA / AJAX submission) and validation errors are detected, the page must move keyboard focus to the first field in error or to an error summary at the top of the form. Without this, keyboard and screen-reader users receive no indication that submission failed.
+
+```js
+// After AJAX form submission returns errors:
+function handleSubmitErrors(errorFields) {
+  if (errorFields.length > 0) {
+    // Option A: move focus to the first errored field
+    const firstError = document.getElementById(errorFields[0].id);
+    firstError.setAttribute('aria-invalid', 'true');
+    firstError.focus();
+
+    // Option B: move focus to an error summary container
+    const summary = document.getElementById('error-summary');
+    summary.setAttribute('tabindex', '-1');
+    summary.focus();
+  }
+}
+```
+
+```html
+<!-- Error summary pattern (receive focus on submit failure) -->
+<div id="error-summary" role="alert" tabindex="-1">
+  <h2>2 errors found. Please correct them before continuing.</h2>
+  <ul>
+    <li><a href="#email">Email address is not valid</a></li>
+    <li><a href="#password">Password must be at least 8 characters</a></li>
+  </ul>
+</div>
+```
+
+### Detection rule
+
+In a JavaScript event handler that submits a form (look for `form.addEventListener('submit', ...)` or `onSubmit` in React), if validation errors are detected and the handler does NOT call `element.focus()` on either the first errored input or an error summary container → violation.

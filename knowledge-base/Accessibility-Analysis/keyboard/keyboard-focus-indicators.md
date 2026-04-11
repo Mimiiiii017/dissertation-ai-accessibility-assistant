@@ -47,3 +47,54 @@ input:focus-visible {
 <!-- Focusable element with visible focus -->
 <a href="/settings">Account settings</a>
 ```
+
+---
+
+## Anti-patterns
+
+### `box-shadow` is not a valid focus indicator
+
+`box-shadow` is sometimes used to style a custom focus ring, but it is **not visible in Windows High Contrast Mode** (also called Forced Colours Mode), where `box-shadow` is suppressed entirely. Always use the `outline` property (or `outline` + `outline-offset`) for focus indicators.
+
+```css
+/* ❌ Broken — invisible in high-contrast mode */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px #005fcc;
+}
+
+/* ✅ Correct — outline is always visible, including high-contrast mode */
+button:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+```
+
+### Detection rule
+
+Any selector that sets `outline: none` or `outline: 0` AND replaces it only with `box-shadow` (without any `outline` property with a non-zero value) is a violation.
+
+---
+
+## Pairing `:focus` with `:hover`
+
+Whenever a `:hover` rule changes the appearance of an interactive element (colour, background, underline, border), the same visual change must be replicated for `:focus` (or `:focus-visible`). Keyboard users rely on the same visual affordances as mouse users.
+
+```css
+/* ❌ Broken — hover state has no keyboard equivalent */
+a:hover {
+  text-decoration: none;
+  color: #005fcc;
+}
+
+/* ✅ Correct — :focus mirrors :hover */
+a:hover,
+a:focus {
+  text-decoration: none;
+  color: #005fcc;
+}
+```
+
+### Detection rule
+
+A CSS rule that applies only to `:hover` (with no accompanying `:focus` or `:focus-visible` declaration for the same selector and properties) is a candidate violation when the property change conveys interactive state to the user.

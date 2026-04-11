@@ -73,7 +73,7 @@ const ALL_MODELS: string[] = [
   'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
   // 'minimax-m2.5:cloud',           // ~456 B MoE (updated) — BROKEN: cloud API returns HTTP 500 on every request
   'deepseek-v3.2:cloud',             // ~671 B MoE
-  'gemma4:31b-cloud',                // ~31 B (Google Gemma 4)
+  'gemma4:31b-cloud',               // ~31 B (Google Gemma 4) — T30 final retest: 0/4 in T28 and T29 with zero variance; included at supervisor's request to give T30 prompt restructure (explicit event-handler table, TSX-K) one more chance before removal
 
 
   // ── Large (100–700 B) ─────────────────────────────────────────────────

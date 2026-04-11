@@ -169,3 +169,90 @@ Provide accessible implementation patterns for common interactive widgets that r
 - Provide visible focus indicators within all widget components.
 - Test every widget with keyboard-only and screen reader navigation.
 - Prefer native HTML elements (e.g., `<details>` / `<summary>` for disclosure) before using ARIA.
+
+---
+
+## Rating and Review Widgets
+
+Star ratings, numeric scores, and review summaries are widely used in product and pricing pages. They must be accessible in two distinct ways depending on whether they are read-only (display) or interactive (user input).
+
+### Read-only rating (display)
+
+The container element must carry `role="img"` and an `aria-label` that states the rating value in plain language. Individual star icons must be decorative-only (`aria-hidden="true"`).
+
+```html
+<!-- ✅ Correct — read-only star rating -->
+<div role="img" aria-label="4.5 out of 5 stars">
+  <svg aria-hidden="true" focusable="false"><!-- filled star --></svg>
+  <svg aria-hidden="true" focusable="false"><!-- filled star --></svg>
+  <svg aria-hidden="true" focusable="false"><!-- filled star --></svg>
+  <svg aria-hidden="true" focusable="false"><!-- filled star --></svg>
+  <svg aria-hidden="true" focusable="false"><!-- half star --></svg>
+</div>
+
+<!-- ❌ Broken — no role or label; screen reader reads nothing or raw SVG titles -->
+<div class="star-rating">
+  <svg><!-- filled star --></svg>
+  <svg><!-- filled star --></svg>
+  …
+</div>
+```
+
+### Interactive rating (user input)
+
+Each star must be a radio input within a `role="radiogroup"`. Either native `<input type="radio">` elements or elements with `role="radio"` and `aria-label` are acceptable.
+
+```html
+<!-- ✅ Correct — interactive star rating using native radio inputs -->
+<fieldset>
+  <legend>Rate this product</legend>
+  <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+  <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+  <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+  <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+  <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+</fieldset>
+
+<!-- ✅ Correct — ARIA radio group -->
+<div role="radiogroup" aria-label="Rate this product">
+  <span role="radio" aria-label="1 star" aria-checked="false" tabindex="-1">★</span>
+  <span role="radio" aria-label="2 stars" aria-checked="false" tabindex="-1">★</span>
+  <span role="radio" aria-label="3 stars" aria-checked="false" tabindex="-1">★</span>
+  <span role="radio" aria-label="4 stars" aria-checked="false" tabindex="-1">★</span>
+  <span role="radio" aria-label="5 stars" aria-checked="true" tabindex="0">★</span>
+</div>
+```
+
+### React / TSX variant
+
+```tsx
+// ✅ Read-only
+<div role="img" aria-label={`${rating} out of 5 stars`}>
+  {stars.map((_, i) => (
+    <StarIcon key={i} aria-hidden={true} />
+  ))}
+</div>
+
+// ✅ Interactive
+<div role="radiogroup" aria-label="Rate this product">
+  {[1,2,3,4,5].map(n => (
+    <button
+      key={n}
+      role="radio"
+      aria-checked={selected === n}
+      aria-label={`${n} star${n > 1 ? 's' : ''}`}
+      onClick={() => setSelected(n)}
+    >
+      <StarIcon aria-hidden={true} />
+    </button>
+  ))}
+</div>
+```
+
+### Detection rule
+
+A rating widget is any element that visually renders filled/empty star icons, a numeric score out of N, or a review-count summary.
+
+- If it is **read-only**: the container must have `role="img"` and `aria-label` stating the value. If neither is present → violation.
+- If it is **interactive**: star elements must have `role="radio"` and `aria-label`. If stars are plain `<div>` or `<span>` with click handlers and no role → violation.
+- Decorative star SVGs inside a correctly labelled container must have `aria-hidden="true"` / `aria-hidden={true}`. If missing → violation (duplicate/meaningless content in accessibility tree).

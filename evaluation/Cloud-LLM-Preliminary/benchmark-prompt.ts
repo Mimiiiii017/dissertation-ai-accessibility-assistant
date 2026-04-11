@@ -230,6 +230,7 @@ COMPLETION CHECK — before finalising output:
   Note: each distinct selector in your Phase 1 outline inventory (CSS-A) and each distinct selector below the size threshold (CSS-B) is a separate Issue block — a stylesheet applying outline: none across 15 component selectors is 15 separate issues.
   A dense stylesheet typically yields 15–35 separate issues across all sweeps; if you have fewer than 10, return to CSS-A and ensure you reported every selector in your Phase 1 outline inventory that lacks a visible focus replacement.
   ⚠ FALSE-POSITIVE CHECK: Before reporting each issue, verify you can quote the exact CSS property and value from the source file that causes it. If you cannot point to a specific rule — for example if you are estimating a touch-target size from a class name rather than a measured px property, or asserting a reduced-motion violation without finding both the animation and the absence of the @media (prefers-reduced-motion) override in Phase 1 — omit that issue. Do not report inferred or estimated violations.
+  ⚠ FP CAP: If you have identified more than 25 CSS issues, re-verify each one before writing it. For each issue ask: "Can I quote the exact selector and property from the source that causes this?" Remove any issue where the answer is no. A false positive is significantly worse for the user than a missed issue.
 `;
 
 /**
@@ -246,14 +247,15 @@ MANDATORY JAVASCRIPT ARIA SWEEPS — run ALL sweeps JS-A through JS-G against yo
 
 Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
-PHASE 1 JS — before any sweep, build this inventory:
-  • Every function whose name or body suggests toggling or showing/hiding content: look for words like toggle, open, close, expand, collapse, show, hide, activate, deactivate in function names or in the DOM operations they perform.
-    For each such function: does it call setAttribute('aria-expanded', ...) or assign .ariaExpanded anywhere in that function body (or a clearly paired companion open/close function)?
-  • Every button-like element reference (querySelector, getElementById, etc.) in a toggle function. Does the function call setAttribute('aria-pressed', ...) or assign .ariaPressed?
-  • Every block of code that updates visible content in reaction to user input (innerHTML assignment, textContent assignment, insertAdjacentHTML, classList changes that switch display/visibility): is there a companion aria-live region (role="status", role="alert", aria-live="polite" or "assertive") whose content is also updated immediately after?
-  • Every form validation function: does it call setAttribute('aria-invalid', 'true') on invalid inputs and setAttribute('aria-invalid', 'false') (or removeAttribute) on valid inputs?
-  • Every interactive widget (accordion, nav drawer, dropdown, combobox, modal dialog) that is closed/hidden on initial page load: does any DOMContentLoaded / init function set aria-expanded="false" on its trigger?
-  • Every element whose visibility is toggled dynamically based on scroll position, user interaction, or application state (e.g. a floating action button that appears on scroll, a navigation drawer that opens/closes, an autocomplete dropdown that shows/hides, a sticky header that changes state, a loading overlay or toast notification): does the code that changes CSS display or visibility also update aria-hidden (aria-hidden="true" when invisible, aria-hidden="false" or removeAttribute when visible)?
+PHASE 1 JS — before any sweep, build FOUR explicit lists:
+
+  LIST 1 — TOGGLE FUNCTIONS: every function whose name or body toggles or shows/hides content (look for toggle, open, close, expand, collapse, show, hide, activate, deactivate in function names or in the DOM operations). For each entry record: (a) the function name, (b) the trigger element it operates on, (c) the DOM change it makes (adds/removes class, sets display, changes innerHTML, etc.), (d) whether it calls setAttribute('aria-expanded',...) or .ariaExpanded.
+
+  LIST 2 — EVENT HANDLERS: scan every addEventListener call and every on* property assignment in the file. For each handler record: (a) the event name (click, keydown, submit, scroll, input, change, focus, etc.), (b) the element or selector it is attached to, (c) what visible change to the page that handler causes (what the user sees change after the event fires).
+
+  LIST 3 — VALIDATION FUNCTIONS: every function that evaluates form field correctness (look for validate, check, isValid, onSubmit, handleSubmit, handleBlur). For each: does it setAttribute('aria-invalid','true') on invalid fields and setAttribute('aria-invalid','false') or removeAttribute on valid fields?
+
+  LIST 4 — VISIBILITY-TOGGLED ELEMENTS: every element whose CSS display or visibility is changed dynamically (scroll-triggered show/hide, drawer open/close, autocomplete list appear/disappear, overlay appear/disappear). For each: does the function that hides it also set aria-hidden="true", and the function that shows it also remove aria-hidden?
 
 SWEEP JS-A — Toggle functions not updating aria-expanded (HIGH):
   For every function in your toggle inventory that changes the visible state of a panel, menu, accordion, drawer, or combobox suggestion list: if no setAttribute('aria-expanded', ...) or .ariaExpanded = ... assignment exists in that function (or its directly paired open/close counterpart) → report "toggle function does not update aria-expanded on trigger element" (HIGH), naming the function and the trigger element selector.
@@ -279,9 +281,11 @@ SWEEP JS-F — Dynamically-hidden elements not removed from accessibility tree (
   Do NOT report elements that are hidden with aria-hidden from the start and never shown dynamically.
 
 SWEEP JS-G — User actions with no live-region announcement (MEDIUM):
-  For every user-triggered action in the file that updates visible content (applying a filter, running a search, changing a result count, toggling a display mode, expanding an accordion, opening or closing a navigation panel, advancing a wizard step, activating a keyboard shortcut, dismissing or showing a floating element) — verify that an aria-live region (any element with role="status", role="alert", aria-live="polite", or aria-live="assertive") has its textContent or innerHTML updated immediately after the action completes.
-  If an action updates visible content but NO live region is written after it → report "user action result not announced via aria-live region" (MEDIUM), naming the action/function and the visible change it causes.
-  Do NOT report purely navigational actions (route changes) or actions that directly move keyboard focus to the newly revealed content — focus movement is an acceptable announcement substitute.
+  Using LIST 2 (event handlers) from Phase 1: for each handler whose visible DOM change is one of the following categories — filter/search result update, result count change, view or mode label change, accordion panel open/close, navigation drawer open/close, wizard step advance, keyboard shortcut action, billing or plan change, scroll-to-top activation, suggestion list update — check whether that handler (or a function it calls) writes to an aria-live region immediately after making the DOM change.
+  An aria-live write means: assigning .textContent or .innerHTML to an element that has role="status", role="alert", aria-live="polite", or aria-live="assertive".
+  If the handler causes a visible change but NO live region is written → report "user action result not announced via aria-live region" (MEDIUM), naming the specific handler, the element it is attached to, and the visible change it causes.
+  Work through LIST 2 entry by entry — do not skip any handler that causes a content change.
+  Do NOT report: (a) route navigation changes, (b) actions whose handler directly calls element.focus() on the newly revealed content — focus movement is an acceptable alternative to live-region announcement.
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (JS-A through JS-G) using your Phase 1 inventory.
@@ -300,7 +304,7 @@ COMPLETION CHECK — before finalising output:
  * These sweeps provide the scanning algorithm that drives detection.
  */
 const TSX_MANDATORY_SWEEPS = `
-MANDATORY TSX/JSX ARIA SWEEPS — run ALL sweeps TSX-A through TSX-J against your Phase 1 inventory:
+MANDATORY TSX/JSX ARIA SWEEPS — run ALL sweeps TSX-A through TSX-K against your Phase 1 inventory:
 
 Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
@@ -314,10 +318,11 @@ PHASE 1 TSX — before any sweep, build this inventory:
   • Every button with a loading/submitting state (isLoading, isSubmitting, isSaving): does it receive aria-busy={isLoading}?
   • Every spinner component rendered during loading: does it have aria-hidden={true}?
   • Every <section>, <nav>, <aside> appearing more than once — does each have aria-label or aria-labelledby?
-  • Every <article> element used in a repeated card or grid context (any grid of pricing plans, product cards, feature cards, testimonial cards, team member cards, etc.): does each have aria-labelledby referencing a heading or title inside it?
+  • Every <article> element used in a repeated card or grid context (any grid of pricing plans, product cards, feature cards, testimonial cards, team member cards, etc.): for each article record the text of the first heading element inside it (h1–h6 or a component whose name contains Heading/Title/Name); does the article have aria-labelledby referencing that heading's id?
   • Every decorative overlay, backdrop, skeleton, cloned template element, or visually-duplicated grid item: does each have aria-hidden={true} to prevent duplicate or meaningless content being read by assistive technology?
   • Every named page-section component that wraps a <section> or <nav>: does the underlying element have aria-labelledby referencing its visible heading, or an aria-label? This applies to any section component whose name suggests a distinct page region (hero, stats, features, pricing, integrations, testimonials, navigation, etc.).
   • Every group of related controls rendered inside a section whose purpose is not already conveyed by a surrounding heading (e.g. a button group, a trust-badge row, a social-proof strip, an account action bar): does each group have an aria-label identifying what it contains?
+  • Every star rating, score display, or review widget: does it have role="img" + aria-label describing the rating value, OR are the individual interactive stars given role="radio" with aria-label each?
 
 SWEEP TSX-A — Disclosure toggle components missing aria-expanded (HIGH):
   For every component using a boolean to control a show/hide region: if the trigger element does NOT receive aria-expanded={stateVariable} → report "toggle component trigger missing aria-expanded prop" (HIGH), naming the component, the trigger element, and the state variable.
@@ -356,13 +361,19 @@ SWEEP TSX-J — Page-section components and card grids missing accessible names 
   Using your Phase 1 named-section inventory, apply these checks to whichever patterns exist in the file:
   • Any <section> or region component used as a major page section (hero/banner, statistics display, feature grid, pricing grid, testimonial section, integration showcase, etc.) — must have aria-labelledby referencing its visible heading, or an aria-label. Report each missing label as a separate issue.
   • Any sub-group of related controls rendered inside a section whose purpose is not conveyed by a surrounding <h1>–<h6> (e.g. a row of CTA buttons, a strip of trust badges, a group of social proof items) — must have an aria-label naming the group.
-  • Each <article> in a repeated card grid — must have aria-labelledby pointing to the heading/title inside it, AND each card's primary CTA link or button must have an aria-label that includes the item name (e.g. "Buy Starter plan", "Read more about Feature X").
+  • Each <article> in a repeated card grid — check the heading text you recorded in Phase 1; the article must have aria-labelledby pointing to that heading's id. Also check that the card's primary CTA link or button has an aria-label that includes the item name.
   • If more than one <nav> element exists — each must have a unique aria-label distinguishing it (e.g. "Main", "Mobile", "Breadcrumb", "Footer").
   • Any element that is a DOM duplicate of visible content (cloned for layout purposes, skeleton placeholders, off-screen template copies) — must have aria-hidden={true}.
   For each missing accessible name or unlabelled duplicate → report "page-section or card component missing accessible name" (MEDIUM), identifying the component and the specific missing label.
 
+SWEEP TSX-K — Star ratings and review widgets missing accessible semantics (MEDIUM):
+  For every star-rating, score display, or review-count widget in your Phase 1 inventory:
+  (a) If the widget is read-only (display only): the container must have role="img" and an aria-label that states the numerical value (e.g. aria-label="4 out of 5 stars"). If it has neither, and individual filled/empty star elements have no accessible label → report "star rating widget missing accessible label" (MEDIUM).
+  (b) If the widget is interactive (user can select a star): each star element must have role="radio" and an aria-label naming the value (e.g. "1 star", "2 stars"). If individual stars have no role or aria-label → report "interactive star rating missing radio role and labels" (HIGH).
+  (c) Individual star icons (SVG or icon components) that are purely decorative within a labelled container must have aria-hidden={true}.
+
 COMPLETION CHECK — before finalising output:
-  Verify you executed every sweep above (TSX-A through TSX-J) using your Phase 1 inventory.
+  Verify you executed every sweep above (TSX-A through TSX-K) using your Phase 1 inventory.
   If you have produced fewer than 8 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
 `;
