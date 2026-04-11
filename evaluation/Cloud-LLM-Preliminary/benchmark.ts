@@ -68,6 +68,8 @@ const RAG_NONHTML_MAX_CHUNKS = 6;
 /** T21: JS cap reduced to 4 — fewer chunks prevent context dilution in deepseek/gpt.
  *  T22: raised to 5 — third aria-live query needs a slot alongside the 2 existing queries. */
 const RAG_JS_MAX_CHUNKS = 5;
+/** T30: TSX raised to 8 — 4th query added for star-rating and card CTA patterns. */
+const RAG_TSX_MAX_CHUNKS = 8;
 /** Distance threshold for non-HTML — matches the existing single-query default. */
 const RAG_NONHTML_DISTANCE_THRESHOLD = 0.65;
 /** T21: JS uses a tighter threshold (0.70) — more selective retrieval to reduce noise. */
@@ -78,8 +80,8 @@ const RAG_JS_DISTANCE_THRESHOLD = 0.70;
  * Mirrors HTML_SWEEP_QUERIES so RAG retrieval aligns with CSS_MANDATORY_SWEEPS.
  */
 const CSS_SWEEP_QUERIES = [
-  // Sweep 1 — focus indicators
-  'outline none focus indicator removed keyboard accessibility CSS visible focus ring replacement',
+  // Sweep 1 — focus indicators (T30: added box-shadow to retrieve new anti-pattern section)
+  'outline none focus indicator removed keyboard accessibility CSS visible focus ring box-shadow high contrast replacement',
   // Sweep 2 — touch targets & visually-hidden patterns
   'touch target minimum size 44px interactive element visually hidden sr-only clip screen reader CSS',
   // Sweep 3 — motion, forced-colors, contrast, word-spacing, link underlines
@@ -118,6 +120,9 @@ const TSX_SWEEP_QUERIES = [
   // Sweep 3 — landmarks, aria-current, dialog/modal patterns (replaces T20 sweep 4):
   //            adds aria-modal/role=dialog because TSX fixture has modal backdrop patterns
   'aria-label landmark nav region aria-current aria-modal role dialog hamburger accessible name React',
+  // Sweep 4 (T30) — star ratings, review widgets, card grid CTA labels:
+  //            targets star-rating-role / star-inner-hidden FNs and plan-cta-label FNs
+  'star rating role img aria-label review widget role radio radiogroup card CTA button aria-label item name plan Buy Learn more',
 ];
 
 type RagChunk = { id: string; source: string; text: string };
@@ -182,7 +187,7 @@ async function retrieveMultiQueryRag(
 const retrieveCssMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, CSS_SWEEP_QUERIES);
 // T21: JS uses tighter threshold (0.70) and smaller cap (4 chunks) to prevent context dilution
 const retrieveJsMultiQueryRag  = (ep: string) => retrieveMultiQueryRag(ep, JS_SWEEP_QUERIES, RAG_JS_MAX_CHUNKS, RAG_JS_DISTANCE_THRESHOLD);
-const retrieveTsxMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, TSX_SWEEP_QUERIES);
+const retrieveTsxMultiQueryRag = (ep: string) => retrieveMultiQueryRag(ep, TSX_SWEEP_QUERIES, RAG_TSX_MAX_CHUNKS);
 
 import { FixtureGroundTruth } from '../preset-benchmark/ground-truth';
 import { scoreRun } from '../preset-benchmark/benchmark';
