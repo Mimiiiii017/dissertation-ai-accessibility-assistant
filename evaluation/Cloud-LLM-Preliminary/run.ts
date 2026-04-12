@@ -70,10 +70,10 @@ const ALL_MODELS: string[] = [
   
   // ── Mid-range (30–200 B) ──────────────────────────────────────────────
   
-  'gemini-3-flash-preview:cloud',    // ~undisclosed (Google Flash-class)
+  // 'gemini-3-flash-preview:cloud',  // ~undisclosed  — removed after T31: 1/4 conditions across T29–T31 (nn only); plateau with no improvement trajectory; TSX and JS recall consistently near-zero; retained as contrast model through T31 but adds no discriminating signal
   // 'minimax-m2.5:cloud',           // ~456 B MoE (updated) — BROKEN: cloud API returns HTTP 500 on every request
-  'deepseek-v3.2:cloud',             // ~671 B MoE
-  'gemma4:31b-cloud',               // ~31 B (Google Gemma 4) — T30 final retest: 0/4 in T28 and T29 with zero variance; included at supervisor's request to give T30 prompt restructure (explicit event-handler table, TSX-K) one more chance before removal
+  // 'deepseek-v3.2:cloud',          // ~671 B MoE  — removed after T31: genuine 0/4 across T28–T31 (T29/T30 passes were error-denominator artifacts); extreme slowness (557–767 s avg per fixture); CSS cold-scan timeouts in norag; nt recall 12.2% in clean run
+  // 'gemma4:31b-cloud',             // ~31 B        — removed after T31: 0/4 across T28–T31 with flat 79.1–79.4% ceiling; does not follow structured sweep instructions; JS TP=4, TSX TP=6 in final clean run; prompt changes produce no measurable improvement
 
 
   // ── Large (100–700 B) ─────────────────────────────────────────────────

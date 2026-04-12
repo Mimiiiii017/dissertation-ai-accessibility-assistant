@@ -59,17 +59,21 @@ const HTML_SWEEP_QUERIES = [
 ];
 
 /** Max unique chunks to inject per fixture — caps context size regardless of dedup yield. */
-const RAG_HTML_MAX_CHUNKS = 8;
+/** T32: raised from 8→10 — 8 queries × top_k=3 yields up to 24 candidates; cap raised to pull more coverage. */
+const RAG_HTML_MAX_CHUNKS = 10;
 /** Stricter cosine distance threshold for HTML multi-query (vs default 0.65). */
 const RAG_HTML_DISTANCE_THRESHOLD = 0.5;
 
-/** Max unique chunks for non-HTML multi-query (3–4 queries × top_k=2 = up to 6 deduped). */
-const RAG_NONHTML_MAX_CHUNKS = 6;
+/** Max unique chunks for non-HTML multi-query (3 queries × top_k=3 = up to 9 deduped). */
+/** T32: raised from 6→8 — matches increased per-query top_k. */
+const RAG_NONHTML_MAX_CHUNKS = 8;
 /** T21: JS cap reduced to 4 — fewer chunks prevent context dilution in deepseek/gpt.
- *  T22: raised to 5 — third aria-live query needs a slot alongside the 2 existing queries. */
-const RAG_JS_MAX_CHUNKS = 5;
-/** T30: TSX raised to 8 — 4th query added for star-rating and card CTA patterns. */
-const RAG_TSX_MAX_CHUNKS = 8;
+ *  T22: raised to 5 — third aria-live query needs a slot alongside the 2 existing queries.
+ *  T32: raised to 7 — 3 queries × top_k=3 yields up to 9 candidates; deeper JS recall needed. */
+const RAG_JS_MAX_CHUNKS = 7;
+/** T30: TSX raised to 8 — 4th query added for star-rating and card CTA patterns.
+ *  T32: raised to 9 — 3 queries × top_k=3 yields up to 9 candidates. */
+const RAG_TSX_MAX_CHUNKS = 9;
 /** Distance threshold for non-HTML — matches the existing single-query default. */
 const RAG_NONHTML_DISTANCE_THRESHOLD = 0.65;
 /** T21: JS uses a tighter threshold (0.70) — more selective retrieval to reduce noise. */
@@ -138,7 +142,7 @@ async function retrieveHtmlMultiQueryRag(ragEndpoint: string): Promise<RagChunk[
   for (const q of HTML_SWEEP_QUERIES) {
     if (allChunks.length >= RAG_HTML_MAX_CHUNKS) break;
     try {
-      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', RAG_HTML_DISTANCE_THRESHOLD);
+      const res = await ragRetrieve(ragEndpoint, q, 3, 'accessibility', RAG_HTML_DISTANCE_THRESHOLD);
       for (const chunk of res.chunks) {
         if (allChunks.length >= RAG_HTML_MAX_CHUNKS) break;
         if (!seen.has(chunk.id)) {
@@ -169,7 +173,7 @@ async function retrieveMultiQueryRag(
   for (const q of queries) {
     if (allChunks.length >= maxChunks) break;
     try {
-      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', distanceThreshold);
+      const res = await ragRetrieve(ragEndpoint, q, 3, 'accessibility', distanceThreshold);
       for (const chunk of res.chunks) {
         if (allChunks.length >= maxChunks) break;
         if (!seen.has(chunk.id)) {

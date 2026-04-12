@@ -234,31 +234,30 @@ Multiple models hallucinate `:focus-visible { outline: none }` removals on eleme
 
 ---
 
-## 9. T31 recommendations
+## 9. Changes made for T31
 
-### P0 — Critical
+All changes applied to `evaluation/Cloud-LLM-Preliminary/benchmark-prompt.ts`.
 
-1. **Fix deepseek TSX regression**: TSX Phase 1 is now too long for deepseek in norag conditions. Compress the article heading-text inventory and star-widget inventory into a single combined inventory table (one pass, not two). Move TSX-K into the existing sweep list rather than adding a new named sweep.
+### P0 — Applied (regression fixes)
 
-2. **Reduce JS Phase 1 prompt length**: The event-handler table (LIST 1–4) increased timeout rate 8×. Consolidate LIST 1 (toggle functions) and LIST 2 (event handlers) into a single "JS INTERACTION TABLE" with columns: `handler | element | event | visible change`. Remove the separate LIST 3/LIST 4 and incorporate validation + visibility checks into the JS-D sweep directly.
+1. **JS Phase 1 shortened — LIST 1+2 merged into JS INTERACTION TABLE**: The T30 LIST 1–4 structure increased timeout rate 8×. LIST 1 (toggle functions) and LIST 2 (event handlers) are now a single combined table with columns: `function/handler | element | trigger | visible DOM change | aria notes`. Old LIST 3 → LIST 2 (validation), old LIST 4 → LIST 3 (visibility-toggled elements). Phase 1 is now THREE lists instead of FOUR.
 
-3. **Fix gpt nt regression (think mode + norag)**: gpt lost nt at 79.3%. The new JS table structure appears to exhaust gpt's reasoning budget before TSX. Add a per-phase instruction: "If analysis time is limited, prioritise TSX-A through TSX-K before completing the JS event-handler table."
+2. **TSX Phase 1 shortened — article + star-rating bullets merged**: The two separate T30 inventory bullets (article heading-text and star/review widget) are now one combined bullet. This reduces TSX Phase 1 length for deepseek in norag conditions, addressing the 22→0 tsx-high TP regression.
 
-### P1 — High
+3. **JS-A and JS-G updated to reference new LIST 1**: All sweep cross-references updated from `LIST 2 (event handlers)` → `LIST 1 (JS Interaction Table)` to stay consistent with the Phase 1 renumbering.
 
-4. **TSX-K remediation**: Strengthen the negative-evidence instruction — "Report each `<svg>` / `<span>` acting as a star/rating that lacks `role` and `aria-label` as a separate issue. Do not skip if the element renders correctly; the missing attribute IS the issue."
+### P1 — Applied (recall improvements)
 
-5. **gemma4 — monitor after prompt compression**: The P0 prompt-length reductions (JS table consolidation, TSX Phase 1 compression) should free capacity. If gemma4 still produces nt TP=67 in T31, investigate whether it is hitting a context-length ceiling on the fixture content itself.
+4. **TSX-K negative-evidence framing strengthened**: Added `⚠ The absence of role and aria-label IS the accessibility defect — report it even if the element renders visually correctly. Do not skip any star/rating element that lacks these attributes.` Targets persistent `star-rating-role` / `star-inner-hidden` zero-detection.
 
-6. **JS-G live-region specificity**: Revise JS-G to add: "A live region is per-action-specific if it announces only this state change. A generic live region shared with unrelated actions does not count. Mark each action without its own dedicated live-region write as a FN."
+5. **JS-G live-region specificity added**: Added `⚠ SPECIFICITY: An aria-live write satisfies this check only if it announces this specific state change. A generic status region written to by multiple unrelated actions does NOT count — each action must have its own dedicated announcement.` Targets the JS announcement suite FN cluster.
 
-7. **Investigate deepseek nt accuracy improvement**: deepseek nt improved from FAIL (78.7%) to PASS (80.7%) despite 4 errors. If the improvement is real (not denomintor shrinkage), understand what changed and preserve it.
+### Not yet applied (still pending / monitor)
 
-### P2 — Normal
-
-8. **CSS `:focus-visible` FP clarification**: Add to CSS sweep: "A `box-shadow` rule inside `:focus` or `:focus-visible` is a valid focus indicator replacement if it produces a visible outline. Do NOT report it as focus-indicator-removed."
-
-9. **Gemini TSX/JS exploration**: gemini is 1/4 across T28, T29, T30. Its miss pattern is dominated by TSX and JS. It performs adequately on HTML and CSS. Consider a gemini-specific Phase 1 instruction reminding it that TSX and JS sweeps are mandatory even when no obvious accessibility markers are present.
+6. **gemma4** — monitor after prompt compression. If nt TP=67 persists in T31, investigate context-length ceiling.
+7. **Deepseek nt improvement** — verify in T31 whether 80.7% holds with fewer errors.
+8. **CSS `:focus-visible` FP clarification** — `box-shadow` inside `:focus-visible` is a valid replacement; already covered by anti-FP rule [x] but may need reinforcing if FP rate rises.
+9. **Gemini TSX/JS** — gemini is 1/4 across T28–T30; consider mandatory-sweep reminder if plateau continues into T31.
 
 ---
 

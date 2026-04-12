@@ -121,11 +121,6 @@ export interface ModelParamOverride {
  *                    (aligned with Qwen3/DeepSeek-R1 CoT community consensus)
  *   Qwen3 series   — Alibaba Qwen3 model card (HuggingFace)
  *                    https://huggingface.co/Qwen/Qwen3-235B-A22B
- *   DeepSeek-V3    — DeepSeek API docs, parameter settings guide
- *                    https://api-docs.deepseek.com/quick_start/parameter_settings
- *   GLM-5          — Zhipu AI API docs: lower temperature for structured/factual tasks
- *   Gemini         — Google AI API docs: temperature=0 for factual/precise/structured tasks
- *   Mistral Large  — Mistral AI docs + cookbook: temperature=0.3 for focused analytical tasks
  */
 export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // ── GPT-OSS class (gpt-oss:120b) ────────────────────────────────────────
@@ -152,49 +147,6 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   'qwen3': {
     think:   { temperature: 0.6, top_p: 0.95 },
     noThink: { temperature: 0.7, top_p: 0.8  },
-  },
-  // ── DeepSeek-V3 ─────────────────────────────────────────────────────────
-  // Manufacturer recommended: temperature=0.0 for deterministic/structured output.
-  // DeepSeek-V3 is sensitive to temperature; even 0.2 introduces variation that
-  // compounds across the 51-issue fixture.
-  'deepseek': {
-    think:   { temperature: 0.0, top_p: 0.95 },  // T25: reverted from T24 0.1 — raising think temp caused rt TP collapse 135→82; greedy 0.0 was best for deepseek-rt (80.0% in T23)
-    noThink: { temperature: 0.1, top_p: 0.95 },  // T23 change retained (0.0→0.1 gained +0.8pp nn); T24 raise to 0.2 added no TP and regressed nt
-  },
-  // ── GLM-5 (Zhipu AI) ─────────────────────────────────────────────────────
-  // GLM family default is 0.95; Zhipu's API guide recommends lower values for
-  // structured/factual tasks. GLM-5 has no dedicated thinking mode.
-  'glm': {
-    think:   { temperature: 0.2, top_p: 0.9 },
-    noThink: { temperature: 0.2, top_p: 0.9 },
-  },
-  // ── Gemini (Google) ──────────────────────────────────────────────────────
-  // Google AI API docs explicitly recommend temperature=0 for factual, precise,
-  // and structured-output tasks. top_p=1.0 avoids nucleus truncation side-effects
-  // at such low temperature (distribution is already very peaked).
-  // T21 finding: temperature=0.0 in think mode causes pathological under-reporting
-  // on TSX/HTML — gemini reasons itself out of reporting obvious violations (2 TP
-  // on tsx-rt vs 7 TP in no-think). Raising think temperature to 0.15 restores
-  // stochastic sweep coverage across 3 runs without inflating precision loss.
-  'gemini': {
-    think:   { temperature: 0.15, top_p: 0.95 },  // T25: reverted from T24 0.2 — further raise caused no recall gain; 0.15 from T21 remains best for think mode
-    noThink: { temperature: 0.0,  top_p: 1.0  },  // T25: reverted from T24 0.1 — temperature raise did not improve recall; 0.0 yields lowest FPs (2 in T23 nn)
-  },
-  // ── Mistral Large ────────────────────────────────────────────────────────
-  // Mistral AI docs and cookbook examples recommend temperature=0.3 for focused
-  // analytical tasks and structured extraction workflows.
-  'mistral': {
-    think:   { temperature: 0.3, top_p: 0.9 },
-    noThink: { temperature: 0.3, top_p: 0.9 },
-  },
-  // ── Gemma 4 (Google) ─────────────────────────────────────────────────────
-  // Gemma 4 is an instruction-tuned model, not a reasoning/thinking model.
-  // temperature=0.1 for structured detection; top_p=1.0 avoids nucleus
-  // truncation at low temperature. Think/noThink use identical params since
-  // Gemma 4 does not have a dedicated chain-of-thought mode.
-  'gemma4': {
-    think:   { temperature: 0.1, top_p: 1.0 },
-    noThink: { temperature: 0.1, top_p: 1.0 },
   },
 };
 
