@@ -4,7 +4,7 @@
 **Conditions:** rn (rag-nothink), rt (rag-think), nn (norag-nothink), nt (norag-think)  
 **Fixtures:** html-high, css-high, js-high, tsx-high (high-difficulty only)  
 **Models:** 6 — kimi-k2.5, qwen3.5:397b, gpt-oss:120b, gemini-3-flash-preview, deepseek-v3.2, gemma4:31b  
-**Changes from T29:** JS Phase 1 explicit event-handler table (LIST 1–4); JS-G row-by-row iteration; TSX Phase 1 article heading-text + star/rating widget inventories; TSX-K new sweep (star/rating roles); CSS FP cap (>25 issues → re-verify each); gemma4:31b restored for final retest; RAG TSX Sweep 4 added; TSX max chunks 6→8; CSS Sweep 1 extended with `box-shadow high contrast`; 5 knowledge base files extended.  
+**Changes from T29:** JS Phase 1 explicit event-handler table (LIST 1–4); JS-G row-by-row iteration; TSX Phase 1 article heading-text + star/rating widget inventories; TSX-K new sweep (star/rating roles); CSS FP cap (>25 issues → re-verify each); RAG TSX Sweep 4 added; TSX max chunks 6→8; CSS Sweep 1 extended with `box-shadow high contrast`; 5 knowledge base files extended.  
 **Pass threshold:** ≥ 80.0% accuracy  
 **Ground truth per condition:** 603 positive issues, 1 797 TN slots → 2 400 total per model
 
@@ -143,7 +143,7 @@ Critical regression:
 | TSX Phase 1 heading/star inventories raise TSX recall | ✅ For kimi (+7) and qwen (+3); ❌ for deepseek (−22). Net effect is mixed. |
 | TSX-K star-rating sweep detects star/rating widget issues | ⚠️ Unverifiable — most T30 nn TSX FNs still include `star-rating-role`; the sweep added instructions but recall did not improve meaningfully for that specific concept ID. |
 | CSS FP cap (>25 → re-verify) suppresses CSS false positives | ✅ CSS FP counts remain well-controlled (kimi=14, qwen=16, gemini=13, deepseek=15, gpt=2, gemma4=11 in nn). No inflation detected. |
-| gemma4 can reach ≥80% with better prompt structure | ❌ Confirmed final negative — 0/4 across all conditions for the third consecutive benchmark. Regression in nt (78.3% vs 78.9% T29). |
+| gemma4 can reach ≥80% with better prompt structure | ❌ Not yet — 0/4 for third consecutive benchmark. Regression in nt (78.3% vs 78.9% T29). Prompt-length reductions in T31 are the next lever. |
 | Error rate stays at T29 level | ❌ T30 had approximately 8× more errors than T29 (≈61 vs ≈7). New JS event-handler table substantially increased prompt length and likely caused timeouts. |
 
 ---
@@ -177,11 +177,9 @@ T29 ran with the JS-G sweep pattern (~4 lines). T30 added an explicit 4-list eve
 - Errors cluster heavily in rn (22 errors): rn = long RAG context + long prompt = maximum token pressure point.
 - rt had fewer errors than rn despite think mode, likely because think mode manages context allocation differently than nothink.
 
-### 6d. gemma4 confirmed non-viable (0/4 third benchmark in a row)
+### 6d. gemma4 still below threshold (0/4 third benchmark in a row)
 
-gemma4 reached its lowest result ever in nt: 78.3%, TP=67, recall=14.8%. It produced only 5 FP across all nt fixtures — extreme conservatism. In think mode without RAG, gemma4 ignores structured sweep instructions entirely and performs a shallow accessibility scan. CSS performance remains adequate (26 TP in nn) but JS (5 TP) and TSX (6 TP) are model ceilings, not prompt-fixable.
-
-**Verdict: remove gemma4 from T31 onwards.**
+gemma4 reached its lowest result ever in nt: 78.3%, TP=67, recall=14.8%. It produced only 5 FP across all nt fixtures — extreme conservatism. In think mode without RAG, gemma4 ignores structured sweep instructions entirely and performs a shallow accessibility scan. CSS performance remains adequate (26 TP in nn) but JS (5 TP) and TSX (6 TP) are the main drag. The prompt-length reduction targeted for T31 (§9) may free up capacity for gemma4 to follow structured sweeps; it remains in the benchmark.
 
 ---
 
@@ -248,9 +246,9 @@ Multiple models hallucinate `:focus-visible { outline: none }` removals on eleme
 
 ### P1 — High
 
-4. **Remove gemma4**: Drop gemma4:31b from T31 benchmark run. Replace with a 5-model run to reduce total cost and timeout exposure.
+4. **TSX-K remediation**: Strengthen the negative-evidence instruction — "Report each `<svg>` / `<span>` acting as a star/rating that lacks `role` and `aria-label` as a separate issue. Do not skip if the element renders correctly; the missing attribute IS the issue."
 
-5. **TSX-K remediation**: Strengthen the negative-evidence instruction — "Report each `<svg>` / `<span>` acting as a star/rating that lacks `role` and `aria-label` as a separate issue. Do not skip if the element renders correctly; the missing attribute IS the issue."
+5. **gemma4 — monitor after prompt compression**: The P0 prompt-length reductions (JS table consolidation, TSX Phase 1 compression) should free capacity. If gemma4 still produces nt TP=67 in T31, investigate whether it is hitting a context-length ceiling on the fixture content itself.
 
 6. **JS-G live-region specificity**: Revise JS-G to add: "A live region is per-action-specific if it announces only this state change. A generic live region shared with unrelated actions does not count. Mark each action without its own dedicated live-region write as a FN."
 
@@ -329,7 +327,7 @@ Multiple models hallucinate `:focus-visible { outline: none }` removals on eleme
 | gpt-oss:120b | 0/4 | 4/4 | 3/4 | ⚠️ Minor regression |
 | gemini-flash | 0/4 | 1/4 | 1/4 | ⚠️ Plateau |
 | deepseek-v3.2 | 0/4 | 2/4 | 3/4 | 📈 Improving |
-| gemma4:31b | 0/4 | 0/4 | 0/4 | ❌ Removed |
+| gemma4:31b | 0/4 | 0/4 | 0/4 | ⚠️ Plateau |
 
 **F1 best-condition trajectory (best F1 across any condition):**
 
