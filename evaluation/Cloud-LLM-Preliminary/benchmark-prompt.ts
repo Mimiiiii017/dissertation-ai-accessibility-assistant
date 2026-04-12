@@ -176,6 +176,7 @@ const CSS_MANDATORY_SWEEPS = `
 MANDATORY CSS ACCESSIBILITY SWEEPS — run ALL sweeps CSS-A through CSS-H against your Phase 1 inventory:
 
 ⚠ ACTIVATION MANDATE: You MUST execute all CSS-A through CSS-H sweeps regardless of whether supplementary WCAG guidance was retrieved. These sweeps operate solely on the CSS source code identified in your Phase 1 inventory. After completing Phase 1, self-verify: a dense stylesheet typically contains 10 or more violations — if your Phase 1 inventory has zero outline:none selectors and zero undersized interactive elements, you have not fully read the file. Re-read from line 1 before proceeding to the sweeps.
+⚠ COMPLETION GATE: After building your Phase 1 outline inventory, count the number of outline:none / outline:0 / outline:transparent selectors you recorded. If your count seems low relative to the number of interactive components visible in the stylesheet, you have not fully read the file — re-read the entire file from line 1 before proceeding to the sweeps.
 
 Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
@@ -250,6 +251,7 @@ Execute every sweep below fully and independently. Supplementary WCAG guidance t
 PHASE 1 JS — before any sweep, build THREE explicit lists:
 
   LIST 1 — JS INTERACTION TABLE: scan every function that toggles/shows/hides content (names containing toggle, open, close, expand, collapse, show, hide, activate, deactivate) AND every addEventListener / on* handler in the file. For each entry record four columns: (a) function or handler name, (b) element/selector it operates on, (c) trigger event or call site, (d) the visible DOM change it causes (class toggle, display change, innerHTML update, etc.). Also note per row: whether it calls setAttribute('aria-expanded',...), whether it writes to an aria-live region (role="status"/role="alert"/aria-live), and whether it sets aria-hidden.
+  ⚠ COMPLETENESS GATE: LIST 1 is complete only when you have processed EVERY function definition and EVERY addEventListener / on* call in the file. Before proceeding, state the total entry count. If your count seems low relative to the number of interactive features visible in the file, you have missed entries — re-scan from the top of the file.
 
   LIST 2 — VALIDATION FUNCTIONS: every function that evaluates form field correctness (look for validate, check, isValid, onSubmit, handleSubmit, handleBlur). For each: does it setAttribute('aria-invalid','true') on invalid fields and setAttribute('aria-invalid','false') or removeAttribute on valid fields?
 
@@ -365,7 +367,12 @@ SWEEP TSX-J — Page-section components and card grids missing accessible names 
   For each missing accessible name or unlabelled duplicate → report "page-section or card component missing accessible name" (MEDIUM), identifying the component and the specific missing label.
 
 SWEEP TSX-K — Star ratings and review widgets missing accessible semantics (MEDIUM):
-  For every star-rating, score display, or review-count widget in your Phase 1 inventory:
+  ⚠ MANDATORY: This sweep is required even if no star or rating elements are immediately obvious. Before marking this sweep complete, actively search for:
+    • Any <svg> or named icon component (e.g. <StarIcon>, <RatingIcon>, <FillStar>) inside a row of sibling elements that may represent a score scale
+    • Any component whose name contains 'star', 'rating', 'score', or 'review'
+    • Any group of 4–5 sibling icons or identical repeated elements that could represent a rating scale
+    • Any numeric display adjacent to icon elements (e.g. "4.8" next to star icons)
+  For every star-rating, score display, or review-count widget found:
   (a) If the widget is read-only (display only): the container must have role="img" and an aria-label that states the numerical value (e.g. aria-label="4 out of 5 stars"). If it has neither, and individual filled/empty star elements have no accessible label → report "star rating widget missing accessible label" (MEDIUM).
   (b) If the widget is interactive (user can select a star): each star element must have role="radio" and an aria-label naming the value (e.g. "1 star", "2 stars"). If individual stars have no role or aria-label → report "interactive star rating missing radio role and labels" (HIGH).
   (c) Individual star icons (SVG or icon components) that are purely decorative within a labelled container must have aria-hidden={true}.
