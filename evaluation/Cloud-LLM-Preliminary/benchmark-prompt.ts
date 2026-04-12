@@ -78,6 +78,8 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 [ix]  TABLE HEADER SCOPE — A <th> element does NOT require a scope attribute when its position alone unambiguously identifies its axis. Specifically: if a row contains only ONE <th> at the start of the row, screen readers infer row scope. If a column contains only ONE <th> in the header row, screen readers infer col scope. Only flag a <th> as "missing scope" if (a) the scope attribute is literally absent AND (b) there are multiple <th> elements in the same row (ambiguous row headers) or multiple <th> elements in the same column position across rows (ambiguous col headers). Do NOT flag every <th> in a simple table where position is unambiguous.
 
 [x]   FOCUS INDICATOR REPLACEMENT — A CSS rule that sets outline: none or outline: 0 AND provides a visible alternative in the SAME rule-block is NOT a violation. A visible alternative means: box-shadow with non-zero spread and visible colour, a visually distinct border, or a non-zero outline value. Example: ".btn:focus-visible { outline: none; box-shadow: 0 0 0 3px blue; }" is valid — do NOT report it. Only report when NO visible alternative exists anywhere for that selector or its paired base selector.
+
+[xi]  JS FUNCTION CITATION — For every issue you report in JS sweeps (JS-A through JS-G): the function name and element selector you cite must appear literally in the source code. Do not report a function or handler that you inferred from class names, assumed patterns, or cross-file conventions — only report what you can directly quote from the file being analysed. If you cannot point to the exact function name or element selector in the source, skip that issue.
 `;
 
 /**
@@ -176,7 +178,7 @@ const CSS_MANDATORY_SWEEPS = `
 MANDATORY CSS ACCESSIBILITY SWEEPS — run ALL sweeps CSS-A through CSS-H against your Phase 1 inventory:
 
 ⚠ ACTIVATION MANDATE: You MUST execute all CSS-A through CSS-H sweeps regardless of whether supplementary WCAG guidance was retrieved. These sweeps operate solely on the CSS source code identified in your Phase 1 inventory. After completing Phase 1, self-verify: a dense stylesheet typically contains 10 or more violations — if your Phase 1 inventory has zero outline:none selectors and zero undersized interactive elements, you have not fully read the file. Re-read from line 1 before proceeding to the sweeps.
-⚠ COMPLETION GATE: After building your Phase 1 outline inventory, count the number of outline:none / outline:0 / outline:transparent selectors you recorded. If your count seems low relative to the number of interactive components visible in the stylesheet, you have not fully read the file — re-read the entire file from line 1 before proceeding to the sweeps.
+⚠ BASE-SELECTOR REMINDER: outline:none and outline:0 most commonly appear in BASE component rules — e.g. .btn { outline: none }, .tab { outline: 0 }, .form-input { outline: none } — NOT only in :focus or :focus-visible pseudo-class rules. Your Phase 1 outline inventory must include both base-class rules and pseudo-class rules. If you recorded only :focus-scoped selectors, return and scan the stylesheet for base component class rules that also suppress the outline.
 
 Execute every sweep below fully and independently. Supplementary WCAG guidance that follows is reference-only — it does not replace or skip any sweep.
 
@@ -229,9 +231,9 @@ COMPLETION CHECK — before finalising output:
   If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
   Note: each distinct selector in your Phase 1 outline inventory (CSS-A) and each distinct selector below the size threshold (CSS-B) is a separate Issue block — a stylesheet applying outline: none across 15 component selectors is 15 separate issues.
-  A dense stylesheet typically yields 15–35 separate issues across all sweeps; if you have fewer than 10, return to CSS-A and ensure you reported every selector in your Phase 1 outline inventory that lacks a visible focus replacement.
+  A dense stylesheet typically yields 20–50 separate issues across all sweeps; if you have fewer than 10, return to CSS-A and ensure you reported every selector in your Phase 1 outline inventory that lacks a visible focus replacement.
   ⚠ FALSE-POSITIVE CHECK: Before reporting each issue, verify you can quote the exact CSS property and value from the source file that causes it. If you cannot point to a specific rule — for example if you are estimating a touch-target size from a class name rather than a measured px property, or asserting a reduced-motion violation without finding both the animation and the absence of the @media (prefers-reduced-motion) override in Phase 1 — omit that issue. Do not report inferred or estimated violations.
-  ⚠ FP CAP: If you have identified more than 25 CSS issues, re-verify each one before writing it. For each issue ask: "Can I quote the exact selector and property from the source that causes this?" Remove any issue where the answer is no. A false positive is significantly worse for the user than a missed issue.
+  ⚠ FP CHECK: If you have identified more than 40 CSS issues, re-verify each one before writing it. For each issue ask: "Can I quote the exact selector and property from the source that causes this?" Remove any issue where the answer is no. Both missed issues and false positives harm users — report everything you can directly confirm from the source.
 `;
 
 /**
@@ -251,7 +253,7 @@ Execute every sweep below fully and independently. Supplementary WCAG guidance t
 PHASE 1 JS — before any sweep, build THREE explicit lists:
 
   LIST 1 — JS INTERACTION TABLE: scan every function that toggles/shows/hides content (names containing toggle, open, close, expand, collapse, show, hide, activate, deactivate) AND every addEventListener / on* handler in the file. For each entry record four columns: (a) function or handler name, (b) element/selector it operates on, (c) trigger event or call site, (d) the visible DOM change it causes (class toggle, display change, innerHTML update, etc.). Also note per row: whether it calls setAttribute('aria-expanded',...), whether it writes to an aria-live region (role="status"/role="alert"/aria-live), and whether it sets aria-hidden.
-  ⚠ COMPLETENESS GATE: LIST 1 is complete only when you have processed EVERY function definition and EVERY addEventListener / on* call in the file. Before proceeding, state the total entry count. If your count seems low relative to the number of interactive features visible in the file, you have missed entries — re-scan from the top of the file.
+  ⚠ DEPTH REQUIREMENT: LIST 1 must capture handlers and functions at ALL nesting levels — those inside DOMContentLoaded / window.onload callbacks, module IIFE bodies, class method definitions, and helper functions called from init. Do not stop after the outermost-level definitions or after the first 10–15 entries. An event listener registered inside an init callback is IN SCOPE for LIST 1. Scan the full file top-to-bottom without truncating.
 
   LIST 2 — VALIDATION FUNCTIONS: every function that evaluates form field correctness (look for validate, check, isValid, onSubmit, handleSubmit, handleBlur). For each: does it setAttribute('aria-invalid','true') on invalid fields and setAttribute('aria-invalid','false') or removeAttribute on valid fields?
 
@@ -292,7 +294,7 @@ COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (JS-A through JS-G) using your Phase 1 inventory.
   If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep.
   Return to the sweep list and run each one explicitly before writing output.
-  A medium-density JS file typically yields 12–20 statically-detectable issues; a high-density file typically yields 18–30. Each unique function or element is a separate Issue block.
+  A medium-density JS file typically yields 15–25 statically-detectable issues; a high-density file with many interactive handlers typically yields 25–50. Each unique function or element is a separate Issue block.
 `;
 
 /**
