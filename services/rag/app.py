@@ -30,8 +30,8 @@ _tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-
 client = chromadb.PersistentClient(path=str(DB_DIR))
 
 # ─── Chunking constants ───────────────────────────────────────────────────────
-MAX_CHUNK_TOKENS = 200   # upper bound; keeps every chunk well within the 256-token embedding limit
-OVERLAP_TOKENS   = 32    # overlap between consecutive sub-windows for continuity
+MAX_CHUNK_TOKENS = 128   # smallest viable chunk; fits well within all-MiniLM-L6-v2's 256-token limit
+OVERLAP_TOKENS   = 13    # ~10% overlap between consecutive sub-windows for continuity
 MIN_CHUNK_CHARS  = 80    # discard/merge chunks shorter than this
 
 

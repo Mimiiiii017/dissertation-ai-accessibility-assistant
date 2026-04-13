@@ -1134,26 +1134,48 @@ export function saveCsv(
 
   // ── § 4  DETAIL BY FIXTURE ─────────────────────────────────────────────
   rows.push([]);
-  rows.push(['# DETAIL BY FIXTURE']);
-  rows.push(['fixture', 'model', 'short_name', 'issues_found', 'tp', 'tn', 'fp', 'fn', 'f1', 'accuracy', 'mcc', 'response_s', 'hallucinated_titles', 'missed_concept_ids']);
+  rows.push(['# DETAIL BY FIXTURE  (each run listed individually, then aggregate average)']);
+  rows.push(['fixture', 'model', 'short_name', 'run', 'issues_found', 'tp', 'tn', 'fp', 'fn', 'f1', 'accuracy', 'mcc', 'response_s', 'hallucinated_titles', 'missed_concept_ids']);
   // Group per fixture, sorted by fixture then by F1 desc
   const fixtures = [...new Set(results.map(r => r.fixtureId))];
   for (const fixtureId of fixtures) {
     for (const modelId of models) {
-      const runs = results.filter(r => r.fixtureId === fixtureId && r.modelId === modelId && !r.errorOccurred);
+      const runs = results.filter(r => r.fixtureId === fixtureId && r.modelId === modelId && !r.errorOccurred)
+        .sort((a, b) => a.runIndex - b.runIndex);
       if (runs.length === 0) continue;
-      const r = runs[0]; // single run per combo
-      rows.push([
-        fixtureId, r.modelId, shortName(r.modelId),
-        c(r.issuesFound.length),
-        c(r.tp), c(r.tn), c(r.fp), c(r.fn),
-        (r.f1 * 100).toFixed(1) + '%',
-        (r.accuracy * 100).toFixed(1) + '%',
-        r.mcc.toFixed(2),
-        (r.responseTimeMs / 1000).toFixed(1) + 's',
-        r.fpTitles.join(' | '),
-        r.missedIds.join(' | '),
-      ]);
+      // Individual run rows
+      for (const r of runs) {
+        rows.push([
+          fixtureId, r.modelId, shortName(r.modelId),
+          c(r.runIndex + 1),
+          c(r.issuesFound.length),
+          c(r.tp), c(r.tn), c(r.fp), c(r.fn),
+          (r.f1 * 100).toFixed(1) + '%',
+          (r.accuracy * 100).toFixed(1) + '%',
+          r.mcc.toFixed(2),
+          (r.responseTimeMs / 1000).toFixed(1) + 's',
+          r.fpTitles.join(' | '),
+          r.missedIds.join(' | '),
+        ]);
+      }
+      // Aggregate row (average across all runs)
+      if (runs.length > 1) {
+        const avg = (key: keyof ModelRunResult) =>
+          runs.reduce((s, r) => s + (r[key] as number), 0) / runs.length;
+        const firstRun = runs[0];
+        rows.push([
+          fixtureId, modelId, shortName(modelId),
+          'AVG',
+          (runs.reduce((s, r) => s + r.issuesFound.length, 0) / runs.length).toFixed(1),
+          avg('tp').toFixed(1), avg('tn').toFixed(1), avg('fp').toFixed(1), avg('fn').toFixed(1),
+          (avg('f1') * 100).toFixed(1) + '%',
+          (avg('accuracy') * 100).toFixed(1) + '%',
+          avg('mcc').toFixed(2),
+          (avg('responseTimeMs') / 1000).toFixed(1) + 's',
+          firstRun.fpTitles.join(' | '),
+          firstRun.missedIds.join(' | '),
+        ]);
+      }
     }
   }
 
