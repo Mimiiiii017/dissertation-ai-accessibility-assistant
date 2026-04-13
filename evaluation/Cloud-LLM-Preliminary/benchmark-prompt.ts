@@ -79,7 +79,11 @@ ADDITIONAL ANTI-HALLUCINATION RULES (supplement to the rules above):
 
 [x]   FOCUS INDICATOR REPLACEMENT — A CSS rule that sets outline: none or outline: 0 AND provides a visible alternative in the SAME rule-block is NOT a violation. A visible alternative means: box-shadow with non-zero spread and visible colour, a visually distinct border, or a non-zero outline value. Example: ".btn:focus-visible { outline: none; box-shadow: 0 0 0 3px blue; }" is valid — do NOT report it. Only report when NO visible alternative exists anywhere for that selector or its paired base selector.
 
-[xi]  JS FUNCTION CITATION — For every issue you report in JS sweeps (JS-A through JS-G): the function name and element selector you cite must appear literally in the source code. Do not report a function or handler that you inferred from class names, assumed patterns, or cross-file conventions — only report what you can directly quote from the file being analysed. If you cannot point to the exact function name or element selector in the source, skip that issue.
+[xi]  JS / TSX CITATION RULE — For every issue you report in JS sweeps (JS-A through JS-G) or TSX sweeps (TSX-A through TSX-K): the function name, element selector, prop name, or component name you cite must appear LITERALLY in the source code being analysed. Do not report a function, handler, prop, or component that you inferred from patterns, assumed from naming conventions, or derived from cross-file relationships — only report what you can directly quote from the file. If you cannot point to the exact identifier in the source, skip that issue.
+
+[xii] CONDITIONALLY-RENDERED ARIA REFERENCES (TSX/JSX) — In React and JSX components, it is a common and valid pattern to reference an error-message element's id in aria-describedby or aria-errormessage BEFORE that element is rendered in the DOM. The error element only appears when there is an error: e.g. {hasError && <span id="email-error">...</span>}. The aria-describedby="email-error" on the input is CORRECT — it works when the error appears. Do NOT report this pattern as a broken ARIA reference. Only flag an aria-describedby/aria-errormessage reference as broken if there is NO code path in the component that ever renders an element with that id.
+
+[xiii] CSS :focus:not(:focus-visible) — The selector :focus:not(:focus-visible) used with outline: none is a VALID and recommended technique for removing focus rings for pointer/mouse interactions while preserving them for keyboard users (who trigger :focus-visible). Do NOT report ":focus:not(:focus-visible) { outline: none }" as a focus indicator violation. It IS the correct accessibility pattern. Only report if :focus-visible itself also suppresses the indicator.
 `;
 
 /**
@@ -117,7 +121,7 @@ SWEEP B — Buttons with no accessible name:
 
 SWEEP C — Table headers without scope:
   For every <th>: apply BOTH conditions before reporting:
-  (a) The scope attribute is literally absent from that element.
+  (a) The scope attribute is literally absent from that element — YOU MUST re-read the exact opening tag of that specific <th> in the source before reporting. Look for scope="col", scope="row", scope="colgroup", or scope="rowgroup" in the opening tag. If you did not read the literal opening tag of that <th>, do NOT report it as missing scope.
   (b) The table is ambiguous — i.e. the header row contains more than one <th>, OR multiple <th> elements appear in the same column position across rows.
   If a table has a single header row with clearly distinct column <th> elements AND no row <th> elements, position is unambiguous and scope is NOT required.
   Only report "table header missing scope" when BOTH (a) and (b) are true.
@@ -201,9 +205,10 @@ SWEEP CSS-A — Focus indicator removed without replacement (HIGH):
   Skip outline removal on non-interactive structural containers (div, p, section, article, ul, li) where keyboard focus is not expected.
 
 SWEEP CSS-B — Touch target too small (MEDIUM):
-  For every interactive-element selector in your height/width/min-height/min-width inventory: if the explicitly-set height, width, min-height, OR min-width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM).
-  If the value is 24–43px, also report as a potential violation — "touch target may be below 44px recommended size: <selector>" (MEDIUM) — unless surrounding margin or padding of ≥8px on each side compensates.
+  For every interactive-element selector in your height/width/min-height/min-width inventory: if the explicitly-set height, width, min-height, OR min-width is below 24px → report "touch target below minimum size: <selector> height/width <value>" (MEDIUM). You MUST quote the exact pixel value from the source (e.g. "height: 20px").
+  If the value is 24–43px AND the same rule-block (or a directly paired rule) has padding less than 8px on the height/width axis → report as a potential violation — "touch target may be below 44px recommended size: <selector>" (MEDIUM). If padding ≥ 8px per side is present in the same rule or an immediately paired rule, skip it — the effective touch area is compliant.
   Do NOT report elements that have no explicit height, width, min-height, or min-width rule.
+  Do NOT report touch target issues on elements whose class name ends in -sm, -xs, or similar size variants unless you have confirmed the exact px value AND absence of compensating padding.
 
 SWEEP CSS-C — Broken visually-hidden utility (HIGH):
   Inspect the sr-only / visually-hidden / screen-reader-text utility rule. A correct implementation uses: position: absolute, very small dimensions (1px × 1px or equivalent), clip or clip-path, and does NOT use display: none or visibility: hidden.
@@ -278,8 +283,9 @@ SWEEP JS-E — aria-expanded not initialised at page load (MEDIUM):
   Also check: does any init function set aria-controls on the trigger to point to the controlled region's id? If the trigger has no aria-controls and the region has an id → report "toggle trigger missing aria-controls" (MEDIUM).
 
 SWEEP JS-F — Dynamically-hidden elements not removed from accessibility tree (MEDIUM):
-  For every element in your Phase 1 visibility-toggle inventory: if the function that hides it (sets display:none, visibility:hidden, removes a show-class) does NOT also set aria-hidden="true" on that element → report "dynamically-hidden element not updated in accessibility tree" (MEDIUM), naming the element and function.
-  Conversely, if the function that reveals the element does not remove aria-hidden or set it to "false" → same report.
+  For every element in your Phase 1 visibility-toggle inventory: if the function that hides it uses display:none or visibility:hidden by REMOVING A CSS CLASS (i.e. the element returns to its natural hidden state via CSS), that is SUFFICIENT — browsers automatically map display:none to removal from the accessibility tree. Do NOT report JS-F for elements whose hidden state is achieved by CSS class removal (removing 'active', 'open', 'show', 'is-visible', 'expanded' classes that expose the element). NO explicit aria-hidden is required in this case.
+  Only report JS-F when the hide function positions the element OFF-SCREEN (negative margin, translate, absolute+clip, visually-hidden technique) while keeping it display:block — in this case aria-hidden IS required because the element is still in the display tree.
+  Conversely, if the function that reveals an element removes an explicit aria-hidden="true" attribute that was set programmatically, but fails to do so → report.
   Do NOT report elements that are hidden with aria-hidden from the start and never shown dynamically.
 
 SWEEP JS-G — User actions with no live-region announcement (MEDIUM):
