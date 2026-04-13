@@ -1,5 +1,8 @@
 # CSS Accessibility Detection Rules
 
+## Tags
+Tags: #css #html #js #tsx #visual #focus #touch-target #motion #contrast #2.4.7 #2.5.5 #1.4.1 #2.3.1 #1.4.3 #1.4.11
+
 ## Overview
 
 This document provides systematic detection rules for identifying CSS accessibility violations through static code analysis. Each rule describes the specific CSS pattern that constitutes a violation, what to look for, and common false-positive pitfalls.

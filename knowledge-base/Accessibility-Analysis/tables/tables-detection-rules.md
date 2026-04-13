@@ -1,5 +1,8 @@
 # Tables: Detection Rules for Accessibility Violations
 
+## Tags
+Tags: #html #tsx #tables #scope #1.3.1
+
 These are precise detection rules. Check the FIRES condition against the actual code. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -47,3 +50,42 @@ FIRES when: a table used purely for layout (no data relationship between cells) 
 DOES NOT FIRE when:
 - The table uses `role="presentation"` or `role="none"` (suppresses table semantics)
 - The table is a genuine data table with meaningful row/column relationships
+
+---
+
+## Multi-language examples
+
+### TSX (React) — table without scope attributes
+```tsx
+// ❌ FIRES: complex table, th elements have no scope
+function PricingTable() {
+  return (
+    <table>
+      <tbody>
+        <tr><th></th><th>Monthly</th><th>Annual</th></tr>
+        <tr><th>Basic</th><td>$9</td><td>$90</td></tr>
+        <tr><th>Pro</th><td>$29</td><td>$290</td></tr>
+      </tbody>
+    </table>
+  );
+}
+
+// ✅ DOES NOT FIRE: scope explicitly set on all th elements
+function PricingTable() {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Plan</th>
+          <th scope="col">Monthly</th>
+          <th scope="col">Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Basic</th><td>$9</td><td>$90</td></tr>
+        <tr><th scope="row">Pro</th><td>$29</td><td>$290</td></tr>
+      </tbody>
+    </table>
+  );
+}
+```

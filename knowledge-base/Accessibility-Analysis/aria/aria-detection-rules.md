@@ -1,5 +1,8 @@
 # ARIA: Detection Rules for Accessibility Violations
 
+## Tags
+Tags: #html #js #tsx #aria #4.1.2 #1.3.1 #4.1.3 #aria-expanded #aria-live #aria-labelledby
+
 These are precise detection rules. Check the FIRES condition against the actual code. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -72,3 +75,80 @@ DOES NOT FIRE when:
 - `role="alert"` or `role="status"` wraps the dynamic content
 - `aria-live="polite"` or `aria-live="assertive"` is present
 - The content is in a modal dialog that receives focus on open
+
+---
+
+## Multi-language examples
+
+### JavaScript — aria-expanded toggle
+```javascript
+// ❌ FIRES: disclosure button controls a panel but aria-expanded never updated
+const btn = document.querySelector('.accordion-btn');
+btn.addEventListener('click', () => {
+  document.querySelector('.accordion-panel').classList.toggle('open');
+});
+
+// ✅ DOES NOT FIRE: aria-expanded and hidden attribute updated in sync
+btn.addEventListener('click', () => {
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!expanded));
+  document.querySelector('#panel1').hidden = expanded;
+});
+```
+
+### JavaScript — aria-live for dynamic status messages
+```javascript
+// ❌ FIRES: result count updates DOM but no live region announces it
+function renderResults(results) {
+  document.querySelector('#results-list').innerHTML = buildHTML(results);
+}
+
+// ✅ DOES NOT FIRE: polite live region announces result count
+function renderResults(results) {
+  document.querySelector('#results-list').innerHTML = buildHTML(results);
+  document.querySelector('#results-status').textContent =
+    `${results.length} results found`;
+}
+// requires: <div id="results-status" role="status" aria-live="polite"></div>
+```
+
+### TSX (React) — broken aria-labelledby reference
+```tsx
+// ❌ FIRES: aria-labelledby points to id that is absent from the rendered output
+function Dialog() {
+  return (
+    <div role="dialog" aria-labelledby="dialog-heading">
+      <h2>Settings</h2>  {/* id="dialog-heading" is missing */}
+    </div>
+  );
+}
+
+// ✅ DOES NOT FIRE
+function Dialog() {
+  return (
+    <div role="dialog" aria-labelledby="dialog-heading">
+      <h2 id="dialog-heading">Settings</h2>
+    </div>
+  );
+}
+
+// ❌ FIRES: aria-hidden on parent traps focusable child links
+function NavOverlay({ hidden }: { hidden: boolean }) {
+  return (
+    <div aria-hidden={hidden}>
+      <a href="/home">Home</a>
+      <a href="/about">About</a>
+    </div>
+  );
+}
+
+// ✅ DOES NOT FIRE: focusable children also removed from tab order
+function NavOverlay({ hidden }: { hidden: boolean }) {
+  return (
+    <div aria-hidden={hidden}>
+      <a href="/home" tabIndex={hidden ? -1 : 0}>Home</a>
+      <a href="/about" tabIndex={hidden ? -1 : 0}>About</a>
+    </div>
+  );
+}
+```

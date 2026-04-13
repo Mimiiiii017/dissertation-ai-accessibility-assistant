@@ -1,5 +1,8 @@
 # Navigation and Links: Detection Rules for Accessibility Violations
 
+## Tags
+Tags: #html #js #tsx #navigation #landmarks #links #2.4.4 #2.4.1 #1.3.6 #4.1.2
+
 These are precise detection rules. Check the FIRES condition against the actual code. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -77,3 +80,55 @@ FIRES when: a page has more than one `<nav>` element (or `role="navigation"`) an
 DOES NOT FIRE when:
 - Only one `<nav>` exists on the page
 - Each `<nav>` has a unique `aria-label` (e.g. "Main navigation", "Footer navigation")
+
+---
+
+## Multi-language examples
+
+### JavaScript — SPA route change announcement
+```javascript
+// ❌ FIRES: client-side navigation changes content without announcing the new page
+router.on('navigate', () => renderPage());
+
+// ✅ DOES NOT FIRE: live region announces new page title after route change
+router.on('navigate', () => {
+  renderPage();
+  document.getElementById('route-announce').textContent = document.title;
+});
+// requires: <div id="route-announce" role="status" aria-live="polite" class="sr-only"></div>
+```
+
+### TSX (React) — non-descriptive link and multiple unlabelled nav elements
+```tsx
+// ❌ FIRES: generic link text with no additional context
+function ArticleCard({ href, title }: { href: string; title: string }) {
+  return <a href={href}>Read more</a>;
+}
+
+// ✅ DOES NOT FIRE
+function ArticleCard({ href, title }: { href: string; title: string }) {
+  return (
+    <a href={href} aria-label={`Read more about ${title}`}>Read more</a>
+  );
+}
+
+// ❌ FIRES: two nav elements with no distinguishing labels
+function Layout() {
+  return (
+    <>
+      <nav><MainLinks /></nav>
+      <nav><FooterLinks /></nav>
+    </>
+  );
+}
+
+// ✅ DOES NOT FIRE
+function Layout() {
+  return (
+    <>
+      <nav aria-label="Main navigation"><MainLinks /></nav>
+      <nav aria-label="Footer navigation"><FooterLinks /></nav>
+    </>
+  );
+}
+```

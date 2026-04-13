@@ -1,5 +1,8 @@
 # Images: Detection Rules for Accessibility Violations
 
+## Tags
+Tags: #html #tsx #images #alt #svg #1.1.1 #2.4.4
+
 These are precise detection rules. For each rule: check whether the FIRES condition is met in the actual code before reporting. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -84,3 +87,48 @@ DOES NOT FIRE when:
 - `<svg aria-hidden="true">` (decorative icon, intentionally hidden)
 - `<svg role="img" aria-label="Upload icon">` (labelled correctly)
 - `<svg><title>Chart showing revenue growth</title></svg>`
+
+---
+
+## Multi-language examples
+
+### TSX (React) — img alt and SVG accessible name
+```tsx
+// ❌ FIRES: img has no alt attribute
+function HeroBanner() {
+  return <img src="/hero.jpg" />;
+}
+
+// ✅ DOES NOT FIRE: informative image with descriptive alt
+function HeroBanner() {
+  return <img src="/hero.jpg" alt="Team collaborating in an open office" />;
+}
+
+// ✅ DOES NOT FIRE: decorative image with empty alt
+function Divider() {
+  return <img src="/wave.svg" alt="" />;
+}
+
+// ❌ FIRES: SVG star-rating widget has no role or accessible name
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div>
+      {[1,2,3,4,5].map(i => (
+        <svg key={i}><use href="#star" /></svg>
+      ))}
+      <span>{rating}/5</span>
+    </div>
+  );
+}
+
+// ✅ DOES NOT FIRE: container has role="img" with descriptive aria-label
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div role="img" aria-label={`Rated ${rating} out of 5 stars`}>
+      {[1,2,3,4,5].map(i => (
+        <svg key={i} aria-hidden="true"><use href="#star" /></svg>
+      ))}
+    </div>
+  );
+}
+```

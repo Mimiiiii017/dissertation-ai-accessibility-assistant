@@ -1,5 +1,8 @@
 # Forms: Detection Rules for Accessibility Violations
 
+## Tags
+Tags: #html #css #js #tsx #forms #labels #inputs #1.3.1 #4.1.2 #3.3.2 #3.3.1
+
 These are precise detection rules. For each rule: check whether the FIRES condition is met in the actual code before reporting. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -82,3 +85,82 @@ DOES NOT FIRE when: the label includes a required indicator and the form has an 
 FIRES when: a validation error or hint message appears near a form field but is not linked via `aria-describedby` on the input and not announced via a live region.
 
 DOES NOT FIRE when: `aria-describedby` on the `<input>` references the error element's `id`.
+
+---
+
+## Multi-language examples
+
+### CSS — visually hiding error messages accessibly
+```css
+/* ✅ Error text hidden visually but read by screen readers */
+.error-message {
+  position: absolute;
+  width: 1px; height: 1px;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+/* ❌ FIRES: display:none removes content from AT entirely */
+.error-message { display: none; }
+```
+
+### JavaScript — dynamic aria-invalid and aria-describedby
+```javascript
+// ❌ FIRES: error shown visually but no ARIA link from field to message
+function showError(fieldId, msg) {
+  document.getElementById(fieldId + '-error').textContent = msg;
+}
+
+// ✅ DOES NOT FIRE: field linked to message via aria-describedby
+function showError(fieldId, msg) {
+  const errorEl = document.getElementById(fieldId + '-error');
+  errorEl.textContent = msg;
+  const input = document.getElementById(fieldId);
+  input.setAttribute('aria-invalid', 'true');
+  input.setAttribute('aria-describedby', fieldId + '-error');
+}
+```
+
+### TSX (React) — form field labelling and error state
+```tsx
+// ❌ FIRES: input has no accessible label (htmlFor missing or mismatched)
+function EmailField() {
+  return <input type="email" placeholder="Enter email" />;
+}
+
+// ✅ DOES NOT FIRE: label linked via htmlFor
+function EmailField() {
+  return (
+    <>
+      <label htmlFor="email">Email address</label>
+      <input id="email" type="email" />
+    </>
+  );
+}
+
+// ❌ FIRES: error state not wired to input via aria-describedby
+function PasswordField({ error }: { error: string }) {
+  return (
+    <>
+      <label htmlFor="password">Password</label>
+      <input id="password" type="password" />
+      {error && <span className="error">{error}</span>}
+    </>
+  );
+}
+
+// ✅ DOES NOT FIRE
+function PasswordField({ error }: { error: string }) {
+  return (
+    <>
+      <label htmlFor="password">Password</label>
+      <input
+        id="password" type="password"
+        aria-invalid={!!error}
+        aria-describedby={error ? 'pw-error' : undefined}
+      />
+      {error && <span id="pw-error" role="alert">{error}</span>}
+    </>
+  );
+}
+```

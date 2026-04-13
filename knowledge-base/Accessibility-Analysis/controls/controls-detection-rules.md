@@ -1,5 +1,8 @@
 # Buttons and Interactive Controls: Detection Rules
 
+## Tags
+Tags: #html #js #tsx #controls #buttons #aria-expanded #aria-pressed #4.1.2 #2.1.1
+
 These are precise detection rules. Check the FIRES condition against the actual code. Do not report if the DOES NOT FIRE condition applies.
 
 ---
@@ -74,3 +77,65 @@ FIRES when: an `<a>` element has `href="#"` or `href="javascript:void(0)"` and i
 DOES NOT FIRE when:
 - A proper `<button>` is used instead
 - The `<a>` genuinely navigates to a destination (including same-page anchor targets that are real sections)
+
+---
+
+## Multi-language examples
+
+### JavaScript — aria-pressed toggle buttons
+```javascript
+// ❌ FIRES: filter button toggled visually but aria-pressed not updated
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => btn.classList.toggle('active'));
+});
+
+// ✅ DOES NOT FIRE: aria-pressed reflects pressed state
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pressed = btn.getAttribute('aria-pressed') === 'true';
+    btn.setAttribute('aria-pressed', String(!pressed));
+  });
+});
+```
+
+### TSX (React) — icon-only button and disclosure button
+```tsx
+// ❌ FIRES: icon-only button with no accessible name
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return <button onClick={onClose}><XIcon /></button>;
+}
+
+// ✅ DOES NOT FIRE
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <button aria-label="Close dialog" onClick={onClose}>
+      <XIcon aria-hidden="true" />
+    </button>
+  );
+}
+
+// ❌ FIRES: disclosure button missing aria-expanded
+function AccordionItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(v => !v)}>{question}</button>
+      {open && <div>{answer}</div>}
+    </>
+  );
+}
+
+// ✅ DOES NOT FIRE
+function AccordionItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <button aria-expanded={open} aria-controls="answer-panel"
+              onClick={() => setOpen(v => !v)}>
+        {question}
+      </button>
+      <div id="answer-panel" hidden={!open}>{answer}</div>
+    </>
+  );
+}
+```
