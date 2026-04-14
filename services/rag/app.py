@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import chromadb
 from chromadb.utils import embedding_functions
 import re
+import os
 from transformers import AutoTokenizer
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -20,19 +21,37 @@ DB_DIR = Path(__file__).resolve().parent / "chroma_db"
 
 app = FastAPI(title="AI Accessibility Assistant - RAG Service")
 
+# ─── Embedding model (overridable via EMBED_MODEL env var) ───────────────────
+# Supported values and their token limits:
+#   all-MiniLM-L6-v2       → 256 tokens  (default)
+#   all-mpnet-base-v2      → 512 tokens
+#   nomic-ai/nomic-embed-text-v1  → 2048 tokens (practical: 1024)
+EMBED_MODEL = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+
+# HuggingFace model ID for tokenizer (may differ from sentence-transformers name)
+_HF_TOKENIZER_MAP = {
+    "all-MiniLM-L6-v2":  "sentence-transformers/all-MiniLM-L6-v2",
+    "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
+    "nomic-ai/nomic-embed-text-v1": "nomic-ai/nomic-embed-text-v1",
+}
+_tokenizer_id = _HF_TOKENIZER_MAP.get(EMBED_MODEL, EMBED_MODEL)
+
+_embed_kwargs = {}
+if "nomic" in EMBED_MODEL:
+    _embed_kwargs["trust_remote_code"] = True
 embed_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-    model_name="all-MiniLM-L6-v2"
+    model_name=EMBED_MODEL, **_embed_kwargs
 )
-# Tokenizer matching the embedding model — gives accurate token counts.
-# all-MiniLM-L6-v2 has a 256-token limit; we target 200 tokens per chunk.
-_tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+_tokenizer = AutoTokenizer.from_pretrained(_tokenizer_id)
 
 client = chromadb.PersistentClient(path=str(DB_DIR))
 
-# ─── Chunking constants ───────────────────────────────────────────────────────
-MAX_CHUNK_TOKENS = 128   # smallest viable chunk; fits well within all-MiniLM-L6-v2's 256-token limit
-OVERLAP_TOKENS   = 13    # ~10% overlap between consecutive sub-windows for continuity
+# ─── Chunking constants (overridable via MAX_CHUNK_TOKENS / OVERLAP_TOKENS) ──
+MAX_CHUNK_TOKENS = int(os.environ.get("MAX_CHUNK_TOKENS", "128"))
+OVERLAP_TOKENS   = int(os.environ.get("OVERLAP_TOKENS", str(max(1, MAX_CHUNK_TOKENS // 10))))
 MIN_CHUNK_CHARS  = 80    # discard/merge chunks shorter than this
+
+print(f"[RAG] EMBED_MODEL={EMBED_MODEL}  MAX_CHUNK_TOKENS={MAX_CHUNK_TOKENS}  OVERLAP_TOKENS={OVERLAP_TOKENS}")
 
 
 class IndexResponse(BaseModel):
