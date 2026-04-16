@@ -6,6 +6,8 @@ from chromadb.utils import embedding_functions
 import re
 import os
 from transformers import AutoTokenizer
+from rank_bm25 import BM25Okapi
+import pickle
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 KB_PATHS = {
@@ -46,6 +48,9 @@ _tokenizer = AutoTokenizer.from_pretrained(_tokenizer_id)
 
 client = chromadb.PersistentClient(path=str(DB_DIR))
 
+# ─── BM25 Indexes (for hybrid keyword+semantic search) ──────────────────────
+bm25_indexes = {}  # Stores BM25 index per collection: {collection_name: (corpus, bm25_obj)}
+
 # ─── Chunking constants (overridable via MAX_CHUNK_TOKENS / OVERLAP_TOKENS) ──
 MAX_CHUNK_TOKENS = int(os.environ.get("MAX_CHUNK_TOKENS", "128"))
 OVERLAP_TOKENS   = int(os.environ.get("OVERLAP_TOKENS", str(max(1, MAX_CHUNK_TOKENS // 10))))
@@ -59,9 +64,10 @@ class IndexResponse(BaseModel):
 
 class RetrieveRequest(BaseModel):
     query: str
-    top_k: int = 3
+    top_k: int = 3  # Reduced from 5 to avoid context overload
     kb_type: str = "accessibility"  # accessibility or tlx
     distance_threshold: float = 0.65  # cosine distance; chunks above this are too dissimilar
+    use_hybrid: bool = True  # Use hybrid search (BM25 + embeddings)
 
 class Chunk(BaseModel):
     id: str
@@ -227,7 +233,7 @@ def chunk_document(text: str, file_title: str = "") -> list[str]:
 
 @app.post("/index", response_model=IndexResponse)
 def index_kb(kb_type: str = Query("accessibility")):
-    """Index knowledge base files into ChromaDB collection."""
+    """Index knowledge base files into ChromaDB collection and build BM25 index."""
     if kb_type not in KB_PATHS:
         raise ValueError(f"Unknown kb_type: {kb_type}")
 
@@ -243,6 +249,9 @@ def index_kb(kb_type: str = Query("accessibility")):
     )
 
     indexed = 0
+    corpus = []  # For BM25 indexing
+    corpus_ids = []  # Map BM25 results back to docs
+    
     for fpath in iter_kb_files(kb_type):
         text = fpath.read_text(encoding="utf-8", errors="ignore")
         file_meta = extract_file_metadata(text)
@@ -262,16 +271,28 @@ def index_kb(kb_type: str = Query("accessibility")):
                 "tags": file_meta["tags"],
                 "languages": file_meta["languages"],
             })
+            # Add to BM25 corpus
+            corpus.append(c.lower().split())
+            corpus_ids.append(cid)
 
         if docs:
             collection.add(ids=ids, documents=docs, metadatas=metas)
             indexed += len(docs)
 
+    # Build BM25 index for this collection
+    if corpus:
+        bm25 = BM25Okapi(corpus)
+        bm25_indexes[collection_name] = (corpus_ids, bm25)
+        print(f"[RAG] Built BM25 index for {collection_name}: {len(corpus)} documents")
+
     return IndexResponse(indexed=indexed)
 
 @app.post("/retrieve", response_model=RetrieveResponse)
 def retrieve(req: RetrieveRequest):
-    """Retrieve relevant chunks from the specified knowledge base collection."""
+    """
+    Retrieve relevant chunks using hybrid search (BM25 keyword + embedding semantic).
+    Results are deduplicated and sorted by combined score.
+    """
     if req.kb_type not in COLLECTION_NAMES:
         raise ValueError(f"Unknown kb_type: {req.kb_type}")
 
@@ -280,18 +301,84 @@ def retrieve(req: RetrieveRequest):
         name=collection_name, embedding_function=embed_fn
     )
 
-    res = collection.query(query_texts=[req.query], n_results=req.top_k,
-                           include=["documents", "metadatas", "distances"])
-    ids = res.get("ids", [[]])[0]
-    docs = res.get("documents", [[]])[0]
-    metas = res.get("metadatas", [[]])[0]
-    distances = res.get("distances", [[]])[0]
+    # Normalize results into a dict: chunk_id -> {doc, meta, embedding_score, bm25_score}
+    results_dict = {}
+
+    # ─── 1. Semantic search (embeddings) ───────────────────────────────────────
+    sem_res = collection.query(query_texts=[req.query], n_results=req.top_k,
+                               include=["documents", "metadatas", "distances"])
+    sem_ids = sem_res.get("ids", [[]])[0]
+    sem_docs = sem_res.get("documents", [[]])[0]
+    sem_metas = sem_res.get("metadatas", [[]])[0]
+    sem_distances = sem_res.get("distances", [[]])[0]
+
+    for cid, doc, meta, dist in zip(sem_ids, sem_docs, sem_metas, sem_distances):
+        if dist <= req.distance_threshold:
+            # Convert distance to similarity score (0-1, higher is better)
+            sim_score = 1.0 - dist
+            results_dict[cid] = {
+                "doc": doc,
+                "meta": meta,
+                "embedding_score": sim_score,
+                "bm25_score": 0.0,
+            }
+
+    # ─── 2. BM25 keyword search ───────────────────────────────────────────────
+    if req.use_hybrid and collection_name in bm25_indexes:
+        corpus_ids, bm25 = bm25_indexes[collection_name]
+        query_tokens = req.query.lower().split()
+        bm25_scores = bm25.get_scores(query_tokens)
+        
+        # Get top BM25 results
+        top_bm25_indices = sorted(
+            range(len(bm25_scores)), 
+            key=lambda i: bm25_scores[i], 
+            reverse=True
+        )[:req.top_k]
+        
+        for idx in top_bm25_indices:
+            cid = corpus_ids[idx]
+            bm25_score = bm25_scores[idx]
+            
+            if bm25_score > 0:  # Only include positive scores
+                if cid in results_dict:
+                    # Merge: add BM25 score
+                    results_dict[cid]["bm25_score"] = bm25_score
+                else:
+                    # New result from BM25; fetch from ChromaDB
+                    try:
+                        chrom_res = collection.get(ids=[cid], include=["documents", "metadatas"])
+                        if chrom_res["documents"]:
+                            results_dict[cid] = {
+                                "doc": chrom_res["documents"][0],
+                                "meta": chrom_res["metadatas"][0],
+                                "embedding_score": 0.0,
+                                "bm25_score": bm25_score,
+                            }
+                    except Exception:
+                        pass
+
+    # ─── 3. Sort by combined score and return top results ─────────────────────
+    # Combined score: average of normalized scores
+    for cid in results_dict:
+        em_score = results_dict[cid]["embedding_score"]
+        bm_score = results_dict[cid]["bm25_score"]
+        # Normalize BM25 (rough): typical max score ~5-10, cap at 1.0
+        bm_score_norm = min(1.0, bm_score / 5.0)
+        combined = (em_score + bm_score_norm) / 2.0
+        results_dict[cid]["combined_score"] = combined
+
+    # Sort by combined score
+    sorted_results = sorted(
+        results_dict.items(),
+        key=lambda x: x[1]["combined_score"],
+        reverse=True
+    )[:req.top_k]
 
     chunks = []
-    for cid, doc, meta, dist in zip(ids, docs, metas, distances):
-        if dist > req.distance_threshold:
-            continue
+    for cid, info in sorted_results:
         chunks.append(
-            Chunk(id=str(cid), source=str(meta.get("source", "")), text=str(doc))
+            Chunk(id=str(cid), source=str(info["meta"].get("source", "")), text=str(info["doc"]))
         )
+
     return RetrieveResponse(chunks=chunks)

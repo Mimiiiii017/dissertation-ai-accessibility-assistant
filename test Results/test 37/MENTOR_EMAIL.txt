@@ -1,0 +1,63 @@
+Subject: Test 37 Results & Proposed T38 Ensemble Strategy
+
+Hi,
+
+I've completed Test 37, which tested all 4 RAG×Thinking conditions (128-token chunks) on gpt-oss, kimi-k2.5, and qwen3.5. The results show something important: RAG is currently degrading performance instead of helping.
+
+TEST 37 FINDINGS
+
+Scope: Balanced preset, 16 fixtures, 3 runs per model.
+
+Key finding: RAG integration is making results worse, not better. For example, gpt-oss without RAG gets 50.7% F1, but with RAG it drops to 40.7% (a 10 percentage point loss). The knowledge base retrieval seems to add noise instead of helping the models reason.
+
+Performance without RAG (baseline):
+- gpt-oss: F1 50.7%, Precision 69.9%, but high false negatives (misses 674 issues)
+- kimi-k2.5: F1 42.0%, Recall 62.0%, but high false positives (hallucinates 399 issues)
+- qwen3.5: F1 47.9%, but slowest (~293 seconds per run)
+
+The main problem: Each model struggles with different things. gpt-oss misses too many real issues. kimi reports too many false alarms. Neither one alone is balanced.
+
+PROPOSED SOLUTION: MODEL ENSEMBLE (T38)
+
+Instead of trying to get one model to do everything, I'm proposing we use two models together to balance precision and recall.
+
+The idea: Use kimi-k2.5 to find issues (it's good at catching things even if it hallucinates), then have gpt-oss validate the findings (it's precise and won't report false alarms).
+
+Here's how it would work:
+1. Run kimi on a fixture - it reports all potential issues, including some hallucinations
+2. Run gpt-oss on the same fixture - it validates which issues are real
+3. Keep only the issues both models agree on - this reduces false positives while keeping recall high
+
+Example: If kimi reports 5 issues but only 3 are real, gpt-oss will validate and we keep just the 3 real ones.
+   - Keep only issues where **both models agree**
+   - Expected outcome: High precision + reduced hallucinations while maintaining reasonable recall
+
+**Example:**
+- kimi finds: [issue1, issue2, issue3, issue4, issue5] (includes FPs)
+- gpt-oss validates: [issue1, issue3, issue5] are real; [issue2, issue4] are hallucinations
+- Ensemble result: [issue1, issue3, issue5] (lower FP, maintained recall)
+
+
+TEST 38 PLAN
+
+I'm proposing we run an ensemble test with kimi and gpt-oss together. Here's what we'd do:
+
+1. Run both models on the same 16 fixtures (3 runs each, same as T37)
+2. Keep only issues where both models agree
+3. Measure if this improves the F1 score and reduces both false positives and false negatives
+
+Expected improvements: Lower false positives than kimi alone, fewer missed issues than gpt-oss alone. Target is to get F1 around 48% or better with more balanced false positive/negative rates.
+
+Trade-offs: This would cost twice as much in API calls and take longer per run (roughly 320 seconds instead of 160 seconds). But if it improves accuracy meaningfully, it could be worth it.
+
+ALTERNATIVE: If the 2x cost is too high, we could instead implement language-based RAG filtering - only retrieve KB chunks that match the fixture language (HTML fixtures get HTML examples, CSS gets CSS examples, etc.). This would be cheaper and might reduce kimi's hallucinations without needing a second model.
+
+NEXT STEPS
+
+I'm ready to run T38 whenever you give the go-ahead. Just let me know if you want to do the ensemble approach, the RAG filtering approach, or explore something else.
+
+Full test results are in: test Results/test 37/RESULTS.md
+
+Let me know what you think.
+
+Mireya

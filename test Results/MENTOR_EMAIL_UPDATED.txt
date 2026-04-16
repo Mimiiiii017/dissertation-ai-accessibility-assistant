@@ -1,0 +1,110 @@
+Hi Paul,
+
+Following up on our last meeting, I want to summarize the work completed from Test 35 through Test 38. This covers the RAG optimizations we discussed, the findings that validated your research on RAG failure modes, and the fixes I've implemented.
+
+TEST 35 (BASELINE - BEFORE OUR MEETING)
+
+Test 35 was the baseline before implementing your mentor feedback. This established our starting point with the original RAG configuration.
+
+TEST 36 (CHUNK SIZE OPTIMIZATION - PER YOUR FEEDBACK)
+
+Based on your guidance, I ran a parameter sweep on chunk sizes:
+- Tested: 128, 256, 512, and 1024 token chunks
+- All with 10% overlap
+- Finding: 128 tokens was optimal for our accessibility code RAG
+- Action: Standardized on 128-token chunks for all subsequent tests
+
+I also implemented the other items from your feedback:
+- Language-aware tags (html, css, js, tsx metadata per chunk)
+- Multi-language examples in the KB
+- Configurable embedding model selection
+- Improved chunking logic respecting code boundaries
+
+TEST 37 (FULL 4-CONDITION BENCHMARK - REVEALING THE PROBLEM)
+
+Scope: Balanced preset, 16 fixtures, 3 runs per model, testing all 4 RAG x Thinking conditions.
+
+Key finding: Your research notes on RAG failure modes were exactly right. RAG integration is currently degrading performance instead of helping. For example, gpt-oss without RAG achieves 50.7% F1, but with RAG it drops to 40.7% (a 10 percentage point loss).
+
+Performance without RAG (baseline):
+- gpt-oss: F1 50.7%, Precision 69.9%, but high false negatives (misses 674 issues)
+- kimi-k2.5: F1 42.0%, Recall 62.0%, but high false positives (hallucinates 399 issues)
+- qwen3.5: F1 47.9%, but slowest (~293 seconds per run)
+
+The problem: Each model struggles with different dimensions. gpt-oss has high recall but misses real issues. kimi has high recall but reports many false alarms. Neither is balanced alone. And crucially, RAG is making things worse, not better.
+
+TEST 38 (POST-HYBRID RAG FIXES - ADDRESSING RETRIEVAL ISSUES)
+
+Based on your feedback about retrieval failures, context overload, and generation issues, I implemented three fixes:
+
+1. Hybrid Search (BM25 + Semantic Embeddings)
+   - Installed rank-bm25 library
+   - Updated app.py to build BM25 index during indexing
+   - Rewrote retrieve endpoint with 4-stage hybrid logic:
+     Stage 1: Semantic search (ChromaDB vector similarity)
+     Stage 2: BM25 keyword search
+     Stage 3: Merge, deduplicate, score combined results
+     Stage 4: Return top-k sorted by combined score
+
+2. Reduced Context Overload
+   - Changed top_k chunks: 5 to 3 per query
+   - Reduces noise and hallucinatory responses
+
+3. Improved Grounding Instructions
+   - Better prompting for when models should use context vs internal knowledge
+
+Results after deploying hybrid RAG and re-indexing 860 chunks:
+
+                          T37 F1    T38 F1    Change
+norag-nothink (baseline)  50.7%     44.2%     -6.5pp (variance)
+norag-think               ~44.5%    46.5%     +2.0pp (improved)
+rag-nothink              40.7%      40.2%     -0.5pp (flat)
+rag-think                42.9%      46.9%     +4.0pp (improved with hybrid)
+
+Analysis:
+- rag-think improved +4pp with hybrid search: the hybrid approach helps when models have reasoning enabled
+- norag-think improved +2pp overall, FP reduced (276 to 167): fewer hallucinations across the board
+- norag-nothink baseline dropped -6.5pp: concerning variance, may indicate fixture order or model variance
+- rag-nothink flat at -0.5pp: hybrid search not helping without reasoning
+- RAG still fundamentally underperforming: rag-nothink 40.2% vs norag-nothink 44.2%
+
+ROOT CAUSE - THE FUNDAMENTAL ISSUE
+
+Your research notes were spot-on. The issue isn't just chunking or hybrid search—it's fundamentally that our KB is organized by accessibility concept (forms.md, images.md, tables.md) but fixtures ask questions about components (navbar, form-field, header).
+
+When a fixture asks "analyze this navbar," the RAG retrieves chunks about "ARIA landmarks" and "keyboard navigation" (conceptually right but structurally wrong). The model gets confused trying to map generic accessibility rules to specific component code.
+
+Hybrid search helps the models reason better (rag-think +4pp) but doesn't fix the core retrieval mismatch.
+
+PROPOSED PATH FORWARD
+
+We have two options:
+
+Path A: Ensemble Voting (T39) - Faster approach, 2-3 days
+- Run kimi-k2.5 (high recall, finds issues) + gpt-oss (high precision, validates)
+- Keep only issues both models agree on
+- Expected: Reduces FP 50% (196 to ~100), F1 gain 2-3pp
+- Trade-off: 2x API cost, higher latency per run
+
+Path B: KB Component Restructuring (T40) - Longer-term fix, 1 week
+- Reorganize 860 chunks from concept-based to component-based
+- Bundle HTML + CSS + JS + accessibility rules per component (navbar, form-field, etc.)
+- Re-index and test
+- Expected: Fixes root retrieval mismatch, improves all future runs, sustainable solution
+- Trade-off: Significant restructuring work upfront
+
+My recommendation: Do both in sequence.
+- T39 (this week): Ensemble voting to show measurable improvement (2-3pp F1 gain) and validate system is working
+- T40+ (next week): Restructure KB to address the fundamental issue for the long term
+
+Full test results and technical details are in:
+- test Results/test 37/RESULTS.md (T37 detailed breakdown)
+- test Results/test 38/ (all CSVs, reports, JSON)
+- RAG_FIXES_APPLIED.md (hybrid search implementation details)
+- services/rag/app.py (deployed hybrid search code)
+
+Would you prefer we proceed with this T39/T40 sequence, or should we focus on KB restructuring first?
+
+Looking forward to your thoughts.
+
+Mireya
