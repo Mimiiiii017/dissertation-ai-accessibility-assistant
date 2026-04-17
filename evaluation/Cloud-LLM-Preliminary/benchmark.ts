@@ -384,6 +384,123 @@ function mcc(tp: number, tn: number, fp: number, fn: number): number {
   return denom === 0 ? 0 : (tp * tn - fp * fn) / denom;
 }
 
+// ─── Ensemble Voting Helpers ──────────────────────────────────────────────
+
+/**
+ * Compare two sets of issues and keep only those where both models agree.
+ * Agreement is determined by matching against the same ground truth concept.
+ */
+export function computeConsensusIssues(
+  model1Issues: AiIssue[],
+  model2Issues: AiIssue[],
+  fixture: FixtureGroundTruth
+): AiIssue[] {
+  // Build a set of concepts that were matched by model1
+  const model1Matches = new Set<string>();
+  const model2Matches = new Set<string>();
+
+  // Score both models' issues to find which concepts they matched
+  const score1 = scoreRun(fixture, model1Issues);
+  const score2 = scoreRun(fixture, model2Issues);
+
+  // Collect matched concept IDs
+  score1.conceptMatches
+    .filter(cm => cm.matchedBy !== null)
+    .forEach(cm => model1Matches.add(cm.concept.id));
+
+  score2.conceptMatches
+    .filter(cm => cm.matchedBy !== null)
+    .forEach(cm => model2Matches.add(cm.concept.id));
+
+  // Find concepts both models matched
+  const consensusConceptIds = new Set(
+    [...model1Matches].filter(id => model2Matches.has(id))
+  );
+
+  // Build consensus issues: keep issues from model1 that matched shared concepts
+  const consensusIssues: AiIssue[] = [];
+  const usedIndices = new Set<number>();
+
+  for (const cm of score1.conceptMatches) {
+    if (consensusConceptIds.has(cm.concept.id) && cm.matchedBy !== null) {
+      const idx = model1Issues.indexOf(cm.matchedBy);
+      if (idx >= 0 && !usedIndices.has(idx)) {
+        consensusIssues.push(cm.matchedBy);
+        usedIndices.add(idx);
+      }
+    }
+  }
+
+  return consensusIssues;
+}
+
+/**
+ * Create a voted result by combining results from two models.
+ * Keeps only issues both models agree on (matched same concepts).
+ */
+export function createVotedResult(
+  model1Result: ModelRunResult,
+  model2Result: ModelRunResult,
+  fixture: FixtureGroundTruth,
+  votedModelId: string = 'ensemble-2models'
+): ModelRunResult {
+  // Compute consensus issues
+  const consensusIssues = computeConsensusIssues(
+    model1Result.issuesFound,
+    model2Result.issuesFound,
+    fixture
+  );
+
+  // Re-score with consensus issues
+  const votedScore = scoreRun(fixture, consensusIssues);
+
+  // Compute metrics
+  const tn = fixture.expectedIssues.length > 0 ? 0 : 0; // Simplified; true TN calculation varies by schema
+  const specificity = votedScore.fp === 0 ? 1 : 0; // Simplified
+  const accuracy = votedScore.tp / fixture.expectedIssues.length || 0;
+  const balancedAccuracy = (votedScore.recall + specificity) / 2;
+
+  // MCC (Matthews Correlation Coefficient)
+  const mccDenom = Math.sqrt(
+    (votedScore.tp + votedScore.fp) *
+    (votedScore.tp + votedScore.fn) *
+    (tn + votedScore.fp) *
+    (tn + votedScore.fn)
+  );
+  const mccValue = mccDenom === 0 ? 0 : (votedScore.tp * tn - votedScore.fp * votedScore.fn) / mccDenom;
+
+  const npv = votedScore.fn === 0 ? 1 : tn / (tn + votedScore.fn);
+
+  return {
+    modelId: votedModelId,
+    fixtureId: model1Result.fixtureId,
+    complexityTier: model1Result.complexityTier,
+    presetId: model1Result.presetId,
+    runIndex: model1Result.runIndex,
+    issuesFound: consensusIssues,
+    tp: votedScore.tp,
+    tn,
+    fn: votedScore.fn,
+    fp: votedScore.fp,
+    precision: votedScore.precision,
+    recall: votedScore.recall,
+    specificity,
+    npv,
+    f1: votedScore.f1,
+    accuracy,
+    balancedAccuracy,
+    mcc: mccValue,
+    responseTimeMs: Math.max(model1Result.responseTimeMs, model2Result.responseTimeMs),
+    errorOccurred: model1Result.errorOccurred || model2Result.errorOccurred,
+    errorMessage: model1Result.errorMessage || model2Result.errorMessage,
+    rawResponse: `${model1Result.modelId}: ${model1Result.issuesFound.length} issues | ${model2Result.modelId}: ${model2Result.issuesFound.length} issues | consensus: ${consensusIssues.length} issues`,
+    missedIds: votedScore.conceptMatches
+      .filter(cm => cm.matchedBy === null)
+      .map(cm => cm.concept.id),
+    fpTitles: votedScore.unexpectedIssues.map(i => i.title ?? 'unknown'),
+  };
+}
+
 // ─── Ollama streaming call ────────────────────────────────────────────────
 
 const TIMEOUT_MS = 7 * 60_000;

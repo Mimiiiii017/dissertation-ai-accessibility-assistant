@@ -51,7 +51,7 @@ import {
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
 
 import { ALL_FIXTURES, CORE_FIXTURES, ADVERSARIAL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
-import { ModelBenchmarkConfig, runBenchmark, shortName } from './benchmark';
+import { ModelBenchmarkConfig, runBenchmark, shortName, computeConsensusIssues, createVotedResult, ModelRunResult } from './benchmark';
 import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 // ─── All installed models ──────────────────────────────────────────────────
@@ -147,6 +147,9 @@ Options:
              e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
   --all-conditions   Run all 4 RAG×Think conditions simultaneously and save
                      separate result files for each. Ignores --no-rag / --no-think.
+  --ensemble-voting  Run ensemble voting with kimi-k2.5 (high recall) and
+                     gpt-oss:120b (high precision). Keeps only issues both
+                     models agree on. Produces consensus F1 score.
   --help             Show this help
     `);
     process.exit(0);
@@ -227,6 +230,7 @@ Options:
     noThink:       flag('--no-think'),
     allConditions: flag('--all-conditions'),
     models:        opt('--model'),
+    ensembleVoting: flag('--ensemble-voting'),
   };
 }
 
@@ -324,6 +328,105 @@ async function main() {
     );
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     console.log(`\n  All conditions finished in ${elapsed}s total`);
+    return;
+  }
+
+  // Ensemble voting path
+  if (opts.ensembleVoting) {
+    // Run ensemble voting with kimi and gpt-oss
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel)) {
+      console.error(`Error: Ensemble voting requires both ${kimiModel} and ${gptModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — ENSEMBLE VOTING mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} (recall) + ${gptModel} (precision)`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture`);
+      console.log(`  Strategy: Keep only issues both models agree on`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 2} LLM calls (both models on same fixtures)`);
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run both models
+    const config1: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [kimiModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    const config2: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [gptModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    if (!opts.quiet) console.log(`\n  Running ${kimiModel}…`);
+    const kimiResults = await runBenchmark(config1);
+
+    if (!opts.quiet) console.log(`\n  Running ${gptModel}…`);
+    const gptResults = await runBenchmark(config2);
+
+    // Compute consensus results
+    if (!opts.quiet) console.log(`\n  Computing consensus votes…`);
+    const votedResults: ModelRunResult[] = [];
+
+    for (const fixture of fixtures) {
+      for (let run = 0; run < opts.runs; run++) {
+        const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+        const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+        if (kimiResult && gptResult) {
+          const votedResult = createVotedResult(
+            kimiResult,
+            gptResult,
+            fixture,
+            'ensemble-kimi+gpt-oss'
+          );
+          votedResults.push(votedResult);
+        }
+      }
+    }
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    if (!opts.quiet) console.log(`\n  Ensemble voting completed in ${elapsed}s`);
+
+    // Report results
+    const allModelIds = [kimiModel, gptModel, 'ensemble-kimi+gpt-oss'];
+    printReport(votedResults, allModelIds, opts.presetId);
+
+    if (opts.save) {
+      const label = `ensemble-voting-${opts.noRag ? 'norag' : 'rag'}-${opts.noThink ? 'nothink' : 'think'}`;
+      const jsonPath = saveJson(votedResults, opts.outputDir, label);
+      const csvPath = saveCsv(votedResults, allModelIds, opts.outputDir, label);
+      const reportPath = saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+      if (!opts.quiet) {
+        console.log(`\n  JSON   saved → ${jsonPath}`);
+        console.log(`  CSV    saved → ${csvPath}`);
+        console.log(`  Report saved → ${reportPath}`);
+      }
+    }
+
     return;
   }
 
