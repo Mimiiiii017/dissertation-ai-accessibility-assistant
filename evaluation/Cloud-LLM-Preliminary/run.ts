@@ -299,6 +299,104 @@ async function main() {
     console.log(`  Models filtered to: ${models.map(shortName).join(', ')}`);
   }
 
+  // Ensemble voting with all conditions
+  if (opts.ensembleVoting && opts.allConditions) {
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel)) {
+      console.error(`Error: Ensemble voting requires both ${kimiModel} and ${gptModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    const conditions: Array<[boolean, boolean, string]> = [
+      [true,  true,  'norag-nothink' ],
+      [true,  false, 'norag-think'   ],
+      [false, true,  'rag-nothink'   ],
+      [false, false, 'rag-think'     ],
+    ];
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — ENSEMBLE VOTING + ALL CONDITIONS mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} (recall) + ${gptModel} (precision)`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture × 4 conditions`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 2 * 4} LLM calls (both models × 4 conditions)`);
+      console.log('');
+      console.log('  All 4 conditions running simultaneously with ensemble voting:');
+      console.log('    norag-nothink  |  norag-think  |  rag-nothink  |  rag-think');
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run all 4 conditions in parallel
+    await Promise.all(
+      conditions.map(async ([noRag, noThink, condLabel]) => {
+        const config1: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [kimiModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const config2: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [gptModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const kimiResults = await runBenchmark(config1);
+        const gptResults = await runBenchmark(config2);
+
+        // Compute consensus
+        const votedResults: ModelRunResult[] = [];
+        for (const fixture of fixtures) {
+          for (let run = 0; run < opts.runs; run++) {
+            const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+            const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+            if (kimiResult && gptResult) {
+              const votedResult = createVotedResult(
+                kimiResult,
+                gptResult,
+                fixture,
+                'ensemble-kimi+gpt-oss'
+              );
+              votedResults.push(votedResult);
+            }
+          }
+        }
+
+        // Save results for this condition
+        if (opts.save) {
+          const label = `ensemble-voting-${condLabel}`;
+          const allModelIds = [kimiModel, gptModel, 'ensemble-kimi+gpt-oss'];
+          saveJson(votedResults, opts.outputDir, label);
+          saveCsv(votedResults, allModelIds, opts.outputDir, label);
+          saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+        }
+      })
+    );
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  All 4 conditions with ensemble voting finished in ${elapsed}s total`);
+    return;
+  }
+
   if (opts.allConditions) {
     // Run all 4 RAG×Think conditions simultaneously
     const conditions: Array<[boolean, boolean]> = [
@@ -331,7 +429,7 @@ async function main() {
     return;
   }
 
-  // Ensemble voting path
+  // Ensemble voting path (single condition)
   if (opts.ensembleVoting) {
     // Run ensemble voting with kimi and gpt-oss
     const kimiModel = 'kimi-k2.5:cloud';
