@@ -144,9 +144,86 @@
 
 ---
 
+## T40 Plan: Multi-Stage Voting (Next Phase)
+
+**Objective:** Recover recall while maintaining precision advantage via staged confidence levels
+
+### Architecture
+
+**Stage 1: Consensus Voting (Verified Tier)**
+- Both kimi-k2.5 and gpt-oss:120b must agree on accessibility concept
+- Issue classification: `confidence: "verified"`
+- Result: High precision (100%), lower recall (~44-46%)
+- Same logic as T39 current implementation
+
+**Stage 2: Secondary Review (Review Tier)**
+- Issues rejected in Stage 1 are re-scored individually against ground truth
+- Run rejected issues through both models separately
+- Classification: `confidence: "review-recommended"`
+- Result: Catches single-model findings without consensus requirement
+
+### Expected Outcomes
+
+| Metric | T39 (Stage 1 Only) | T40 (Both Stages) | Gain |
+|---|---|---|---|
+| Verified (100% precision) | 257 TP | 257 TP | Same |
+| Review-Recommended (single model) | 0 | ~200-300 TP | +200-300 |
+| Total TP | 251 | ~450-550 | +200-300 |
+| Total FP | 0 | Low (~50-100) | +50-100 |
+| Recall | 44.3% | ~65-76% | +20-32pp |
+| Precision | 100% | ~80-90% | -10-20pp |
+| F1 (weighted) | 53.9% | ~72-81% | +18-27pp |
+| User Confidence | High (zero FP) | High (transparent tiers) | Same trust, better coverage |
+
+### Implementation
+
+1. **Modify `benchmark.ts`:**
+   - New function: `computeRejectedIssues(votes, allIssues)` — find non-consensus issues
+   - Modify `createVotedResult()` — add confidence tier labels
+   - New function: `scoreRejectedIssues(rejectedIssues, fixture)` — rescores single-model findings
+
+2. **Update `run.ts`:**
+   - New flag: `--multi-stage-voting` (enables T40 mode)
+   - Logic: Stage 1 voting → Stage 2 rejected issue rescoring → merge results
+   - Output: Combined JSON with dual-tier confidence scores
+
+3. **Result Format:**
+   ```json
+   {
+     "verification_tier": {
+       "consensus": { "count": 251, "confidence": "verified" },
+       "review": { "count": 280, "confidence": "review-recommended" }
+     },
+     "issues": [
+       { "issue": "...", "concept": "ARIA", "confidence": "verified" },
+       { "issue": "...", "concept": "KEYBOARD", "confidence": "review-recommended" }
+     ]
+   }
+   ```
+
+### Why Multi-Stage is Better Than Alternatives
+
+| Alternative | Pros | Cons | Chosen? |
+|---|---|---|---|
+| **3-Model Voting** | Consensus with qwen | No confidence differentiation, +~100s per run | ❌ |
+| **Weighted Voting** | Nuanced agreement | Complex tuning, hard to interpret | ❌ |
+| **Multi-Stage Voting** | Recalls+precision, transparent tiers, users know confidence level | Adds code complexity | ✅ |
+
+### Success Criteria for T40
+
+- ✅ Recall improvement: Target 65-75% (from 44% in T39)
+- ✅ Verified precision: Maintain 100% (Stage 1)
+- ✅ Overall F1: Improve to 72%+ (from 56.8% max in T39)
+- ✅ User transparency: Clear labeling of confidence tiers
+- ✅ Execution time: < 350 seconds per run (both stages + voting)
+
+---
+
 ## Next Steps
 
-- [ ] Commit ensemble-voting code to GitHub
-- [ ] Deploy `--ensemble-voting` flag to extension
-- [ ] Update extension UI to show "Verified by 2 models" badge
-- [ ] Consider T40: Test 3-model voting (kimi + gpt-oss + qwen) to explore recall recovery
+- [ ] **T40 Implementation:** Add multi-stage voting to benchmark.ts and run.ts
+- [ ] **T40 Execution:** Run all 4 conditions with `--multi-stage-voting --all-conditions`
+- [ ] **T40 Analysis:** Compare T39 vs T40 recall/F1/precision trade-offs
+- [ ] **Decision:** Choose between single-stage (T39) or multi-stage (T40) for production
+- [ ] Deploy `--ensemble-voting` or `--multi-stage-voting` flag to extension
+- [ ] Update extension UI to show "Verified by 2 models" vs "Review Recommended" badges
