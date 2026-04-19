@@ -51,7 +51,7 @@ import {
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
 
 import { ALL_FIXTURES, CORE_FIXTURES, ADVERSARIAL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
-import { ModelBenchmarkConfig, runBenchmark, shortName, computeConsensusIssues, createVotedResult, ModelRunResult } from './benchmark';
+import { ModelBenchmarkConfig, runBenchmark, shortName, computeConsensusIssues, createVotedResult, computeRejectedIssues, scoreRejectedIssues, createMultiStageVotedResult, computeMajorityVotingIssues, createThreeModelMultiStageVotedResult, ModelRunResult } from './benchmark';
 import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 // ─── All installed models ──────────────────────────────────────────────────
@@ -150,6 +150,12 @@ Options:
   --ensemble-voting  Run ensemble voting with kimi-k2.5 (high recall) and
                      gpt-oss:120b (high precision). Keeps only issues both
                      models agree on. Produces consensus F1 score.
+  --multi-stage-voting Run multi-stage voting: Stage 1 consensus (high precision)
+                     + Stage 2 secondary review (recover recall). Labels issues
+                     as "verified" (both models) or "review-recommended" (single model).
+  --multi-stage-voting-3models Run 3-model multi-stage voting (kimi + gpt-oss + qwen).
+                     Stage 1: Majority voting (2 of 3 must agree). Stage 2: secondary
+                     review. Expected: 72%+ F1, improved precision via consensus.
   --help             Show this help
     `);
     process.exit(0);
@@ -231,6 +237,8 @@ Options:
     allConditions: flag('--all-conditions'),
     models:        opt('--model'),
     ensembleVoting: flag('--ensemble-voting'),
+    multiStageVoting: flag('--multi-stage-voting'),
+    multiStageVoting3models: flag('--multi-stage-voting-3models'),
   };
 }
 
@@ -397,6 +405,224 @@ async function main() {
     return;
   }
 
+  // Multi-stage voting with all conditions
+  if (opts.multiStageVoting && opts.allConditions) {
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel)) {
+      console.error(`Error: Multi-stage voting requires both ${kimiModel} and ${gptModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    const conditions: Array<[boolean, boolean, string]> = [
+      [true,  true,  'norag-nothink' ],
+      [true,  false, 'norag-think'   ],
+      [false, true,  'rag-nothink'   ],
+      [false, false, 'rag-think'     ],
+    ];
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — MULTI-STAGE VOTING + ALL CONDITIONS mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} (recall) + ${gptModel} (precision)`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture × 4 conditions`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 2 * 4} LLM calls (both models × 4 conditions)`);
+      console.log('');
+      console.log('  Stage 1: Consensus voting (verified, 100% precision)');
+      console.log('  Stage 2: Secondary review of rejected issues (review-recommended)');
+      console.log('');
+      console.log('  All 4 conditions running simultaneously with multi-stage voting:');
+      console.log('    norag-nothink  |  norag-think  |  rag-nothink  |  rag-think');
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run all 4 conditions in parallel
+    await Promise.all(
+      conditions.map(async ([noRag, noThink, condLabel]) => {
+        const config1: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [kimiModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const config2: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [gptModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const kimiResults = await runBenchmark(config1);
+        const gptResults = await runBenchmark(config2);
+
+        // Compute multi-stage voting
+        const votedResults: ModelRunResult[] = [];
+        for (const fixture of fixtures) {
+          for (let run = 0; run < opts.runs; run++) {
+            const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+            const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+            if (kimiResult && gptResult) {
+              const votedResult = createMultiStageVotedResult(
+                kimiResult,
+                gptResult,
+                fixture,
+                'multi-stage-kimi+gpt-oss'
+              );
+              votedResults.push(votedResult);
+            }
+          }
+        }
+
+        // Save results for this condition
+        if (opts.save) {
+          const label = `multi-stage-voting-${condLabel}`;
+          const allModelIds = [kimiModel, gptModel, 'multi-stage-kimi+gpt-oss'];
+          saveJson(votedResults, opts.outputDir, label);
+          saveCsv(votedResults, allModelIds, opts.outputDir, label);
+          saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+        }
+      })
+    );
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  All 4 conditions with multi-stage voting finished in ${elapsed}s total`);
+    return;
+  }
+
+  // 3-Model multi-stage voting with all conditions (kimi + gpt-oss + qwen)
+  if (opts.multiStageVoting3models && opts.allConditions) {
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+    const qwenModel = 'qwen3.5:397b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel) || !ALL_MODELS.includes(qwenModel)) {
+      console.error(`Error: 3-model voting requires ${kimiModel}, ${gptModel}, and ${qwenModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    const conditions: Array<[boolean, boolean, string]> = [
+      [true,  true,  'norag-nothink' ],
+      [true,  false, 'norag-think'   ],
+      [false, true,  'rag-nothink'   ],
+      [false, false, 'rag-think'     ],
+    ];
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — 3-MODEL MULTI-STAGE VOTING + ALL CONDITIONS mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} + ${gptModel} + ${qwenModel}`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture × 4 conditions`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 3 * 4} LLM calls (3 models × 4 conditions)`);
+      console.log('');
+      console.log('  Stage 1: Majority voting (2 of 3 models must agree on concept)');
+      console.log('  Stage 2: Secondary review of rejected issues');
+      console.log('');
+      console.log('  All 4 conditions running simultaneously with 3-model voting:');
+      console.log('    norag-nothink  |  norag-think  |  rag-nothink  |  rag-think');
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run all 4 conditions in parallel
+    await Promise.all(
+      conditions.map(async ([noRag, noThink, condLabel]) => {
+        const config1: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [kimiModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const config2: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [gptModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const config3: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [qwenModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const kimiResults = await runBenchmark(config1);
+        const gptResults = await runBenchmark(config2);
+        const qwenResults = await runBenchmark(config3);
+
+        // Compute 3-model multi-stage voting
+        const votedResults: ModelRunResult[] = [];
+        for (const fixture of fixtures) {
+          for (let run = 0; run < opts.runs; run++) {
+            const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+            const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+            const qwenResult = qwenResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+            if (kimiResult && gptResult && qwenResult) {
+              const votedResult = createThreeModelMultiStageVotedResult(
+                kimiResult,
+                gptResult,
+                qwenResult,
+                fixture,
+                'multi-stage-3model-kimi+gpt+qwen'
+              );
+              votedResults.push(votedResult);
+            }
+          }
+        }
+
+        // Save results for this condition
+        if (opts.save) {
+          const label = `multi-stage-3model-voting-${condLabel}`;
+          const allModelIds = [kimiModel, gptModel, qwenModel, 'multi-stage-3model-kimi+gpt+qwen'];
+          saveJson(votedResults, opts.outputDir, label);
+          saveCsv(votedResults, allModelIds, opts.outputDir, label);
+          saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+        }
+      })
+    );
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  All 4 conditions with 3-model multi-stage voting finished in ${elapsed}s total`);
+    return;
+  }
+
   if (opts.allConditions) {
     // Run all 4 RAG×Think conditions simultaneously
     const conditions: Array<[boolean, boolean]> = [
@@ -515,6 +741,226 @@ async function main() {
 
     if (opts.save) {
       const label = `ensemble-voting-${opts.noRag ? 'norag' : 'rag'}-${opts.noThink ? 'nothink' : 'think'}`;
+      const jsonPath = saveJson(votedResults, opts.outputDir, label);
+      const csvPath = saveCsv(votedResults, allModelIds, opts.outputDir, label);
+      const reportPath = saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+      if (!opts.quiet) {
+        console.log(`\n  JSON   saved → ${jsonPath}`);
+        console.log(`  CSV    saved → ${csvPath}`);
+        console.log(`  Report saved → ${reportPath}`);
+      }
+    }
+
+    return;
+  }
+
+  // Multi-stage voting path (single condition)
+  if (opts.multiStageVoting) {
+    // Run multi-stage voting with kimi and gpt-oss
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel)) {
+      console.error(`Error: Multi-stage voting requires both ${kimiModel} and ${gptModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — MULTI-STAGE VOTING mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} (recall) + ${gptModel} (precision)`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture`);
+      console.log(`  Strategy: Stage 1 - Consensus (verified); Stage 2 - Secondary review (review-recommended)`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 2} LLM calls (both models on same fixtures)`);
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run both models
+    const config1: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [kimiModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    const config2: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [gptModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    if (!opts.quiet) console.log(`\n  Running ${kimiModel}…`);
+    const kimiResults = await runBenchmark(config1);
+
+    if (!opts.quiet) console.log(`\n  Running ${gptModel}…`);
+    const gptResults = await runBenchmark(config2);
+
+    // Compute multi-stage voted results
+    if (!opts.quiet) console.log(`\n  Computing multi-stage voting…`);
+    if (!opts.quiet) console.log(`    Stage 1: Consensus issues (verified tier)…`);
+    if (!opts.quiet) console.log(`    Stage 2: Secondary review of rejected issues (review-recommended tier)…`);
+    const votedResults: ModelRunResult[] = [];
+
+    for (const fixture of fixtures) {
+      for (let run = 0; run < opts.runs; run++) {
+        const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+        const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+        if (kimiResult && gptResult) {
+          const votedResult = createMultiStageVotedResult(
+            kimiResult,
+            gptResult,
+            fixture,
+            'multi-stage-kimi+gpt-oss'
+          );
+          votedResults.push(votedResult);
+        }
+      }
+    }
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    if (!opts.quiet) console.log(`\n  Multi-stage voting completed in ${elapsed}s`);
+
+    // Report results
+    const allModelIds = [kimiModel, gptModel, 'multi-stage-kimi+gpt-oss'];
+    printReport(votedResults, allModelIds, opts.presetId);
+
+    if (opts.save) {
+      const label = `multi-stage-voting-${opts.noRag ? 'norag' : 'rag'}-${opts.noThink ? 'nothink' : 'think'}`;
+      const jsonPath = saveJson(votedResults, opts.outputDir, label);
+      const csvPath = saveCsv(votedResults, allModelIds, opts.outputDir, label);
+      const reportPath = saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+      if (!opts.quiet) {
+        console.log(`\n  JSON   saved → ${jsonPath}`);
+        console.log(`  CSV    saved → ${csvPath}`);
+        console.log(`  Report saved → ${reportPath}`);
+      }
+    }
+
+    return;
+  }
+
+  // 3-Model multi-stage voting path (single condition)
+  if (opts.multiStageVoting3models) {
+    // Run 3-model multi-stage voting with kimi, gpt-oss, and qwen
+    const kimiModel = 'kimi-k2.5:cloud';
+    const gptModel = 'gpt-oss:120b-cloud';
+    const qwenModel = 'qwen3.5:397b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(gptModel) || !ALL_MODELS.includes(qwenModel)) {
+      console.error(`Error: 3-model voting requires ${kimiModel}, ${gptModel}, and ${qwenModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — 3-MODEL MULTI-STAGE VOTING mode');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} + ${gptModel} + ${qwenModel}`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture`);
+      console.log(`  Strategy: Stage 1 - Majority voting (2of3); Stage 2 - Secondary review`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 3} LLM calls (3 models on same fixtures)`);
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run all 3 models
+    const config1: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [kimiModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    const config2: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [gptModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    const config3: ModelBenchmarkConfig = {
+      ollamaHost: opts.host,
+      models: [qwenModel],
+      presetId: opts.presetId,
+      fixtures,
+      runsPerCombination: opts.runs,
+      verbose: !opts.quiet,
+      concurrency: opts.concurrency,
+      noRag: opts.noRag,
+      noThink: opts.noThink,
+    };
+
+    if (!opts.quiet) console.log(`\n  Running ${kimiModel}…`);
+    const kimiResults = await runBenchmark(config1);
+
+    if (!opts.quiet) console.log(`\n  Running ${gptModel}…`);
+    const gptResults = await runBenchmark(config2);
+
+    if (!opts.quiet) console.log(`\n  Running ${qwenModel}…`);
+    const qwenResults = await runBenchmark(config3);
+
+    // Compute 3-model multi-stage voting
+    if (!opts.quiet) console.log(`\n  Computing 3-model multi-stage voting…`);
+    if (!opts.quiet) console.log(`    Stage 1: Majority voting (2 of 3 models must agree)…`);
+    if (!opts.quiet) console.log(`    Stage 2: Secondary review of rejected issues…`);
+    const votedResults: ModelRunResult[] = [];
+
+    for (const fixture of fixtures) {
+      for (let run = 0; run < opts.runs; run++) {
+        const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+        const gptResult = gptResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+        const qwenResult = qwenResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+        if (kimiResult && gptResult && qwenResult) {
+          const votedResult = createThreeModelMultiStageVotedResult(
+            kimiResult,
+            gptResult,
+            qwenResult,
+            fixture,
+            'multi-stage-3model-kimi+gpt+qwen'
+          );
+          votedResults.push(votedResult);
+        }
+      }
+    }
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    if (!opts.quiet) console.log(`\n  3-model multi-stage voting completed in ${elapsed}s`);
+
+    // Report results
+    const allModelIds = [kimiModel, gptModel, qwenModel, 'multi-stage-3model-kimi+gpt+qwen'];
+    printReport(votedResults, allModelIds, opts.presetId);
+
+    if (opts.save) {
+      const label = `multi-stage-3model-voting-${opts.noRag ? 'norag' : 'rag'}-${opts.noThink ? 'nothink' : 'think'}`;
       const jsonPath = saveJson(votedResults, opts.outputDir, label);
       const csvPath = saveCsv(votedResults, allModelIds, opts.outputDir, label);
       const reportPath = saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);

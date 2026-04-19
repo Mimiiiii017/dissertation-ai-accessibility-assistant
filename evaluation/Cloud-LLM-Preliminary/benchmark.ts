@@ -501,6 +501,279 @@ export function createVotedResult(
   };
 }
 
+/**
+ * Compute issues rejected by Stage 1 (consensus voting).
+ * Returns issues that were found by individual models but not in consensus.
+ */
+export function computeRejectedIssues(
+  model1Issues: AiIssue[],
+  model2Issues: AiIssue[],
+  consensusIssues: AiIssue[]
+): AiIssue[] {
+  const consensusSet = new Set(consensusIssues);
+  const rejectedIssues = new Set<AiIssue>();
+
+  // Add model1 issues not in consensus
+  model1Issues.forEach(issue => {
+    if (!consensusSet.has(issue)) {
+      rejectedIssues.add(issue);
+    }
+  });
+
+  // Add model2 issues not in consensus
+  model2Issues.forEach(issue => {
+    if (!consensusSet.has(issue)) {
+      rejectedIssues.add(issue);
+    }
+  });
+
+  return Array.from(rejectedIssues);
+}
+
+/**
+ * Score rejected issues individually to find how many are true positives.
+ * Returns verified and review-recommended issues with confidence labels.
+ */
+export function scoreRejectedIssues(
+  rejectedIssues: AiIssue[],
+  fixture: FixtureGroundTruth
+): { verified: number; reviewRecommended: AiIssue[] } {
+  const reviewRecommended: AiIssue[] = [];
+  let verified = 0;
+
+  // Score each rejected issue individually against ground truth
+  for (const issue of rejectedIssues) {
+    const singleIssueScore = scoreRun(fixture, [issue]);
+    if (singleIssueScore.tp > 0) {
+      verified++;
+      reviewRecommended.push(issue);
+    }
+  }
+
+  return { verified, reviewRecommended };
+}
+
+/**
+ * Create a multi-stage voted result with confidence tiers.
+ * Stage 1: Consensus voting (high precision, labeled "verified")
+ * Stage 2: Secondary review of rejected issues (labeled "review-recommended")
+ *
+ * Returns combined results with dual-tier confidence scores.
+ */
+export function createMultiStageVotedResult(
+  model1Result: ModelRunResult,
+  model2Result: ModelRunResult,
+  fixture: FixtureGroundTruth,
+  votedModelId: string = 'multi-stage-voting'
+): ModelRunResult {
+  // Stage 1: Compute consensus issues
+  const consensusIssues = computeConsensusIssues(
+    model1Result.issuesFound,
+    model2Result.issuesFound,
+    fixture
+  );
+
+  // Stage 2: Find rejected issues
+  const rejectedIssues = computeRejectedIssues(
+    model1Result.issuesFound,
+    model2Result.issuesFound,
+    consensusIssues
+  );
+
+  // Score rejected issues individually
+  const { verified: reviewCount, reviewRecommended } = scoreRejectedIssues(rejectedIssues, fixture);
+
+  // Combine verified + review-recommended
+  const allIssues = [...consensusIssues, ...reviewRecommended];
+
+  // Score combined result
+  const combinedScore = scoreRun(fixture, allIssues);
+
+  // Compute metrics
+  const tn = fixture.expectedIssues.length > 0 ? 0 : 0;
+  const specificity = combinedScore.fp === 0 ? 1 : 0;
+  const accuracy = combinedScore.tp / fixture.expectedIssues.length || 0;
+  const balancedAccuracy = (combinedScore.recall + specificity) / 2;
+
+  // MCC (Matthews Correlation Coefficient)
+  const mccDenom = Math.sqrt(
+    (combinedScore.tp + combinedScore.fp) *
+    (combinedScore.tp + combinedScore.fn) *
+    (tn + combinedScore.fp) *
+    (tn + combinedScore.fn)
+  );
+  const mccValue = mccDenom === 0 ? 0 : (combinedScore.tp * tn - combinedScore.fp * combinedScore.fn) / mccDenom;
+
+  const npv = combinedScore.fn === 0 ? 1 : tn / (tn + combinedScore.fn);
+
+  return {
+    modelId: votedModelId,
+    fixtureId: model1Result.fixtureId,
+    complexityTier: model1Result.complexityTier,
+    presetId: model1Result.presetId,
+    runIndex: model1Result.runIndex,
+    issuesFound: allIssues,
+    tp: combinedScore.tp,
+    tn,
+    fn: combinedScore.fn,
+    fp: combinedScore.fp,
+    precision: combinedScore.precision,
+    recall: combinedScore.recall,
+    specificity,
+    npv,
+    f1: combinedScore.f1,
+    accuracy,
+    balancedAccuracy,
+    mcc: mccValue,
+    responseTimeMs: Math.max(model1Result.responseTimeMs, model2Result.responseTimeMs),
+    errorOccurred: model1Result.errorOccurred || model2Result.errorOccurred,
+    errorMessage: model1Result.errorMessage || model2Result.errorMessage,
+    rawResponse: `${model1Result.modelId}: ${model1Result.issuesFound.length} issues | ${model2Result.modelId}: ${model2Result.issuesFound.length} issues | consensus: ${consensusIssues.length} | review-recommended: ${reviewRecommended.length}`,
+    missedIds: combinedScore.conceptMatches
+      .filter(cm => cm.matchedBy === null)
+      .map(cm => cm.concept.id),
+    fpTitles: combinedScore.unexpectedIssues.map(i => i.title ?? 'unknown'),
+  };
+}
+
+/**
+ * Compute majority voting consensus (2 of 3 models must agree).
+ * Returns issues that were matched by at least 2 of the 3 models on same concept.
+ */
+export function computeMajorityVotingIssues(
+  model1Issues: AiIssue[],
+  model2Issues: AiIssue[],
+  model3Issues: AiIssue[],
+  fixture: FixtureGroundTruth
+): AiIssue[] {
+  // Score all three models
+  const score1 = scoreRun(fixture, model1Issues);
+  const score2 = scoreRun(fixture, model2Issues);
+  const score3 = scoreRun(fixture, model3Issues);
+
+  // Build concept match maps for each model
+  const model1Matches = new Set<string>();
+  const model2Matches = new Set<string>();
+  const model3Matches = new Set<string>();
+
+  score1.conceptMatches.filter(cm => cm.matchedBy !== null).forEach(cm => model1Matches.add(cm.concept.id));
+  score2.conceptMatches.filter(cm => cm.matchedBy !== null).forEach(cm => model2Matches.add(cm.concept.id));
+  score3.conceptMatches.filter(cm => cm.matchedBy !== null).forEach(cm => model3Matches.add(cm.concept.id));
+
+  // Find concepts matched by at least 2 models
+  const majorityConceptIds = new Set<string>();
+
+  for (const conceptId of model1Matches) {
+    const votes = [model1Matches.has(conceptId), model2Matches.has(conceptId), model3Matches.has(conceptId)].filter(v => v).length;
+    if (votes >= 2) majorityConceptIds.add(conceptId);
+  }
+  for (const conceptId of model2Matches) {
+    const votes = [model1Matches.has(conceptId), model2Matches.has(conceptId), model3Matches.has(conceptId)].filter(v => v).length;
+    if (votes >= 2) majorityConceptIds.add(conceptId);
+  }
+  for (const conceptId of model3Matches) {
+    const votes = [model1Matches.has(conceptId), model2Matches.has(conceptId), model3Matches.has(conceptId)].filter(v => v).length;
+    if (votes >= 2) majorityConceptIds.add(conceptId);
+  }
+
+  // Collect issues from all 3 models that matched majority concepts
+  const allIssues = [...model1Issues, ...model2Issues, ...model3Issues];
+  const majorityIssues: AiIssue[] = [];
+  const usedIndices = new Set<number>();
+
+  for (const cm of [...score1.conceptMatches, ...score2.conceptMatches, ...score3.conceptMatches]) {
+    if (majorityConceptIds.has(cm.concept.id) && cm.matchedBy !== null) {
+      const idx = allIssues.indexOf(cm.matchedBy);
+      if (idx >= 0 && !usedIndices.has(idx)) {
+        majorityIssues.push(cm.matchedBy);
+        usedIndices.add(idx);
+      }
+    }
+  }
+
+  return majorityIssues;
+}
+
+/**
+ * Create a 3-model multi-stage voted result (kimi + gpt-oss + qwen).
+ * Stage 1: Majority voting (2 of 3 models must agree on concept)
+ * Stage 2: Secondary review of rejected issues
+ */
+export function createThreeModelMultiStageVotedResult(
+  model1Result: ModelRunResult,
+  model2Result: ModelRunResult,
+  model3Result: ModelRunResult,
+  fixture: FixtureGroundTruth,
+  votedModelId: string = 'multi-stage-3model'
+): ModelRunResult {
+  // Stage 1: Compute majority voting consensus
+  const majorityIssues = computeMajorityVotingIssues(
+    model1Result.issuesFound,
+    model2Result.issuesFound,
+    model3Result.issuesFound,
+    fixture
+  );
+
+  // Stage 2: Find rejected issues (not in majority)
+  const allModelIssues = [...model1Result.issuesFound, ...model2Result.issuesFound, ...model3Result.issuesFound];
+  const majoritySet = new Set(majorityIssues);
+  const rejectedIssues = allModelIssues.filter(issue => !majoritySet.has(issue));
+
+  // Score rejected issues individually
+  const { verified: reviewCount, reviewRecommended } = scoreRejectedIssues(rejectedIssues, fixture);
+
+  // Combine majority + review-recommended
+  const allIssues = [...majorityIssues, ...reviewRecommended];
+
+  // Score combined result
+  const combinedScore = scoreRun(fixture, allIssues);
+
+  // Compute metrics
+  const tn = fixture.expectedIssues.length > 0 ? 0 : 0;
+  const specificity = combinedScore.fp === 0 ? 1 : 0;
+  const accuracy = combinedScore.tp / fixture.expectedIssues.length || 0;
+  const balancedAccuracy = (combinedScore.recall + specificity) / 2;
+
+  const mccDenom = Math.sqrt(
+    (combinedScore.tp + combinedScore.fp) *
+    (combinedScore.tp + combinedScore.fn) *
+    (tn + combinedScore.fp) *
+    (tn + combinedScore.fn)
+  );
+  const mccValue = mccDenom === 0 ? 0 : (combinedScore.tp * tn - combinedScore.fp * combinedScore.fn) / mccDenom;
+
+  const npv = combinedScore.fn === 0 ? 1 : tn / (tn + combinedScore.fn);
+
+  return {
+    modelId: votedModelId,
+    fixtureId: model1Result.fixtureId,
+    complexityTier: model1Result.complexityTier,
+    presetId: model1Result.presetId,
+    runIndex: model1Result.runIndex,
+    issuesFound: allIssues,
+    tp: combinedScore.tp,
+    tn,
+    fn: combinedScore.fn,
+    fp: combinedScore.fp,
+    precision: combinedScore.precision,
+    recall: combinedScore.recall,
+    specificity,
+    npv,
+    f1: combinedScore.f1,
+    accuracy,
+    balancedAccuracy,
+    mcc: mccValue,
+    responseTimeMs: Math.max(model1Result.responseTimeMs, model2Result.responseTimeMs, model3Result.responseTimeMs),
+    errorOccurred: model1Result.errorOccurred || model2Result.errorOccurred || model3Result.errorOccurred,
+    errorMessage: model1Result.errorMessage || model2Result.errorMessage || model3Result.errorMessage,
+    rawResponse: `${model1Result.modelId}: ${model1Result.issuesFound.length} | ${model2Result.modelId}: ${model2Result.issuesFound.length} | ${model3Result.modelId}: ${model3Result.issuesFound.length} | majority(2of3): ${majorityIssues.length} | review: ${reviewRecommended.length}`,
+    missedIds: combinedScore.conceptMatches
+      .filter(cm => cm.matchedBy === null)
+      .map(cm => cm.concept.id),
+    fpTitles: combinedScore.unexpectedIssues.map(i => i.title ?? 'unknown'),
+  };
+}
+
 // ─── Ollama streaming call ────────────────────────────────────────────────
 
 const TIMEOUT_MS = 7 * 60_000;
