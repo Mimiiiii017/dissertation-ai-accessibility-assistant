@@ -156,6 +156,9 @@ Options:
   --multi-stage-voting-3models Run 3-model multi-stage voting (kimi + gpt-oss + qwen).
                      Stage 1: Majority voting (2 of 3 must agree). Stage 2: secondary
                      review. Expected: 72%+ F1, improved precision via consensus.
+  --multi-stage-voting-kimi-qwen Run multi-stage voting with kimi (recall) + qwen (balanced).
+                     Alternative model pair to test if qwen precision helps over gpt-oss.
+                     Stage 1: Consensus, Stage 2: secondary review. Expected: 69-71% F1.
   --help             Show this help
     `);
     process.exit(0);
@@ -239,6 +242,7 @@ Options:
     ensembleVoting: flag('--ensemble-voting'),
     multiStageVoting: flag('--multi-stage-voting'),
     multiStageVoting3models: flag('--multi-stage-voting-3models'),
+    multiStageVotingKimiQwen: flag('--multi-stage-voting-kimi-qwen'),
   };
 }
 
@@ -503,6 +507,108 @@ async function main() {
 
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     console.log(`\n  All 4 conditions with multi-stage voting finished in ${elapsed}s total`);
+    return;
+  }
+
+  // Kimi+Qwen multi-stage voting with all conditions (testing alternative model pair - T42)
+  if (opts.multiStageVotingKimiQwen && opts.allConditions) {
+    const kimiModel = 'kimi-k2.5:cloud';
+    const qwenModel = 'qwen3.5:397b-cloud';
+
+    if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(qwenModel)) {
+      console.error(`Error: Kimi+Qwen voting requires both ${kimiModel} and ${qwenModel} in ALL_MODELS`);
+      process.exit(1);
+    }
+
+    const conditions: Array<[boolean, boolean, string]> = [
+      [true,  true,  'norag-nothink' ],
+      [true,  false, 'norag-think'   ],
+      [false, true,  'rag-nothink'   ],
+      [false, false, 'rag-think'     ],
+    ];
+
+    if (!opts.quiet) {
+      console.log('');
+      console.log('  Cloud-LLM-Preliminary — KIMI+QWEN MULTI-STAGE VOTING + ALL CONDITIONS mode (T42)');
+      console.log(`  Ollama:   ${opts.host}`);
+      console.log(`  Models:   ${kimiModel} (recall) + ${qwenModel} (balanced)`);
+      console.log(`  Fixtures: ${opts.fixtureIds.length}  →  ${opts.fixtureIds.join(', ')}`);
+      console.log(`  Runs:     ${opts.runs} per fixture × 4 conditions`);
+      console.log(`  Total:    ~${fixtures.length * opts.runs * 2 * 4} LLM calls (both models × 4 conditions)`);
+      console.log('');
+      console.log('  Stage 1: Consensus voting (kimi + qwen agreement)');
+      console.log('  Stage 2: Secondary review of rejected issues');
+      console.log('  Hypothesis: Qwen precision may improve over gpt-oss');
+      console.log('');
+      console.log('  All 4 conditions running simultaneously:');
+      console.log('    norag-nothink  |  norag-think  |  rag-nothink  |  rag-think');
+      console.log('');
+    }
+
+    const t0 = Date.now();
+
+    // Run all 4 conditions in parallel
+    await Promise.all(
+      conditions.map(async ([noRag, noThink, condLabel]) => {
+        const config1: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [kimiModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const config2: ModelBenchmarkConfig = {
+          ollamaHost: opts.host,
+          models: [qwenModel],
+          presetId: opts.presetId,
+          fixtures,
+          runsPerCombination: opts.runs,
+          verbose: !opts.quiet,
+          concurrency: opts.concurrency,
+          noRag,
+          noThink,
+        };
+
+        const kimiResults = await runBenchmark(config1);
+        const qwenResults = await runBenchmark(config2);
+
+        // Compute multi-stage voting with kimi + qwen
+        const votedResults: ModelRunResult[] = [];
+        for (const fixture of fixtures) {
+          for (let run = 0; run < opts.runs; run++) {
+            const kimiResult = kimiResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+            const qwenResult = qwenResults.find(r => r.fixtureId === fixture.fixtureId && r.runIndex === run);
+
+            if (kimiResult && qwenResult) {
+              const votedResult = createMultiStageVotedResult(
+                kimiResult,
+                qwenResult,
+                fixture,
+                'multi-stage-kimi+qwen'
+              );
+              votedResults.push(votedResult);
+            }
+          }
+        }
+
+        // Save results for this condition
+        if (opts.save) {
+          const label = `multi-stage-kimi-qwen-${condLabel}`;
+          const allModelIds = [kimiModel, qwenModel, 'multi-stage-kimi+qwen'];
+          saveJson(votedResults, opts.outputDir, label);
+          saveCsv(votedResults, allModelIds, opts.outputDir, label);
+          saveReport(votedResults, allModelIds, opts.presetId, opts.outputDir, label);
+        }
+      })
+    );
+
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  All 4 conditions with kimi+qwen multi-stage voting finished in ${elapsed}s total`);
     return;
   }
 
