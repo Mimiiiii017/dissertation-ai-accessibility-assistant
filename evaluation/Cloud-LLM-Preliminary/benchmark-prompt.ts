@@ -414,7 +414,7 @@ SWEEP TSX-E — Interactive state not communicated to assistive technology (HIGH
       * For button-like toggles (play/pause, favorite, like): aria-pressed={stateVar}
       * For radio-like toggles (exclusive selection): aria-checked={stateVar}
     - If the state variable exists but the CORRECT ARIA PROP is missing → report "state variable updating but missing corresponding ARIA prop: [expected aria-XYZ, not found]" (HIGH), naming the element and state variable.
-  (2) DO NOT REPORT if: clickHandler props exist but the component is still dumb (passes through state correctly). DO CHECK the prop name matches the state (e.g. if stateVar is `isExpanded` but prop is `aria-selected`, that's a mismatch — report it).
+  (2) DO NOT REPORT if: clickHandler props exist but the component is still dumb (passes through state correctly). DO CHECK the prop name matches the state (e.g. if stateVar is isExpanded but prop is aria-selected, that's a mismatch — report it).
 
 SWEEP TSX-F — Landmark and card regions missing accessible names (MEDIUM):
   For every <section>, <nav>, or <aside> that appears more than once: if neither aria-label nor aria-labelledby is present → report "repeated landmark region missing accessible name" (MEDIUM), naming the element and approximate location.
