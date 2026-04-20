@@ -257,50 +257,90 @@ Execute every sweep below fully and independently. Supplementary WCAG guidance t
 
 PHASE 1 JS — before any sweep, build THREE explicit lists:
 
-  LIST 1 — JS INTERACTION TABLE: scan every function that toggles/shows/hides content (names containing toggle, open, close, expand, collapse, show, hide, activate, deactivate) AND every addEventListener / on* handler in the file. For each entry record four columns: (a) function or handler name, (b) element/selector it operates on, (c) trigger event or call site, (d) the visible DOM change it causes (class toggle, display change, innerHTML update, etc.). Also note per row: whether it calls setAttribute('aria-expanded',...), whether it writes to an aria-live region (role="status"/role="alert"/aria-live), and whether it sets aria-hidden.
-  ⚠ DEPTH REQUIREMENT: LIST 1 must capture handlers and functions at ALL nesting levels — those inside DOMContentLoaded / window.onload callbacks, module IIFE bodies, class method definitions, and helper functions called from init. Do not stop after the outermost-level definitions or after the first 10–15 entries. An event listener registered inside an init callback is IN SCOPE for LIST 1. Scan the full file top-to-bottom without truncating.
+  LIST 1 — JS INTERACTION TABLE: scan the ENTIRE file for functions and event listeners that change visible DOM state. Look for:
+    • Function declarations/methods with names containing: toggle, open, close, expand, collapse, show, hide, activate, deactivate, submit, change, select
+    • All addEventListener calls (including those nested inside DOMContentLoaded, window.onload, module constructors, or class methods)
+    • All on* event handlers (onclick, onchange, onsubmit, onblur, onfocus, etc.)
+    • All visible DOM mutations: classList.toggle(), classList.add(), classList.remove(), style.display changes, innerHTML/textContent writes, setAttribute/removeAttribute calls
+    
+    CRITICAL PATTERN DETECTION — do not skip nested handlers:
+    - Handlers inside window.addEventListener('DOMContentLoaded', ...) callback
+    - Handlers inside module IIFE (function(){...}()) bodies
+    - Handlers inside class constructors or method definitions
+    - Nested callbacks inside promise .then() chains or async/await handlers
+    
+    For each handler/function record: (a) exact name, (b) trigger (event type), (c) target selector or element, (d) visible change it causes, (e) does it update aria-expanded/aria-pressed/aria-invalid?, (f) does it write to aria-live region?
 
-  LIST 2 — VALIDATION FUNCTIONS: every function that evaluates form field correctness (look for validate, check, isValid, onSubmit, handleSubmit, handleBlur). For each: does it setAttribute('aria-invalid','true') on invalid fields and setAttribute('aria-invalid','false') or removeAttribute on valid fields?
+  LIST 2 — VALIDATION FUNCTIONS: Find every function whose name suggests validation (validate, check, isValid, checkValidity, onSubmit, handleSubmit, onBlur, handleBlur, onInput, onChange, handleChange on form fields). Search patterns: "validate(", "isValid(", "onSubmit", "handleSubmit", "checkField", "validateInput", "isError". For each: does it call setAttribute('aria-invalid','true') when marking field invalid? Does it call setAttribute('aria-invalid','false') or removeAttribute('aria-invalid') when clearing error?
 
-  LIST 3 — VISIBILITY-TOGGLED ELEMENTS: every element whose CSS display or visibility is changed dynamically (scroll-triggered show/hide, drawer open/close, autocomplete list appear/disappear, overlay appear/disappear). For each: does the function that hides it also set aria-hidden="true", and the function that shows it also remove aria-hidden?
+  LIST 3 — VISIBILITY-TOGGLED ELEMENTS: Find every place where display:none, visibility:hidden, or aria-hidden is set/removed programmatically. Look for patterns: element.style.display = 'none', element.classList.add('hidden'), element.setAttribute('aria-hidden', 'true'), element.setAttribute('hidden', ''), and their inverse patterns showing/revealing the element. For each: (a) element selector, (b) function that hides/shows it, (c) is aria-hidden set when hidden?, (d) is aria-hidden removed when shown?
+
 
 SWEEP JS-A — Toggle functions not updating aria-expanded (HIGH):
-  For every entry in LIST 1 (JS Interaction Table) that changes the visible state of a panel, menu, accordion, drawer, or combobox suggestion list: if no setAttribute('aria-expanded', ...) or .ariaExpanded = ... assignment exists in that function (or its directly paired open/close counterpart) → report "toggle function does not update aria-expanded on trigger element" (HIGH), naming the function and the trigger element selector.
+  For every entry in LIST 1 (JS Interaction Table) that represents a function changing visibility of a panel/menu/accordion/dropdown/combobox:
+  ⚠ SPECIFIC PATTERN CHECK: The function body must contain at least one of these patterns:
+    - setAttribute('aria-expanded', true/false) or setAttribute("aria-expanded", "true"/"false")
+    - .ariaExpanded = 'true' or .ariaExpanded = 'false'
+    - el.setAttribute('aria', 'expanded') — NO, this is incorrect and counts as missing
+  Look for these patterns being called on the TRIGGER ELEMENT (button, link, element with role="button") that controls the panel.
+  If the function changes classList (adding/removing 'open', 'expanded', 'active', 'visible', 'is-active' etc.) or style.display to show/hide — but does NOT update aria-expanded — report "toggle function does not update aria-expanded on trigger element" (HIGH), naming the function name and the trigger element selector if available.
+  Also check: is the paired close/hide function equally missing aria-expanded? Report each separately if both lack it.
 
 SWEEP JS-B — Toggle buttons not updating aria-pressed (HIGH):
-  For every button that acts as a two-state toggle (on/off, active/inactive, play/pause, mute/unmute) — identifiable by its name, class, or the fact that it cycles between exactly two modes — if no setAttribute('aria-pressed', ...) or .ariaPressed = ... assignment → report "toggle button does not update aria-pressed" (HIGH), naming the element selector and function.
+  For every button or role="button" element in LIST 1 that maintains two mutually-exclusive states (e.g. play/pause, mute/unmute, filter active/inactive, like/unlike, favorite toggle):
+  ⚠ SPECIFIC PATTERN CHECK: The handler or click callback must contain:
+    - setAttribute('aria-pressed', true/false) or setAttribute("aria-pressed", "true"/"false")
+    - .ariaPressed = 'true' or .ariaPressed = 'false'
+  Look for these patterns in the handler that toggles the button's visual state (classList toggle between 'active'/'inactive', style change, etc.).
+  If the state toggle exists but aria-pressed is not updated → report "toggle button does not update aria-pressed" (HIGH), naming the button selector and handler name.
 
 SWEEP JS-C — Dynamic content updates not announced via live region (MEDIUM):
-  For every code path that changes visible content in response to user action (e.g. result counts, status labels, wizard step indicators, mode labels) AND no companion aria-live region is written to immediately after → report "dynamic content update not announced to screen readers" (MEDIUM), naming the update type and function.
-  A live-region write means: assigning .textContent or .innerHTML to an element with role="status", role="alert", aria-live="polite", or aria-live="assertive".
+  For every entry in LIST 1 where the visible change is one of: filter results refresh, search result count update, mode/view label change, wizard step label change, status indicator update, error/success message appearance:
+  ⚠ SPECIFIC PATTERN CHECK: Immediately after the DOM update (same function or a called cleanup/update function), does the code:
+    - Find or reference an element with role="status", role="alert", aria-live="polite", or aria-live="assertive"?
+    - Write to that element using .textContent = ... or .innerHTML = ... or appendChild() of new content?
+  If NO aria-live write is found or if the live region exists but is never populated after this action → report "dynamic content update not announced to screen readers" (MEDIUM), naming the action and element.
 
 SWEEP JS-D — Form validation errors not reflected in aria-invalid (HIGH):
-  For every validation function that marks an input as invalid (adds error class, inserts error message): if no setAttribute('aria-invalid', 'true') call is made for that same input → report "form validation error not reflected in aria-invalid" (HIGH), naming the input element.
-  If valid-state resets do not clear aria-invalid to 'false' → report "aria-invalid not cleared on valid input" (MEDIUM).
+  For every entry in LIST 2 (validation functions):
+  ⚠ SPECIFIC PATTERN CHECK: When the function marks a field as invalid (adds error class like 'is-error', 'error', 'invalid'), display error message, or sets another visual error indicator:
+    - Does the same code path call setAttribute('aria-invalid', 'true') on that input?
+    - Does the function call element.setAttribute('aria-invalid', 'false') or removeAttribute('aria-invalid') when clearing the error?
+  If the validation sets an error state but does NOT call setAttribute('aria-invalid','true') → report "form validation error not reflected in aria-invalid" (HIGH), naming the field and validation function.
+  If the validation clears errors but does not reset aria-invalid to 'false' → report "aria-invalid not cleared on valid input" (MEDIUM).
 
 SWEEP JS-E — aria-expanded not initialised at page load (MEDIUM):
-  For every toggle widget (nav, accordion, dropdown, combobox) that is closed/hidden on load: if no DOMContentLoaded / module-init code sets aria-expanded="false" on the trigger element → report "aria-expanded not initialised on page load" (MEDIUM), naming the element.
-  Also check: does any init function set aria-controls on the trigger to point to the controlled region's id? If the trigger has no aria-controls and the region has an id → report "toggle trigger missing aria-controls" (MEDIUM).
+  For every toggle widget (nav drawer, accordion, dropdown, combobox) in LIST 1 that starts in a closed/hidden state:
+  ⚠ SPECIFIC PATTERN CHECK: Is there initialization code (inside DOMContentLoaded, window.onload, module init(), or constructor) that:
+    - Calls setAttribute('aria-expanded', 'false') on the trigger button/element?
+    - Calls element.setAttribute('aria-controls', <controlledElementId>) to link trigger to controlled region?
+  If NO initialization code sets aria-expanded to the initial state → report "aria-expanded not initialised on page load" (MEDIUM), naming the widget and trigger element.
+  If aria-controls is missing and the controlled element has an id attribute → report "toggle trigger missing aria-controls attribute" (MEDIUM).
 
 SWEEP JS-F — Dynamically-hidden elements not removed from accessibility tree (MEDIUM):
-  For every element in your Phase 1 visibility-toggle inventory: if the function that hides it uses display:none or visibility:hidden by REMOVING A CSS CLASS (i.e. the element returns to its natural hidden state via CSS), that is SUFFICIENT — browsers automatically map display:none to removal from the accessibility tree. Do NOT report JS-F for elements whose hidden state is achieved by CSS class removal (removing 'active', 'open', 'show', 'is-visible', 'expanded' classes that expose the element). NO explicit aria-hidden is required in this case.
-  Only report JS-F when the hide function positions the element OFF-SCREEN (negative margin, translate, absolute+clip, visually-hidden technique) while keeping it display:block — in this case aria-hidden IS required because the element is still in the display tree.
-  Conversely, if the function that reveals an element removes an explicit aria-hidden="true" attribute that was set programmatically, but fails to do so → report.
-  Do NOT report elements that are hidden with aria-hidden from the start and never shown dynamically.
+  For every entry in LIST 3 (visibility-toggled elements):
+  ⚠ SPECIFIC PATTERN CHECK: When the element is hidden:
+    - If hidden via CSS CLASS removal (e.g., element.classList.remove('visible'), element.classList.remove('show'), element.classList.remove('open'), and the CSS class causes display:none or visibility:hidden) — this is SUFFICIENT. No aria-hidden needed. Skip it.
+    - If hidden via style property (element.style.display = 'none' or element.style.visibility = 'hidden') — this is SUFFICIENT. Skip it.
+    - If hidden via OFF-SCREEN positioning (element.style.transform = 'translateX(-9999px)', margin-left: -9999px, position: absolute with no display property) — aria-hidden IS required. If not set, report "dynamically-hidden element not removed from accessibility tree; consider aria-hidden=true" (MEDIUM).
+  For the show/reveal path: is an explicit aria-hidden="true" that was programmatically set being removed? If the code set aria-hidden="true" on hide, it must set aria-hidden="false" or removeAttribute('aria-hidden') on show. If not, report.
+  Do NOT report elements that are hidden with aria-hidden from page load and never shown dynamically.
 
 SWEEP JS-G — User actions with no live-region announcement (MEDIUM):
-  Using LIST 1 (JS Interaction Table) from Phase 1: for each entry whose visible DOM change is one of the following categories — filter/search result update, result count change, view or mode label change, accordion panel open/close, navigation drawer open/close, wizard step advance, keyboard shortcut action, billing or plan change, scroll-to-top activation, suggestion list update — check whether that entry (or a function it calls) writes to an aria-live region immediately after making the DOM change.
-  An aria-live write means: assigning .textContent or .innerHTML to an element that has role="status", role="alert", aria-live="polite", or aria-live="assertive".
-  ⚠ SPECIFICITY: An aria-live write satisfies this check only if it announces this specific state change. A generic status region written to by multiple unrelated actions does NOT count — each action must have its own dedicated announcement.
-  If the entry causes a visible change but NO dedicated live-region write exists → report "user action result not announced via aria-live region" (MEDIUM), naming the specific handler, the element it is attached to, and the visible change it causes.
-  Work through LIST 1 entry by entry — do not skip any entry that causes a content change.
-  Do NOT report: (a) route navigation changes, (b) actions whose handler directly calls element.focus() on the newly revealed content — focus movement is an acceptable alternative to live-region announcement.
+  For every entry in LIST 1 that causes one of these visible changes: filter/search result update, result count change, mode/view switching, accordion open/close, drawer open/close, wizard/stepper progression, page scroll (e.g. scroll-to-top), suggestion list update, billing plan selection, product quantity change:
+  ⚠ SPECIFIC PATTERN CHECK: After the DOM change, is there a call to update an aria-live region?
+    - querySelector('[aria-live]') or similar to find the region
+    - textContent/innerHTML write to populate the region with announcement text
+    - timing: does the update happen synchronously or in a micro-task after the DOM change?
+  If the action causes visible change but NO aria-live update is found → report "user action result not announced via aria-live region" (MEDIUM), naming the action, element, and visible change.
+  Do NOT report if: (a) the handler calls element.focus() on newly revealed content (focus movement is an acceptable alternative), or (b) the change navigates to a new page/route (not a live-region use case).
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (JS-A through JS-G) using your Phase 1 inventory.
-  If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep.
-  Return to the sweep list and run each one explicitly before writing output.
+  If you have produced fewer than 10 Issue blocks, you almost certainly did not complete every sweep or did not capture all handlers during Phase 1.
+  Return to Phase 1 and re-scan the file for nested event listeners, handlers inside init callbacks, and handlers in class methods. Then re-execute the sweeps.
   A medium-density JS file typically yields 15–25 statically-detectable issues; a high-density file with many interactive handlers typically yields 25–50. Each unique function or element is a separate Issue block.
+  If you identified more than 50 issues, spot-check 5 randomly selected issues to verify they are not duplicates.
 `;
 
 /**
@@ -343,14 +383,38 @@ SWEEP TSX-C — Icon-only interactive elements missing accessible names (HIGH):
   For every button, link, or role="button"/"link" element whose only content is an icon (no visible text, no aria-label, no aria-labelledby, no title): report "icon-only interactive element missing accessible name" (HIGH), naming the component.
 
 SWEEP TSX-D — Form fields missing label, aria-invalid, or aria-required (HIGH):
-  For every form input component:
-  (1) No <label htmlFor={id}>, aria-label, or aria-labelledby → report "form field missing accessible label" (HIGH).
-  (2) Component has an error/invalid state AND no aria-invalid prop → report "form field missing aria-invalid state" (HIGH).
-  (3) Field is required AND neither required nor aria-required is passed → report "required field not programmatically marked as required" (HIGH).
-  (4) Error message is rendered AND no aria-describedby links it to the input → report "form field error message not connected via aria-describedby" (MEDIUM).
+  For every form input component such as <input type="text|email|number|password">, <textarea>, <select>, or custom Input/TextInput/Select/Checkbox/Radio component:
+  ⚠ CHECK SEQUENCE (perform all checks for each input field):
+  (1) LABEL ACCESSIBILITY:
+    - Does the component have a JSX <label htmlFor={inputId}>? Check the JSX tree for a <label> element with a htmlFor prop that matches this input's id.
+    - OR does it have an aria-label prop? Check the component's props for aria-label="...".
+    - OR does it have an aria-labelledby prop? Check if that element exists in the rendered tree.
+    - If NONE of these exist → report "form field missing accessible label" (HIGH), naming the input name/placeholder and its location in the component.
+  (2) ERROR STATE MARKING:
+    - Is there a conditional that renders the field with an error/invalid class (error, invalid, is-error, is-invalid)?
+    - Does the same condition or handler pass aria-invalid={{ error: true }} or aria-invalid={isInvalid}?
+    - If the error state exists but aria-invalid is NOT set → report "form field missing aria-invalid prop on error state" (HIGH), naming the field.
+  (3) REQUIRED STATE MARKING:
+    - Is this field marked with required={true} or required? Check the JSX prop
+    - OR does it have aria-required="true"? Check the aria-required prop.
+    - If NEITHER exists and the form context treats this field as required → report "required field not programmatically marked as required" (HIGH), naming the field.
+  (4) ERROR MESSAGE LINKING:
+    - If an error message is conditionally rendered (e.g. {error && <span>{error}</span>}), does it have an id attribute?
+    - Does the input have aria-describedby pointing to that error's id?
+    - If the error is rendered but NOT linked via aria-describedby → report "form field error message not connected via aria-describedby" (MEDIUM).
 
 SWEEP TSX-E — Interactive state not communicated to assistive technology (HIGH):
-  For every tab, filter button, pricing plan card, or two-state toggle whose state is tracked by a boolean: if no aria-selected, aria-pressed, or aria-checked prop mirrors that state variable → report "interactive state not communicated to assistive technology" (HIGH), naming the component and state variable.
+  ⚠ STATE TRACKING PATTERNS: Scan Phase 1 inventory for state variables. For each state-tracked interactive element:
+  For every tab, filter button, pricing plan card, or two-state toggle whose state is tracked by a boolean or enum:
+  (1) TAB AND SELECTED-STATE ELEMENTS:
+    - Element name/text: "Tab X", "Filter Y", "Plan Z", or identified by className containing 'tab', 'filter', 'plan', 'option', 'choice', 'card'
+    - State variable found in JSX: isSelected={stateVar}, active={stateVar}, selected={stateVar}, isActive={stateVar}, isCurrent={stateVar}, etc.
+    - REQUIRED PROPS ON THE ELEMENT:
+      * For tabs and generic toggles: aria-selected={stateVar} (not aria-pressed or aria-checked unless the element is explicitly a button/pressure-based control)
+      * For button-like toggles (play/pause, favorite, like): aria-pressed={stateVar}
+      * For radio-like toggles (exclusive selection): aria-checked={stateVar}
+    - If the state variable exists but the CORRECT ARIA PROP is missing → report "state variable updating but missing corresponding ARIA prop: [expected aria-XYZ, not found]" (HIGH), naming the element and state variable.
+  (2) DO NOT REPORT if: clickHandler props exist but the component is still dumb (passes through state correctly). DO CHECK the prop name matches the state (e.g. if stateVar is `isExpanded` but prop is `aria-selected`, that's a mismatch — report it).
 
 SWEEP TSX-F — Landmark and card regions missing accessible names (MEDIUM):
   For every <section>, <nav>, or <aside> that appears more than once: if neither aria-label nor aria-labelledby is present → report "repeated landmark region missing accessible name" (MEDIUM), naming the element and approximate location.
@@ -385,6 +449,39 @@ SWEEP TSX-K — Star ratings and review widgets missing accessible semantics (ME
   (b) If the widget is interactive (user can select a star): each star element must have role="radio" and an aria-label naming the value (e.g. "1 star", "2 stars"). If individual stars have no role or aria-label → report "interactive star rating missing radio role and labels" (HIGH).
   (c) Individual star icons (SVG or icon components) that are purely decorative within a labelled container must have aria-hidden={true}.
   ⚠ The absence of role and aria-label IS the accessibility defect — report it even if the element renders visually correctly. Do not skip any star/rating element that lacks these attributes.
+
+SWEEP TSX-K — Star ratings and review widgets missing accessible semantics (HIGH):
+  ⚠ MANDATORY ACTIVE SEARCH: This sweep is required even if no star or rating elements are immediately obvious. Before marking this sweep complete, actively search for:
+    • Any named icon component containing 'star', 'star-filled', 'star-empty', 'rating', 'half-star': <StarIcon>, <FillStar>, <RatingIcon>, <FilledStar>, <EmptyStar>, <HalfStar>, <Star>
+    • Any <svg> element inside a conditional width or opacity calculation (indicators of scale/rating)
+    • Any component whose name contains 'star', 'rating', 'score', 'review', 'rank': <StarRating>, <RatingComponent>, <ReviewStars>, <ScoreDisplay>, <RankingWidget>
+    • Any group of 4–5 sibling icon/span elements with identical or similar classes that could represent a rating scale (look for map() loops or hard-coded repetition of icons)
+    • Any numeric display adjacent to icon elements (text pattern: "4.8 stars", "4.8 out of 5", "rating: 4.5", "★★★★☆ 4/5", etc.)
+  
+  For EVERY star-rating, score display, or review-count widget discovered:
+  
+  (A) READ-ONLY STAR RATING WIDGET (display-only, not user-selectable):
+    - Container must have role="img" to indicate it's a single composite image
+    - Container must have aria-label that includes: the numerical value AND the scale (e.g., "4 out of 5 stars", "4.8 stars")
+    - Individual star icons inside must have aria-hidden={true} because they're decorative within the labelled composite
+    - If the container has NEITHER role="img" NOR aria-label, OR if individual stars are not aria-hidden → report "read-only star rating widget missing accessible structure: needs role='img' + aria-label on container and aria-hidden on individual star icons" (HIGH)
+  
+  (B) INTERACTIVE STAR RATING WIDGET (user can select a star to submit a rating):
+    - Container should have role="radiogroup" (optional but recommended)
+    - Each individual star must have role="radio" and aria-label (e.g., "1 star", "2 stars", "3 stars", etc.)
+    - Selected star must have aria-checked="true", unselected must have aria-checked="false"
+    - If individual stars lack role="radio" or aria-label, OR if aria-checked is not managed → report "interactive star rating missing radio role and individual star labels" (HIGH), naming the component and the specific missing attributes
+    - If stars have onClick handlers but no tabindex and no keyboard support → report "interactive star rating widget not keyboard accessible" (MEDIUM)
+  
+  (C) REVIEW-COUNT DISPLAY (e.g., "based on 1,247 reviews", "4.8 avg from 382 ratings"):
+    - This is a text-only indicator of aggregated score; it does NOT require role="img" unless it also contains visual star icons
+    - If visual stars are rendered as decoration next to review counts, those stars must have aria-hidden={true}
+    - If the review count text itself is hidden from AT (e.g., display:none, visibility:hidden), it should be aria-hidden={true}; if it's visible text, no special ARIA required
+    - If decorative stars are present but not aria-hidden → report "review count stars missing aria-hidden" (MEDIUM)
+  
+  ⚠ SEVERITY UPGRADE: If any interactive star widget lacks role="radio" + aria-label per star, this is HIGH because users cannot use screen readers to select ratings. If read-only stars lack role="img" + aria-label, this is HIGH because the rating value is not announced. Do not classify these as MEDIUM.
+  
+  ⚠ ALSO CHECK: If a star rating component has an onClick or onChange handler but NO aria-label on the container, assume it's interactive and apply rule (B). If the handler updates a state variable representing the user's selection, confirm role="radiogroup" + role="radio" + aria-checked semantics are in place.
 
 COMPLETION CHECK — before finalising output:
   Verify you executed every sweep above (TSX-A through TSX-K) using your Phase 1 inventory.
