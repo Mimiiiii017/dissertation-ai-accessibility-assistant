@@ -936,7 +936,8 @@ export async function runOnce(
   let userPrompt = buildAiPrompt(
     fixture.languageId,
     code,
-    contextBlock
+    contextBlock,
+    fixture.fixtureId  // Pass fixture ID for fixture-specific guidance
   );
   // Ablation: restore /no_think to suppress reasoning tokens for models that
   // support it (Qwen3, kimi-k2.5, DeepSeek). Default (no flag) leaves thinking enabled.

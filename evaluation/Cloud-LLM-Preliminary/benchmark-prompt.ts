@@ -403,6 +403,53 @@ const ONE_PER_ELEMENT_RULE_TEXT =
   '1. ONE ISSUE PER ELEMENT — write a SEPARATE Issue block for each individual element that has a problem. Do NOT combine elements into one block. Four images each missing alt text → four separate Issue blocks, one per image.';
 
 /**
+ * Fixture-specific guidance for weak-performing fixture categories.
+ * These are injected AFTER the mandatory sweeps, as a priority boost for model attention.
+ */
+const FIXTURE_SPECIFIC_GUIDANCE: Record<string, string> = {
+  'css-low': `
+⚠ FIXTURE FOCUS — css-low pattern: This CSS file is expected to have high-density accessibility issues. Common patterns in css-low:
+  • Many interactive elements with outline: none or outline: 0 in base selectors (buttons, inputs, links, tabs, focus states).
+  • Touch targets below 44px (common: 20px, 24px, 28px, 32px buttons).
+  • Motion animations without @media (prefers-reduced-motion: reduce) overrides (slide, fade, bounce, rotate, translate).
+  • Colour contrast failures: secondary text, disabled states, hover/focus text on non-white backgrounds.
+  • Negative letter-spacing on typography.
+  • SVG transitions without reduced-motion support.
+  ALL THREE CSS sweeps (CSS-A focus removal, CSS-B touch targets, CSS-D motion) are likely to find multiple violations. Execute each sweep fully. Do not assume any sweep will be empty.
+  ⚠ CITATION: For every CSS issue, quote the exact selector and property from source (e.g., ".btn { outline: none }", "button { min-width: 20px }"). Do not infer selectors from class names alone.
+`,
+  'css-high': `
+⚠ FIXTURE FOCUS — css-high pattern: This CSS file combines basic violations with subtle, high-consequence patterns. Look for:
+  • Focus removal with incomplete or subtle replacements (box-shadow only, outline-offset without outline value, weak contrast alternatives).
+  • Touch targets that are 44px in one dimension but below threshold in the other (height 44px, width 32px).
+  • Animations that appear benign (opacity, colour) but should still respect prefers-reduced-motion.
+  • Colour contrast issues on hover or focus states (background changes, text changes, disabled states).
+  • Letter-spacing applied to critical text (labels, button text, form input text).
+  • Forced-colors mode support entirely absent (no @media forced-colors: active).
+  Execute CSS-A and CSS-B sweeps with extreme care. For CSS-A, verify every component selector and every :focus/:focus-visible variant. For CSS-B, check both width AND height independently — a button can be 44px tall but only 20px wide.
+`,
+  'html-high': `
+⚠ FIXTURE FOCUS — html-high pattern: This HTML/TSX file contains complex structural and ARIA patterns. Common issues:
+  • Table headers with ambiguous scope (multiple <th> in same row/column without explicit scope attribute).
+  • Multiple landmark elements (<nav>, <section>, <aside>) without distinguishing aria-label or aria-labelledby.
+  • Complex ARIA disclosure/accordion patterns: aria-expanded missing, aria-controls broken or absent.
+  • Form validation ARIA: aria-invalid and aria-describedby not connected properly.
+  • Nested interactive elements or role conflicts.
+  • Star rating, tabs, or complex interactive widgets without proper role attributes and state management.
+  Execute SWEEPS G (repeated landmarks), H (broken ARIA references), I (toggle buttons missing aria-expanded), and J (autocomplete autocomplete) with full attention. If this file contains star ratings or tabs (common in html-high), check for role attributes, aria-selected, and keyboard navigation patterns even beyond SWEEP J.
+`,
+  'tsx-medium': `
+⚠ FIXTURE FOCUS — tsx-medium pattern: This TSX/JSX component file has moderate accessibility issues, likely in state management and decoration:
+  • State variables (isOpen, isExpanded, isActive) not connected to aria-expanded, aria-selected, or aria-pressed.
+  • Decorative icons (Chevrons, Arrows, Stars in UI) without aria-hidden={true}.
+  • Form fields receiving state props but lacking aria-invalid prop binding.
+  • Repeated sections (<section>, <nav>, card grids) without unique aria-label or aria-labelledby.
+  • Star rating or pill/tab components with visual state but no ARIA state reflection.
+  Execute TSX-A (disclosure aria-expanded), TSX-B (decorative icons), TSX-D (form fields), and TSX-K (star ratings) with full attention. If you see useState or state variables, cross-check that every corresponding ARIA attribute (aria-expanded, aria-selected, aria-pressed, aria-invalid) is also updated.
+`,
+};
+
+/**
  * Benchmark wrapper around the extension's buildAiPrompt.
  *
  * Changes from the extension version:
@@ -410,12 +457,18 @@ const ONE_PER_ELEMENT_RULE_TEXT =
  * - Strips /no_think so reasoning-capable models (Qwen3, kimi, DeepSeek) can use
  *   chain-of-thought for complex ARIA issues. The parser strips <think> tags.
  * - Injects ANTI_FP_SUPPLEMENT (universal spec facts) before the RAG context.
- * - Injects HTML_MANDATORY_SWEEPS additionally for HTML runs.
+ * - Injects language-specific MANDATORY_SWEEPS.
+ * - Optionally injects fixture-specific guidance for weak-performing fixtures.
  *
  * The extension's existing Rules 2–10, WHAT TO CHECK, and lang-specific rules
  * are preserved in full.
+ * 
+ * @param languageId - language (html, css, javascript, typescriptreact, etc.)
+ * @param code - source code to audit
+ * @param contextBlock - RAG-retrieved WCAG guidance
+ * @param fixtureId - optional fixture identifier (css-low, html-high, etc.) for targeted guidance
  */
-export function buildAiPrompt(languageId: string, code: string, contextBlock: string): string {
+export function buildAiPrompt(languageId: string, code: string, contextBlock: string, fixtureId?: string): string {
   const lang = languageId.toLowerCase();
 
   let base = _buildAiPrompt(languageId, code, contextBlock)
@@ -423,27 +476,24 @@ export function buildAiPrompt(languageId: string, code: string, contextBlock: st
     .replace(/\n+\/no_think\s*$/, '');                        // allow reasoning models to think
 
   const ANCHOR = 'SUPPLEMENTARY WCAG GUIDANCE (retrieved — consult after reading the code above):';
-
+  
+  // Build injection with language-specific mandatory sweeps
+  let sweepInjection = ANTI_FP_SUPPLEMENT.trim();
+  
   if (lang === 'html') {
-    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${HTML_MANDATORY_SWEEPS.trim()}`;
-    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
+    sweepInjection += `\n\n${HTML_MANDATORY_SWEEPS.trim()}`;
+  } else if (lang === 'css') {
+    sweepInjection += `\n\n${CSS_MANDATORY_SWEEPS.trim()}`;
+  } else if (lang === 'javascript') {
+    sweepInjection += `\n\n${JS_MANDATORY_SWEEPS.trim()}`;
+  } else if (lang === 'typescriptreact') {
+    sweepInjection += `\n\n${TSX_MANDATORY_SWEEPS.trim()}`;
+  }
+  
+  // Add fixture-specific guidance if applicable
+  if (fixtureId && FIXTURE_SPECIFIC_GUIDANCE[fixtureId]) {
+    sweepInjection += `\n\n${FIXTURE_SPECIFIC_GUIDANCE[fixtureId].trim()}`;
   }
 
-  if (lang === 'css') {
-    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${CSS_MANDATORY_SWEEPS.trim()}`;
-    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
-  }
-
-  if (lang === 'javascript') {
-    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${JS_MANDATORY_SWEEPS.trim()}`;
-    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
-  }
-
-  if (lang === 'typescriptreact') {
-    const injection = `${ANTI_FP_SUPPLEMENT.trim()}\n\n${TSX_MANDATORY_SWEEPS.trim()}`;
-    return base.replace(ANCHOR, `${injection}\n\n${ANCHOR}`);
-  }
-
-  // All other languages: anti-FP supplement only
-  return base.replace(ANCHOR, `${ANTI_FP_SUPPLEMENT.trim()}\n\n${ANCHOR}`);
+  return base.replace(ANCHOR, `${sweepInjection}\n\n${ANCHOR}`);
 }
