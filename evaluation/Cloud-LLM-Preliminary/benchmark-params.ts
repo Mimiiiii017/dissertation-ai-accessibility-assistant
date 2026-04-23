@@ -138,16 +138,10 @@ export const MODEL_CLOUD_OVERRIDES: Record<string, ModelParamOverride> = {
   // Extended-thinking model. Moonshot AI recommends temperature=0.6 in reasoning
   // mode — consistent with Qwen3 and DeepSeek-R1 CoT model community consensus.
   // No-think mode gets tighter temperature for deterministic structured output.
+  // Winner of T48–T49 comparison (vs k2.6); achieving 70.5% F1 on access. auditing.
   'kimi-k2.5': {
     think:   { temperature: 0.6, top_p: 0.95 },
     noThink: { temperature: 0.3, top_p: 0.9  },
-  },
-  // ── Kimi-K2.6 (Moonshot AI) ──────────────────────────────────────────────
-  // K2.6 is newer; T48 showed severe under-detection at temp 0.6 (F1 46% vs 70.5% for k2.5).
-  // Trying lower temperature (0.3) to increase determinism and reduce missed issues.
-  'kimi-k2.6': {
-    think:   { temperature: 0.3, top_p: 0.95 },
-    noThink: { temperature: 0.1, top_p: 0.9  },
   },
   // ── Qwen3 family (qwen3.5:397b) ─────────────────────────────────────────
   // Manufacturer recommended: temp 0.6/top_p 0.95 for think, temp 0.7/top_p 0.8 for no-think.

@@ -91,8 +91,8 @@ const ALL_MODELS: string[] = [
   'qwen3.5:397b-cloud',              // ~397 B  — T15 #3: avg F1=39.9%; most stable model
   // 'qwen3-coder:480b-cloud',       // ~480 B        — removed after T15: avg F1=20.9%; declining trend T12→T15; worst of large models
   // 'qwen3-coder-next:cloud',       // ~undisclosed  — removed after T13: extreme condition variance (7.6%–35.7%); nt dropped 32.5 pp T12→T13; avg F1=18.8%
-  'kimi-k2.5:cloud',                 // ~undisclosed  — T42-T47: baseline; avg F1=70.5% (multi-stage rag-think)
-  'kimi-k2.6:cloud',                 // ~undisclosed  — T48: upgraded from k2.5; testing newer version for comparison
+  'kimi-k2.5:cloud',                 // ~undisclosed  — T42-T47: baseline; avg F1=70.5% (multi-stage rag-think) — winner of T48-T49 comparison
+  // 'kimi-k2.6:cloud',              // ~undisclosed  — removed after T48–T49: k2.6 showed severe degradation (F1 46%→44% vs k2.5's 70.5%); recall collapsed to 30% (−43.6 pp); temperature adjustment made no difference; model fundamentally unsuited for accessibility detection
   // 'glm-5:cloud',                  // ~undisclosed  — removed after T23: 2/4 conditions ≥80%; rn regressed −2pp to 79.9%; slow (236–343s avg); replaced by stronger models
 ];
 
