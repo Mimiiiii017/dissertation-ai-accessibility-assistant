@@ -91,7 +91,7 @@ const ALL_MODELS: string[] = [
   'qwen3.5:397b-cloud',              // ~397 B  — T15 #3: avg F1=39.9%; most stable model
   // 'qwen3-coder:480b-cloud',       // ~480 B        — removed after T15: avg F1=20.9%; declining trend T12→T15; worst of large models
   // 'qwen3-coder-next:cloud',       // ~undisclosed  — removed after T13: extreme condition variance (7.6%–35.7%); nt dropped 32.5 pp T12→T13; avg F1=18.8%
-  'kimi-k2.5:cloud',                 // ~undisclosed  — T15 #2: avg F1=42.4%, best nt=54.6%
+  'kimi-k2.6:cloud',                 // ~undisclosed  — T48: upgraded from k2.5; testing newer version
   // 'glm-5:cloud',                  // ~undisclosed  — removed after T23: 2/4 conditions ≥80%; rn regressed −2pp to 79.9%; slow (236–343s avg); replaced by stronger models
 ];
 
@@ -516,7 +516,7 @@ async function main() {
 
   // Kimi+Qwen multi-stage voting with all conditions (testing alternative model pair - T42)
   if (opts.multiStageVotingKimiQwen && opts.allConditions) {
-    const kimiModel = 'kimi-k2.5:cloud';
+    const kimiModel = 'kimi-k2.6:cloud';
     const qwenModel = 'qwen3.5:397b-cloud';
 
     if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(qwenModel)) {
