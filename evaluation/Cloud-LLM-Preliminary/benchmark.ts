@@ -309,6 +309,11 @@ export type ModelBenchmarkConfig = {
    * Use for the think vs no-think ablation condition.
    */
   noThink?: boolean;
+  /**
+   * When true, disable fixture-specific guidance injection in prompts.
+   * Use for ablation testing: compare fixture-guidance vs no-guidance F1 on the same fixtures.
+   */
+  noFixtureGuidance?: boolean;
 };
 
 export type ModelAggregateStats = {
@@ -937,7 +942,7 @@ export async function runOnce(
     fixture.languageId,
     code,
     contextBlock,
-    fixture.fixtureId  // Pass fixture ID for fixture-specific guidance
+    undefined  // T48: fixture guidance disabled (reverting to T45 safe configuration)
   );
   // Ablation: restore /no_think to suppress reasoning tokens for models that
   // support it (Qwen3, kimi-k2.5, DeepSeek). Default (no flag) leaves thinking enabled.

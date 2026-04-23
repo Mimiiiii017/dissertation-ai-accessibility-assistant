@@ -142,6 +142,8 @@ Options:
   --no-think         Re-enable /no_think directive — suppresses chain-of-thought
                      for reasoning models (Qwen3, kimi, DeepSeek). Use for the
                      no-think vs think ablation condition.
+  --no-fixture-guidance Disable fixture-specific prompt guidance (useful for ablation testing)
+                     to isolate RAG impact vs guidance impact
   --concurrency <n>  Max parallel fixture calls per model (default: 1 — safe for cloud gateway; use 4 for local-only Ollama)
   --model    <csv>   Comma-separated model shortNames to run (default: all)
              e.g. --model kimi-k2.5 or --model "kimi-k2.5,deepseek-v3.2"
@@ -237,6 +239,7 @@ Options:
     concurrency,
     noRag:         flag('--no-rag'),
     noThink:       flag('--no-think'),
+    noFixtureGuidance: flag('--no-fixture-guidance'),
     allConditions: flag('--all-conditions'),
     models:        opt('--model'),
     ensembleVoting: flag('--ensemble-voting'),
@@ -266,6 +269,7 @@ async function runCondition(
     concurrency: opts.concurrency,
     noRag,
     noThink,
+    noFixtureGuidance: opts.noFixtureGuidance,
   };
 
   console.log(`  [${label}] Starting…`);
