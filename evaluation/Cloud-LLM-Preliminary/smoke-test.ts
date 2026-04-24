@@ -3,9 +3,9 @@
  * Run: npx ts-node smoke-test.ts
  */
 
-import { ALL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
-import { aggregateByModel, applyCompositeScores, shortName } from './benchmark';
-import type { ModelRunResult } from './benchmark';
+import { ALL_FIXTURES, FIXTURE_MAP } from '../fixtures/ground-truth';
+import { aggregateByModel, applyCompositeScores, shortName } from '../benchmark/benchmark';
+import type { ModelRunResult } from '../benchmark/benchmark';
 
 let pass = 0;
 let fail = 0;

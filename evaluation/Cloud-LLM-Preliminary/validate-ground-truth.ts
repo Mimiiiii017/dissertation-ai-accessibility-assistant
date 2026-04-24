@@ -17,7 +17,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { FixtureGroundTruth, ALL_FIXTURES } from '../preset-benchmark/ground-truth';
+import { FixtureGroundTruth, ALL_FIXTURES } from '../fixtures/ground-truth';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 

@@ -1,0 +1,820 @@
+[
+  {
+    "modelId": "multi-stage-kimi+qwen",
+    "fixtureId": "html-high",
+    "complexityTier": "high",
+    "presetId": "balanced",
+    "runIndex": 0,
+    "issuesFound": [
+      {
+        "title": "html element missing lang attribute",
+        "severity": "high",
+        "lineHint": 2,
+        "explanation": "The root html element does not have a lang attribute, so screen readers cannot automatically select the correct speech synthesis language. This forces users to listen to mispronounced content or manually switch languages.",
+        "fix": "Line 2: <html lang=\"en\">"
+      },
+      {
+        "title": "hero image missing alt attribute",
+        "severity": "high",
+        "lineHint": 138,
+        "explanation": "The decorative dashboard image inside the hero section lacks an alt attribute entirely. Even though the container is aria-hidden, the missing attribute causes some validators and assistive technologies to announce the filename.",
+        "fix": "Line 138: <img src=\"/img/hero-dashboard.png\" alt=\"\" width=\"720\" height=\"480\" loading=\"eager\">"
+      },
+      {
+        "title": "page title is empty",
+        "severity": "high",
+        "lineHint": 7,
+        "explanation": "The title element contains no text, leaving the page without an identifiable name in browser tabs, bookmarks, and screen-reader page lists. Users cannot quickly confirm they are on the correct page.",
+        "fix": "Line 7: <title>Luminary Studio — Accessible design and productivity tools</title>"
+      },
+      {
+        "title": "logo image missing alt attribute",
+        "severity": "high",
+        "lineHint": 152,
+        "explanation": "The Nova Health logo image has no alt attribute"
+      },
+      {
+        "title": "HTML lang attribute missing",
+        "severity": "high",
+        "lineHint": 2,
+        "explanation": "The <html> element lacks a lang attribute, preventing screen readers from identifying the page's primary language. This affects pronunciation and braille translation for users relying on assistive technology.",
+        "fix": "Line 2: <html lang=\"en\">"
+      },
+      {
+        "title": "Page title missing",
+        "severity": "high",
+        "lineHint": 10,
+        "explanation": "The <title> element is empty, providing no context about the page content in browser tabs or screen reader announcements. Users cannot distinguish this page from others in their history or bookmarks.",
+        "fix": "Line 10: <title>Luminary Studio — Accessible design and productivity tools</title>"
+      },
+      {
+        "title": "Image missing alt attribute",
+        "severity": "high",
+        "explanation": "The <img> element displaying the hero dashboard has no alt attribute, making it invisible to screen reader users. Decorative or informative images must have alt text (even if empty) to meet WCAG 1.1.1.",
+        "fix": "Line 126: <img src=\"/img/hero-dashboard.png\" alt=\"Dashboard interface showing accessibility scan results\" width=\"720\" height=\"480\" loading=\"eager\">",
+        "lineHints": [
+          126,
+          134,
+          256,
+          321,
+          579,
+          593,
+          853
+        ]
+      },
+      {
+        "title": "Non-descriptive link text",
+        "severity": "med",
+        "explanation": "The link text \"Read more\" provides no context about the destination without surrounding information. Users scanning links list will not know what they are reading more about.",
+        "fix": "Line 113: <a href=\"/signup\" class=\"btn btn-primary btn-lg\">Start free trial <span class=\"sr-only\">(no credit card required)</span></a>",
+        "lineHints": [
+          113,
+          174,
+          334
+        ]
+      },
+      {
+        "title": "Button missing accessible name",
+        "severity": "high",
+        "lineHint": 35,
+        "explanation": "The navigation toggle button contains only an icon with aria-hidden=\"true\" and no text or aria-label. Screen reader users cannot identify the button's purpose (opening the menu).",
+        "fix": "Line 35: <button type=\"button\" class=\"nav-toggle\" aria-label=\"Toggle navigation menu\">"
+      },
+      {
+        "title": "Toggle button missing aria-expanded",
+        "severity": "high",
+        "explanation": "This button controls the visibility of the FAQ answer (faq-2-answer) but lacks aria-expanded to indicate its current state. Screen reader users cannot know if the content is hidden or visible.",
+        "fix": "Line 633: <button type=\"button\" aria-controls=\"faq-2-answer\" aria-expanded=\"false\" id=\"faq-2-question\">",
+        "lineHints": [
+          633,
+          648
+        ]
+      },
+      {
+        "title": "Form input missing accessible label",
+        "severity": "high",
+        "explanation": "The newsletter email input has no associated <label>, aria-label, or aria-labelledby. Screen reader users will not know what information is expected in this field.",
+        "fix": "Line 736: <input type=\"email\" id=\"newsletter-email\" name=\"email\" autocomplete=\"email\" required aria-required=\"true\" placeholder=\"you@example.com\" aria-label=\"Email address for newsletter\">",
+        "lineHints": [
+          736,
+          792
+        ]
+      },
+      {
+        "title": "Personal data input missing autocomplete",
+        "severity": "med",
+        "lineHint": 772,
+        "explanation": "The first name input collects personal data but lacks an autocomplete attribute. This prevents browsers from assisting users in filling out the form, impacting users with cognitive or motor disabilities.",
+        "fix": "Line 772: <input type=\"text\" id=\"contact-first-name\" name=\"first_name\" autocomplete=\"given-name\" required>"
+      },
+      {
+        "title": "Heading level skip",
+        "severity": "med",
+        "lineHint": 253,
+        "explanation": "The heading hierarchy jumps from h2 (Line 229) to h5 (Line 253), skipping levels h3 and h4. This disrupts the logical outline structure used by screen readers to navigate the page.",
+        "fix": "Line 253: <h3>Connect your project</h3>"
+      },
+      {
+        "title": "Table header missing scope",
+        "severity": "med",
+        "explanation": "The <th> element \"Starter\" lacks a scope attribute in a table with multiple header columns. Explicit scope is required to define the header axis for assistive technology.",
+        "fix": "Line 537: <th scope=\"col\">Starter</th>",
+        "lineHints": [
+          537,
+          538,
+          539
+        ]
+      },
+      {
+        "title": "Broken ARIA reference",
+        "severity": "high",
+        "lineHint": 166,
+        "explanation": "The section references aria-labelledby=\"features-heading\", but no element with id=\"features-heading\" exists in the document. This leaves the landmark without an accessible name.",
+        "fix": "Line 168: <h2 id=\"features-heading\">Everything you need to ship accessible software</h2>"
+      },
+      {
+        "title": "Landmark missing distinguishing label",
+        "severity": "med",
+        "explanation": "There are multiple <nav> elements on the page, but this one lacks an aria-label or aria-labelledby. Users navigating by landmarks cannot distinguish this from other navigation regions.",
+        "fix": "Line 32: <nav id=\"main-nav\" aria-label=\"Main navigation\">",
+        "lineHints": [
+          32,
+          83,
+          103,
+          128,
+          856
+        ]
+      }
+    ],
+    "tp": 14,
+    "tn": 0,
+    "fn": 37,
+    "fp": 2,
+    "precision": 0.875,
+    "recall": 0.27450980392156865,
+    "specificity": 0,
+    "npv": 0,
+    "f1": 0.4179104477611941,
+    "accuracy": 0.27450980392156865,
+    "balancedAccuracy": 0.13725490196078433,
+    "mcc": -0.30114161869426803,
+    "responseTimeMs": 827428,
+    "errorOccurred": false,
+    "missedIds": [
+      "footer-logo-alt-missing",
+      "search-label-missing",
+      "logo-bar-aria-label",
+      "features-heading-id",
+      "learn-more-link",
+      "step1-heading-skip",
+      "step1-img-alt-missing",
+      "filter-btn-aria-pressed",
+      "contrast-studio-alt",
+      "contrast-studio-link",
+      "pricing-toggle-role",
+      "table-caption-missing",
+      "th-row-scope-missing",
+      "td-icon-aria-label",
+      "testimonial-avatar-alt",
+      "faq-aria-controls",
+      "faq-dd-region",
+      "contact-label-missing",
+      "skip-links-removed",
+      "main-nav-aria-label",
+      "mobile-toggle-aria",
+      "subnav-btn-aria",
+      "search-form-role",
+      "account-nav-label",
+      "main-id-missing",
+      "live-region-removed",
+      "hero-section-label",
+      "filter-group-label",
+      "product-grid-label",
+      "row-scope-scans",
+      "marcus-avatar-alt",
+      "faq-q1-expanded",
+      "faq-q2-expanded",
+      "contact-aria-required",
+      "contact-msg-describedby",
+      "products-nav-label",
+      "linkedin-link-name"
+    ],
+    "fpTitles": [
+      "HTML lang attribute missing",
+      "Page title missing"
+    ]
+  },
+  {
+    "modelId": "multi-stage-kimi+qwen",
+    "fixtureId": "css-high",
+    "complexityTier": "high",
+    "presetId": "balanced",
+    "runIndex": 0,
+    "issuesFound": [
+      {
+        "title": "Focus indicator removed without replacement on :focus-visible in forced-colors media query",
+        "severity": "high",
+        "lineHint": 515,
+        "explanation": "Inside @media (forced-colors: active), the :focus-visible selector removes outline with only outline-offset. This makes focus invisible in Windows High Contrast Mode where users most need visible focus indicators.",
+        "fix": "Line 515: :focus-visible { outline: 3px solid CanvasText; outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .header-inner > a:first-child:focus-visible",
+        "severity": "high",
+        "lineHint": 759,
+        "explanation": "The header logo link removes outline on focus-visible with only outline-offset. This link is interactive and keyboard users need to see when it receives focus.",
+        "fix": "Line 759: .header-inner > a:first-child:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .nav-toggle:focus-visible",
+        "severity": "high",
+        "lineHint": 789,
+        "explanation": "The mobile navigation toggle button removes outline on focus-visible without visible replacement. This button controls navigation visibility and must show focus state.",
+        "fix": "Line 789: .nav-toggle:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on [id$=\"-submenu\"] li a:focus-visible",
+        "severity": "high",
+        "lineHint": 828,
+        "explanation": "Dropdown submenu links remove outline on focus-visible with only outline-offset and border-radius. These are interactive navigation elements requiring visible focus indication.",
+        "fix": "Line 828: [id$=\"-submenu\"] li a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: -3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on #search-input:focus-visible",
+        "severity": "high",
+        "lineHint": 862,
+        "explanation": "The search input removes outline on focus-visible with outline-offset: 0. While the :focus rule has box-shadow, the :focus-visible rule overrides it with no visible indicator for keyboard users.",
+        "fix": "Line 862: #search-input:focus-visible { outline: 3px solid var(--colour-brand-primary); outline-offset: 0; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on #site-search button[type=\"submit\"]:focus-visible",
+        "severity": "high",
+        "lineHint": 879,
+        "explanation": "The search submit button removes outline on focus-visible without visible replacement. This interactive button needs a visible focus indicator for keyboard users.",
+        "fix": "Line 879: #site-search button[type=\"submit\"]:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on nav[aria-label=\"Account navigation\"] a:focus-visible",
+        "severity": "high",
+        "lineHint": 897,
+        "explanation": "Account navigation links remove outline on focus-visible with only outline-offset and border-radius. These links are interactive and require visible focus states.",
+        "fix": "Line 897: nav[aria-label=\"Account navigation\"] a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .feature-card a:focus-visible",
+        "severity": "high",
+        "lineHint": 1069,
+        "explanation": "Feature card links remove outline on focus-visible without visible replacement. These are interactive elements that keyboard users must be able to identify when focused.",
+        "fix": "Line 1069: .feature-card a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .filter-tabs button:focus-visible",
+        "severity": "high",
+        "lineHint": 1215,
+        "explanation": "Filter tab buttons remove outline on focus-visible with only outline-offset. These toggle buttons control product filtering and need visible focus indication.",
+        "fix": "Line 1215: .filter-tabs button:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .pricing-toggle button:focus-visible",
+        "severity": "high",
+        "lineHint": 1324,
+        "explanation": "Pricing toggle buttons remove outline on focus-visible without visible replacement. These buttons switch between monthly and annual pricing views.",
+        "fix": "Line 1324: .pricing-toggle button:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .table-wrapper:focus-visible",
+        "severity": "high",
+        "lineHint": 1418,
+        "explanation": "The scrollable table wrapper removes outline on focus-visible with only outline-offset. This region is keyboard-focusable for scrolling and needs visible focus.",
+        "fix": "Line 1418: .table-wrapper:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .faq-item dt button:focus-visible",
+        "severity": "high",
+        "lineHint": 1574,
+        "explanation": "FAQ accordion buttons remove outline on focus-visible with only outline-offset. These buttons expand/collapse content and require visible focus states.",
+        "fix": "Line 1574: .faq-item dt button:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: -3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .form-group input:focus-visible",
+        "severity": "high",
+        "lineHint": 1622,
+        "explanation": "Form inputs remove outline on focus-visible with outline-offset: 0. While :focus has box-shadow, :focus-visible overrides it with no visible indicator for keyboard users.",
+        "fix": "Line 1622: .form-group input:focus-visible { outline: 3px solid var(--colour-brand-primary); outline-offset: 0; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .form-group select:focus-visible",
+        "severity": "high",
+        "lineHint": 1622,
+        "explanation": "Form select elements remove outline on focus-visible with outline-offset: 0. Select dropdowns are interactive and need visible focus indication for keyboard users.",
+        "fix": "Line 1622: .form-group select:focus-visible { outline: 3px solid var(--colour-brand-primary); outline-offset: 0; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .form-group textarea:focus-visible",
+        "severity": "high",
+        "lineHint": 1622,
+        "explanation": "Form textareas remove outline on focus-visible with outline-offset: 0. Textareas are interactive input elements requiring visible focus states.",
+        "fix": "Line 1622: .form-group textarea:focus-visible { outline: 3px solid var(--colour-brand-primary); outline-offset: 0; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .form-group input[type=\"checkbox\"]:focus-visible",
+        "severity": "high",
+        "lineHint": 1632,
+        "explanation": "Checkbox inputs remove outline on focus-visible with only outline-offset. Checkboxes are interactive form controls requiring visible focus indication.",
+        "fix": "Line 1632: .form-group input[type=\"checkbox\"]:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .footer-brand a:focus-visible",
+        "severity": "high",
+        "lineHint": 1651,
+        "explanation": "Footer brand links remove outline on focus-visible with only outline-offset and border-radius. These navigation links need visible focus states for keyboard users.",
+        "fix": "Line 1651: .footer-brand a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on footer[role=\"contentinfo\"] nav a:focus-visible",
+        "severity": "high",
+        "lineHint": 1663,
+        "explanation": "Footer navigation links remove outline on focus-visible with only outline-offset and border-radius. These are interactive links requiring visible focus indication.",
+        "fix": "Line 1663: footer[role=\"contentinfo\"] nav a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Focus indicator removed without replacement on .social-links a:focus-visible",
+        "severity": "high",
+        "lineHint": 1676,
+        "explanation": "Social media links remove outline on focus-visible with only outline-offset and border-radius. These interactive links need visible focus states for keyboard navigation.",
+        "fix": "Line 1676: .social-links a:focus-visible { outline: 3px solid var(--colour-focus-ring); outline-offset: 3px; }"
+      },
+      {
+        "title": "Touch target below minimum size on #site-search button[type=\"submit\"]",
+        "severity": "med",
+        "lineHint": 868,
+        "explanation": "The search submit button has explicit width: 28px and height: 28px with padding: 0, resulting in a 28×28px touch target. This is below the 44×44px minimum recommended by WCAG 2.5.8.",
+        "fix": "Line 868: #site-search button[type=\"submit\"] { width: 44px; height: 44px; }"
+      },
+      {
+        "title": "Touch target below minimum size on .btn-sm",
+        "severity": "med",
+        "lineHint": 707,
+        "explanation": "The .btn-sm class has min-height: 20px with padding var(--space-1-5) = 6px per side, resulting in 32px total height. This is below the 44px minimum touch target size.",
+        "fix": "Line 707: .btn-sm { min-height: 44px; padding: var(--space-3) var(--space-3-5); }"
+      },
+      {
+        "title": "Touch target below minimum size on .btn-icon",
+        "severity": "med",
+        "lineHint": 719,
+        "explanation": "The .btn-icon class has min-width: 20px and min-height: 20px with padding var(--space-2-5) = 10px, resulting in 40px total size. This is below the 44px minimum.",
+        "fix": "Line 719: .btn-icon { min-width: 44px; min-height: 44px; padding: var(--space-3); }"
+      },
+      {
+        "title": "Visually-hidden utility removes content from screen readers",
+        "severity": "high",
+        "lineHint": 614,
+        "explanation": "The .sr-only class uses position: static, width: auto, height: auto, clip: auto, and overflow: visible. This does not hide content visually while keeping it accessible. Screen reader users will see this content visually when it should be hidden.",
+        "fix": "Line 614: .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }"
+      },
+      {
+        "title": "Negative word-spacing impairs readability",
+        "severity": "med",
+        "lineHint": 259,
+        "explanation": "The body element has word-spacing: -0.2em which pulls words closer together. This reduces readability for users with cognitive disabilities, dyslexia, or low vision who need clear word separation.",
+        "fix": "Line 259: body { word-spacing: 0; }"
+      },
+      {
+        "title": "Link underline removed with no alternative visual differentiator",
+        "severity": "med",
+        "lineHint": 295,
+        "explanation": "All links have text-decoration: none applied globally without an alternative non-colour visual differentiator. Users with colour vision deficiencies cannot distinguish links from surrounding text by colour alone.",
+        "fix": "Line 295: a { text-decoration: underline; }"
+      },
+      {
+        "title": "Motion animation missing prefers-reduced-motion override for step connector line",
+        "severity": "med",
+        "lineHint": 1136,
+        "explanation": "The .steps-list > .step + .step::before pseudo-element has a gradient background creating a visual connecting line with spatial properties. There is no @media (prefers-reduced-motion: reduce) rule to disable this for users who prefer reduced motion.",
+        "fix": "Line 1136: @media (prefers-reduced-motion: reduce) { .steps-list > .step + .step::before { background: var(--colour-border); } }"
+      }
+    ],
+    "tp": 22,
+    "tn": 0,
+    "fn": 28,
+    "fp": 4,
+    "precision": 0.8461538461538461,
+    "recall": 0.44,
+    "specificity": 0,
+    "npv": 0,
+    "f1": 0.5789473684210525,
+    "accuracy": 0.44,
+    "balancedAccuracy": 0.22,
+    "mcc": -0.2935197542821371,
+    "responseTimeMs": 63096,
+    "errorOccurred": true,
+    "errorMessage": "Ollama HTTP 503: {\"StatusCode\":503,\"Status\":\"503 Service Unavailable\",\"error\":\"Service Temporarily Unavailable (ref: c1b3bd01-86ac-439e-a35b-52ff95d7d7ac)\"}",
+    "missedIds": [
+      "font-size-px",
+      "btn-primary-outline-none",
+      "skip-link-transform",
+      "negative-word-spacing",
+      "forced-colors-outline",
+      "mobile-trigger-small",
+      "mobile-toggle-small",
+      "close-btn-target-small",
+      "input-target-small",
+      "visually-hidden-display",
+      "skip-link-target-small",
+      "brand-secondary-contrast",
+      "neutral-900-contrast",
+      "error-colour-contrast",
+      "forced-color-adjust",
+      "hero-link-outline-none",
+      "badge-outline-none",
+      "stat-item-small",
+      "testimonial-outline-none",
+      "pagination-small",
+      "footer-text-contrast",
+      "dropdown-outline-none",
+      "modal-btn-outline-none",
+      "faq-dt-outline-none",
+      "form-input-outline-none",
+      "footer-nav-outline",
+      "social-link-small-h",
+      "social-link-outline"
+    ],
+    "fpTitles": [
+      "Focus indicator removed without replacement on .faq-item dt button:focus-visible",
+      "Focus indicator removed without replacement on .form-group textarea:focus-visible",
+      "Focus indicator removed without replacement on footer[role=\"contentinfo\"] nav a:focus-visible",
+      "Touch target below minimum size on .btn-sm"
+    ]
+  },
+  {
+    "modelId": "multi-stage-kimi+qwen",
+    "fixtureId": "js-high",
+    "complexityTier": "high",
+    "presetId": "balanced",
+    "runIndex": 0,
+    "issuesFound": [
+      {
+        "title": "mobileNav toggle functions do not update aria-expanded on trigger",
+        "severity": "high",
+        "lineHints": [
+          1685,
+          1705
+        ],
+        "lineHint": 1685,
+        "explanation": "The mobileNav open() and close() functions toggle the visibility of the navigation drawer using CSS classes and the hidden attribute on the overlay, but they do not update the aria-expanded state on the trigger button (_trigger). Screen reader users will not be informed when the menu opens or closes.",
+        "fix": "Line 1685: setAttr(_trigger, ARIA.EXPANDED, true);\n  Line 1705: setAttr(_trigger, ARIA.EXPANDED, false);"
+      },
+      {
+        "title": "mobileNav trigger missing initial aria-expanded and aria-controls",
+        "severity": "med",
+        "lineHint": 1740,
+        "explanation": "The mobileNav init() function does not set the initial aria-expanded=\"false\" state on the trigger button, nor does it link the trigger to the drawer using aria-controls. This prevents assistive technology from understanding the relationship and initial state.",
+        "fix": "Line 1740: setAttr(_trigger, ARIA.EXPANDED, 'false'); setAttr(_trigger, ARIA.CONTROLS, _drawer.id);"
+      },
+      {
+        "title": "dropdownMenu toggle functions do not update aria-expanded on trigger",
+        "severity": "high",
+        "lineHints": [
+          1875,
+          1890
+        ],
+        "lineHint": 1875,
+        "explanation": "The dropdownMenu _openInstance() and _closeInstance() functions manage the panel visibility but fail to update the aria-expanded attribute on the trigger button. This breaks the disclosure pattern for screen reader users.",
+        "fix": "Line 1875: setAttr(inst.trigger, ARIA.EXPANDED, true);\n  Line 1890: setAttr(inst.trigger, ARIA.EXPANDED, false);"
+      },
+      {
+        "title": "dropdownMenu trigger missing initial aria-expanded",
+        "severity": "med",
+        "lineHint": 1995,
+        "explanation": "The dropdownMenu register() function sets aria-haspopup and aria-controls but does not initialize aria-expanded=\"false\" on the trigger. The initial state is ambiguous to assistive technology.",
+        "fix": "Line 1995: setAttr(trigger, ARIA.EXPANDED, 'false');"
+      },
+      {
+        "title": "siteSearch combobox does not update aria-expanded",
+        "severity": "high",
+        "lineHints": [
+          2215,
+          2225
+        ],
+        "lineHint": 2215,
+        "explanation": "The siteSearch _open() and _close() functions show and hide the suggestion listbox but do not update aria-expanded on the search input (_inputEl). The combobox state is not communicated to screen readers.",
+        "fix": "Line 2215: setAttr(_inputEl, ARIA.EXPANDED, true);\n  Line 2225: setAttr(_inputEl, ARIA.EXPANDED, false);"
+      },
+      {
+        "title": "siteSearch input missing initial aria-expanded",
+        "severity": "med",
+        "lineHint": 2260,
+        "explanation": "The siteSearch init() function configures the input as a combobox but does not set the initial aria-expanded=\"false\" state. The initial closed state is not announced.",
+        "fix": "Line 2260: setAttr(_inputEl, ARIA.EXPANDED, 'false');"
+      },
+      {
+        "title": "productFilter tabs do not update aria-pressed or aria-selected",
+        "severity": "high",
+        "lineHint": 2465,
+        "explanation": "The productFilter _syncTabAriaStates() function updates the visual active state of filter tabs but does not update aria-pressed (for buttons) or aria-selected. The current filter selection is not accessible.",
+        "fix": "Line 2465: setAttr(btn, ARIA.PRESSED, String(isActive));"
+      },
+      {
+        "title": "faqAccordion open function does not update aria-expanded to true",
+        "severity": "high",
+        "lineHint": 2995,
+        "explanation": "The faqAccordion open() function expands the answer panel but does not set aria-expanded=\"true\" on the trigger button. The close() function correctly sets it to false, creating an inconsistent state.",
+        "fix": "Line 2995: setAttr(item.trigger, ARIA.EXPANDED, 'true');"
+      },
+      {
+        "title": "inlineValidator markInvalid does not set aria-invalid",
+        "severity": "high",
+        "lineHint": 1385,
+        "explanation": "The srUtils.markInvalid() function links the error message via aria-describedby but fails to set aria-invalid=\"true\" on the field. Screen readers may not announce the field as invalid.",
+        "fix": "Line 1385: field.setAttribute('aria-invalid', 'true');"
+      },
+      {
+        "title": "inlineValidator markValid does not clear aria-invalid",
+        "severity": "med",
+        "lineHint": 1395,
+        "explanation": "The srUtils.markValid() function removes the error description but does not remove or reset the aria-invalid attribute to \"false\". The field may remain stuck in an invalid state for assistive technology.",
+        "fix": "Line 1395: field.setAttribute('aria-invalid', 'false');"
+      },
+      {
+        "title": "productFilter applyFilters does not announce result count",
+        "severity": "med",
+        "lineHint": 2415,
+        "explanation": "The productFilter applyFilters() function updates the visible product grid and count badge but does not announce the change to an aria-live region. Screen reader users are not informed that the results have changed.",
+        "fix": "Line 2415: liveRegion.announce(`${totalMatches} product${totalMatches !== 1 ? 's' : ''} found`);"
+      },
+      {
+        "title": "scrollToTop click action not announced",
+        "severity": "med",
+        "lineHint": 1495,
+        "explanation": "The scrollToTop _onClick() function scrolls the page and moves focus but does not announce the action via a live region. Users may be disoriented by the sudden viewport change.",
+        "fix": "Line 1495: liveRegion.announce(STRINGS.scrolledToTop || 'Scrolled to top of page');"
+      },
+      {
+        "title": "cookieConsent banner state change not announced",
+        "severity": "med",
+        "lineHints": [
+          3775,
+          3795
+        ],
+        "lineHint": 3775,
+        "explanation": "The cookieConsent _hideBanner() and _showBanner() functions change the visibility of the consent dialog but do not announce the state change. Users may not know the banner has appeared or been dismissed.",
+        "fix": "Line 3775: liveRegion.announce('Cookie banner dismissed');\n  Line 3795: liveRegion.announce('Cookie consent banner displayed');"
+      },
+      {
+        "title": "mobileNav trigger missing aria-controls attribute",
+        "severity": "med",
+        "lineHint": 1740,
+        "explanation": "The mobileNav init() function fails to associate the trigger button with the navigation drawer using aria-controls. The relationship between the control and the region is missing.",
+        "fix": "Line 1740: setAttr(_trigger, ARIA.CONTROLS, _drawer.id);"
+      }
+    ],
+    "tp": 12,
+    "tn": 0,
+    "fn": 38,
+    "fp": 2,
+    "precision": 0.8571428571428571,
+    "recall": 0.24,
+    "specificity": 0,
+    "npv": 0,
+    "f1": 0.375,
+    "accuracy": 0.24,
+    "balancedAccuracy": 0.12,
+    "mcc": -0.3295017884191656,
+    "responseTimeMs": 178803,
+    "errorOccurred": true,
+    "errorMessage": "Ollama HTTP 503: {\"StatusCode\":503,\"Status\":\"503 Service Unavailable\",\"error\":\"Service Temporarily Unavailable (ref: 8c4347af-0603-449c-9301-5e6d2bed44d2)\"}",
+    "missedIds": [
+      "nav-focus-trap",
+      "pricing-aria-pressed",
+      "nav-close-expanded",
+      "dropdown-close-expanded",
+      "scroll-top-announce",
+      "scroll-btn-hidden",
+      "search-submit-announce",
+      "search-clear-announce",
+      "filter-result-announce",
+      "view-mode-announce",
+      "filter-reset-announce",
+      "billing-period-announce",
+      "comparison-expand-announce",
+      "scroll-to-plan-announce",
+      "faq-open-announce",
+      "faq-open-all-announce",
+      "faq-close-all-announce",
+      "shortcut-search-announce",
+      "nav-open-announce",
+      "dropdown-close-focus",
+      "dropdown-register-expanded",
+      "scroll-btn-show-hidden",
+      "scroll-btn-hide-hidden",
+      "breadcrumb-current",
+      "breadcrumb-separator",
+      "shortcut-nav-announce",
+      "shortcut-main-announce",
+      "shortcut-footer-announce",
+      "suggestions-show-expanded",
+      "suggestions-aria-selected",
+      "suggestions-show-expanded2",
+      "suggestions-hide-expanded",
+      "suggestion-navigate-announce",
+      "card-reduced-hidden",
+      "pagination-aria-label",
+      "pricing-aria-selected",
+      "pricing-aria-checked",
+      "comparison-col-selected"
+    ],
+    "fpTitles": [
+      "faqAccordion open function does not update aria-expanded to true",
+      "cookieConsent banner state change not announced"
+    ]
+  },
+  {
+    "modelId": "multi-stage-kimi+qwen",
+    "fixtureId": "tsx-high",
+    "complexityTier": "high",
+    "presetId": "balanced",
+    "runIndex": 0,
+    "issuesFound": [
+      {
+        "title": "MobileNav main toggle missing aria-expanded",
+        "severity": "high",
+        "lineHint": 670,
+        "explanation": "The mobile navigation toggle button controls the visibility of the navigation panel but does not have aria-expanded. Screen reader users are not informed whether the menu is open or closed.",
+        "fix": "Line 670: <button id={toggleId} ref={menuToggleRef} type=\"button\" aria-controls={menuId} aria-expanded={isOpen} aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'} className=\"mobile-nav-toggle\" onClick={isOpen ? close : open}>"
+      },
+      {
+        "title": "MobileNav submenu trigger missing aria-expanded",
+        "severity": "high",
+        "lineHint": 535,
+        "explanation": "The button toggles a sub-menu within the mobile navigation but lacks aria-expanded. The state of the sub-menu is not conveyed to assistive technology.",
+        "fix": "Line 535: <button type=\"button\" aria-controls={sectionId} aria-expanded={isExpanded} className=\"mobile-nav__link mobile-nav__link--trigger\" onClick={() => setOpenSectionId(isExpanded ? null : item.href)}>"
+      },
+      {
+        "title": "ThemeToggle icon button missing accessible name",
+        "severity": "high",
+        "lineHint": 605,
+        "explanation": "The IconButton component is used without an aria-label prop. As an icon-only button, it has no accessible name for screen reader users to identify its purpose (theme switching).",
+        "fix": "Line 605: <IconButton onClick={() => setTheme(NEXT[theme])} aria-label={LABELS[theme]} className=\"theme-toggle\">"
+      },
+      {
+        "title": "BillingToggle monthly button missing aria-pressed",
+        "severity": "high",
+        "lineHint": 1115,
+        "explanation": "The billing period toggle button does not have aria-pressed to indicate whether 'Monthly' is the currently selected option.",
+        "fix": "Line 1115: <button type=\"button\" id=\"billing-monthly\" className={['billing-toggle__btn', value === 'monthly' ? 'billing-toggle__btn--active' : ''].filter(Boolean).join(' ')} aria-pressed={value === 'monthly'} onClick={() => onChange('monthly')}>"
+      },
+      {
+        "title": "BillingToggle annual button missing aria-pressed",
+        "severity": "high",
+        "lineHint": 1122,
+        "explanation": "The billing period toggle button does not have aria-pressed to indicate whether 'Annual' is the currently selected option.",
+        "fix": "Line 1122: <button type=\"button\" id=\"billing-annual\" className={['billing-toggle__btn', value === 'annual' ? 'billing-toggle__btn--active' : ''].filter(Boolean).join(' ')} aria-pressed={value === 'annual'} onClick={() => onChange('annual')}>"
+      },
+      {
+        "title": "Button component spinner missing aria-hidden",
+        "severity": "med",
+        "lineHint": 273,
+        "explanation": "The decorative spinner span inside the button is exposed to assistive technology without an accessible name, causing confusion. It should be hidden as it is purely visual.",
+        "fix": "Line 273: <span className=\"btn-spinner\" aria-hidden=\"true\" />"
+      },
+      {
+        "title": "Button component missing aria-busy",
+        "severity": "med",
+        "lineHint": 262,
+        "explanation": "When the button is in a loading state (isLoading), it does not communicate this via aria-busy. Users are not informed that the button is temporarily unavailable due to processing.",
+        "fix": "Line 262: <button type={type} disabled={isDisabled} aria-disabled={isDisabled || undefined} aria-busy={isLoading || undefined} className={['btn', `btn--${variant}`, `btn--${size}`, className].filter(Boolean).join(' ')} {...rest}>"
+      },
+      {
+        "title": "Spinner component inner ring missing aria-hidden",
+        "severity": "med",
+        "lineHint": 312,
+        "explanation": "The visual ring inside the Spinner component is exposed to assistive technology. Since the parent has role=\"status\" and a label, this decorative child should be hidden.",
+        "fix": "Line 312: <span className=\"spinner__ring\" aria-hidden=\"true\" />"
+      },
+      {
+        "title": "StarRating inner spans missing aria-hidden",
+        "severity": "med",
+        "lineHint": 220,
+        "explanation": "The individual star spans are exposed to assistive technology despite the parent container having the accessible label. This causes verbosity (e.g., \"star, star, star\").",
+        "fix": "Line 220: <span key={i} className={filled ? 'star star--filled' : 'star star--empty'} aria-hidden=\"true\">"
+      },
+      {
+        "title": "Modal overlay has invalid aria-modal",
+        "severity": "med",
+        "lineHint": 1475,
+        "explanation": "aria-modal=\"true\" is placed on the overlay div instead of the dialog element. This attribute is only valid on the element with role=\"dialog\".",
+        "fix": "Line 1475: <div className=\"modal-overlay\" onClick={onClose}>"
+      },
+      {
+        "title": "Modal dialog missing aria-modal",
+        "severity": "med",
+        "lineHint": 1478,
+        "explanation": "The element with role=\"dialog\" is missing aria-modal=\"true\", which is required to indicate that content outside the dialog is inert.",
+        "fix": "Line 1478: <div ref={dialogRef} role=\"dialog\" aria-modal=\"true\" aria-labelledby={titleId} aria-describedby={description ? descId : undefined} className={['modal-dialog', `modal-dialog--${size}`].join(' ')} onClick={(ev) => ev.stopPropagation()}>"
+      },
+      {
+        "title": "FormGroup required marker missing aria-hidden",
+        "severity": "low",
+        "lineHint": 345,
+        "explanation": "The visual asterisk indicating a required field is exposed to assistive technology. It should be hidden to avoid announcing \"star\" or \"asterisk\" unnecessarily.",
+        "fix": "Line 345: <span className=\"form-required-marker\" aria-hidden=\"true\"> *</span>"
+      },
+      {
+        "title": "IntegrationsBar clone list missing aria-hidden",
+        "severity": "med",
+        "lineHint": 865,
+        "explanation": "The duplicated list used for the visual marquee effect is exposed to assistive technology, causing duplicate content to be read. It should be hidden.",
+        "fix": "Line 865: <ul role=\"list\" className=\"integrations-bar__list\" aria-hidden=\"true\">"
+      },
+      {
+        "title": "StatItem value missing accessible label",
+        "severity": "med",
+        "lineHint": 795,
+        "explanation": "The statistic value (e.g., \"40,000+\") is displayed visually but lacks an aria-label using the screen-reader-friendly text (e.g., \"40,000 plus\") provided in the data.",
+        "fix": "Line 795: <p className=\"stat-value\" aria-label={stat.valueLabel}> {stat.value} </p>"
+      },
+      {
+        "title": "TestimonialsCarousel prev button missing accessible name",
+        "severity": "high",
+        "lineHint": 1315,
+        "explanation": "The IconButton for the previous slide lacks an aria-label. Icon-only buttons must have an accessible name to be usable by screen reader users.",
+        "fix": "Line 1315: <IconButton aria-label=\"Previous testimonial\" aria-controls={trackId} onClick={handlePrev} className=\"testimonials-track__prev\">"
+      },
+      {
+        "title": "TestimonialsCarousel next button missing accessible name",
+        "severity": "high",
+        "lineHint": 1320,
+        "explanation": "The IconButton for the next slide lacks an aria-label. Icon-only buttons must have an accessible name to be usable by screen reader users.",
+        "fix": "Line 1320: <IconButton aria-label=\"Next testimonial\" aria-controls={trackId} onClick={handleNext} className=\"testimonials-track__next\">"
+      },
+      {
+        "title": "PlanCard article missing accessible name",
+        "severity": "med",
+        "lineHint": 1165,
+        "explanation": "The article element representing a pricing plan lacks aria-labelledby referencing its heading. This prevents users from identifying the card's context when navigating by landmarks or articles.",
+        "fix": "Line 1165: <article aria-labelledby={headingId} className=\"pricing-card__article\">"
+      },
+      {
+        "title": "PlanCard CTA link missing specific accessible name",
+        "severity": "med",
+        "lineHint": 1205,
+        "explanation": "The CTA link text (e.g., \"Start Pro free trial\") is generic. In a list of plans, it should include the plan name to be uniquely identifiable (e.g., \"Start Pro free trial — Pro plan\").",
+        "fix": "Line 1205: <a href={plan.ctaHref} aria-label={`${plan.ctaLabel} — ${plan.name} plan`} className={[ 'btn', plan.featured ? 'btn--primary' : 'btn--outline', 'btn--md', ].filter(Boolean).join(' ')}>"
+      }
+    ],
+    "tp": 16,
+    "tn": 0,
+    "fn": 34,
+    "fp": 2,
+    "precision": 0.8888888888888888,
+    "recall": 0.32,
+    "specificity": 0,
+    "npv": 0,
+    "f1": 0.47058823529411764,
+    "accuracy": 0.32,
+    "balancedAccuracy": 0.16,
+    "mcc": -0.2748737083745107,
+    "responseTimeMs": 900572,
+    "errorOccurred": false,
+    "missedIds": [
+      "textinput-aria-invalid",
+      "billing-monthly-pressed",
+      "billing-annual-pressed",
+      "newsletter-aria-required",
+      "skip-links-label",
+      "textarea-aria-invalid",
+      "checkbox-aria-invalid",
+      "desktop-nav-current",
+      "mobile-section-expanded",
+      "mobile-nav-current",
+      "hamburger-expanded",
+      "hero-ctas-label",
+      "hero-trust-label",
+      "stats-bar-labelledby",
+      "integrations-clone-hidden",
+      "plan-card-label",
+      "plan-article-labelledby",
+      "plan-cta-label",
+      "star-rating-role",
+      "error-msg-role",
+      "form-label-for",
+      "required-marker-hidden",
+      "select-aria-invalid",
+      "section-labelledby",
+      "nav-chevron-hidden",
+      "nav-submenu-labelledby",
+      "desktop-nav-label",
+      "mobile-backdrop-hidden",
+      "mobile-close-label",
+      "mobile-nav-body-label",
+      "theme-toggle-label",
+      "search-form-role",
+      "account-actions-label",
+      "hero-overlay-hidden"
+    ],
+    "fpTitles": [
+      "PlanCard article missing accessible name",
+      "PlanCard CTA link missing specific accessible name"
+    ]
+  }
+]

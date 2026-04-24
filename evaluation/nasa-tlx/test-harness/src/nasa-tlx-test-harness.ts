@@ -19,6 +19,8 @@
  *
  * Raw TLX Score = (MD + PD + TD + (100 - Perf) + E + F) / 6
  *   Range: 0–100 (0 = no workload, 100 = maximum workload)
+ *
+ * Run: npx ts-node src/nasa-tlx-test-harness.ts
  */
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -381,7 +383,7 @@ export const EXAMPLE_TEST_ISSUES: Record<string, AccessibilityIssue[]> = {
     { id: 'mh3', title: 'Skip links missing or broken', category: 'html', severity: 'high' },
     { id: 'mh4', title: 'Low color contrast on text (4 elements)', category: 'contrast', severity: 'high' },
     { id: 'mh5', title: 'Focus indicators removed without replacement (6)', category: 'focus', severity: 'critical' },
-    { id: 'mh6', title: 'Keyboard only: Tab trap in modal', category: 'keyboard-trap', severity: 'critical' },
+    { id: 'mh6', title: 'Keyboard only: Tab trap in modal', category: 'html', severity: 'critical' },
     { id: 'mh7', title: 'Unexpected dynamic updates (no announcements)', category: 'cognitive', severity: 'high' },
     { id: 'mh8', title: 'ARIA role misuse (button as link)', category: 'aria', severity: 'high' },
   ],

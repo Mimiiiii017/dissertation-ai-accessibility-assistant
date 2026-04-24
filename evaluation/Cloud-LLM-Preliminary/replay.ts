@@ -12,7 +12,7 @@
 
 import * as fs   from 'fs';
 import * as path from 'path';
-import { ModelRunResult } from './benchmark';
+import { ModelRunResult } from '../benchmark/benchmark';
 import { printReport, saveReport } from './reporter';
 import { AnalysisPresetId } from
   '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';

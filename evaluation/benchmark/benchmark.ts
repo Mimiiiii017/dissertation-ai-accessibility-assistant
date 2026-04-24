@@ -21,11 +21,11 @@ import {
   AnalysisPresetId,
   DEFAULT_ANALYSIS_PRESET,
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
-import { CLOUD_BENCHMARK_OPTIONS, CLOUD_SAFE_OPTIONS, getCloudOptions } from '../benchmark/benchmark-params';
+import { CLOUD_BENCHMARK_OPTIONS, CLOUD_SAFE_OPTIONS, getCloudOptions } from './benchmark-params';
 import {
   BENCHMARK_SYSTEM_PROMPT as SYSTEM_PROMPT,
   buildAiPrompt,
-} from '../benchmark/benchmark-prompt';
+} from './benchmark-prompt';
 import {
   parseTextResponse,
   deduplicateIssues,

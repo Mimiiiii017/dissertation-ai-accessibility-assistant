@@ -50,8 +50,8 @@ import {
   DEFAULT_ANALYSIS_PRESET,
 } from '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
 
-import { ALL_FIXTURES, CORE_FIXTURES, ADVERSARIAL_FIXTURES, FIXTURE_MAP } from '../preset-benchmark/ground-truth';
-import { ModelBenchmarkConfig, runBenchmark, shortName, computeConsensusIssues, createVotedResult, computeRejectedIssues, scoreRejectedIssues, createMultiStageVotedResult, computeMajorityVotingIssues, createThreeModelMultiStageVotedResult, ModelRunResult } from './benchmark';
+import { ALL_FIXTURES, CORE_FIXTURES, ADVERSARIAL_FIXTURES, FIXTURE_MAP } from '../fixtures/ground-truth';
+import { ModelBenchmarkConfig, runBenchmark, shortName, computeConsensusIssues, createVotedResult, computeRejectedIssues, scoreRejectedIssues, createMultiStageVotedResult, computeMajorityVotingIssues, createThreeModelMultiStageVotedResult, ModelRunResult } from '../benchmark/benchmark';
 import { printReport, saveJson, saveCsv, saveReport } from './reporter';
 
 // ─── All installed models ──────────────────────────────────────────────────

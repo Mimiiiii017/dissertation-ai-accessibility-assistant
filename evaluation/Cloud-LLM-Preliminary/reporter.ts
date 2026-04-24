@@ -22,7 +22,7 @@ import {
   shortName,
   computeParetoFrontier,
   computeVulnerabilityAnalysis,
-} from './benchmark';
+} from '../benchmark/benchmark';
 import { AnalysisPresetId, ANALYSIS_PRESETS } from
   '../../extension/ai-accessibility-assistant/src/utils/llm/ollama';
 
