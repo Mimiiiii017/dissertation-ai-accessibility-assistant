@@ -14,6 +14,7 @@
     "run:voting:kimi-qwen": "ts-node src/tlx-from-llm.ts --multi-stage-voting-kimi-qwen --all-conditions",
     "run:voting:kimi-gpt": "ts-node src/tlx-from-llm.ts --multi-stage-voting --all-conditions",
     "run:voting:3models": "ts-node src/tlx-from-llm.ts --multi-stage-voting-3models --all-conditions",
+    "run:all": "npm run run:llm:all-conditions -- --fixtures html-high,css-high,js-high,tsx-high --model kimi-k2.5:cloud,gpt-oss:120b-cloud,qwen3.5:397b-cloud && npm run run:voting:kimi-qwen -- --fixtures html-high,css-high,js-high,tsx-high && npm run run:voting:kimi-gpt -- --fixtures html-high,css-high,js-high,tsx-high && npm run run:voting:3models -- --fixtures html-high,css-high,js-high,tsx-high",
     "build": "tsc"
   },
   "keywords": [
