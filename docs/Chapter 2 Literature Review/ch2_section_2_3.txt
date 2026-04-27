@@ -1,0 +1,126 @@
+2.4  Automated Accessibility Evaluation
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.4.1  DOM-Based Rule Engines
+───────────────────────────────────────────────────────
+
+Automated accessibility testing tools evaluate rendered web pages or source
+documents against a defined set of rules derived from WCAG success criteria.
+The most widely deployed tools in current professional and academic use include
+axe-core (Deque Systems), WAVE (WebAIM), Lighthouse (Google), and Pa11y.  Each
+operates by traversing the Document Object Model (DOM) of a rendered page and
+applying rule functions to individual nodes or node groups.
+
+axe-core is an open-source JavaScript engine maintained by Deque Systems that
+is embedded in both browser developer tools and continuous integration pipelines
+[13].  It executes against the live DOM, enabling it to detect failures that only
+manifest after JavaScript has executed, such as dynamically inserted content
+lacking appropriate live-region markup.  Its rule set is well-maintained and
+maps explicitly to WCAG 2.2 SCs, making its output traceable to the specific
+normative requirement violated.
+
+WAVE (Web Accessibility Evaluation Tool), produced by WebAIM, provides a visual
+overlay identifying detected errors, alerts, and structural elements directly in
+the browser [14].  Its interface is designed for manual review rather than
+automated CI integration, making it more suited to auditor workflows than to
+inline developer feedback.
+
+Google Lighthouse is an integrated audit tool in Chrome DevTools and the
+Lighthouse CLI that combines accessibility scoring with performance, SEO, and
+progressive web app assessments [15].  Its accessibility module uses the axe-core
+engine as its analytical back-end, meaning that the two tools share an evaluation
+ceiling.
+
+Pa11y is a Node.js command-line tool that runs Deque's axe-core and optionally
+HTML_CodeSniffer against a headless browser session [16].  Its CLI interface
+makes it particularly well suited for automated continuous-integration pipelines,
+enabling per-commit accessibility regression testing.
+
+The four tools differ substantially in their primary deployment context despite
+sharing the same fundamental evaluation paradigm.  axe-core and its derivative
+Lighthouse target programmatic integration into browser DevTools and CI pipelines
+respectively [13][15]; WAVE is optimised for manual auditor review through its
+visual browser overlay and is poorly suited to automation [14]; and Pa11y bridges
+the gap by providing command-line access to the same axe-core engine within
+headless browser sessions [16].  Notably, however, none of the four provides
+inline, code-level guidance during active source-file authorship.  None delivers
+explanatory educational context, such as the specific WCAG success criterion
+violated and a remediation strategy, at the point where a developer is writing
+code.  This shared absence of author-time IDE integration constitutes the
+principal usability gap that the present research addresses.
+
+───────────────────────────────────────────────────────
+2.4.2  The Detection Coverage Gap
+───────────────────────────────────────────────────────
+
+Despite the availability of multiple mature automated tools, systematic research
+has consistently found that they capture only a fraction of the accessibility
+violations present on real-world pages.  Abou-Zahra et al. identified through
+testing across multiple automated evaluation suites that existing tools only
+reliably detect between 25 and 40 per cent of WCAG violations detectable by
+human expert evaluators, with the proportion falling lower for SCs requiring
+semantic or contextual reasoning [17].  Campoverde-Molina et al. (2021)
+conducted a systematic review of web accessibility evaluation tools and found
+that the most commonly used tools each implement only a subset of the WCAG
+conformance requirements, with significant divergence between tools in which SCs
+they test and which they omit [18].
+
+The structural reason for this ceiling is that DOM traversal enables attribute-
+presence and attribute-value checks but cannot evaluate the semantic adequacy
+of attribute values.  A rule engine can verify that an img element has an alt
+attribute but cannot determine whether the text supplied is meaningful, concise,
+and accurate for the specific image content.  It can verify that a button element
+is present but cannot determine whether the button's accessible name sufficiently
+communicates its function to a user who cannot see the surrounding visual
+context.  It can verify that aria-labelledby points to an existing DOM node but
+cannot determine whether the referenced content constitutes a meaningful label
+for the associated component in the context of the user's task.
+
+This category of semantically dependent violation, which requires reasoning about
+content relationships, communicative intent, and interface context, represents
+the principal class of barrier that the present research is designed to address.
+Ground-truth validation conducted as part of this study found that automated
+tools (axe-core and Pa11y) achieved approximately 1.2 per cent pattern-match
+accuracy against the semantic violation set encoded in the project's ground-truth
+concept pools.  This finding confirms prior literature and directly motivates the
+LLM-based approach.
+
+───────────────────────────────────────────────────────
+2.4.3  Shift-Left Testing and IDE-Integrated Accessibility
+───────────────────────────────────────────────────────
+
+The shift-left testing principle, advocating that quality and compliance checks
+be embedded earlier in the development lifecycle rather than deferred to
+dedicated audit phases, was articulated in the continuous-delivery literature
+by Humble and Farley (2010) and is now widely adopted in both software quality
+engineering and security practise [19].  Applied to accessibility, shift-left
+implies that developers should receive actionable, specific feedback at the point
+of authorship rather than discovering violations during acceptance testing, user
+research, or legal review.
+
+Hellendoorn et al. (2021) investigated the design space for automated
+accessibility auditing tools embedded in the developer IDE and identified
+three critical requirements for effective shift-left accessibility tooling:
+feedback must be specific to the element and file under development; recommendations must include actionable remediation guidance referencing the relevant
+standard; and the tool must not introduce prohibitive context-switching overhead
+[20].  These requirements serve as design constraints that the extension
+implemented in the present research is explicitly designed to satisfy.
+
+Research on context switching in software development provides further motivation
+for IDE-integrated solutions.  Work in this field has demonstrated that
+transitions between development tools and reference documentation introduce
+significant attention restoration costs and are associated with error rate
+increases [20].  The provision of on-demand, in-editor accessibility context
+reduces the number of such transitions by surfacing relevant WCAG SC references,
+severity ratings, and remediation suggestions within the editor pane where the
+developer is already focused.
+
+Existing research on IDE-integrated accessibility tooling remains limited.
+Commercial plugins for IDEs (notably for Visual Studio Code and JetBrains
+products) exist but rely on the same rule-based engines as browser tools, and
+therefore share the same detection ceiling described above.  No prior published
+work was identified in this review that integrates a retrieval-augmented large
+language model into an IDE for real-time accessibility analysis of CSS,
+JavaScript, or TypeScript source files, a gap directly addressed by the
+present study.

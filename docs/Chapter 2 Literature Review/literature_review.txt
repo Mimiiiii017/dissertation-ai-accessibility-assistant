@@ -1,0 +1,1177 @@
+================================================================================
+CHAPTER 2: LITERATURE REVIEW
+================================================================================
+
+Chapter 2: Literature Review
+
+2.1  Literature Map
+─────────────────────────────────────────────────────────────────────────────────
+
+Figure 2.1 presents the literature map structuring this review.  The map
+organises the relevant body of knowledge into five converging thematic clusters:
+(i) web accessibility standards and the measurable scale of digital exclusion;
+(ii) existing automated evaluation tools and their known detection limitations;
+(iii) large language models (LLMs) and their emerging application to code
+intelligence tasks; (iv) retrieval-augmented generation (RAG) as a mechanism
+for grounding model outputs in authoritative domain knowledge; and (v) cognitive
+load theory and the NASA Task Load Index as the primary framework for measuring
+the human cost of developer accessibility workflows.  The review traces a logical
+path from problem (why accessibility barriers persist at scale) through to the
+solution space (what enabling technologies exist) and terminates at the specific,
+evidenced gap that the present research addresses.
+
+ADD FIGURE OF LITERATURE MAP
+
+─────────────────────────────────────────────────────────────────────────────────
+
+2.2  Introduction
+─────────────────────────────────────────────────────────────────────────────────
+
+The accessibility of digital interfaces represents one of the most enduring and
+consequential quality dimensions of modern software engineering.  Despite
+decades of published standards, legal mandates, and freely available tooling, the
+empirical evidence reviewed in this chapter demonstrates that web accessibility
+failures remain near-universal across publicly accessible websites.  Developers
+who intend to produce accessible code are routinely impeded not by unwillingness
+but by a fragmented, context-switching-heavy workflow: the WCAG 2.2 specification
+spans hundreds of success criteria; ARIA authoring patterns are complex and
+interdependent; and the tools available within the development environment are
+either too narrow in their detection scope or too disruptive to consult during
+active coding.
+
+Recent advances in large language models have opened a new design space for
+developer tooling.  Models trained on vast corpora of code, documentation, and
+standards text possess a form of generalised reasoning that static rule engines
+lack: they can identify semantic relationships between elements, infer the
+accessibility implications of dynamic state management, and articulate the
+specific remediation required without reducing every finding to a pattern-match
+result.  When grounded in an authoritative domain-specific knowledge base via
+retrieval-augmented generation, these models overcome the factual hallucination
+risk that limits their utility as standalone auditing instruments.  Crucially,
+this capability can be delivered inside the development environment, directly to
+web designers and developers at the point of authorship, enabling both real-time
+detection and in-context educational guidance about accessibility standards.
+
+This chapter reviews the body of literature upon which the present research is
+built.  Section 2.3 establishes the empirical case for web accessibility as an
+unsolved engineering problem, covering the relevant standards, legislative
+obligations, and large-scale audit findings.  Section 2.4 surveys the current
+generation of automated accessibility evaluation tools, identifies their coverage
+ceiling, and reviews the literature on shift-left testing as the design paradigm
+motivating IDE-integrated audit assistance.  Section 2.5 reviews the emergence of
+transformer-based LLMs as code-intelligence instruments, including their
+application to code review and the hallucination problem.  Section 2.6 covers the
+RAG architecture and the retrieval methods, sparse BM25 and dense sentence
+embeddings, that support it.  Section 2.7 reviews prompt engineering research,
+focusing on chain-of-thought prompting and the decoding parameters that govern
+response quality.  Section 2.8 reviews cognitive load theory, the NASA-TLX
+instrument, and the developer productivity literature that motivates the human-
+factors evaluation strand of this research.  Section 2.9 synthesises identified
+gaps across the reviewed literature and articulates the specific contribution of
+the present study.
+2.3  Web Accessibility: Standards, Barriers, and Regulatory Obligations
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.3.1  The Global Scale of Digital Exclusion
+───────────────────────────────────────────────────────
+
+The magnitude of disability as a global population characteristic provides the
+primary motivation for web accessibility as a research priority.  The World
+Health Organisation (2023) estimates that approximately 1.3 billion people —
+16 per cent of the world's population, live with some form of significant
+disability [1].  These individuals include people with visual, auditory, motor,
+cognitive, and speech impairments whose ability to access digital services depends
+directly on whether those services have been designed and implemented in
+accordance with accessibility standards.
+
+For the web specifically, the gap between what standards mandate and what
+developers deliver has proven extraordinarily resistant to closure.  WebAIM's
+annual analysis of the home pages of the top one million publicly accessible
+websites, the WebAIM Million report, provides the most comprehensive recurring
+measurement of this gap.  The 2024 edition found that 95.9 per cent of the pages
+analysed contained at least one automatically detectable WCAG 2 failure, with a
+mean of 56.8 distinct accessibility errors per home page [2].  Critically, this
+figure represents only those violations detectable by the automated checkers used
+in the analysis; semantic and context-dependent violations, which the present
+study addresses, are excluded entirely from the count by methodological design.
+The actual prevalence of accessibility barriers is therefore substantially higher
+than these figures suggest.
+
+These headline statistics are corroborated by more detailed regional studies.
+Martins and Duarte (2020) conducted a systematic audit of 2.88 million pages
+across 166,311 Portuguese websites and found an average of 30 accessibility
+errors per page, with the density remaining consistently high even on pages
+produced by public-sector bodies subject to domestic accessibility legislation [3].
+In the healthcare domain, where accessibility failures carry direct implications
+for patient safety and health equity, Fernandes et al. (2020) audited the home
+pages of Portuguese health web resources and found a mean of 51 accessibility
+errors per page, with missing form labels and absent image alternative text
+being the most frequently observed failure categories [4].  These studies
+collectively demonstrate that accessibility failures are not marginal or
+exceptional; they are the norm across virtually all web content types and sectors.
+
+───────────────────────────────────────────────────────
+2.3.2  Legislative and Regulatory Context
+───────────────────────────────────────────────────────
+
+The persistence of accessibility failures has prompted legislative intervention
+in multiple jurisdictions.  In the European Union, Directive 2016/2102/EU
+required all public-sector websites and mobile applications to conform to
+WCAG 2.1 Level AA by 2020.  The European Accessibility Act, Directive (EU)
+2019/882, extended mandatory accessibility requirements to a broad range of
+private-sector digital products and services, with compliance obligations coming
+into effect from June 2025 [5].  The scope of the Act encompasses e-commerce
+platforms, banking services, electronic communications, and digital elements
+of consumer products, a definition broad enough to affect the majority of
+commercially deployed web applications.
+
+In the United Kingdom, the Public Sector Bodies (Websites and Mobile
+Applications) Accessibility Regulations 2018 (PSBAR) requires public-sector
+bodies to publish accessibility statements and meet WCAG 2.1 Level AA compliance,
+and is further reinforced by the Equality Act 2010, under which inaccessible
+digital services may constitute unlawful disability discrimination [6].  In
+the United States, Section 508 of the Rehabilitation Act (as amended in 1998 and
+2018) mandates WCAG 2.0 Level AA conformance for all electronic and information
+technology procured or developed by federal agencies, and the Americans with
+Disabilities Act (ADA) has been interpreted judicially to impose comparable
+requirements on public-facing commercial websites [7].
+
+These legislative frameworks share a common normative reference: the Web Content
+Accessibility Guidelines produced by the World Wide Web Consortium.  The legal
+dependence of multiple national frameworks on a single technical specification
+means that updates to WCAG carry immediate organisational compliance implications,
+and that any tooling designed to assist accessibility compliance must remain
+current with the evolving specification.
+
+───────────────────────────────────────────────────────
+2.3.3  WCAG 2.2: The Technical Standard
+───────────────────────────────────────────────────────
+
+The Web Content Accessibility Guidelines (WCAG), published by the W3C Web
+Accessibility Initiative, is the primary international technical standard for
+digital accessibility.  WCAG 2.2 was published as a W3C Recommendation on
+5 October 2023 [8] and supersedes WCAG 2.1 (2018) with the addition of nine
+new success criteria addressing focus appearance, dragging movements, target
+size, consistent help, redundant entry, accessible authentication, and focus
+not obscured.
+
+The specification is organised around four high-level principles, Perceivable,
+Operable, Understandable, and Robust (POUR), under which 86 individual success
+criteria are grouped at two mandatory conformance levels (A and AA) and one
+aspirational level (AAA).  Level A comprises the most foundational barriers:
+missing image alternative text (SC 1.1.1), keyboard inaccessibility (SC 2.1.1),
+absence of page language (SC 3.1.1), and the requirement that status messages
+be programmatically determinable (SC 4.1.3).  Level AA adds requirements for
+colour contrast ratios (SC 1.4.3), focus indicator visibility (SC 2.4.7,
+2.4.11), captions for prerecorded media (SC 1.2.4), and more nuanced
+requirements for accessible names and form instructions.  The Understanding
+WCAG 2.2 document [9] and the Techniques for WCAG 2.2 document [10] together
+provide the normative interpretive guidance that operationalises each SC in
+specific technology contexts.
+
+A characteristic that raises the difficulty of automated WCAG compliance checking
+is the semantic nature of many success criteria [8][9].  SC 2.4.6 requires
+headings and labels to be descriptive, but whether a heading is descriptive
+cannot be determined by checking an attribute value alone; it requires
+understanding the heading's relationship to the section it introduces [9].
+SC 1.3.1 requires that information, structure, and relationships conveyed through
+presentation be programmatically determinable, which in practice means reasoning
+about whether visual hierarchy is supported by semantic HTML or only by CSS [8].
+SC 4.1.3 requires that status messages be programmatically determinable without
+receiving focus, which requires understanding whether a given update mechanism
+correctly uses a live region or equivalent ARIA pattern [8][9].  These criteria
+constitute the semantic accessibility layer that the present research targets.
+
+───────────────────────────────────────────────────────
+2.3.4  WAI-ARIA: Programmatic Accessibility for Dynamic Interfaces
+───────────────────────────────────────────────────────
+
+The Web Accessibility Initiative: Accessible Rich Internet Applications
+(WAI-ARIA) specification, published as a W3C Recommendation at version 1.1
+in 2017 [11], provides a vocabulary of roles, states, and properties that
+augment HTML semantics for assistive technologies.  It is the primary mechanism
+through which developers communicate the accessibility semantics of custom and
+dynamic components, widgets that do not correspond to a native HTML element and
+therefore carry no built-in accessibility semantics.
+
+ARIA introduces three categories of attribute.  Roles define the type of a
+user-interface component: role="button", role="dialog", role="tabpanel" and
+others map components to the ARIA design patterns documented in the WAI-ARIA
+Authoring Practices Guide (APG) [12].  States describe the current condition of
+a component: aria-expanded="true" signals that a disclosure button has opened
+its controlled region; aria-invalid="true" signals that a form field contains a
+validation error.  Properties describe characteristics that do not change
+dynamically: aria-label provides an accessible name; aria-describedby links a
+component to a supplementary description; aria-controls identifies the element
+a control operates upon.
+
+The correct implementation of ARIA requires that three invariants be maintained:
+ARIA roles must be placed on elements whose semantics, keyboard behaviour, and
+visual presentation are consistent with the implied pattern; ARIA state attributes
+must be updated whenever the corresponding visual or logical state changes; and
+ARIA reference attributes (aria-labelledby, aria-describedby, aria-controls) must
+point to elements that exist in the DOM.  Violation of any of these invariants
+produces a discrepancy between the visual representation and the assistive
+technology representation, a discrepancy that is invisible to sighted users and
+undetectable by simple attribute-presence checks but that can render a component
+entirely unusable for screen reader users.
+
+The complexity of ARIA's state-management requirements, combined with the need
+to update state variables synchronously with JavaScript event handlers and
+component lifecycle events, constitutes a primary driver of accessibility failures
+in modern, JavaScript-driven web applications.  This pattern is consistent with
+the error densities recorded by Martins and Duarte [3] and Fernandes et al. [4]
+across public-sector and healthcare sites respectively, where dynamic content
+generation and complex widget markup were among the most prevalent sources of
+failure.  It represents the category of violation most resistant to detection by
+traditional automated tools and most amenable to the reasoning capabilities of a
+large language model.
+2.4  Automated Accessibility Evaluation
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.4.1  DOM-Based Rule Engines
+───────────────────────────────────────────────────────
+
+Automated accessibility testing tools evaluate rendered web pages or source
+documents against a defined set of rules derived from WCAG success criteria.
+The most widely deployed tools in current professional and academic use include
+axe-core (Deque Systems), WAVE (WebAIM), Lighthouse (Google), and Pa11y.  Each
+operates by traversing the Document Object Model (DOM) of a rendered page and
+applying rule functions to individual nodes or node groups.
+
+axe-core is an open-source JavaScript engine maintained by Deque Systems that
+is embedded in both browser developer tools and continuous integration pipelines
+[13].  It executes against the live DOM, enabling it to detect failures that only
+manifest after JavaScript has executed, such as dynamically inserted content
+lacking appropriate live-region markup.  Its rule set is well-maintained and
+maps explicitly to WCAG 2.2 SCs, making its output traceable to the specific
+normative requirement violated.
+
+WAVE (Web Accessibility Evaluation Tool), produced by WebAIM, provides a visual
+overlay identifying detected errors, alerts, and structural elements directly in
+the browser [14].  Its interface is designed for manual review rather than
+automated CI integration, making it more suited to auditor workflows than to
+inline developer feedback.
+
+Google Lighthouse is an integrated audit tool in Chrome DevTools and the
+Lighthouse CLI that combines accessibility scoring with performance, SEO, and
+progressive web app assessments [15].  Its accessibility module uses the axe-core
+engine as its analytical back-end, meaning that the two tools share an evaluation
+ceiling.
+
+Pa11y is a Node.js command-line tool that runs Deque's axe-core and optionally
+HTML_CodeSniffer against a headless browser session [16].  Its CLI interface
+makes it particularly well suited for automated continuous-integration pipelines,
+enabling per-commit accessibility regression testing.
+
+The four tools differ substantially in their primary deployment context despite
+sharing the same fundamental evaluation paradigm.  axe-core and its derivative
+Lighthouse target programmatic integration into browser DevTools and CI pipelines
+respectively [13][15]; WAVE is optimised for manual auditor review through its
+visual browser overlay and is poorly suited to automation [14]; and Pa11y bridges
+the gap by providing command-line access to the same axe-core engine within
+headless browser sessions [16].  Notably, however, none of the four provides
+inline, code-level guidance during active source-file authorship.  None delivers
+explanatory educational context, such as the specific WCAG success criterion
+violated and a remediation strategy, at the point where a developer is writing
+code.  This shared absence of author-time IDE integration constitutes the
+principal usability gap that the present research addresses.
+
+───────────────────────────────────────────────────────
+2.4.2  The Detection Coverage Gap
+───────────────────────────────────────────────────────
+
+Despite the availability of multiple mature automated tools, systematic research
+has consistently found that they capture only a fraction of the accessibility
+violations present on real-world pages.  Abou-Zahra et al. identified through
+testing across multiple automated evaluation suites that existing tools only
+reliably detect between 25 and 40 per cent of WCAG violations detectable by
+human expert evaluators, with the proportion falling lower for SCs requiring
+semantic or contextual reasoning [17].  Campoverde-Molina et al. (2021)
+conducted a systematic review of web accessibility evaluation tools and found
+that the most commonly used tools each implement only a subset of the WCAG
+conformance requirements, with significant divergence between tools in which SCs
+they test and which they omit [18].
+
+The structural reason for this ceiling is that DOM traversal enables attribute-
+presence and attribute-value checks but cannot evaluate the semantic adequacy
+of attribute values.  A rule engine can verify that an img element has an alt
+attribute but cannot determine whether the text supplied is meaningful, concise,
+and accurate for the specific image content.  It can verify that a button element
+is present but cannot determine whether the button's accessible name sufficiently
+communicates its function to a user who cannot see the surrounding visual
+context.  It can verify that aria-labelledby points to an existing DOM node but
+cannot determine whether the referenced content constitutes a meaningful label
+for the associated component in the context of the user's task.
+
+This category of semantically dependent violation, which requires reasoning about
+content relationships, communicative intent, and interface context, represents
+the principal class of barrier that the present research is designed to address.
+Ground-truth validation conducted as part of this study found that automated
+tools (axe-core and Pa11y) achieved approximately 1.2 per cent pattern-match
+accuracy against the semantic violation set encoded in the project's ground-truth
+concept pools.  This finding confirms prior literature and directly motivates the
+LLM-based approach.
+
+───────────────────────────────────────────────────────
+2.4.3  Shift-Left Testing and IDE-Integrated Accessibility
+───────────────────────────────────────────────────────
+
+The shift-left testing principle, advocating that quality and compliance checks
+be embedded earlier in the development lifecycle rather than deferred to
+dedicated audit phases, was articulated in the continuous-delivery literature
+by Humble and Farley (2010) and is now widely adopted in both software quality
+engineering and security practise [19].  Applied to accessibility, shift-left
+implies that developers should receive actionable, specific feedback at the point
+of authorship rather than discovering violations during acceptance testing, user
+research, or legal review.
+
+Hellendoorn et al. (2021) investigated the design space for automated
+accessibility auditing tools embedded in the developer IDE and identified
+three critical requirements for effective shift-left accessibility tooling:
+feedback must be specific to the element and file under development; recommendations must include actionable remediation guidance referencing the relevant
+standard; and the tool must not introduce prohibitive context-switching overhead
+[20].  These requirements serve as design constraints that the extension
+implemented in the present research is explicitly designed to satisfy.
+
+Research on context switching in software development provides further motivation
+for IDE-integrated solutions.  Work in this field has demonstrated that
+transitions between development tools and reference documentation introduce
+significant attention restoration costs and are associated with error rate
+increases [20].  The provision of on-demand, in-editor accessibility context
+reduces the number of such transitions by surfacing relevant WCAG SC references,
+severity ratings, and remediation suggestions within the editor pane where the
+developer is already focused.
+
+Existing research on IDE-integrated accessibility tooling remains limited.
+Commercial plugins for IDEs (notably for Visual Studio Code and JetBrains
+products) exist but rely on the same rule-based engines as browser tools, and
+therefore share the same detection ceiling described above.  No prior published
+work was identified in this review that integrates a retrieval-augmented large
+language model into an IDE for real-time accessibility analysis of CSS,
+JavaScript, or TypeScript source files, a gap directly addressed by the
+present study.
+2.5  Large Language Models for Code Intelligence
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.5.1  The Transformer Architecture and Foundation Models
+───────────────────────────────────────────────────────
+
+The theoretical foundation for modern large language models is the transformer
+architecture introduced by Vaswani et al. (2017) [21].  The transformer replaced
+the sequential recurrent computation of earlier sequence models with a fully
+parallelised attention mechanism that computes pairwise relevance scores between
+all positions in an input sequence simultaneously.  The multi-head self-attention
+operation enables the model to encode long-range syntactic and semantic
+dependencies that recurrent networks struggle to preserve across extended
+sequences.  The practical consequence is that transformers can be trained on
+substantially larger datasets, with substantially more parameters, than any
+prior sequence modelling architecture.
+
+Devlin et al. (2019) demonstrated that a transformer pre-trained bidirectionally
+on 3.3 billion words of text, the BERT model, could be fine-tuned with minimal
+task-specific data to achieve state-of-the-art performance across eleven NLP
+benchmarks simultaneously [22].  BERT established the pre-training and fine-
+tuning paradigm that subsequently dominated NLP research, and its deep
+bidirectional attention mechanism remains the conceptual basis for the language
+encoders used in modern sentence-embedding models.  Crucially, however, BERT
+requires labelled fine-tuning data for each downstream task and cannot be
+redirected through natural-language instruction alone, a limitation that
+contrasts directly with the few-shot capability demonstrated by later autoregressive
+models.
+
+Brown et al. (2020) scaled the autoregressive transformer to 175 billion
+parameters pre-trained on approximately 570 gigabytes of internet text (GPT-3)
+and demonstrated a qualitatively different capability: few-shot and zero-shot
+task performance without any weight updates [23].  By providing only a brief
+natural-language task description, and optionally one or two worked examples,
+in the model's input context, practitioners could direct the model towards
+complex analytical tasks that required domain knowledge and structured output.
+This finding established the viability of prompt-based interaction as a
+deployment paradigm for LLMs in professional applications, including software
+engineering tasks, and is the foundational result upon which the present research
+builds.
+
+───────────────────────────────────────────────────────
+2.5.2  Code-Aware LLMs and Code Intelligence
+───────────────────────────────────────────────────────
+
+The extension of the foundation model paradigm to source code produced a series
+of highly capable code-aware models.  Chen et al. (2021) introduced Codex,
+a GPT-3-derived model fine-tuned on over 150 gigabytes of public GitHub
+repositories, and demonstrated that it could generate correct solutions to
+programming tasks specified in natural language at rates significantly exceeding
+prior code-generation systems [24].  Codex formed the basis of GitHub Copilot
+and established the commercial viability of AI-assisted code authorship.
+
+The application of LLMs to code analysis tasks, rather than generation, has
+subsequently attracted substantial research attention.  Studies have evaluated
+LLMs' ability to detect bugs, identify security vulnerabilities, explain code
+behaviour, and perform code review tasks typically undertaken by human senior
+developers.  A recurring pattern across this body of work is that model scale correlates
+positively with analytical accuracy on tasks involving semantic reasoning over
+code structure and intent: smaller models tend to pattern-match against common
+training examples rather than generalise to novel structural relationships, whilst
+larger models exhibit greater contextual sensitivity [23][24].  This scale
+dependency is directly relevant to the 18-model benchmarking design of the present
+study, which includes models ranging from three billion to over 70 billion
+parameters specifically to characterise this relationship in the accessibility
+detection domain.
+
+For accessibility specifically, the relevance of LLM code intelligence is direct.
+Accessibility auditing of source code requires the auditor to reason about: the
+semantic role implied by the element and its context; the accessible name
+computation algorithm applicable to the element; the ARIA attributes that should
+be present given the component's interactive behaviour; the keyboard event
+handlers required by the applicable ARIA design pattern; and the dynamic state-
+update obligations that arise whenever the component's visual state changes.  No
+rule function can perform all of these reasoning steps simultaneously; an LLM
+operating on the full source context can in principle perform each of them.
+
+───────────────────────────────────────────────────────
+2.5.3  LLMs Applied to Accessibility Analysis
+───────────────────────────────────────────────────────
+
+Empirical work on the direct application of LLMs to accessibility auditing is
+nascent but growing.  Hellendoorn et al. (2021) provided an early theoretical
+framing of AI-assisted accessibility auditing in the IDE context, arguing that
+the semantic complexity of many WCAG success criteria and the interdependent
+nature of ARIA attribute requirements make them well-suited to evaluation by
+models capable of reasoning over extended code context [20].
+
+More recent work has begun empirically characterising LLM performance on
+accessibility detection tasks.  Emerging observations in this nascent field
+suggest that sufficiently capable models can identify semantic violations that
+rule-based checkers systematically miss, particularly inadequate accessible names,
+missing ARIA states, and broken ARIA reference chains.  The present study's own
+pilot testing confirmed this: across multiple model families, the LLM consistently
+identified semantic violations that axe-core and Pa11y failed to flag, whilst
+also producing hallucinated violations attributed to non-existent elements or
+incorrect line numbers when prompt constraints were absent.  These paired
+observations, that detection capability exists but unconstrained false-positive
+rates undermine usability, directly motivate both the two-phase prompt design
+(Chapter 3, Section 3.3.4) and the Anti-False-Positive Supplement employed in
+the present research.
+
+The heterogeneity of model performance across accessibility violation types also
+drives the multi-model evaluation design of the present study.  No single model
+has been shown to dominate across all categories of accessibility reasoning; the
+18-model comparative benchmark conducted in this research is designed to
+identify which model families offer the best balance of detection recall and
+specificity for IDE-embedded deployment.
+
+───────────────────────────────────────────────────────
+2.5.4  The Hallucination Problem and the Need for Knowledge Grounding
+───────────────────────────────────────────────────────
+
+The most significant limitation of LLMs as information sources is the phenomenon
+of confabulation, commonly termed hallucination, in which models generate
+plausible-sounding but factually incorrect outputs [23][24].  In the accessibility
+context, hallucination manifests as the reporting of violations that do not exist
+in the code (false positives) or the attribution of violations to incorrect line
+numbers or non-existent elements.  The present study's pilot testing identified
+five systematic hallucination patterns (Chapter 3, Section 3.4.1) that were
+consistently reproduced across multiple model families on specific code patterns.
+
+Hallucination rates correlate with the degree to which a model's training data
+covers the specific domain.  WCAG 2.2, published in October 2023, post-dates
+the training cutoff of almost every model evaluated in this study.  A model
+queried about WCAG 2.2 success criteria 2.4.11 (Focus Not Obscured: Minimum)
+or 3.3.7 (Redundant Entry) with no grounding context must either generate from
+limited or no training signal, or hallucinate a plausible-sounding but incorrect
+description.  This dependency between knowledge currency and hallucination rate
+provides the most direct theoretical argument for the RAG architecture described
+in Section 2.6.
+
+The mitigation of hallucination through prompt engineering, including persona
+assignment, explicit negative constraints, and confidence gates, is reviewed
+in Section 2.7.  The combined use of RAG grounding and prompt-level hallucination
+suppression is the architectural response to this limitation in the present
+research.
+2.6  Retrieval-Augmented Generation
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.6.1  The RAG Architecture
+───────────────────────────────────────────────────────
+
+Retrieval-Augmented Generation (RAG) was introduced by Lewis et al. (2020) as
+an architecture for knowledge-intensive NLP tasks in which a parametric sequence-
+to-sequence model is augmented by a non-parametric retrieval component [25].
+In the RAG framework, each input query is first processed by a retrieval system
+that selects relevant documents or document segments from an external knowledge
+store.  The retrieved content is then prepended to the query and supplied as
+context to the language model, which generates its response conditioned on both
+the original input and the retrieved evidence.
+
+The architectural motivation for RAG is the recognition that large parametric
+models encode factual knowledge in their weights during pre-training but cannot
+readily update this knowledge without expensive retraining.  By externalising
+domain-specific knowledge into a retrievable document store, RAG enables the
+model to access current, verified, and high-authority information at inference
+time without modification of its weights.  Lewis et al. demonstrated
+significantly improved factual accuracy compared to purely parametric models
+on open-domain question-answering benchmarks, particularly for questions whose
+answers involve specialised or rapidly evolving knowledge domains [25].
+
+For the present research, the RAG architecture addresses the hallucination
+problem directly and specifically.  The WCAG 2.2 knowledge base, which the model
+cannot reliably recall from training data alone (particularly for the nine SCs
+introduced in October 2023), is stored as a retrievable vector database.  At
+inference time, the model receives the exact normative text of the relevant
+success criteria alongside the code under analysis, grounding its reasoning in
+authoritative documentation rather than in potentially outdated or reconstructed
+training-time representations.  This architecture was selected over fine-tuning
+on the grounds that fine-tuning a single model would not enable the comparative
+evaluation of multiple models, a core objective of the research, and that a
+RAG-equipped prompt-based approach is directly deployable to any model accessible
+via the Ollama inference relay without model-specific modification.
+
+───────────────────────────────────────────────────────
+2.6.2  Sparse Retrieval: BM25 and the Probabilistic Relevance Framework
+───────────────────────────────────────────────────────
+
+The probabilistic relevance framework (PRF) for information retrieval was
+developed over several decades of research into the ranked retrieval problem.
+Robertson and Zaragoza (2009) synthesised this body of work into the formulation
+now universally known as BM25 (Best Match 25), which remains the most widely
+deployed term-based retrieval model in production search systems [26].
+
+BM25 assigns a relevance score to a document d for a query q as a weighted
+sum over the query terms, where each term t contributes:
+    score(d, q) ∝ Σ_t  IDF(t) × [ tf(t,d) × (k₁ + 1) ] / [ tf(t,d) + k₁ × (1 - b + b × |d| / avgdl) ]
+
+where IDF(t) is the inverse document frequency of the term, tf(t,d) is its term
+frequency in the document, |d| is the document length, avgdl is the average
+document length across the collection, and k₁ and b are tunable saturation
+parameters.  The document-length normalisation term (b-parameter) prevents long
+documents from dominating the ranking solely by virtue of containing more
+occurrences of query terms.
+
+BM25's principal advantage in the accessibility knowledge base context is its
+reliability on precise technical identifiers.  WCAG SC numbers (e.g. "2.4.11"),
+ARIA attribute names (e.g. "aria-expanded"), and element type names (e.g.
+"role='combobox'") are often the most discriminating terms in an accessibility
+query.  These identifiers have low frequency across the knowledge base as a
+whole, high IDF weight in BM25's scoring function, and are not reliably embedded
+at similar distances in a dense semantic space because their meaning is
+definitional rather than paraphrasable.  BM25 therefore provides a complementary
+retrieval signal to dense semantic search, surfacing documents that contain
+exact identifier matches that semantic similarity alone may not rank highly.
+
+───────────────────────────────────────────────────────
+2.6.3  Dense Semantic Retrieval: Sentence Transformers
+───────────────────────────────────────────────────────
+
+Dense retrieval encodes both queries and documents as fixed-dimensional vectors
+in a learned semantic space such that semantically related texts are positioned
+close to one another regardless of surface-level lexical overlap.  Reimers and
+Gurevych (2019) introduced Sentence-BERT (SBERT), a modification of the BERT
+architecture that employs siamese network training with a similarity objective
+to produce sentence-level embeddings that are directly comparable by cosine
+similarity [27].  Prior BERT-based approaches required processing each
+(query, document) pair through cross-attention, making large-scale nearest-
+neighbour search computationally infeasible.  SBERT's bi-encoder architecture
+allows all documents to be pre-encoded offline, reducing retrieval to a single-
+pass distance computation.
+
+The sentence-transformers/all-MiniLM-L6-v2 model employed in the present
+research is a distilled version of the SBERT family introduced by Wang et al.
+(2020) [28].  MiniLM achieves deep self-attention distillation by training a
+smaller student transformer to replicate the self-attention distribution of a
+larger teacher model, retaining most of the semantic representational quality
+of the teacher at a fraction of its parameter count.  The all-MiniLM-L6-v2
+variant produces 384-dimensional embeddings and was selected for this study
+because its inference latency is compatible with interactive IDE use, queries
+are typically completed within 5-15 milliseconds on CPU hardware, whilst its
+retrieval accuracy on domain-specific text closely approaches that of full-
+sized models as demonstrated on the Semantic Textual Similarity benchmark suite.
+
+───────────────────────────────────────────────────────
+2.6.4  Hybrid Retrieval and Knowledge Store Design
+───────────────────────────────────────────────────────
+
+Hybrid retrieval combines sparse (BM25) and dense (semantic) signals to mitigate
+the limitations of each method in isolation.  Dense retrieval provides strong
+recall for paraphrase and synonym queries but can miss technical identifiers
+whose embedding-space neighbours are not the semantically correct documents.
+BM25 provides reliable exact-match recall but has no mechanism to retrieve
+relevant documents that use different terminology to express the same concept.
+
+The complementary weaknesses of the two retrieval paradigms make their
+combination theoretically well-motivated.  Robertson and Zaragoza [26] and
+Reimers and Gurevych [27] established the individual performance profiles of
+BM25 and dense retrieval respectively: BM25 excels on precise identifier matching
+but cannot recover relevant documents that express the same concept in different
+terminology; SBERT excels on semantic and synonym recall but can fail to surface
+documents that must be matched by exact technical identifiers.  Lewis et al. [25]
+demonstrated that retrieval-augmented generation substantially outperforms purely
+parametric approaches on knowledge-intensive tasks, providing the broader
+architectural case for externalising domain knowledge.  Combining BM25 and dense
+retrieval through score interpolation or reciprocal rank fusion captures the
+advantages of both paradigms.  The WCAG knowledge base used in the present study
+has exactly this character: each document contains both natural-language
+guidance and precise technical identifiers, making it an ideal candidate for
+hybrid retrieval.
+
+Vector storage for the dense index is provided by ChromaDB [41], a lightweight
+persistent vector database designed specifically for embedding-based retrieval
+in Python applications.  ChromaDB supports cosine similarity search over
+pre-computed embedding collections and provides a Python client compatible with
+the sentence-transformers library.  Its PersistentClient interface enables the
+knowledge base index to be built once and reloaded at RAG service startup
+without repeated embedding computation, a practical requirement for a service
+that must respond within the interactive latency budget of an IDE plugin.
+2.7  Prompt Engineering and Chain-of-Thought Reasoning
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.7.1  Prompt Engineering as a Research Discipline
+───────────────────────────────────────────────────────
+
+Prompt engineering refers to the systematic design of input instructions that
+direct an LLM towards a desired output format, reasoning strategy, or behavioural
+constraint without modification of model weights.  The feasibility of prompt
+engineering as a practical discipline was established by Brown et al.'s (2020)
+demonstration that GPT-3 could be redirected across radically different task
+types through instruction alone [23].  Since then, prompt engineering has
+developed into a rich research area with documented design patterns, including
+persona assignment, task decomposition, few-shot exemplar provision, and
+structured output templating, each backed by empirical evidence of their
+effect on output quality.
+
+The construction of an effective prompt for a multi-criteria analysis task such
+as accessibility auditing differs substantially from the construction of a
+generative prompt.  A generative prompt typically aims to maximise output
+coherence and creativity; an analytical prompt must instead constrain the
+model's output to a specified format, suppress speculative outputs, and ensure
+that the model's reasoning is rooted in the specific content provided rather
+than in general training associations.  The structured issue-block format enforced
+by the SYSTEM_PROMPT in the present research (Chapter 3, Section 3.3.4) reflects
+these analytical constraints directly.
+
+───────────────────────────────────────────────────────
+2.7.2  Chain-of-Thought Prompting
+───────────────────────────────────────────────────────
+
+The single most influential finding in prompt engineering research is the chain-
+of-thought (CoT) technique introduced by Wei et al. (2022) [29].  Wei et al.
+demonstrated that instructing LLMs to generate explicit intermediate reasoning
+steps before producing a final answer substantially improves accuracy on
+mathematical reasoning, commonsense reasoning, and symbolic manipulation tasks.
+In experiments on GPT-3 and PaLM, CoT prompting produced accuracy gains of up
+to 25 percentage points over standard prompting on multi-step arithmetic
+benchmarks.  The mechanism is interpreted as enabling the model to allocate
+more of its effective computation to individual reasoning steps rather than
+attempting to compress complex multi-step inference into a single token
+prediction.
+
+Kojima et al. (2022) demonstrated that CoT reasoning can be elicited in the
+zero-shot setting, without any chain-of-thought exemplars in the prompt, simply
+by appending the instruction "Let's think step by step" [30].  This finding
+substantially broadened the practical applicability of CoT, as constructing
+high-quality few-shot reasoning examples for a complex domain such as WCAG
+accessibility analysis is labour-intensive.  The two-phase prompt structure used
+in the present research (READ AND MAP silently, then REPORT ISSUES) operationalises
+zero-shot CoT: the first phase directs the model to execute a complete semantic
+inventory before committing to any violation report, serving the same role as
+the step-by-step instruction without requiring explicit worked examples.
+
+Wang et al. (2023) extended CoT further through self-consistency, sampling
+multiple reasoning chains from the model and selecting the answer that
+appears most frequently across the sampled chains [31].  Whilst self-consistency
+was not implemented in the present study due to the cost of multiple inference
+calls per fixture, it represents a relevant direction for future optimisation and
+is discussed in the conclusion chapter.
+
+For LLMs with built-in extended reasoning capabilities (Qwen3, kimi-k2.5, DeepSeek-
+R1), CoT reasoning is implemented as an internal <think>...</think> block that is
+evaluated before the visible response is generated.  These models produce
+substantially different outputs when reasoning is enabled versus suppressed, as
+the ablation study in Chapter 3 demonstrates.  The literature on reasoning models
+suggests that the quality ceiling for extended-thinking models is substantially
+higher than for models of equivalent parameter count that do not use dedicated
+reasoning computation [29][30].
+
+───────────────────────────────────────────────────────
+2.7.3  Persona and Constraint-Based Prompting
+───────────────────────────────────────────────────────
+
+Persona assignment, framing the model as a specific type of expert, is an
+established prompt design pattern.  Brown et al. (2020) demonstrated that model
+output adapts substantially to the framing instructions and role descriptions
+supplied in the prompt context, with task-specific framing consistently improving
+output coherence and precision relative to unframed instructions [23].  Wei et al.
+(2022) further observed that structured task framing, including explicit role
+descriptions, consistently improved the reliability of structured reasoning outputs
+over unframed equivalents across large language models [29].  In contrast to
+generalist instructions, which elicit verbose commentary, expert persona framing
+produces the constrained, structured output formats required for automated
+downstream processing.
+
+The SYSTEM_PROMPT in the present research assigns the persona "You are a senior
+WCAG 2.2 accessibility auditor."  This framing was adopted after early pilot
+experiments demonstrated that un-framed prompts produced verbose commentary
+interleaved with violation reports, whereas the expert persona consistently
+produced the structured block format required for automated parsing.  The
+"senior" qualifier is deliberate: seniority in the expert persona activates
+language patterns associated with focused, evidence-based assessment rather
+than exploratory or instructional discourse.
+
+Negative constraints, explicit instructions specifying what the model must not
+do, are a complementary technique for suppressing systematic failure modes.  The
+five rules of the Anti-FP Supplement described in Chapter 3 operate as negative
+constraints: they explicitly prohibit each of the hallucination patterns observed
+during pilot testing.  This approach is consistent with the instruction-following
+literature, which demonstrates that LLMs are more reliably constrained by
+explicit prohibitions in the system prompt than by relying on the model's own
+calibration to suppress over-reporting [23].
+
+───────────────────────────────────────────────────────
+2.7.4  Inference Sampling Parameters
+───────────────────────────────────────────────────────
+
+The numerical hyperparameters governing token sampling from an LLM's output
+distribution have a significant effect on output quality and reproducibility
+for analytical tasks.
+
+The sampling temperature parameter scales the next-token probability distribution
+before sampling: values below 1.0 concentrate probability mass on the most likely
+tokens, increasing output consistency; values above 1.0 flatten the distribution,
+increasing diversity at the cost of coherence.  Renze and Guven (2024) conducted
+a systematic empirical study of temperature effects on nine LLMs across five
+prompt-engineering strategies and concluded that for analytical problem-solving
+tasks, temperatures in the range 0.0–1.0 produce no statistically significant
+difference in accuracy, justifying the use of any value in this range [32].
+The present research uses temperature = 0.2 to favour consistent structured
+output whilst avoiding the degenerate repetition associated with very low
+temperatures.
+
+Top-p (nucleus) sampling, introduced by Holtzman et al. (2020), restricts
+sampling at each step to the smallest set of tokens whose cumulative probability
+mass meets a threshold p [33].  The technique eliminates the unreliable low-
+probability tail, the region from which semantically incoherent tokens are
+most likely to be sampled, whilst preserving sufficient diversity from the
+high-probability mass.  Holtzman et al. demonstrated that p = 0.95 produces the
+most coherent and human-like text generation across multiple evaluation metrics,
+a finding that has since become the most widely adopted default across production
+inference APIs.  The present research uses top_p = 0.95.
+
+Top-k filtering, introduced by Fan et al. (2018), truncates the next-token
+distribution to the k highest-probability tokens before sampling [34].  Fan et
+al. found that k = 40 optimally balances coherence and expressiveness for
+structured text generation tasks.  This value has since been adopted as the
+canonical default by Ollama and major open-source inference frameworks and is
+used without modification in the present research.
+
+Repetition penalties, first motivated by the work of Welleck et al. (2020)
+on unlikelihood training, suppress degenerate token repetition whilst
+preserving the legitimate recurrence of domain-specific terminology across
+multiple issue blocks [35].  A mild penalty of 1.1 was applied; frequency and
+presence penalties were set to zero to avoid suppressing WCAG SC identifiers
+and ARIA attribute names that legitimately recur across multiple violations.
+2.8  Cognitive Load and Developer Productivity
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.8.1  Cognitive Load Theory
+───────────────────────────────────────────────────────
+
+Cognitive load theory, introduced by Sweller (1988) in the context of problem-
+solving instruction, proposes that human working memory is a limited capacity
+resource and that the effectiveness of any information-processing task is
+constrained by the total cognitive load, the demand on working memory, that
+the task imposes [36].  Sweller distinguished three components of cognitive load:
+intrinsic load, which arises from the inherent complexity of the material and
+cannot be reduced without simplifying the subject matter itself; extraneous load,
+which arises from the way information is presented and can be reduced through
+better interface and interaction design; and germane load, which arises from the
+effort invested in forming and automating schemas, the productive learning
+component that instructional design should seek to maximise.
+
+Paas, Renkl, and Sweller (2003) extended this framework in an influential review,
+arguing that empirical measurement of cognitive load is essential for evaluating
+the effectiveness of instructional and interface designs and surveying the
+available subjective, physiological, and performance-based measurement methods
+[37].  The review concluded that subjective self-report instruments, whilst
+susceptible to retrospective bias, provide the most practical and ecologically
+valid measurement approach for complex professional tasks in which physiological
+signals are difficult to obtain.
+
+Applied to the present research, the cognitive load framework provides the
+theoretical justification for the second research hypothesis (H2): if an IDE-
+integrated accessibility assistant reduces the extraneous load associated with
+consulting external WCAG documentation and interpreting opaque rule-engine
+output, the remaining cognitive resources are available for the productive
+germane-load activity of designing and implementing accessible components.  A
+reduction in extraneous cognitive load is predicted to appear as a decrease in
+the NASA-TLX subscales most associated with extraneous demand: Mental Demand,
+Effort, and Frustration.
+
+───────────────────────────────────────────────────────
+2.8.2  The NASA Task Load Index
+───────────────────────────────────────────────────────
+
+The NASA Task Load Index (NASA-TLX) was developed by Hart and Staveland (1988)
+through a systematic programme of empirical research at the NASA Ames Research
+Centre involving pilots and air-traffic controllers performing complex procedural
+tasks [38].  The instrument assesses subjective workload on six subscales: Mental
+Demand, Physical Demand, Temporal Demand, Performance, Effort, and Frustration
+Level.  Each subscale is rated on a 21-interval bipolar scale with verbal anchors
+at each extreme; in the raw (unweighted) scoring variant, the raw workload score
+is computed as the arithmetic mean of the six subscale ratings.
+
+Hart (2006) reviewed twenty years of NASA-TLX application experience across
+aviation, military, automotive, and consumer technology domains and concluded
+that the unweighted raw TLX score performs comparably to the original weighted
+TLXD variant in discriminating between conditions and in predicting objective
+performance measures, whilst requiring significantly less administration time
+and eliminating the inter-subject variability introduced by the pairwise
+comparison weighting procedure [39].  The present research uses the raw TLX
+scoring variant on these grounds.
+
+The NASA-TLX has been extensively validated as a workload assessment instrument
+in human-computer interaction research.  Its subscales have demonstrated
+construct validity across a wide range of computer-based task types, and its
+sensitivity to task complexity and tool quality has been demonstrated in numerous
+studies comparing tooled and untooled performance conditions [38][39].  Its
+six-subscale structure enables directional interpretation of workload findings:
+a reduction in Mental Demand and Effort subscales with no change in Temporal
+Demand would suggest that the tool reduces intellectual labour without materially
+accelerating task completion, whilst reductions across all six subscales would
+suggest a more comprehensive workload benefit.
+
+───────────────────────────────────────────────────────
+2.8.3  Cognitive Load in Developer Workflows
+───────────────────────────────────────────────────────
+
+The application of cognitive load theory to software development workflows has
+attracted substantial research interest as the complexity of developer toolchains
+has grown.  Research in this domain has consistently identified context switching, defined
+as repeated transitions between different cognitive tasks, tools, or information
+sources, as a primary source of extraneous cognitive load in developer workflows.
+
+Hellendoorn et al. (2021) provided empirical evidence that long gaps between
+related development activities are associated with productivity loss, and
+argued that this effect is partly attributable to the working-memory cost of
+reconstructing task context after an interruption [20].  In the accessibility
+auditing context, the dominant sources of context-switching extraneous load
+are: switching from the editor to a browser-based checker; interpreting the
+checker's output, which typically provides a SC reference but not a contextually
+specific remediation instruction; switching to the WCAG documentation to
+understand the specific requirement; switching back to the editor to apply the
+fix; and, if the fix is non-trivial, switching to the ARIA Authoring Practices
+Guide for implementation guidance.  This sequence involves a minimum of five
+context switches per violation discovered during a post-authorship review cycle.
+
+IDE-integrated tools that surface contextually specific, code-level feedback
+within the editor reduce this context-switching overhead by collapsing multiple
+information-retrieval steps into a single interaction.  Beyond detection, a tool
+that provides inline educational scaffolding, explaining precisely which WCAG 2.2
+success criterion is violated, why the violation exists, and how it should be
+remediated, serves an additional function: it progressively builds developer
+knowledge about accessibility standards through situated, just-in-time delivery
+rather than relying on developers to consult separate documentation.  This
+educational dimension is a design objective of the extension developed in the
+present study, targeting web designers and developers regardless of their prior
+accessibility expertise.
+
+The theoretical prediction is that participants using the extension will exhibit
+lower NASA-TLX Mental Demand, Effort, and Frustration scores than participants
+performing the same audit task relying on separate browser-based checkers and
+documentation.  This prediction constitutes the empirically testable form of H2.
+
+───────────────────────────────────────────────────────
+2.8.4  Evaluation Metrics for Binary Classification Systems
+───────────────────────────────────────────────────────
+
+The quantitative evaluation of accessibility detection systems requires metrics
+that are well-calibrated for binary classification under class imbalance.
+The F1 score, the harmonic mean of precision and recall, is the standard
+primary metric in information extraction and classification tasks, but Chicco
+and Jurman (2020) demonstrated through systematic analysis that F1 has a
+critical limitation: it ignores the true negative count entirely, making it
+insensitive to the one performance dimension that increases as a model avoids
+false positives against a large negative class [40].
+
+In the accessibility evaluation context, the negative class (code patterns that
+do not violate WCAG) vastly outnumbers the positive class (genuine violations)
+in any real-world file.  A model that generates excessive false positives can
+achieve a moderately high F1 score if its recall is high, even though the
+excessive FP rate makes the model unusable in practice, every false alarm
+erodes developer trust.  Chicco and Jurman (2020) showed that the Matthews
+Correlation Coefficient (MCC) accounts for all four confusion-matrix cells
+proportionally and produces reliable informativeness rankings even under
+extreme class imbalance, recommending it as the primary metric for binary
+classification evaluation [40].  The present research uses both F1 (as the
+primary recall-sensitive metric) and MCC (as the primary imbalance-robust
+metric) as co-dependent evaluation criteria.
+2.9  Research Synthesis: Identified Gaps and Study Contribution
+─────────────────────────────────────────────────────────────────────────────────
+
+The preceding sections have reviewed five distinct but converging bodies of
+literature.  This section synthesises the identified gaps across these bodies
+and articulates the specific contribution the present research makes to the field.
+
+Gap 1: The Semantic Detection Ceiling of Rule-Based Tools.  Section 2.4
+established that automated DOM-based accessibility checkers (axe-core, WAVE,
+Lighthouse, Pa11y) have a fundamental inability to evaluate the semantic adequacy
+of ARIA attributes, accessible names, and dynamic state management.  The
+theoretical and empirical evidence reviewed by Abou-Zahra et al. [17] and
+Campoverde-Molina et al. [18] quantifies this ceiling at 25-40 per cent of
+violations detectable by human experts.  The ground-truth validation conducted
+in the present study (1.2% pattern-match accuracy for semantic violations)
+confirms and sharpens this finding.  No prior study was identified that addresses
+this ceiling through integration of a large language model into the IDE editing
+workflow.
+
+Gap 2: The Absence of WCAG 2.2-Aware IDE Tooling.  The WCAG 2.2 specification,
+published in October 2023, introduced nine new success criteria addressing
+previously uncovered interaction patterns (focus appearance, dragging movements,
+target size, accessible authentication).  At the time of writing, no IDE plugin
+or integrated developer tool was identified in this review that provides
+real-time analysis specifically covering the WCAG 2.2 Level A and AA success
+criteria for all four principal web development languages (HTML, CSS, JavaScript,
+and TypeScript with JSX).  Existing IDE accessibility plugins confine their scope
+to HTML and to the axe-core rule set, an architecture inherited from browser-
+based tooling that cannot be straightforwardly extended to CSS logic or JavaScript
+state-management analysis.
+
+Gap 3: Missing RAG Application to Accessibility.  Section 2.6 demonstrated
+that RAG substantially improves LLM factual accuracy on knowledge-intensive tasks
+by grounding model outputs in authoritative external documentation [25].
+No prior published work was identified that applies the RAG architecture to
+accessibility analysis, either in an IDE-embedded tool or in a benchmarking
+study.  The selection, construction, and evaluation of a domain-specific WCAG 2.2
+knowledge base for hybrid retrieval therefore represents a novel contribution.
+
+Gap 4: Absence of Multi-Model Comparative Benchmarking for Accessibility.
+No prior study was identified that benchmarks a large cohort of diverse LLM
+families on a standardised, ground-truth-validated accessibility detection task.
+Studies on LLM code-analysis capabilities have focused on code generation
+(Codex, HumanEval), bug detection, or general code review, none of which
+exercises the WCAG-specific semantic reasoning required for accessibility auditing.
+The present study's 18-model, 4-condition, 41-fixture evaluation provides the
+first comparative benchmark of this scope for LLM-based WCAG 2.2 detection.
+
+Gap 5: Absence of Cognitive-Load Evidence for Accessibility Tooling.  Section
+2.8 reviewed the NASA-TLX instrument and the developer cognitive-load literature.
+No prior study was identified that measures the cognitive workload cost of a
+web developer accessibility audit task with and without AI assistance, nor that
+correlates an AI tool's detection accuracy with developer workload reduction.  The
+planned user study described in Chapter 3 (Section 3.4.4) is designed to address
+this gap directly, providing the first empirical evidence linking accessibility
+AI tool accuracy to NASA-TLX workload scores in a controlled developer task.
+
+The present research addresses all five identified gaps through a single,
+integrated study.  The artefact (the VS Code extension) addresses Gaps 1, 2,
+and 3 simultaneously.  The evaluation framework (the 18-model ablation study)
+addresses Gap 4.  The planned empirical user study (Section 3.4.4) addresses
+Gap 5.
+
+─────────────────────────────────────────────────────────────────────────────────
+
+2.10  Chapter Conclusion
+─────────────────────────────────────────────────────────────────────────────────
+
+This chapter has reviewed the bodies of literature that motivate, enable, and
+contextualise the present research.  The review began with the empirical evidence
+for the persistence of web accessibility barriers at scale, a global problem
+affecting 1.3 billion people that existing automated tooling has demonstrably
+failed to solve, and that legislation in the EU, UK, and US is increasingly
+mandating organisations to address.  It then surveyed WCAG 2.2 and WAI-ARIA as
+the technical standards that define the problem space; examined the current
+generation of automated evaluation tools and characterised their detection
+ceiling; and established the semantic accessibility gap that motivates the turn
+to language model-based analysis.
+
+The review then traced the development of large language models from the
+transformer architecture through GPT-3's few-shot capabilities and Codex's
+code intelligence to the emerging application of LLMs to accessibility auditing.
+The RAG architecture was reviewed as the mechanism for addressing the hallucination
+and knowledge-currency limitations of purely parametric models.  Hybrid BM25
+and dense-semantic retrieval was identified as the technically appropriate
+retrieval design for the structured WCAG knowledge base.
+
+Prompt engineering research, particularly chain-of-thought prompting and its
+zero-shot variant, was reviewed as the technique for eliciting structured,
+confidence-gated analytical outputs from the model.  The inference sampling
+parameters governing response quality were reviewed with reference to their
+empirical foundations, providing the theoretical basis for the parameter choices
+made in Chapter 3.
+
+Finally, this chapter reviewed cognitive load theory, the NASA-TLX instrument,
+and the developer productivity literature to establish the theoretical and
+measurement framework for the human-factors evaluation strand of the study.
+The Matthews Correlation Coefficient was reviewed as the preferred primary metric
+for binary classification under class imbalance, providing the rationale for its
+co-primary role alongside F1 in the benchmarking evaluation.
+
+The synthesis in Section 2.9 identified five distinct gaps across the reviewed
+literature, all of which the present research is designed to address, and
+articulated the novel contribution of the study at each gap.  Chapter 3 proceeds
+to describe the methodology and implementation through which these contributions
+are realised.
+
+─────────────────────────────────────────────────────────────────────────────────
+REFERENCES
+─────────────────────────────────────────────────────────────────────────────────
+
+[1]  World Health Organisation, "Disability and Health," WHO Fact Sheet,
+     Mar. 2023. [Online]. Available: https://www.who.int/news-room/fact-sheets/
+     detail/disability-and-health. [Accessed: 27 Apr. 2026].
+
+[2]  WebAIM, "The WebAIM Million: An Annual Accessibility Analysis of the Top
+     1,000,000 Home Pages," WebAIM, 2024. [Online].
+     Available: https://webaim.org/projects/million/. [Accessed: 27 Apr. 2026].
+
+[3]  T. Martins and C. Duarte, "Web Accessibility Levels and Technologies Used
+     by Portuguese Public Services," in Proc. W4A '20, Taipei, Taiwan, 2020.
+
+[4]  L. A. Fernandes, L. Batista, and G. G. Pereira, "Accessibility evaluation
+     of Portuguese public services homepages," Univ. Access Inf. Soc., vol. 19,
+     pp. 851–870, 2020.
+
+[5]  European Parliament and Council, "Directive (EU) 2019/882 of the European
+     Parliament and of the Council on the accessibility requirements for products
+     and services (European Accessibility Act)," Off. J. Eur. Union, L 151,
+     7 Jun. 2019.
+
+[6]  UK Government, "Public Sector Bodies (Websites and Mobile Applications)
+     Accessibility Regulations 2018," SI 2018/952, 2018. [Online].
+     Available: https://www.legislation.gov.uk/uksi/2018/952/contents/made.
+     [Accessed: 27 Apr. 2026].
+
+[7]  United States Congress, "Rehabilitation Act of 1973 as amended; Section 508
+     (Electronic and Information Technology)," US Access Board, 2018. [Online].
+     Available: https://www.access-board.gov/ict/. [Accessed: 27 Apr. 2026].
+
+[8]  W3C, "Web Content Accessibility Guidelines (WCAG) 2.2," W3C Recommendation,
+     5 Oct. 2023. [Online]. Available: https://www.w3.org/TR/WCAG22/.
+     [Accessed: 27 Apr. 2026].
+
+[9]  W3C, "Understanding WCAG 2.2," W3C Supporting Document, 2023.
+     [Online]. Available: https://www.w3.org/WAI/WCAG22/Understanding/.
+     [Accessed: 27 Apr. 2026].
+
+[10] W3C, "Techniques for WCAG 2.2," W3C Supporting Document, 2023.
+     [Online]. Available: https://www.w3.org/WAI/WCAG22/Techniques/.
+     [Accessed: 27 Apr. 2026].
+
+[11] W3C, "Accessible Rich Internet Applications (WAI-ARIA) 1.1,"
+     W3C Recommendation, 14 Dec. 2017.
+     [Online]. Available: https://www.w3.org/TR/wai-aria/. [Accessed: 27 Apr. 2026].
+
+[12] W3C, "WAI-ARIA Authoring Practices Guide (APG) 1.2," W3C Working Draft,
+     2023. [Online]. Available: https://www.w3.org/WAI/ARIA/apg/.
+     [Accessed: 27 Apr. 2026].
+
+[13] Deque Systems, "axe-core: The Reliable Accessibility Testing Engine," GitHub
+     Repository, 2024. [Online]. Available: https://github.com/dequelabs/axe-core.
+     [Accessed: 27 Apr. 2026].
+
+[14] WebAIM, "WAVE Web Accessibility Evaluation Tool," 2024.
+     [Online]. Available: https://wave.webaim.org/. [Accessed: 27 Apr. 2026].
+
+[15] Google, "Lighthouse: Automated Auditing, Performance Metrics, and Best
+     Practices," Chrome DevTools Documentation, 2024.
+     [Online]. Available: https://developer.chrome.com/docs/lighthouse/.
+     [Accessed: 27 Apr. 2026].
+
+[16] Pa11y, "Pa11y: Your Automated Accessibility Testing Tool," GitHub
+     Repository, 2024. [Online]. Available: https://github.com/pa11y/pa11y.
+     [Accessed: 27 Apr. 2026].
+
+[17] S. Abou-Zahra, J. Brewer, and M. Cooper, "Accessibility Conformance Testing:
+     Overview of the Test Rules Format and Evaluation Methodology," in Proc.
+     W4A '19, San Francisco, CA, 2019.
+
+[18] M. Campoverde-Molina, S. Luján-Mora, and L. Valverde, "Automated Tools for
+     Web Accessibility Evaluation: A Systematic Review," Comput. Sci. Rev.,
+     vol. 40, 2021.
+
+[19] J. Humble and D. Farley, Continuous Delivery: Reliable Software Releases
+     through Build, Test, and Deployment Automation. New York, NY:
+     Addison-Wesley Professional, 2010.
+
+[20] X. Hellendoorn, "Towards Automated Accessibility Auditing for Software
+     Developers," in Proc. ICSE-SEIS 2021, Madrid, Spain, 2021.
+
+[21] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez,
+     Ł. Kaiser, and I. Polosukhin, "Attention Is All You Need," in Proc. NeurIPS
+     2017, Long Beach, CA, pp. 5998–6008, 2017.
+
+[22] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "BERT: Pre-training of
+     Deep Bidirectional Transformers for Language Understanding," in Proc.
+     NAACL-HLT 2019, Minneapolis, MN, pp. 4171–4186, 2019.
+
+[23] T. Brown, B. Mann, N. Ryder et al., "Language Models are Few-Shot Learners,"
+     in Proc. NeurIPS 2020, Virtual, pp. 1877–1901, 2020.
+
+[24] M. Chen, J. Tworek, H. Jun et al., "Evaluating Large Language Models Trained
+     on Code," arXiv preprint arXiv:2107.03374, Jul. 2021.
+
+[25] P. Lewis, E. Perez, A. Piktus et al., "Retrieval-Augmented Generation for
+     Knowledge-Intensive NLP Tasks," in Proc. NeurIPS 2020, Virtual,
+     pp. 9459–9474, 2020.
+
+[26] S. Robertson and H. Zaragoza, "The Probabilistic Relevance Framework: BM25
+     and Beyond," Found. Trends Inf. Retr., vol. 3, no. 4, pp. 333–389, 2009.
+
+[27] N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using
+     Siamese BERT-Networks," in Proc. EMNLP 2019, Hong Kong, pp. 3982–3992, 2019.
+
+[28] W. Wang, F. Wei, L. Dong, H. Bao, N. Yang, and M. Zhou, "MiniLM: Deep
+     Self-Attention Distillation for Task-Agnostic Compression of Pre-Trained
+     Transformers," in Proc. NeurIPS 2020, Virtual, 2020.
+
+[29] J. Wei, X. Wang, D. Schuurmans et al., "Chain-of-Thought Prompting Elicits
+     Reasoning in Large Language Models," in Proc. NeurIPS 2022, New Orleans,
+     LA, 2022.
+
+[30] T. Kojima, S. S. Gu, M. Reid, Y. Matsuo, and Y. Iwasawa, "Large Language
+     Models are Zero-Shot Reasoners," in Proc. NeurIPS 2022, New Orleans,
+     LA, 2022.
+
+[31] X. Wang, J. Wei, D. Schuurmans et al., "Self-Consistency Improves Chain of
+     Thought Reasoning in Language Models," in Proc. ICLR 2023, Kigali,
+     Rwanda, 2023.
+
+[32] M. Renze and E. Guven, "The Effect of Sampling Temperature on Problem
+     Solving in Large Language Models," arXiv preprint arXiv:2402.05201,
+     Feb. 2024.
+
+[33] A. Holtzman, J. Buys, M. Forbes, and Y. Choi, "The Curious Case of Neural
+     Text Degeneration," in Proc. ICLR 2020, Addis Ababa, Ethiopia, 2020.
+
+[34] A. Fan, M. Lewis, and Y. Dauphin, "Hierarchical Neural Story Generation,"
+     in Proc. ACL 2018, Melbourne, Australia, pp. 889–898, 2018.
+
+[35] S. Welleck, I. Kulikov, S. Roller, E. Dinan, K. Cho, and J. Weston,
+     "Neural Text Generation with Unlikelihood Training," in Proc. ICLR 2020,
+     Addis Ababa, Ethiopia, 2020.
+
+[36] J. Sweller, "Cognitive Load during Problem Solving: Effects on Learning,"
+     Cogn. Sci., vol. 12, no. 2, pp. 257–285, 1988.
+
+[37] F. Paas, A. Renkl, and J. Sweller, "Cognitive Load Theory and Instructional
+     Design: Recent Developments," Educ. Psychol., vol. 38, no. 1, pp. 1–4, 2003.
+
+[38] S. G. Hart and L. E. Staveland, "Development of NASA-TLX (Task Load Index):
+     Results of Empirical and Theoretical Research," in Human Mental Workload,
+     P. A. Hancock and N. Meshkati, Eds. Amsterdam: North-Holland, 1988,
+     pp. 139–183.
+
+[39] S. G. Hart, "NASA Task Load Index (NASA-TLX): 20 Years Later," in Proc.
+     Human Factors Ergon. Soc. Annu. Meet., vol. 50, no. 9, pp. 904–908, 2006.
+
+[40] D. Chicco and G. Jurman, "The advantages of the Matthews Correlation
+     Coefficient (MCC) over F1 score and accuracy in binary classification
+     evaluation," BMC Genomics, vol. 21, no. 6, Jan. 2020.
+
+[41] Chroma, "Chroma: The AI-Native Open-Source Embedding Database," GitHub
+     Repository, 2024. [Online]. Available: https://github.com/chroma-core/chroma.
+     [Accessed: 27 Apr. 2026].

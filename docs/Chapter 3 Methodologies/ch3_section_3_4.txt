@@ -1,0 +1,182 @@
+3.4  Pilot Study
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+3.4.1  Pilot Study: Identifying UI/UX Friction and Logical Hallucinations
+───────────────────────────────────────────────────────
+
+Prior to the formal benchmarking programme, a pilot study was conducted with the
+fully integrated extension to identify usability deficiencies and instances of
+hallucinated output that would not be captured by automated metric evaluation
+alone.  The pilot was undertaken by the researcher and two volunteer developers
+who had not been involved in implementing any component of the system.
+
+The pilot targeted two distinct classes of problem.  The first class comprised
+user-interface friction: workflow steps that were confusing, redundant, or
+insufficiently explained within the extension's panel UI.  The second class
+comprised logical hallucinations: outputs in which the language model produced
+plausible-sounding but factually incorrect accessibility diagnoses, such as
+attributing a violation to an element that was not present in the file, citing a
+non-existent WCAG 2.2 success criterion, or reporting a violation for a code
+pattern that was in fact valid.
+
+UI/UX Friction Findings.  Participants observed that the "Select Analysis
+Profile" panel provided no indication of which profile was currently active
+before the selection dialogue opened, causing confusion about the effect of a
+prior selection.  The "NASA-TLX Estimate" command was found to require
+contextual explanation because participants were unfamiliar with the TLX
+instrument and had no guidance on what the subscale score ranges meant in
+practice.  The panel also initially rendered multi-line code excerpts without
+preserving indentation whitespace, making it difficult to locate the flagged
+element in the editor.
+
+Hallucination Findings.  Several classes of false-positive hallucination were
+identified in the pilot:
+
+(a) href="#" on anchor elements was repeatedly flagged as a missing-href
+    violation.  The href="#" pattern is a valid placeholder anchor used in
+    component libraries; it is not a WCAG 2.2 failure.
+(b) Compound autocomplete attribute values such as autocomplete="work email"
+    or autocomplete="billing street-address" were flagged as invalid even though
+    the HTML Living Standard explicitly permits multiple space-separated tokens.
+(c) On TSX files, the model would occasionally report a missing aria-label for
+    an SVG component and simultaneously report a missing aria-hidden for the
+    same component — two mutually exclusive remedies being reported as two
+    separate concurrent violations against the same element.
+(d) form fields with the HTML required attribute were reported as also missing
+    aria-required="true", despite the specification confirming that required
+    implies aria-required.
+
+These hallucination patterns had direct implications for benchmark scoring: each
+constituted a systematic source of false positives that would artificially
+depress precision scores.
+
+───────────────────────────────────────────────────────
+3.4.2  Pilot Refinements: Wiring Out Errors in Information Delivery
+───────────────────────────────────────────────────────
+
+Each identified deficiency was addressed before the formal benchmarking programme
+commenced.
+
+UI Refinements.  The "Select Analysis Profile" panel was updated to display the
+currently active profile name in the panel heading before any selection is made,
+eliminating ambiguity about the initial state.  The NASA-TLX panel was extended
+with a brief explanatory preamble describing each of the six subscales, their
+response anchors (Low/High or Perfect/Failure), and the interpretation of the
+raw workload score.  The issue-report panel was updated to render code excerpts
+using a pre-formatted block with monospace font-family and preserved whitespace,
+and the relevant line number was highlighted via a bold prefix marker for rapid
+visual scanning.
+
+Hallucination Mitigations.  The five systematic hallucination patterns identified
+above were addressed by the Anti-False-Positive Supplement (ANTI_FP_SUPPLEMENT)
+described in Section 3.3.6.  These rules were appended to the prompt for all
+languages so that models received explicit negative instruction for each class of
+hallucination observed.  Pilot re-runs with the refined prompt confirmed the
+elimination of all five previously observed hallucination categories; remaining
+false positives in formal benchmarking therefore represent model-specific
+reasoning failures rather than structural prompt deficiencies.
+
+Context Fragmentation Mitigation.  The pilot also revealed that on the largest
+JavaScript and TypeScript fixtures (approximately 500 kB), the excerpt produced
+by buildRelevantExcerpt() could be dominated by import statements and type
+declarations, leaving the model insufficient token budget for the actual
+component logic.  The excerpt builder was updated to skip contiguous import
+blocks when the component code begins after line 20 and to prioritise function
+bodies and JSX blocks for inclusion within the token budget.
+
+Streaming Timing Artefacts.  For one of the cloud models under test, the pilot
+revealed that partial streaming responses could be delivered in very large single
+chunks separated by multi-second silences.  A chunk-boundary buffer was
+implemented to ensure that partial issue blocks received in separate stream
+events were correctly concatenated before parsing, preventing issues that straddled
+chunk boundaries from being discarded.
+
+───────────────────────────────────────────────────────
+3.4.3  Main Testing Protocol
+───────────────────────────────────────────────────────
+
+The main testing protocol for the automated benchmarking programme is as follows.
+
+Step 1 — Environment Preparation.  The Ollama relay service is started on
+localhost port 11434.  The RAG service is started on localhost port 8000 via
+"uvicorn app:app --reload".  Both services are confirmed reachable via health-
+check requests before any benchmark run is initiated.
+
+Step 2 — Ground Truth Loading.  The benchmark runner imports the ground-truth
+concept pool from ground-truth.ts, which defines CORE_FIXTURES (16 entries) and
+ADVERSARIAL_FIXTURES (25 entries), yielding ALL_FIXTURES = 41.  Each fixture
+entry specifies: the fixture file path, the language, the expected violation
+count, and a string concept pool listing the canonical WCAG issue descriptors
+that any correct detection is expected to match.
+
+Step 3 — Condition Selection.  The CLI runner accepts four flags: --rag,
+--no-rag, --think, --no-think.  These enable the four conditions of the 2×2
+ablation study.  The combination also controls whether the benchmark prompt
+wrapper appends /no_think and whether the RAG service is invoked or bypassed.
+
+Step 4 — Fixture Iteration.  For each fixture in ALL_FIXTURES, the benchmark
+runner: (a) reads the fixture file; (b) builds the full prompt using the
+benchmark wrapper; (c) dispatches the prompt to the model via Ollama; (d)
+collects the streamed response; (e) strips <think> blocks; (f) parses detected
+issues; (g) scores each detected concept against the expected concept pool to
+compute TP, FP, FN, and TN; and (h) records all raw metrics to a per-fixture
+results entry.
+
+Step 5 — Aggregation and Reporting.  Upon completion of all fixtures, the
+benchmark runner computes per-model aggregate statistics: precision, recall, F1
+score, MCC (Chicco and Jurman 2020) [26], specificity, NPV, composite score,
+mean latency, and total token count.  The reporter.ts module writes three output
+files per run: a machine-readable JSON file, a comma-separated CSV summary, and
+a human-readable text report.  All output files are timestamped and stored in
+the evaluation/Cloud-LLM-Preliminary/results/ directory.
+
+Step 6 — Cross-Validation.  For the ground truth fixtures, the
+validate-ground-truth.ts module runs axe-core and Pa11y against equivalent HTML
+representations of the fixture content and cross-checks their detections against
+the manually authored concept pools.  Discrepancies are flagged for researcher
+review before the final ground truth is locked.
+
+───────────────────────────────────────────────────────
+3.4.4  Participant Selection and Sampling Strategy
+───────────────────────────────────────────────────────
+
+The planned empirical user study will recruit 10–12 participants who are
+practising front-end or full-stack web developers with at least six months of
+professional experience writing HTML, CSS, or JavaScript.  Participants are not
+required to have prior knowledge of WCAG or accessibility standards; this
+constraint would introduce demand characteristics by selecting for participants
+already sensitised to the very phenomena the extension is designed to surface.
+
+Participants will be recruited through two channels: (i) the MCAST Institute of
+Information and Communication Technology staff and student professional networks,
+and (ii) posts on developer community platforms and local tech meetup groups.
+Recruitment material will describe the study as an evaluation of an IDE
+accessibility assistant tool and will invite participants to attend a single
+approximately 90-minute session.
+
+Sampling Strategy.  The study employs purposive sampling, selecting participants
+on the basis of confirmed professional development experience rathr than
+convenience alone.  A minimum of four participants will have never performed a
+formal accessibility audit of any kind; a minimum of two will have had at least
+informal prior exposure to WCAG guidelines.  This stratification ensures the
+sample is representative of the broader developer population for whom the
+extension is the intended intervention.
+
+Counterbalancing.  To control for order effects, participants will be assigned
+to two groups using a counterbalanced A/B design.  Group A will first complete
+the audit task without the extension (baseline condition) and subsequently with
+the extension (treatment condition).  Group B will complete the tasks in the
+reverse order.  Within each condition, participants will be assigned fixtures in
+a pseudo-randomised order to prevent fixture-specific learning effects from
+systematically favouring either group.  Both groups will audit the same three
+representative fixtures: one HTML file at medium error density, one CSS file at
+medium error density, and one TSX component at medium error density.
+
+Data Collection.  During each task, participants will be observed by the
+researcher who will take structured field notes using a pre-defined observation
+protocol.  At the end of each task condition, participants will complete the
+NASA-TLX questionnaire to provide a subjective workload measurement for that
+condition.  A brief semi-structured debrief interview will follow to capture
+qualitative insights not reflected in the TLX scores.  All sessions will be
+audio-recorded with participant consent for transcription.

@@ -1,0 +1,389 @@
+3.3  System Implementation and Technical Pre-Testing
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+3.3.1  Knowledge Base Construction
+───────────────────────────────────────────────────────
+
+The RAG knowledge base is stored in the knowledge-base/ directory of the project
+repository and is divided into two collections.  The Accessibility-Analysis
+collection contains Markdown documents covering each WCAG 2.2 success criterion
+at Levels A and AA, organised into fourteen topic subdirectories: aria, controls,
+dialogs, forms, headings, images, input-modalities, keyboard, media, navigation,
+structure, tables, timing, and visual.  The NASA-TLX collection contains nine
+documents describing the instrument, its subscales, scoring procedures, and
+cognitive-load-to-accessibility-barrier mappings used by the TLX prediction
+subsystem.
+
+Each knowledge-base document was authored specifically for this study by
+compiling the W3C's official WCAG 2.2 Understanding documents and Techniques
+for WCAG 2.2 guidance [24][25] with supplementary ARIA Authoring Practices
+guidance from the W3C.  Documents were written in a format designed to maximise
+retrieval relevance: each file carries a ## Tags section containing language
+and topic hashtags (e.g. #html, #aria, #forms, #1.3.1) which the RAG indexing
+pipeline extracts and stores as ChromaDB metadata, enabling filtered retrieval
+by language type.
+
+The construction process follows four steps.  First, source documents are
+located by recursively scanning the knowledge base directories for Markdown and
+text files.  Second, each document is tokenised using the HuggingFace AutoTokenizer
+for the embedding model (sentence-transformers/all-MiniLM-L6-v2) and split into
+overlapping chunks of no more than 128 tokens with a 13-token overlap, ensuring
+that no single concept is split across a retrieval boundary.  Chunks shorter than
+80 characters are merged with adjacent chunks to avoid returning fragments devoid
+of meaningful content.  Third, each chunk is embedded using the all-MiniLM-L6-v2
+sentence transformer and stored in the ChromaDB persistent client.  Fourth, all
+chunk texts are simultaneously tokenised and stored in a BM25Okapi index for
+hybrid retrieval.
+
+The ChromaDB store uses cosine similarity as its distance metric.  The
+all-MiniLM-L6-v2 model produces 384-dimensional embeddings and was selected
+because it provides the best trade-off between semantic retrieval quality and
+inference speed for IDE-embedded use.  Reimers and Gurevych (2019) introduced
+the SBERT architecture on which this model is based, demonstrating that siamese
+BERT networks trained with similarity objectives produce embeddings well-suited
+to semantic search tasks [31].  Wang et al. (2020) demonstrated that MiniLM
+distillation retains most of the retrieval quality of full-size BERT models at a
+fraction of the inference cost [32].
+
+───────────────────────────────────────────────────────
+3.3.2  The RAG Pipeline Engine
+───────────────────────────────────────────────────────
+
+The RAG service is implemented as a FastAPI application (services/rag/app.py)
+backed by a persistent ChromaDB vector store.  Following the architecture
+introduced by Lewis et al. (2020) [23], it combines a non-parametric retrieval
+component with the parametric language model, grounding model outputs in
+authoritative external evidence rather than relying solely on the factual
+knowledge encoded during pre-training.  This design was chosen specifically
+because some WCAG 2.2 success criteria post-date the training cutoffs of several
+models under evaluation, making at-inference grounding essential for correctness
+with newer SCs.
+
+The service exposes a single POST endpoint at /retrieve, accepting the following
+parameters:
+
+    query              — the search string
+    top_k              — maximum number of chunks to return (default 3)
+    kb_type            — collection to search ("accessibility" or "tlx")
+    distance_threshold — cosine distance above which chunks are discarded (0.65)
+    use_hybrid         — whether to apply BM25 + semantic interpolation (true)
+
+Hybrid Retrieval.  The service simultaneously processes each query through two
+complementary indices.  The keyword index uses BM25Okapi — the probabilistic
+relevance framework formalised by Robertson and Zaragoza (2009) that integrates
+term frequency, inverse document frequency, and document-length normalisation
+[30].  BM25 provides reliable exact-match recall for structured identifiers such
+as WCAG success-criterion numbers (e.g. "1.3.1", "2.4.11") and ARIA attribute
+names (e.g. "aria-label", "aria-expanded") that may not have semantically similar
+neighbours in the embedding space.  The dense semantic index uses the
+all-MiniLM-L6-v2 sentence transformer to capture paraphrases and synonyms such
+as "focus ring" matching content discussing "focus indicator" or "outline".
+
+Both indices produce ranked candidate lists that are combined by weighted score
+interpolation.  The interpolated scores are re-ranked and the top-k results above
+the distance threshold are returned.  This hybrid approach outperformed pure
+semantic retrieval in preliminary experiments by recovering WCAG SC identifiers
+that semantic similarity alone failed to surface.
+
+Caching.  The extension layer maintains an in-memory Least-Recently-Used cache
+keyed on language identifier, query string, and excerpt character count.  Cached
+responses are valid for five minutes.  This prevents duplicate retrieval calls
+during iterative editing sessions and reduces end-to-end latency for repeated
+analyses of the same file.
+
+───────────────────────────────────────────────────────
+3.3.3  Core Algorithm Specification
+───────────────────────────────────────────────────────
+
+The following pseudocode describes the complete recommendation loop executed by
+the VS Code extension when the Analyse File command is invoked.
+
+────────────────────────────────────────────────────────
+FUNCTION analyseFileForPanel(logger, diagnostics):
+
+  doc ← activeEditor.document
+  IF doc IS NULL THEN showWarning("Open a file first") ; RETURN
+
+  config ← getExtensionConfig()   // ollamaHost, ragEndpoint, analysisPreset
+  model  ← FIXED_MODEL            // gpt-oss:120b-cloud (hardcoded after Phase 2)
+
+  // ── STEP 1: BASELINE STATIC CHECKS ──────────────────────────
+  baselineIssues ← runBaselineChecks(doc)
+  // Regex-based scan: missing <title>, empty alt, obvious missing lang
+
+  // ── STEP 2: EXCERPT CONSTRUCTION ─────────────────────────────
+  excerpt ← buildRelevantExcerpt(doc)
+  // Trims whitespace; respects token budget for context window
+
+  // ── STEP 3: RAG RETRIEVAL ─────────────────────────────────────
+  IF doc.languageId == 'html':
+    chunks ← retrieveHtmlRag(config.ragEndpoint)
+    // Dispatches 5 category-specific queries in sequence;
+    // deduplicates by chunk ID; caps total at 8 chunks;
+    // distance threshold = 0.5 (stricter for HTML)
+    FOR EACH query IN HTML_SWEEP_QUERIES:
+      results ← ragRetrieve(endpoint, query, topK=2, threshold=0.5)
+      chunks ← deduplicate(chunks + results) UP TO 8
+  ELSE:
+    ragResult ← ragRetrieve(endpoint, buildRagQuery(languageId, excerpt),
+                             topK=3, collection='accessibility')
+    chunks ← ragResult.chunks
+
+  contextBlock ← formatRagContext(chunks)
+  // Formats chunks as "WCAG REFERENCE CONTEXT" block for prompt inclusion
+
+  // ── STEP 4: PROMPT ASSEMBLY ───────────────────────────────────
+  prompt ← buildAiPrompt(languageId, excerpt, contextBlock)
+  // Combines: SYSTEM_PROMPT + language sweep rules +
+  //           contextBlock + code excerpt
+
+  // ── STEP 5: LLM INFERENCE (STREAMING) ────────────────────────
+  fullResponse ← ""
+  streamStart()
+
+  FOR EACH token IN ollamaGenerateStream(ollamaHost, model, prompt):
+    fullResponse += token
+    IF issueStreamStarted AND NOT stopStreaming:
+      IF token CONTAINS "Final Answer:" THEN stopStreaming ← TRUE
+      ELSE: streamChunk(token)
+    ELSE:
+      // Buffer pre-issue text; detect start of first Issue block
+      preIssueBuffer += token
+      IF preIssueBuffer MATCHES /^Issue\s+\d+/i:
+        issueStreamStarted ← TRUE ; streamChunk(preIssueBuffer)
+
+  // ── STEP 6: RESPONSE PARSING ──────────────────────────────────
+  cleanedResponse ← stripThinkBlocks(fullResponse)
+  // Removes <think>...</think> reasoning blocks
+  rawIssues ← parseTextResponse(cleanedResponse)
+  // Extracts: description, wcag-sc, line, severity, suggestion
+  issues ← deduplicateIssues(rawIssues)
+  // Removes issues sharing same element + same SC
+
+  // ── STEP 7: DIAGNOSTIC INTEGRATION ───────────────────────────
+  allIssues ← baselineIssues + issues
+  FOR EACH issue IN allIssues:
+    diagnostic ← aiIssueToDiagnostic(issue, doc)
+    diagnostics.add(doc.uri, [diagnostic])
+
+  logger.log("Analysis complete: " + allIssues.length + " issue(s)")
+
+END FUNCTION
+────────────────────────────────────────────────────────
+
+Figure 3.2: Core Analysis Algorithm Pseudocode.
+
+The two-phase protocol encoded in SYSTEM_PROMPT is directly motivated by chain-
+of-thought prompting research.  Wei et al. (2022) demonstrated that instructing
+LLMs to generate explicit intermediate reasoning steps before producing a final
+answer substantially improves performance on multi-step reasoning and
+classification tasks [27].  Kojima et al. (2022) extended this to the zero-shot
+setting, demonstrating that the directive "let's think step by step" alone
+elicits reasoning chains that improve accuracy without any few-shot examples
+[28].  Wang et al. (2023) further demonstrated that self-consistency — allowing
+models to generate multiple reasoning chains and converge on a verified answer
+— improves task accuracy [29].
+
+In the present implementation, Phase 1 (READ AND MAP) operationalises this
+insight: the model is directed to build a complete semantic inventory of the
+source file before committing to any violation report.  The Phase 2 confidence
+gate — "emit only confirmed violations; omit speculative findings" — suppresses
+hallucinatory detections by requiring the model to distinguish between what it
+observed in the code and what it merely inferred.
+
+───────────────────────────────────────────────────────
+3.3.4  Prompt Engineering and Persona Design
+───────────────────────────────────────────────────────
+
+The system prompt (SYSTEM_PROMPT in prompt.ts) defines the model's operational
+persona as a "senior WCAG 2.2 accessibility auditor" and enforces a strict two-
+phase output protocol.  The persona framing was adopted because early experiments
+(Section 3.3.5) showed that un-framed prompts produced verbose natural-language
+commentary interleaved with violation reports, whereas the expert persona
+consistently produced the structured block format required for automated parsing.
+
+The two-phase structure is as follows.  In Phase 1, the model is directed to read
+every line of the code and to construct an internal inventory without producing
+any output.  The inventory includes: all element IDs; the count of each landmark
+type; all aria-labelledby, aria-describedby, and aria-controls values with their
+referenced targets; all interactive elements and their accessible-name attributes;
+the heading hierarchy; and the page structure.  Producing no output during
+Phase 1 is explicitly stated as a core rule.
+
+In Phase 2, the model reports every confirmed violation using a structured issue-
+block format:
+    Issue N
+    Description: ...
+    WCAG: ...
+    Line: ...
+    Severity: HIGH / MEDIUM / LOW
+    Suggestion: ...
+
+A CONFIDENCE GATE rule is appended: "report an issue only if you can point to
+the exact element from your Phase 1 inventory; if you cannot name the specific
+element, skip it."  This gate is designed to prevent models from hallucinating
+violations they did not directly observe in the code.
+
+Language-specific mandatory sweep instructions are appended to the system prompt
+depending on the file type detected.  These sweeps were developed iteratively
+through analysis of the top-missed violations in early benchmark runs.
+
+For CSS files, eight sweeps (CSS-A through CSS-H) are mandatory: focus
+indicator removal, touch-target sizing, broken visually-hidden utilities, motion
+without prefers-reduced-motion, negative word-spacing, colour contrast failures,
+absence of forced-colors support, and link underlines removed without alternative.
+Each sweep includes a Phase 1 inventory instruction followed by a reporting rule.
+
+For JavaScript and TypeScript files, seven sweeps (JS-A through JS-G) plus an
+extras sweep cover: toggle functions not updating aria-expanded, toggle buttons
+not updating aria-pressed, dynamic content without live-region announcements,
+form validation errors not reflected in aria-invalid, initial aria-expanded not
+set at page load, dynamically hidden elements not removed from the accessibility
+tree, and user actions with no live-region feedback.
+
+For TypeScript React (TSX) files, ten sweeps (TSX-A through TSX-J) target the
+component-level patterns distinctive to React codebases: disclosure toggles
+missing aria-expanded on state variables, SVG and icon components missing
+aria-hidden or role="img", form field components missing aria-invalid in error
+states, two-state toggles missing aria-selected or aria-pressed, active navigation
+links missing aria-current="page", loading buttons missing aria-busy, spinner
+components missing aria-hidden, duplicate landmark sections requiring aria-label,
+card/article components requiring aria-labelledby, and decorative overlays
+requiring aria-hidden.
+
+The prompt concludes with a self-verification instruction warning the model that
+a clean file with no genuine issues should produce no issue blocks, and that a
+dense file with known issues typically produces 10–30 blocks for CSS and 18–30
+for JavaScript; any run yielding zero blocks should trigger a re-read of the file.
+
+The prompt was refined through thirteen test iterations before the final version
+was fixed for all benchmark runs.
+
+───────────────────────────────────────────────────────
+3.3.5  Pre-Testing Results: Identifying Initial Technical Shortcomings
+───────────────────────────────────────────────────────
+
+Prior to the main benchmarking programme, a series of preliminary test runs were
+conducted to identify systematic technical deficiencies in the pipeline.  These
+runs revealed four significant shortcomings.
+
+Shortcoming 1 — Prompt Rule Contradiction.  The extension's buildAiPrompt()
+function contains a formatting rule: "GROUPING — same problem type across
+multiple elements = ONE issue block."  This instruction conflicts directly with
+the benchmark requirement of one issue block per element to enable per-element
+precision and recall scoring.  Because the benchmark re-uses buildAiPrompt(),
+models received contradictory instructions in the same prompt, causing
+inconsistent grouping behaviour and suppressing per-element recall.
+
+Evidence: gpt-oss:120b, evaluated before the fix, achieved F1 = 32.9%.  After
+the contradicting rule was replaced with the ONE-ISSUE-PER-ELEMENT requirement,
+F1 rose to 67.6% — an improvement of 34.7 percentage points.  Qwen3.5 improved
+from F1 = 25.0% to 68.2% (+43.2 pp) under the same correction.  This was the
+single largest accuracy improvement identified in the pre-testing phase.
+
+Shortcoming 2 — Reasoning Suppression via /no_think.  The extension prompt ends
+with the directive /no_think, recognised by Qwen3, kimi-k2.5, and DeepSeek as
+an instruction to suppress chain-of-thought reasoning.  For real-time IDE use
+this reduces perceived latency.  For benchmarking — where the objective is to
+evaluate model ceiling quality with num_predict = 32,000 — suppressing reasoning
+is counterproductive: these models are architected to produce superior analytical
+outputs when extended reasoning is permitted.  Evidence: kimi-k2.5 achieved MCC
+= 0.027 under No-RAG + No-Think conditions, rising to MCC = 0.370 under RAG +
+Think — a difference attributable in part to the removal of this suppression.
+
+Shortcoming 3 — Parser Contamination by <think> Tags.  When /no_think was
+removed, reasoning models emitted <think>...</think> blocks containing internal
+deliberation text.  The original response parser treated this text as an issue
+description, causing reasoning narration about accessibility keywords to generate
+spurious false-positive issue detections.  Evidence: early runs of kimi-k2.5
+with thinking enabled showed substantially elevated FP counts before the parser
+was updated.
+
+Shortcoming 4 — Response Truncation at 20,000 Tokens.  The initial output
+ceiling of 20,000 tokens (num_predict) caused silent truncation of partial
+responses from larger models processing dense high-error fixtures.  Issues
+present in the latter portion of a truncated response were treated as false
+negatives in scoring.  Chen et al. (2021) specifically identify response
+completeness as a critical factor in LLM evaluation quality [11].  Evidence:
+increasing the ceiling to 32,000 tokens recovered additional true positives from
+affected models, improving recall on medium and high error-level fixtures.
+
+In addition to the above systematic shortcomings, several timeout and stream-
+abortion issues were identified and resolved:
+
+—  The streaming abort timer was being incorrectly cleared before the stream
+   completed, causing premature abandonment on slow cloud responses.  The
+   clearTimeout() call was moved to a finally block.
+
+—  A global timeout constant (TIMEOUT_MS) was increased from 7 minutes to 20
+   minutes to accommodate the longer generation times of the largest models
+   evaluated (qwen3.5:397b, deepseek-v3.2) on high-density fixtures.
+
+───────────────────────────────────────────────────────
+3.3.6  Robustness Iterations: Code Refinements and Handling Context Fragmentation
+───────────────────────────────────────────────────────
+
+Following the identification of the shortcomings described in Section 3.3.5, the
+following refinements were implemented and validated before the main benchmarking
+programme commenced.
+
+Refinement 1 — Benchmark Prompt Wrapper.  A wrapper module (benchmark-prompt.ts)
+was introduced in each evaluation phase directory.  This wrapper intercepts the
+output of buildAiPrompt() and applies two transformations before any model call:
+(a) a string replacement replacing the GROUPING rule with the ONE-PER-ELEMENT
+instruction; and (b) a regex strip removing the /no_think directive.  The
+/no_think directive can be selectively re-applied by passing the --no-think flag
+to the CLI, enabling controlled condition switching for the ablation study.  The
+extension's production behaviour is unchanged by this wrapper.
+
+Refinement 2 — <think> Tag Stripping.  A pre-parse stripping step was added to
+parseTextResponse() in parser.ts:
+    text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+This ensures that reasoning narration is discarded entirely before any
+accessibility keywords in the reasoning text are matched against the ground-truth
+concept pool.
+
+Refinement 3 — Anti-False-Positive Supplement.  An ANTI_FP_SUPPLEMENT block of
+five rules was appended to the prompt for all languages.  These rules target the
+most common hallucination patterns observed in early runs:
+    (1) href="#" is a valid placeholder — not a missing-href violation.
+    (2) target="_blank" alone does not constitute a WCAG failure.
+    (3) Compound autocomplete token values (e.g. "work email") are valid per the
+        HTML Living Standard; do not flag them as errors.
+    (4) Verify that a fieldset is genuinely present before reporting a missing
+        legend.
+    (5) The HTML required attribute implies aria-required — do not double-report.
+
+Refinement 4 — HTML Mandatory Sweeps.  A dedicated HTML_MANDATORY_SWEEPS block
+was added to the benchmark prompt for HTML-only runs.  Six sweeps are mandatory:
+Sweep A (link accessible name algorithm), Sweep B (button accessible name),
+Sweep C (<th scope> attribute verification), Sweep D (heading level skip
+detection), Sweep E (form field label verification), and Sweep F (img alt
+attribute presence).  These sweeps were derived from analysis of the top-missed
+violations across the first five benchmark test runs.
+
+Refinement 5 — Retry Logic.  The streaming inference function was updated to
+retry up to two times on "terminated" error responses, with exponential back-off
+(2 seconds, then 4 seconds).  This addressed intermittent cloud relay
+disconnections observed during large-model runs.
+
+Refinement 6 — Streaming Timeout Management.  The TIMEOUT_MS constant in
+benchmark.ts was increased from 7 minutes to 20 minutes, and the clearTimeout
+call was moved from the response-received handler to the finally block of the
+stream closure, ensuring that the abort timer is cancelled regardless of whether
+the stream completes normally or with an error.
+
+Refinement 7 — HTML Parallel RAG Queries.  The extension's HTML analysis path
+was refactored from a single general query to five category-specific queries
+executed in sequence.  The five queries target: (1) link accessible names and
+non-descriptive text; (2) button names, expansion states, and hamburger menus;
+(3) form input labels, autocomplete, and personal-data fields; (4) image alt
+text, heading hierarchy, and table structure; and (5) ARIA reference integrity
+(broken aria-labelledby, aria-describedby, aria-controls targets).  Results
+from all five queries are deduplicated by chunk ID and capped at eight chunks
+total with a stricter distance threshold (0.5 versus the default 0.65).  This
+change improved RAG recall for HTML fixtures by providing specific guidance for
+each violation category rather than relying on a single generic query whose top-k
+results were dominated by whichever category happened to be lexically closest to
+the overall document content.

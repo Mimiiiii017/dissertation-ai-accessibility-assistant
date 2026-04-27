@@ -1,0 +1,80 @@
+3.6  Ethical Considerations
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+3.6.1  Participant Anonymity, Data Privacy, and Secure Storage
+───────────────────────────────────────────────────────
+
+The study adopts a privacy-by-design approach consistent with the General Data
+Protection Regulation (EU) 2016/679 (GDPR) and the MCAST Research Ethics Policy.
+No personally identifiable information is collected beyond what is necessary to
+coordinate the study sessions and verify participant eligibility.
+
+Each participant will be assigned a randomly generated alphanumeric code at the
+point of recruitment.  All task-performance data, NASA-TLX questionnaire
+responses, and observer field notes will be associated exclusively with this
+pseudonymous code.  The mapping table linking participant names to codes will be
+stored separately from the study data, password-protected, and made accessible
+only to the principal researcher.
+
+Audio recordings taken during the debrief interview will be transcribed in full
+and subsequently deleted.  The transcript will be pseudonymised before archiving
+by replacing all references to the participant's name, employer, or identifying
+project details with coded placeholders.  No identifying excerpts will be
+included in any published output; any quotations used in the dissertation will
+include only the participant code, role category (e.g. front-end developer), and
+years of experience.
+
+All study data will be retained for a minimum of one year after submission of the
+dissertation and for a maximum of three years, in accordance with MCAST research
+data retention policy.  Data will be stored on a password-protected institutional
+device with full-disk encryption.  No data will be stored on personal cloud
+services or shared devices.
+
+The extension itself, as a static analysis tool operating on files open in the
+developer's editor, does not transmit any source code to external parties other
+than the configured LLM relay endpoint (localhost:11434 in the default
+configuration).  In the deployment configuration used for this study, all
+inference requests are routed to a self-hosted Ollama instance; no source code
+leaves the participant's machine during evaluation sessions.
+
+───────────────────────────────────────────────────────
+3.6.2  Informed Consent and Institutional Research Approval
+───────────────────────────────────────────────────────
+
+All participants will receive a written participant information sheet at least 48
+hours before their scheduled session.  The information sheet describes: the
+purpose of the study; the tasks participants will be asked to perform; the data
+that will be collected and how it will be stored; the pseudonymisation procedure;
+the basis on which participation is voluntary; and the fact that participants may
+withdraw at any point during the session without giving a reason and without
+penalty.
+
+Written informed consent will be obtained from every participant at the start of
+the session, prior to any data collection.  The consent form will explicitly
+address: (a) audio recording during the debriefing phase; (b) use of anonymised
+excerpts in the final dissertation and any future academic publications; and (c)
+acknowledgement that participation is voluntary and that withdrawal rights are
+unconditional.  Participants who withdraw after the session commences will have
+their data removed from the dataset and destroyed.
+
+The study protocol has been submitted to the MCAST Institute of Information and
+Communication Technology Research Ethics Committee for institutional approval
+before any recruitment commences.  The submission covers participant eligibility
+criteria, recruitment materials, the participant information sheet and consent
+form, the observation protocol, and the data management plan described above.
+Research activities will not begin until written approval has been received.
+
+No deception is involved at any stage of the study.  Participants are informed
+that they will evaluate an AI-powered accessibility assistant and that their
+task performance and subjective workload ratings will be measured.  There is no
+manipulation of beliefs or suppression of information that would require
+debriefing.
+
+As the extension analyses only files already in the participant's editor and
+produces informational diagnostic output, there is no plausible pathway for harm
+within the tool's operation.  Psychological risk is minimal: the tasks involve
+reviewing developer-familiar source code and completing a validated workload
+questionnaire.  Should a participant express distress at any point, the session
+will be paused and the researcher will follow the MCAST student and participant
+welfare protocol.

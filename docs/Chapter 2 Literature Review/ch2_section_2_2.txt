@@ -1,0 +1,158 @@
+2.3  Web Accessibility: Standards, Barriers, and Regulatory Obligations
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.3.1  The Global Scale of Digital Exclusion
+───────────────────────────────────────────────────────
+
+The magnitude of disability as a global population characteristic provides the
+primary motivation for web accessibility as a research priority.  The World
+Health Organisation (2023) estimates that approximately 1.3 billion people —
+16 per cent of the world's population, live with some form of significant
+disability [1].  These individuals include people with visual, auditory, motor,
+cognitive, and speech impairments whose ability to access digital services depends
+directly on whether those services have been designed and implemented in
+accordance with accessibility standards.
+
+For the web specifically, the gap between what standards mandate and what
+developers deliver has proven extraordinarily resistant to closure.  WebAIM's
+annual analysis of the home pages of the top one million publicly accessible
+websites, the WebAIM Million report, provides the most comprehensive recurring
+measurement of this gap.  The 2024 edition found that 95.9 per cent of the pages
+analysed contained at least one automatically detectable WCAG 2 failure, with a
+mean of 56.8 distinct accessibility errors per home page [2].  Critically, this
+figure represents only those violations detectable by the automated checkers used
+in the analysis; semantic and context-dependent violations, which the present
+study addresses, are excluded entirely from the count by methodological design.
+The actual prevalence of accessibility barriers is therefore substantially higher
+than these figures suggest.
+
+These headline statistics are corroborated by more detailed regional studies.
+Martins and Duarte (2020) conducted a systematic audit of 2.88 million pages
+across 166,311 Portuguese websites and found an average of 30 accessibility
+errors per page, with the density remaining consistently high even on pages
+produced by public-sector bodies subject to domestic accessibility legislation [3].
+In the healthcare domain, where accessibility failures carry direct implications
+for patient safety and health equity, Fernandes et al. (2020) audited the home
+pages of Portuguese health web resources and found a mean of 51 accessibility
+errors per page, with missing form labels and absent image alternative text
+being the most frequently observed failure categories [4].  These studies
+collectively demonstrate that accessibility failures are not marginal or
+exceptional; they are the norm across virtually all web content types and sectors.
+
+───────────────────────────────────────────────────────
+2.3.2  Legislative and Regulatory Context
+───────────────────────────────────────────────────────
+
+The persistence of accessibility failures has prompted legislative intervention
+in multiple jurisdictions.  In the European Union, Directive 2016/2102/EU
+required all public-sector websites and mobile applications to conform to
+WCAG 2.1 Level AA by 2020.  The European Accessibility Act, Directive (EU)
+2019/882, extended mandatory accessibility requirements to a broad range of
+private-sector digital products and services, with compliance obligations coming
+into effect from June 2025 [5].  The scope of the Act encompasses e-commerce
+platforms, banking services, electronic communications, and digital elements
+of consumer products, a definition broad enough to affect the majority of
+commercially deployed web applications.
+
+In the United Kingdom, the Public Sector Bodies (Websites and Mobile
+Applications) Accessibility Regulations 2018 (PSBAR) requires public-sector
+bodies to publish accessibility statements and meet WCAG 2.1 Level AA compliance,
+and is further reinforced by the Equality Act 2010, under which inaccessible
+digital services may constitute unlawful disability discrimination [6].  In
+the United States, Section 508 of the Rehabilitation Act (as amended in 1998 and
+2018) mandates WCAG 2.0 Level AA conformance for all electronic and information
+technology procured or developed by federal agencies, and the Americans with
+Disabilities Act (ADA) has been interpreted judicially to impose comparable
+requirements on public-facing commercial websites [7].
+
+These legislative frameworks share a common normative reference: the Web Content
+Accessibility Guidelines produced by the World Wide Web Consortium.  The legal
+dependence of multiple national frameworks on a single technical specification
+means that updates to WCAG carry immediate organisational compliance implications,
+and that any tooling designed to assist accessibility compliance must remain
+current with the evolving specification.
+
+───────────────────────────────────────────────────────
+2.3.3  WCAG 2.2: The Technical Standard
+───────────────────────────────────────────────────────
+
+The Web Content Accessibility Guidelines (WCAG), published by the W3C Web
+Accessibility Initiative, is the primary international technical standard for
+digital accessibility.  WCAG 2.2 was published as a W3C Recommendation on
+5 October 2023 [8] and supersedes WCAG 2.1 (2018) with the addition of nine
+new success criteria addressing focus appearance, dragging movements, target
+size, consistent help, redundant entry, accessible authentication, and focus
+not obscured.
+
+The specification is organised around four high-level principles, Perceivable,
+Operable, Understandable, and Robust (POUR), under which 86 individual success
+criteria are grouped at two mandatory conformance levels (A and AA) and one
+aspirational level (AAA).  Level A comprises the most foundational barriers:
+missing image alternative text (SC 1.1.1), keyboard inaccessibility (SC 2.1.1),
+absence of page language (SC 3.1.1), and the requirement that status messages
+be programmatically determinable (SC 4.1.3).  Level AA adds requirements for
+colour contrast ratios (SC 1.4.3), focus indicator visibility (SC 2.4.7,
+2.4.11), captions for prerecorded media (SC 1.2.4), and more nuanced
+requirements for accessible names and form instructions.  The Understanding
+WCAG 2.2 document [9] and the Techniques for WCAG 2.2 document [10] together
+provide the normative interpretive guidance that operationalises each SC in
+specific technology contexts.
+
+A characteristic that raises the difficulty of automated WCAG compliance checking
+is the semantic nature of many success criteria [8][9].  SC 2.4.6 requires
+headings and labels to be descriptive, but whether a heading is descriptive
+cannot be determined by checking an attribute value alone; it requires
+understanding the heading's relationship to the section it introduces [9].
+SC 1.3.1 requires that information, structure, and relationships conveyed through
+presentation be programmatically determinable, which in practice means reasoning
+about whether visual hierarchy is supported by semantic HTML or only by CSS [8].
+SC 4.1.3 requires that status messages be programmatically determinable without
+receiving focus, which requires understanding whether a given update mechanism
+correctly uses a live region or equivalent ARIA pattern [8][9].  These criteria
+constitute the semantic accessibility layer that the present research targets.
+
+───────────────────────────────────────────────────────
+2.3.4  WAI-ARIA: Programmatic Accessibility for Dynamic Interfaces
+───────────────────────────────────────────────────────
+
+The Web Accessibility Initiative: Accessible Rich Internet Applications
+(WAI-ARIA) specification, published as a W3C Recommendation at version 1.1
+in 2017 [11], provides a vocabulary of roles, states, and properties that
+augment HTML semantics for assistive technologies.  It is the primary mechanism
+through which developers communicate the accessibility semantics of custom and
+dynamic components, widgets that do not correspond to a native HTML element and
+therefore carry no built-in accessibility semantics.
+
+ARIA introduces three categories of attribute.  Roles define the type of a
+user-interface component: role="button", role="dialog", role="tabpanel" and
+others map components to the ARIA design patterns documented in the WAI-ARIA
+Authoring Practices Guide (APG) [12].  States describe the current condition of
+a component: aria-expanded="true" signals that a disclosure button has opened
+its controlled region; aria-invalid="true" signals that a form field contains a
+validation error.  Properties describe characteristics that do not change
+dynamically: aria-label provides an accessible name; aria-describedby links a
+component to a supplementary description; aria-controls identifies the element
+a control operates upon.
+
+The correct implementation of ARIA requires that three invariants be maintained:
+ARIA roles must be placed on elements whose semantics, keyboard behaviour, and
+visual presentation are consistent with the implied pattern; ARIA state attributes
+must be updated whenever the corresponding visual or logical state changes; and
+ARIA reference attributes (aria-labelledby, aria-describedby, aria-controls) must
+point to elements that exist in the DOM.  Violation of any of these invariants
+produces a discrepancy between the visual representation and the assistive
+technology representation, a discrepancy that is invisible to sighted users and
+undetectable by simple attribute-presence checks but that can render a component
+entirely unusable for screen reader users.
+
+The complexity of ARIA's state-management requirements, combined with the need
+to update state variables synchronously with JavaScript event handlers and
+component lifecycle events, constitutes a primary driver of accessibility failures
+in modern, JavaScript-driven web applications.  This pattern is consistent with
+the error densities recorded by Martins and Duarte [3] and Fernandes et al. [4]
+across public-sector and healthcare sites respectively, where dynamic content
+generation and complex widget markup were among the most prevalent sources of
+failure.  It represents the category of violation most resistant to detection by
+traditional automated tools and most amenable to the reasoning capabilities of a
+large language model.

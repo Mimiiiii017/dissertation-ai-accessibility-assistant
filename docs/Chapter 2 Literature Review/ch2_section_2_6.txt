@@ -1,0 +1,148 @@
+2.7  Prompt Engineering and Chain-of-Thought Reasoning
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.7.1  Prompt Engineering as a Research Discipline
+───────────────────────────────────────────────────────
+
+Prompt engineering refers to the systematic design of input instructions that
+direct an LLM towards a desired output format, reasoning strategy, or behavioural
+constraint without modification of model weights.  The feasibility of prompt
+engineering as a practical discipline was established by Brown et al.'s (2020)
+demonstration that GPT-3 could be redirected across radically different task
+types through instruction alone [23].  Since then, prompt engineering has
+developed into a rich research area with documented design patterns, including
+persona assignment, task decomposition, few-shot exemplar provision, and
+structured output templating, each backed by empirical evidence of their
+effect on output quality.
+
+The construction of an effective prompt for a multi-criteria analysis task such
+as accessibility auditing differs substantially from the construction of a
+generative prompt.  A generative prompt typically aims to maximise output
+coherence and creativity; an analytical prompt must instead constrain the
+model's output to a specified format, suppress speculative outputs, and ensure
+that the model's reasoning is rooted in the specific content provided rather
+than in general training associations.  The structured issue-block format enforced
+by the SYSTEM_PROMPT in the present research (Chapter 3, Section 3.3.4) reflects
+these analytical constraints directly.
+
+───────────────────────────────────────────────────────
+2.7.2  Chain-of-Thought Prompting
+───────────────────────────────────────────────────────
+
+The single most influential finding in prompt engineering research is the chain-
+of-thought (CoT) technique introduced by Wei et al. (2022) [29].  Wei et al.
+demonstrated that instructing LLMs to generate explicit intermediate reasoning
+steps before producing a final answer substantially improves accuracy on
+mathematical reasoning, commonsense reasoning, and symbolic manipulation tasks.
+In experiments on GPT-3 and PaLM, CoT prompting produced accuracy gains of up
+to 25 percentage points over standard prompting on multi-step arithmetic
+benchmarks.  The mechanism is interpreted as enabling the model to allocate
+more of its effective computation to individual reasoning steps rather than
+attempting to compress complex multi-step inference into a single token
+prediction.
+
+Kojima et al. (2022) demonstrated that CoT reasoning can be elicited in the
+zero-shot setting, without any chain-of-thought exemplars in the prompt, simply
+by appending the instruction "Let's think step by step" [30].  This finding
+substantially broadened the practical applicability of CoT, as constructing
+high-quality few-shot reasoning examples for a complex domain such as WCAG
+accessibility analysis is labour-intensive.  The two-phase prompt structure used
+in the present research (READ AND MAP silently, then REPORT ISSUES) operationalises
+zero-shot CoT: the first phase directs the model to execute a complete semantic
+inventory before committing to any violation report, serving the same role as
+the step-by-step instruction without requiring explicit worked examples.
+
+Wang et al. (2023) extended CoT further through self-consistency, sampling
+multiple reasoning chains from the model and selecting the answer that
+appears most frequently across the sampled chains [31].  Whilst self-consistency
+was not implemented in the present study due to the cost of multiple inference
+calls per fixture, it represents a relevant direction for future optimisation and
+is discussed in the conclusion chapter.
+
+For LLMs with built-in extended reasoning capabilities (Qwen3, kimi-k2.5, DeepSeek-
+R1), CoT reasoning is implemented as an internal <think>...</think> block that is
+evaluated before the visible response is generated.  These models produce
+substantially different outputs when reasoning is enabled versus suppressed, as
+the ablation study in Chapter 3 demonstrates.  The literature on reasoning models
+suggests that the quality ceiling for extended-thinking models is substantially
+higher than for models of equivalent parameter count that do not use dedicated
+reasoning computation [29][30].
+
+───────────────────────────────────────────────────────
+2.7.3  Persona and Constraint-Based Prompting
+───────────────────────────────────────────────────────
+
+Persona assignment, framing the model as a specific type of expert, is an
+established prompt design pattern.  Brown et al. (2020) demonstrated that model
+output adapts substantially to the framing instructions and role descriptions
+supplied in the prompt context, with task-specific framing consistently improving
+output coherence and precision relative to unframed instructions [23].  Wei et al.
+(2022) further observed that structured task framing, including explicit role
+descriptions, consistently improved the reliability of structured reasoning outputs
+over unframed equivalents across large language models [29].  In contrast to
+generalist instructions, which elicit verbose commentary, expert persona framing
+produces the constrained, structured output formats required for automated
+downstream processing.
+
+The SYSTEM_PROMPT in the present research assigns the persona "You are a senior
+WCAG 2.2 accessibility auditor."  This framing was adopted after early pilot
+experiments demonstrated that un-framed prompts produced verbose commentary
+interleaved with violation reports, whereas the expert persona consistently
+produced the structured block format required for automated parsing.  The
+"senior" qualifier is deliberate: seniority in the expert persona activates
+language patterns associated with focused, evidence-based assessment rather
+than exploratory or instructional discourse.
+
+Negative constraints, explicit instructions specifying what the model must not
+do, are a complementary technique for suppressing systematic failure modes.  The
+five rules of the Anti-FP Supplement described in Chapter 3 operate as negative
+constraints: they explicitly prohibit each of the hallucination patterns observed
+during pilot testing.  This approach is consistent with the instruction-following
+literature, which demonstrates that LLMs are more reliably constrained by
+explicit prohibitions in the system prompt than by relying on the model's own
+calibration to suppress over-reporting [23].
+
+───────────────────────────────────────────────────────
+2.7.4  Inference Sampling Parameters
+───────────────────────────────────────────────────────
+
+The numerical hyperparameters governing token sampling from an LLM's output
+distribution have a significant effect on output quality and reproducibility
+for analytical tasks.
+
+The sampling temperature parameter scales the next-token probability distribution
+before sampling: values below 1.0 concentrate probability mass on the most likely
+tokens, increasing output consistency; values above 1.0 flatten the distribution,
+increasing diversity at the cost of coherence.  Renze and Guven (2024) conducted
+a systematic empirical study of temperature effects on nine LLMs across five
+prompt-engineering strategies and concluded that for analytical problem-solving
+tasks, temperatures in the range 0.0–1.0 produce no statistically significant
+difference in accuracy, justifying the use of any value in this range [32].
+The present research uses temperature = 0.2 to favour consistent structured
+output whilst avoiding the degenerate repetition associated with very low
+temperatures.
+
+Top-p (nucleus) sampling, introduced by Holtzman et al. (2020), restricts
+sampling at each step to the smallest set of tokens whose cumulative probability
+mass meets a threshold p [33].  The technique eliminates the unreliable low-
+probability tail, the region from which semantically incoherent tokens are
+most likely to be sampled, whilst preserving sufficient diversity from the
+high-probability mass.  Holtzman et al. demonstrated that p = 0.95 produces the
+most coherent and human-like text generation across multiple evaluation metrics,
+a finding that has since become the most widely adopted default across production
+inference APIs.  The present research uses top_p = 0.95.
+
+Top-k filtering, introduced by Fan et al. (2018), truncates the next-token
+distribution to the k highest-probability tokens before sampling [34].  Fan et
+al. found that k = 40 optimally balances coherence and expressiveness for
+structured text generation tasks.  This value has since been adopted as the
+canonical default by Ollama and major open-source inference frameworks and is
+used without modification in the present research.
+
+Repetition penalties, first motivated by the work of Welleck et al. (2020)
+on unlikelihood training, suppress degenerate token repetition whilst
+preserving the legitimate recurrence of domain-specific terminology across
+multiple issue blocks [35].  A mild penalty of 1.1 was applied; frequency and
+presence penalties were set to zero to avoid suppressing WCAG SC identifiers
+and ARIA attribute names that legitimately recur across multiple violations.

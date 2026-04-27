@@ -1,0 +1,134 @@
+2.6  Retrieval-Augmented Generation
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.6.1  The RAG Architecture
+───────────────────────────────────────────────────────
+
+Retrieval-Augmented Generation (RAG) was introduced by Lewis et al. (2020) as
+an architecture for knowledge-intensive NLP tasks in which a parametric sequence-
+to-sequence model is augmented by a non-parametric retrieval component [25].
+In the RAG framework, each input query is first processed by a retrieval system
+that selects relevant documents or document segments from an external knowledge
+store.  The retrieved content is then prepended to the query and supplied as
+context to the language model, which generates its response conditioned on both
+the original input and the retrieved evidence.
+
+The architectural motivation for RAG is the recognition that large parametric
+models encode factual knowledge in their weights during pre-training but cannot
+readily update this knowledge without expensive retraining.  By externalising
+domain-specific knowledge into a retrievable document store, RAG enables the
+model to access current, verified, and high-authority information at inference
+time without modification of its weights.  Lewis et al. demonstrated
+significantly improved factual accuracy compared to purely parametric models
+on open-domain question-answering benchmarks, particularly for questions whose
+answers involve specialised or rapidly evolving knowledge domains [25].
+
+For the present research, the RAG architecture addresses the hallucination
+problem directly and specifically.  The WCAG 2.2 knowledge base, which the model
+cannot reliably recall from training data alone (particularly for the nine SCs
+introduced in October 2023), is stored as a retrievable vector database.  At
+inference time, the model receives the exact normative text of the relevant
+success criteria alongside the code under analysis, grounding its reasoning in
+authoritative documentation rather than in potentially outdated or reconstructed
+training-time representations.  This architecture was selected over fine-tuning
+on the grounds that fine-tuning a single model would not enable the comparative
+evaluation of multiple models, a core objective of the research, and that a
+RAG-equipped prompt-based approach is directly deployable to any model accessible
+via the Ollama inference relay without model-specific modification.
+
+───────────────────────────────────────────────────────
+2.6.2  Sparse Retrieval: BM25 and the Probabilistic Relevance Framework
+───────────────────────────────────────────────────────
+
+The probabilistic relevance framework (PRF) for information retrieval was
+developed over several decades of research into the ranked retrieval problem.
+Robertson and Zaragoza (2009) synthesised this body of work into the formulation
+now universally known as BM25 (Best Match 25), which remains the most widely
+deployed term-based retrieval model in production search systems [26].
+
+BM25 assigns a relevance score to a document d for a query q as a weighted
+sum over the query terms, where each term t contributes:
+    score(d, q) ∝ Σ_t  IDF(t) × [ tf(t,d) × (k₁ + 1) ] / [ tf(t,d) + k₁ × (1 - b + b × |d| / avgdl) ]
+
+where IDF(t) is the inverse document frequency of the term, tf(t,d) is its term
+frequency in the document, |d| is the document length, avgdl is the average
+document length across the collection, and k₁ and b are tunable saturation
+parameters.  The document-length normalisation term (b-parameter) prevents long
+documents from dominating the ranking solely by virtue of containing more
+occurrences of query terms.
+
+BM25's principal advantage in the accessibility knowledge base context is its
+reliability on precise technical identifiers.  WCAG SC numbers (e.g. "2.4.11"),
+ARIA attribute names (e.g. "aria-expanded"), and element type names (e.g.
+"role='combobox'") are often the most discriminating terms in an accessibility
+query.  These identifiers have low frequency across the knowledge base as a
+whole, high IDF weight in BM25's scoring function, and are not reliably embedded
+at similar distances in a dense semantic space because their meaning is
+definitional rather than paraphrasable.  BM25 therefore provides a complementary
+retrieval signal to dense semantic search, surfacing documents that contain
+exact identifier matches that semantic similarity alone may not rank highly.
+
+───────────────────────────────────────────────────────
+2.6.3  Dense Semantic Retrieval: Sentence Transformers
+───────────────────────────────────────────────────────
+
+Dense retrieval encodes both queries and documents as fixed-dimensional vectors
+in a learned semantic space such that semantically related texts are positioned
+close to one another regardless of surface-level lexical overlap.  Reimers and
+Gurevych (2019) introduced Sentence-BERT (SBERT), a modification of the BERT
+architecture that employs siamese network training with a similarity objective
+to produce sentence-level embeddings that are directly comparable by cosine
+similarity [27].  Prior BERT-based approaches required processing each
+(query, document) pair through cross-attention, making large-scale nearest-
+neighbour search computationally infeasible.  SBERT's bi-encoder architecture
+allows all documents to be pre-encoded offline, reducing retrieval to a single-
+pass distance computation.
+
+The sentence-transformers/all-MiniLM-L6-v2 model employed in the present
+research is a distilled version of the SBERT family introduced by Wang et al.
+(2020) [28].  MiniLM achieves deep self-attention distillation by training a
+smaller student transformer to replicate the self-attention distribution of a
+larger teacher model, retaining most of the semantic representational quality
+of the teacher at a fraction of its parameter count.  The all-MiniLM-L6-v2
+variant produces 384-dimensional embeddings and was selected for this study
+because its inference latency is compatible with interactive IDE use, queries
+are typically completed within 5-15 milliseconds on CPU hardware, whilst its
+retrieval accuracy on domain-specific text closely approaches that of full-
+sized models as demonstrated on the Semantic Textual Similarity benchmark suite.
+
+───────────────────────────────────────────────────────
+2.6.4  Hybrid Retrieval and Knowledge Store Design
+───────────────────────────────────────────────────────
+
+Hybrid retrieval combines sparse (BM25) and dense (semantic) signals to mitigate
+the limitations of each method in isolation.  Dense retrieval provides strong
+recall for paraphrase and synonym queries but can miss technical identifiers
+whose embedding-space neighbours are not the semantically correct documents.
+BM25 provides reliable exact-match recall but has no mechanism to retrieve
+relevant documents that use different terminology to express the same concept.
+
+The complementary weaknesses of the two retrieval paradigms make their
+combination theoretically well-motivated.  Robertson and Zaragoza [26] and
+Reimers and Gurevych [27] established the individual performance profiles of
+BM25 and dense retrieval respectively: BM25 excels on precise identifier matching
+but cannot recover relevant documents that express the same concept in different
+terminology; SBERT excels on semantic and synonym recall but can fail to surface
+documents that must be matched by exact technical identifiers.  Lewis et al. [25]
+demonstrated that retrieval-augmented generation substantially outperforms purely
+parametric approaches on knowledge-intensive tasks, providing the broader
+architectural case for externalising domain knowledge.  Combining BM25 and dense
+retrieval through score interpolation or reciprocal rank fusion captures the
+advantages of both paradigms.  The WCAG knowledge base used in the present study
+has exactly this character: each document contains both natural-language
+guidance and precise technical identifiers, making it an ideal candidate for
+hybrid retrieval.
+
+Vector storage for the dense index is provided by ChromaDB [41], a lightweight
+persistent vector database designed specifically for embedding-based retrieval
+in Python applications.  ChromaDB supports cosine similarity search over
+pre-computed embedding collections and provides a Python client compatible with
+the sentence-transformers library.  Its PersistentClient interface enables the
+knowledge base index to be built once and reloaded at RAG service startup
+without repeated embedding computation, a practical requirement for a service
+that must respond within the interactive latency budget of an IDE plugin.

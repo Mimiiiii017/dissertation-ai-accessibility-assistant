@@ -1,0 +1,138 @@
+2.5  Large Language Models for Code Intelligence
+─────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────
+2.5.1  The Transformer Architecture and Foundation Models
+───────────────────────────────────────────────────────
+
+The theoretical foundation for modern large language models is the transformer
+architecture introduced by Vaswani et al. (2017) [21].  The transformer replaced
+the sequential recurrent computation of earlier sequence models with a fully
+parallelised attention mechanism that computes pairwise relevance scores between
+all positions in an input sequence simultaneously.  The multi-head self-attention
+operation enables the model to encode long-range syntactic and semantic
+dependencies that recurrent networks struggle to preserve across extended
+sequences.  The practical consequence is that transformers can be trained on
+substantially larger datasets, with substantially more parameters, than any
+prior sequence modelling architecture.
+
+Devlin et al. (2019) demonstrated that a transformer pre-trained bidirectionally
+on 3.3 billion words of text, the BERT model, could be fine-tuned with minimal
+task-specific data to achieve state-of-the-art performance across eleven NLP
+benchmarks simultaneously [22].  BERT established the pre-training and fine-
+tuning paradigm that subsequently dominated NLP research, and its deep
+bidirectional attention mechanism remains the conceptual basis for the language
+encoders used in modern sentence-embedding models.  Crucially, however, BERT
+requires labelled fine-tuning data for each downstream task and cannot be
+redirected through natural-language instruction alone, a limitation that
+contrasts directly with the few-shot capability demonstrated by later autoregressive
+models.
+
+Brown et al. (2020) scaled the autoregressive transformer to 175 billion
+parameters pre-trained on approximately 570 gigabytes of internet text (GPT-3)
+and demonstrated a qualitatively different capability: few-shot and zero-shot
+task performance without any weight updates [23].  By providing only a brief
+natural-language task description, and optionally one or two worked examples,
+in the model's input context, practitioners could direct the model towards
+complex analytical tasks that required domain knowledge and structured output.
+This finding established the viability of prompt-based interaction as a
+deployment paradigm for LLMs in professional applications, including software
+engineering tasks, and is the foundational result upon which the present research
+builds.
+
+───────────────────────────────────────────────────────
+2.5.2  Code-Aware LLMs and Code Intelligence
+───────────────────────────────────────────────────────
+
+The extension of the foundation model paradigm to source code produced a series
+of highly capable code-aware models.  Chen et al. (2021) introduced Codex,
+a GPT-3-derived model fine-tuned on over 150 gigabytes of public GitHub
+repositories, and demonstrated that it could generate correct solutions to
+programming tasks specified in natural language at rates significantly exceeding
+prior code-generation systems [24].  Codex formed the basis of GitHub Copilot
+and established the commercial viability of AI-assisted code authorship.
+
+The application of LLMs to code analysis tasks, rather than generation, has
+subsequently attracted substantial research attention.  Studies have evaluated
+LLMs' ability to detect bugs, identify security vulnerabilities, explain code
+behaviour, and perform code review tasks typically undertaken by human senior
+developers.  A recurring pattern across this body of work is that model scale correlates
+positively with analytical accuracy on tasks involving semantic reasoning over
+code structure and intent: smaller models tend to pattern-match against common
+training examples rather than generalise to novel structural relationships, whilst
+larger models exhibit greater contextual sensitivity [23][24].  This scale
+dependency is directly relevant to the 18-model benchmarking design of the present
+study, which includes models ranging from three billion to over 70 billion
+parameters specifically to characterise this relationship in the accessibility
+detection domain.
+
+For accessibility specifically, the relevance of LLM code intelligence is direct.
+Accessibility auditing of source code requires the auditor to reason about: the
+semantic role implied by the element and its context; the accessible name
+computation algorithm applicable to the element; the ARIA attributes that should
+be present given the component's interactive behaviour; the keyboard event
+handlers required by the applicable ARIA design pattern; and the dynamic state-
+update obligations that arise whenever the component's visual state changes.  No
+rule function can perform all of these reasoning steps simultaneously; an LLM
+operating on the full source context can in principle perform each of them.
+
+───────────────────────────────────────────────────────
+2.5.3  LLMs Applied to Accessibility Analysis
+───────────────────────────────────────────────────────
+
+Empirical work on the direct application of LLMs to accessibility auditing is
+nascent but growing.  Hellendoorn et al. (2021) provided an early theoretical
+framing of AI-assisted accessibility auditing in the IDE context, arguing that
+the semantic complexity of many WCAG success criteria and the interdependent
+nature of ARIA attribute requirements make them well-suited to evaluation by
+models capable of reasoning over extended code context [20].
+
+More recent work has begun empirically characterising LLM performance on
+accessibility detection tasks.  Emerging observations in this nascent field
+suggest that sufficiently capable models can identify semantic violations that
+rule-based checkers systematically miss, particularly inadequate accessible names,
+missing ARIA states, and broken ARIA reference chains.  The present study's own
+pilot testing confirmed this: across multiple model families, the LLM consistently
+identified semantic violations that axe-core and Pa11y failed to flag, whilst
+also producing hallucinated violations attributed to non-existent elements or
+incorrect line numbers when prompt constraints were absent.  These paired
+observations, that detection capability exists but unconstrained false-positive
+rates undermine usability, directly motivate both the two-phase prompt design
+(Chapter 3, Section 3.3.4) and the Anti-False-Positive Supplement employed in
+the present research.
+
+The heterogeneity of model performance across accessibility violation types also
+drives the multi-model evaluation design of the present study.  No single model
+has been shown to dominate across all categories of accessibility reasoning; the
+18-model comparative benchmark conducted in this research is designed to
+identify which model families offer the best balance of detection recall and
+specificity for IDE-embedded deployment.
+
+───────────────────────────────────────────────────────
+2.5.4  The Hallucination Problem and the Need for Knowledge Grounding
+───────────────────────────────────────────────────────
+
+The most significant limitation of LLMs as information sources is the phenomenon
+of confabulation, commonly termed hallucination, in which models generate
+plausible-sounding but factually incorrect outputs [23][24].  In the accessibility
+context, hallucination manifests as the reporting of violations that do not exist
+in the code (false positives) or the attribution of violations to incorrect line
+numbers or non-existent elements.  The present study's pilot testing identified
+five systematic hallucination patterns (Chapter 3, Section 3.4.1) that were
+consistently reproduced across multiple model families on specific code patterns.
+
+Hallucination rates correlate with the degree to which a model's training data
+covers the specific domain.  WCAG 2.2, published in October 2023, post-dates
+the training cutoff of almost every model evaluated in this study.  A model
+queried about WCAG 2.2 success criteria 2.4.11 (Focus Not Obscured: Minimum)
+or 3.3.7 (Redundant Entry) with no grounding context must either generate from
+limited or no training signal, or hallucinate a plausible-sounding but incorrect
+description.  This dependency between knowledge currency and hallucination rate
+provides the most direct theoretical argument for the RAG architecture described
+in Section 2.6.
+
+The mitigation of hallucination through prompt engineering, including persona
+assignment, explicit negative constraints, and confidence gates, is reviewed
+in Section 2.7.  The combined use of RAG grounding and prompt-level hallucination
+suppression is the architectural response to this limitation in the present
+research.
