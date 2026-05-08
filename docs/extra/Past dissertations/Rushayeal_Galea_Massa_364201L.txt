@@ -1,0 +1,4962 @@
+Forecasting Sales for Aesthetic Products Using
+Machine Learning
+
+Rushayeal Galea Massa
+Supervisor: Alan Gatt
+
+June – 2023
+
+A dissertation submitted to the Institute of Information and
+Communication Technology in partial fulfilment of the requirements
+for the degree of Bachelor of Science (Hons) in Business Analytics
+
+Authorship Statement
+This dissertation is based on the results of research carried out by myself, is
+my own composition, and has not been previously presented for any other
+certified or uncertified qualification.
+The research was carried out under the supervision of Alan Gatt – Forecasting
+sales for aesthetic products using Machine Learning, Rushayeal Galea Massa
+
+5th June 2023
+
+II
+
+Copyright Statement
+In submitting this dissertation to the MCAST Institute of Information and
+Communication Technology, I understand that I am giving permission for it to
+be made available for use in accordance with the regulations of MCAST and
+the Library and Learning Resource Centre. I accept that my dissertation may
+be made publicly available at MCAST’s discretion.
+
+5th June 2023
+
+III
+
+Acknowledgements
+First and foremost, I'd like to offer my deepest appreciation to my supervisor
+Mr. Alan Gatt for providing guidance and feedback throughout this project. I
+would also like to express my heartfelt gratitude to my mother, the pillar of our
+family, for her unwavering support throughout my academic path, which would
+not have been possible without her. I am also grateful for my boyfriend and my
+siblings, who have always believed in me and encouraged me to keep pushing
+forward. Finally, I would like to thank Erika, my best friend, who provided me
+with invaluable advice and emotional support that will serve me well
+throughout my life.
+
+IV
+
+Abstract
+In this study, aesthetics sales data obtained from a company based in the
+United Kingdom is used to train and test various machine learning algorithms,
+to forecast demand for particular products. In this data, the Covid-19 sales
+period is included, and questions related to the effect caused by the pandemic
+are answered in the research conducted. This research was carried out to
+have a detailed analysis of the sales made between the year 2015 and the
+year 2022 and highlight any patterns and trends which may occur in the data.
+The problem faced during this research was related to the categorical values
+which are present in the original dataset so to eliminate this issue, one-hot
+encoding was used to transform the data into numerical form. As suggested by
+earlier studies, Random Forest and XGBoost were used to perform the
+forecasting. While an additional algorithm, Neural Network, was also tested on
+the data. The algorithm that performed the best of all the experiments tried out
+was Neural Network, with an RMSE results as low as 0.98, which was
+obtained in the experiment for the last 3 months, while the category was
+Mesotherapy. This was followed by XGBoost, which also achieved a low
+RMSE results of 1.98, which was obtained in the experiment for the summer
+period, while the category was needles. The data was tested out on different
+time periods to analyse the patterns and trends further. The time periods used
+were summer, winter, the whole 2019 year, Covid-19 period and the last 3
+months of the data. During each period, each algorithm was tested out for
+each category one by one. This was done since the sales of the categories
+vary from one another and the result cannot be predicted correctly if all the
+sales of the categories are combined. From this study it was found that the
+Covid-19 pandemic did have a negative effect on the sales of this company as
+they decreased substantially from the sales of the previous years. It was also
+found that machine learning algorithms are an efficient solution to be used
+when predicting supply and demand for aesthetic products. According to the
+findings of this study, the Covid-19 pandemic had almost the same impact on
+all regions of the United Kingdom. between the years 2020 and 2021. Based
+on an analysis of current data collected during the year 2022, it was
+
+V
+
+discovered that sales began to rebound to the high levels seen before the
+pandemic affected the United Kingdom and Ireland.
+
+VI
+
+Table of Contents
+Authorship Statement ........................................................................................II
+Copyright Statement ......................................................................................... III
+Acknowledgements ......................................................................................... IV
+Abstract ............................................................................................................ V
+Table of Contents ........................................................................................... VII
+List of Figures ................................................................................................. XII
+List of Tables ................................................................................................. XIII
+Chapter 1: Introduction ......................................................................................1
+1.1 Research Problem .................................................................................. 1
+1.2 Research Question ................................................................................. 1
+1.3 Aims and Objectives ............................................................................... 2
+1.4 Purpose Statement ................................................................................. 3
+Chapter 2: Literature Review .............................................................................4
+2.1 Sales Forecasting: .................................................................................. 4
+2.1.1 Meeting customer demand................................................................ 4
+2.1.2 Cosmeceutical products supply and demand.................................... 5
+2.1.2.1 Seasonality .................................................................................... 5
+2.1.3 Extraordinary events affecting supply and demand .......................... 6
+2.2 Machine learning: .................................................................................... 9
+2.2.1 Introduction to machine learning ....................................................... 9
+2.2.2 Machine learning approaches ......................................................... 10
+VII
+
+2.3 Forecasting supply and demand: .......................................................... 11
+2.3.1 Time Series Modelling .................................................................... 12
+2.3.2 Forecasting Models ......................................................................... 14
+2.3.3 Related Studies ............................................................................... 15
+Chapter 3: Research Methodology .................................................................. 17
+3.1 Data Acquisition .................................................................................... 17
+3.2 Data description .................................................................................... 18
+3.3 Data Cleaning ....................................................................................... 19
+3.4 Data Exploration .................................................................................... 21
+3.5 Data Preparation for machine learning .................................................. 28
+3.6 Training of Models ................................................................................. 29
+3.7 Testing and Evaluation .......................................................................... 30
+Chapter 4: Analysis of Results and Discussion ............................................... 32
+4.1 Summer Period ..................................................................................... 33
+4.2 Winter Period ........................................................................................ 33
+4.3 Whole Year Period ................................................................................ 34
+4.4 Covid-19 Period .................................................................................... 35
+4.4.1 Dermafiller....................................................................................... 36
+4.4.2 Mesotherapy ................................................................................... 37
+4.4.3 Needles ........................................................................................... 38
+4.4.4 Profilho ............................................................................................ 39
+4.4.5 Skinbooster ..................................................................................... 41
+VIII
+
+4.4.6 Skincare .......................................................................................... 42
+4.5 Last 3 Months Period ............................................................................ 43
+4.5.1 Dermafiller....................................................................................... 43
+4.5.2 Mesotherapy ................................................................................... 44
+4.5.3 Needles ........................................................................................... 45
+4.5.4 Profilho ............................................................................................ 46
+4.5.5 Skinbooster ..................................................................................... 47
+4.5.6 Skincare .......................................................................................... 48
+4.6 Research questions results ................................................................... 49
+4.7 Comparing findings to previous studies................................................. 52
+4.8 Additional findings ................................................................................. 52
+Chapter 5: Conclusion and Recommendations ............................................... 53
+List of References............................................................................................ 58
+Appendices...................................................................................................... 62
+1. Summer Period ..................................................................................... 62
+1.1 All Categories Summer ...................................................................... 62
+1.2 Dermafiller Summer ........................................................................... 63
+1.3 Mesotherapy Summer ........................................................................ 64
+1.4 Needles Summer ............................................................................... 65
+1.5 Profilho Summer ................................................................................ 66
+1.6 Skinbooster Summer ......................................................................... 67
+1.7 Skincare Summer .............................................................................. 68
+IX
+
+2. Winter Period .......................................................................................... 69
+2.1 All Categories Winter ......................................................................... 69
+2.2 Dermafiller Winter .............................................................................. 70
+2.3 Mesotherapy Winter ........................................................................... 71
+2.4 Needles Winter .................................................................................. 72
+2.5 Profilho Winter ................................................................................... 73
+2.6 Skinbooster Winter ............................................................................. 74
+2.7 Skincare Winter.................................................................................. 75
+3. Whole Year ........................................................................................... 76
+3.1
+
+All Categories Whole Year ............................................................. 76
+
+3.2
+
+Dermafiller Whole Year .................................................................. 77
+
+3.3
+
+Mesotherapy Whole Year ............................................................... 78
+
+3.4
+
+Needles Whole Year ...................................................................... 79
+
+3.5
+
+Profilho Whole Year ....................................................................... 80
+
+3.6
+
+Skinbooster Whole Year ................................................................ 81
+
+3.7 Skincare Whole Year ......................................................................... 82
+4. Covid Period............................................................................................ 83
+4.1 All Categories Covid .......................................................................... 83
+4.2 Dermafiller Covid ............................................................................... 83
+4.3 Mesotherapy Covid ............................................................................ 84
+4.4 Needles Covid.................................................................................... 84
+4.5 Profilho Covid..................................................................................... 85
+X
+
+4.6
+
+Skinbooster Covid .......................................................................... 85
+
+4.7
+
+Skincare Covid ............................................................................... 86
+
+5. Last 3 Months.......................................................................................... 86
+5.1 Dermafiller Last 3 Months .................................................................. 86
+5.2 Mesotherapy Last 3 Months ............................................................... 87
+5.3 Needles Last 3 Months ...................................................................... 87
+5.4 Profilho Last 3 Months ....................................................................... 88
+5.5 Skinbooster Last 3 Months................................................................. 88
+5.6 Skincare Last 3 Months ..................................................................... 89
+
+XI
+
+List of Figures
+Figure 1: Pipeline
+Figure 2: Category Distribution
+Figure 3: Product Distribution
+Figure 4: Category Boxplot
+Figure 5: Product Boxplot
+Figure 6: Time Graph
+Figure 7: Time Graph with legend
+Figure 8: Seasonality Graph
+Figure 9: Different Graphs
+Figure 10: Covid Forecast
+Figure 11: Sales Time Graph by Regions
+Figure 12: Summer Prediction
+Figure 13: Last 3 Months Prediction
+
+XII
+
+List of Tables
+Table 1: Variable Description
+Table 2: Product Percentage Table
+Table 3: Category Percentage Table
+Table 4: Location Percentage Table
+Table 5: Periods-Category RMSE best results
+Table 6: Algorithm Results – Dermafiller – Covid
+Table 7: Actual vs Predicted - Dermafiller - Covid
+Table 8: Algorithm Results – Mesotherapy – Covid
+Table 9: Actual vs Predicted - Mesotherapy – Covid
+Table 10: Algorithm Results – Needles – Covid
+Table 11: Actual vs Predicted - Needles – Covid
+Table 12: Algorithm Results – Profilho – Covid
+Table 13: Actual vs Predicted - Profilho – Covid
+Table 14: Algorithm Results – Skinbooster – Covid
+Table 15: Actual vs Predicted - Skinbooster – Covid
+Table 16: Algorithm Results – Skincare – Covid
+Table 17: Actual vs Predicted - Skincare – Covid
+Table 18: Algorithm Results - Dermafiller - Last 3 Months
+Table 19: Actual vs Predicted - Dermafiller – Last 3 Months
+Table 20: Algorithm Results - Mesotherapy - Last 3 Months
+Table 21: Actual vs Predicted - Mesotherapy– Last 3 Months
+Table 22: Algorithm Results - Needles - Last 3 Months
+Table 23: Actual vs Predicted - Needles – Last 3 Months
+XIII
+
+Table 24: Algorithm Results - Profilho - Last 3 Months
+Table 25: Actual vs Predicted - Profilho – Last 3 Months
+Table 26: Algorithm Results - Skinbooster - Last 3 Months
+Table 27: Actual vs Predicted - Skinbooster – Last 3 Months
+Table 28: Algorithm Results - Skincare - Last 3 Months
+Table 29: Actual vs Predicted - Skincare – Last 3 Months
+
+XIV
+
+Chapter 1: Introduction
+1.1 Research Problem
+This research is based on the sales data of a UK based aesthetic company.
+The gathered data includes the sales transactions which occurred from 2015
+to 2022. The transactions are available for 26 different products which are sold
+by the company. The quantity feature will be used later to look for any patterns
+or trends which might be present in the dataset. In addition to trends and
+patterns, seasonality and any other possible events will also be investigated.
+For this type of study, there are various machine learning algorithms which can
+be evaluated, since algorithms can perform differently on the same dataset.
+These machine learning algorithms will be used to predict sales data so that if
+the result is accurately forecasted, these algorithms can be used to predict
+future data. The Covid-19 sales periods will be analysed in this research to be
+able to determine if the pandemic had any effect on the sales of this company.
+This will be conducted so that the company can reduce their costs and meet
+customer demands in a most efficient manner. Other time period will also be
+analysed such as summer, winter, one whole year and the last three months of
+the data.
+
+1.2 Research Question
+In this study, the research questions are:
+- Did the Covid-19 lockdown affect the sales of aesthetics products?
+- Did the Covid-19 pandemic have the same impact on all the regions in the
+UK?
+
+1
+
+- Can machine learning algorithms be used to make a prediction for supply
+based on previous transactions?
+The main hypothesis stated for this study is that Covid-19 did in fact affect the
+sales of aesthetic products. This hypothesis was formulated due to the
+negative effects other non-essential businesses experiences during the Covid19 periods. The hypothesis for the second research question is that the effect
+was approximately the same for all the regions in the UK since the lockdown
+was enforced on all the UK regions. The hypothesis formulated for the third
+research question is that machine learning can be used to make predictions for
+a supply based on previous transactions, given that enough useful information
+in the correct format is provided.
+
+1.3 Aims and Objectives
+Sales forecasting is used in many businesses nowadays as this is very helpful
+when it comes to making orders and planning production for certain products.
+This is especially helpful when it comes to planning supply and demand for
+products which have a short expiration date. The aim of this research is to find
+out how the Covid-19 pandemic affected the company’s sales and in what way
+were they affected. Another aim of this research is to find out the Covid-19’s
+effect on the regions in the United Kingdom. The company will also have a
+forecasting solution which is already tried and tested against their data to help
+them finalise any future orders. They will also be provided with a detailed
+analysis of the product quantities which were sold during different months for
+different categories. The risk of over-ordering too many products or not
+meeting the customer demands will be reduced as they can easily generate an
+
+2
+
+estimate of the supply and demand. The company will know more regarding
+which seasons are more successful and which are the most sold products from
+their ranges, together with the most popular categories. This study will also be
+very helpful to the company when it comes to planning and providing training
+seminar related to their products since they can choose on what to focus them
+more about. Since the findings will also be compared between different regions
+across the UK, this will determine how regions were impacted.
+
+1.4 Purpose Statement
+The reason why this research was chosen was that data analysis is a very
+interesting subject to explore in a more realistic scenario. The data was
+gathered through a personal contact who is working in a company that
+distributes aesthetic products mainly across the United Kingdom and a few
+other countries such as USA and Brazil. Data analysis techniques will be used
+to identify the patterns which are present in this data. Machine learning
+forecasting techniques will also be used to help them formulate a better
+marketing and supply strategy depending on the current and future market
+demand and find out which is the optimal algorithm to be used on this dataset.
+The reason for choosing to conduct this research using this approach is that it
+saves more time when trying out experiment using computerised methods
+rather than statistical model. This is especially suitable since the dataset is
+also larger in size.
+
+3
+
+Chapter 2: Literature Review
+Forecasting is the process of making predictions based on past and present
+data. Forecasting is used by industries and business entities, including
+aesthetic companies to research the supply and demand for their products.
+This assists industries in controlling the market chains.
+
+2.1 Sales Forecasting:
+Forecasting entails making predictions about the expected future demand and
+supplies. This is useful so that the customer demands, and the supply
+requirements are met.
+
+2.1.1 Meeting customer demand
+In businesses, past sales information can be used to forecast the future sales
+for the immediate months. Forecasting in companies is used, so that the
+business can have a general grasp of the market demand and help to set
+goals and plan resources and logistics for this demand. Due to the increase in
+the use of AI technology, competition in the market is growing at a more rapid
+pace [1]. The company can also have an indication of what type of services or
+products are more popular with clients and in what ways are the trends and
+patterns are changing and evolving. If the company does not satisfy the market
+demand for a product, customers will have to opt to purchase from
+competitors, which will then result in loss of sales and possibly even losing the
+customers’ loyalty. A business can get all the demand information by applying
+their sales data to any of the desired forecasting models and increasing the
+chances of improving the satisfaction levels of its customers.
+4
+
+2.1.2 Cosmeceutical products supply and demand
+Cosmeceuticals are the products which fit the niche between drugs and
+cosmetics. This term is used in the professional skin care industry to describe
+a product that has measurable biological effect in the skin but is regulated as a
+cosmetic since it claims to affect appearance. These professional skin care
+products come in the form of sunscreen, antiaging creams, foundation,
+facemasks, derma fillers and more. Cosmeceuticals are the fastest growing
+segment of the personal care industry and their formulations have expanded
+from skin to body to hair and several cosmeceutical treatments for conditions.
+Studies focusing on the cosmeceutical products highlight that there will be
+strong growth perspective for this industry in the coming years [2].
+
+2.1.2.1 Seasonality
+Seasonality stands for regular patterns that are determined by different
+seasons over a given number of periods. Seasonality in terms of sales refers
+to the oscillations in total amount of sales that occur throughout one year and
+then repeats in the following years. Seasonality is not determined by the
+volume of sales of the whole year but in volumes during specific periods. This
+periodic seasonality can be based on short volumes such as weeks or months
+[3]. In an industry, seasonality in sales is highly influenced by the different
+seasons of the year, holiday periods such as summer breaks or Christmas
+holidays, and other notable dates such as Mother’s Day, Father’s Day, or
+Valentine’s Day. When a forecast is predicted based on seasonality, the
+accuracy must be very high because if the forecast is inaccurate, this may
+5
+
+cause major issues in marketing, production, investment, and expenses. If the
+marketing and advertisement is not scheduled in the correct seasonality, the
+targets will not be achieved and the money for campaigns would not have the
+desired effect. Over production of products cause by incorrect seasonality can
+also be an issue as certain products have to be sold in a specific period of
+time. If these products are not sold in this period of time, they may have to be
+either thrown away or sold at a very cheap price that does not cover expenses.
+
+2.1.2.2 Shelf life
+Once a product is produced, this product is labelled with an estimated shelf
+life. This shelf-life duration depends on the product itself which can be either a
+small number of days or it may still be good for several years. Products which
+are natural with less chemicals or additives tend to have a shorter shelf life
+than products with preservatives and additives. Shelf life is a very important
+feature in a product as it determines if the product is still safe to consume or
+use and guarantees the quality of the product. When a customer purchases a
+product which usually has a shelf life of more than one year, they would not
+expect the product to expire in a couple of days or months.
+
+2.1.3 Extraordinary events affecting supply and demand
+When an extraordinary event happens around the world, this may influence the
+sales of businesses which can lead to either a decrease or an increase of
+sales of certain products.
+
+6
+
+2.1.3.1 Covid-19
+The global pandemic in 2020 lead to a worldwide lockdown which affected the
+worldwide economy and stability [4]. To slow the spread of COVID-19,
+governments enforced social distancing restrictions and lockdowns on
+businesses deemed nonessential. The essential businesses were also
+enforced by restrictions, yet they were less drastic. According to research done
+by Fairlie and Fossen [5], from February 2020 to April 2020, the number of
+active business owners dropped by 22%. Year-over-year sales usually
+increase by 3% to 4%. However, in the second quarter of 2020, sales
+decreased by 17% whereas online sales increased by 180%. It was found that
+sales losses were largest in businesses affected by mandatory lockdowns
+such as accommodations, drinking places, and arts, entertainment, and
+recreation [5].
+In the United Kingdom, a 19.8% decline in Gross Domestic Product (GDP) was
+caused by public health measures such as social distancing, travel restrictions,
+and the closure of non-essential businesses between April and June 2020.The
+biggest quarterly recession in household expenditure ever occurred over this
+period, when spending on dining out, lodging, transport, and recreation
+decreased by over 20%.
+The 11.6 million jobs affected by the furlough plan considerably lessened the
+labour market's effects, causing the unemployment rate to increase from 3.8%
+at the end of 2019 to 5.2% at the end of 2020.
+Following the removal of restrictions, the GDP increased by 17.6% in the third
+quarter of 2020, from July to September. In the third quarter of 2020,
+household expenditure increased by 19.6%, including increases in dining,
+
+7
+
+lodging, and transportation costs. Average home prices increased by 13.5% in
+the year leading up to June 2021.
+Despite the Delta variant's emergence and the following lockdown causing a
+1.2% GDP decline over the first three months of 2021, the remainder of the
+year saw incremental growth. In spring and summer of 2021, household
+spending increased once more, returning steadily to pre-coronavirus pandemic
+levels by 8.5% and 2.6%, respectively.
+By the first quarter of 2022, GDP had restored to pre-coronavirus pandemic
+levels1 [6].
+
+2.1.3.2 Brexit
+As the United Kingdom officially exited the single market and customs union at
+the end of the transition period on December 31, 2020, which was the result of
+the June 2016 referendum, trade with the EU initially dropped.
+According to research found, the Brexit process is estimated to have reduced
+the level of UK productivity by between 2% to 5% over the three years since
+the referendum [7].
+It is challenging to separate the economic effects of Brexit from the COVID-19
+pandemic, the disruption of the global supply chain, and the increases in
+energy and food prices since they all overlapped [6].
+
+1
+
+https://www.ons.gov.uk/economy/grossdomesticproductgdp/articles/gdpandeventsinhistoryhowthec
+ovid19pandemicshockedtheukeconomy/2022-0524#:~:text=The%20COVID%2D19%20pandemic%20prompted,country%20reopened%20over%20the%2
+0summer.
+
+8
+
+2.1.3.3 Change in Government
+Since 2015, the UK has had five different prime ministers in the government.
+David Cameron was the prime minister between 2015 and 2016. Between
+2016 and 2019, Theresa May was elected prime minister. Boris Johnson acted
+as a prime minister between 2019 and 2022 followed by Liz Truss in the same
+year. Rishi Sunak is the current prime minister of the UK since 2022.
+
+2.2 Machine learning:
+Machine learning is a field devoted to understanding and developing ways that
+allow machines to learn approaches that use data to enhance computer
+performance on a set of tasks.
+
+2.2.1 Introduction to machine learning
+Machine learning is a set of algorithms found in the Artificial Intelligence (AI)
+discipline, which allows a computer to predict outcomes without being
+specifically programmed to do so [8]. This type of AI is becoming more popular
+and widely used in fields such as banking and finance, real estate, healthcare,
+retail, education, insurance, and pharmaceuticals [9]. The main objective of
+machine learning is to identify patterns based on predictors and then be able
+to use these patterns to predict an outcome on unseen data. These models
+can be trained more than once, given related-context data to be able to predict
+future data and make necessary decisions [10].
+If an algorithm is well trained, it will be able to learn very complex scenarios
+and predict the expected data with high precision. The choice of the correct
+predictors is very important when training a machine learning model [11].
+9
+
+Besides forecasting data, due to its versatile nature, machine learning can also
+be used for facial recognition, car identification, detecting credit fraud,
+detecting spam, providing personalised recommendations and services, and
+virtual customer support amongst others [12]. Machine learning is made up of
+different algorithms, each using different mathematical models to fit data and
+be able to conduct predictions. Some commonly used algorithms are Linear
+Regression, Decision Trees, Random Forest, KNN and K-means.
+
+2.2.2 Machine learning approaches
+There are different approaches for machine learning; most common are
+supervised learning, unsupervised learning, and reinforcement learning. Each
+of these techniques works by implementing different algorithms which process
+and learn data in different ways.
+The main difference between supervised and unsupervised techniques is that
+supervised training requires the programmer to label data beforehand in order
+for the machine learning algorithm to predict an outcome (focuses more on
+classifying the data using labels), while unsupervised focuses more on
+clustering the data, reducing dimensions and identifying sequences by
+association [13].
+Supervised Learning is commonly used in sentiment analysis, predictive
+analysis based on regression or categorical classification, natural language
+processing, detecting email spam and image classification. Some algorithms
+used in this approach are Decision Tree, Random Forest, Support Vector
+Machines and Linear Regression. Unsupervised learning is mostly used in
+scenarios of speech processing, object categorisation, audio classification, and
+
+10
+
+automatic labelling. Commonly used algorithms for this approach are KMeans, Hierarchical Clustering, Density-Based Clustering and A-priori.
+Algorithms which can be implemented in both supervised and unsupervised
+learning are Naïve Bayes, Auto Regressive Integrated Moving Average
+(ARIMA) and Deep Learning.
+Reinforced learning includes techniques like deep Q-network, post-decision
+state, Dyna-Q and Q-learning. These methods assist IoT devices in selecting
+security protocols and key parameters for various threats through trial and
+error. As an example, Q-learning is used as a model-free technique to
+enhance malware detection, offloaded anti-jamming, and authentication
+performance.
+
+2.3 Forecasting supply and demand:
+Nowadays, forecasting using computerised methods has become a very
+popular process that is used in different fields to be able to make predictions of
+future data based on past data. As stated by Petropoulos at al. [14], in around
+15 years, the field of forecasting has seen amazing growth in both theory and
+practice. Using today’s advanced technology, one can immediately get a
+detailed hour-by-hour weather forecast. In this forecast, the temperature, rain,
+weather conditions, UV index, wind and much more are predicted. Probability
+forecasts are used when uncertainty is irreducible, for example it can be used
+during elections to forecast which party will win the election. This does not
+necessarily mean that the party forecasted to win will surely win, but there is a
+great possibility that the forecast is correct. Forecasts can also be utilised in
+
+11
+
+companies when they are selling a service or products to predict future sales
+based on the past sales made [14].
+All these forecasts can be estimated based on using multiple past parameters
+called the predictors. This prediction is made available using the different
+algorithms found in machine learning to be able to not only forecast upcoming
+data, but also help in decision-making and analysing current status such as the
+company’s performance. The information based on the forecasting can help
+businesses to allocate resources, anticipate expenses and plan their budgets
+wisely. When it comes to predicting sales, one can also have an idea of how
+the production schedules need to be set [15]. When performing the
+forecasting, one must pay attention to the data being used and how it is used
+in the forecasting, as if the data is not used correctly, the forecast will not
+output the correct results either. If a company makes their decisions based on
+the incorrect predictions, the company may suffer many losses in both target
+audiences and the sales of products or services.
+
+2.3.1 Time Series Modelling
+At present, the most commonly used forecasting method of sales forecasting is
+time series modelling. From the sales data, multiple patterns and trends can
+be analysed such as trend in sales, seasonality, autocorrelation, patterns
+caused by the impact of external factors, pricing, and competitors’ behaviours
+[16]. Sales prediction can be a very complex problem, especially if the data
+includes outliers, and missing data. At present, several time series models
+have been developed to be able to overcome this issue by using models such
+as ARIMA, SARIMAX, SARIMA, Random Forest, and SVM. To be able to
+
+12
+
+implement such models, the sales data needs to include historical data for a
+long period of time to capture the seasonality and patterns, while also outliers
+must also be removed from the dataset before using one of the time series
+models.
+In the Time Series Modelling, different patterns may be present in the dataset.
+The data can include trends which occur when the data is either increasing or
+decreasing persistently for a long period of time which does not have to be
+linear [17]. Another type of time series pattern is the cyclic pattern. This pattern
+includes repeated fluctuations which are non-periodic, while the duration of
+these fluctuations is usually of a minimum of two years. These fluctuations are
+usually due to the economic conditions. A third pattern is the seasonal pattern
+which reflects the seasonality that is present in the Time Series data.
+Seasonality is always of a fixed and known frequency [18]. An example of
+seasonality is like demand for sunblock which will be highest during the
+summer season.
+Since most machine learning models can understand only numerical values,
+when data contains categorical values, a different approach must be taken.
+This issue can be resolved by using multiple encoding techniques such as
+label encoding or one-hot encoding. In the label encoding technique, each
+categorical variable is assigned an integer [19]. When a categorical feature
+has more than two values, the label encoding technique may cause some
+undesired issues as the integers assigned may be misinterpreted by the
+algorithms as having some sort of hierarchical order. This issue may be
+resolved by using the one-hot encoding technique. In this technique, several
+additional features are created based on the number of unique values in the
+
+13
+
+categorical feature. This mapping can have Q number of possible values, into
+a vector with Q number of elements, where only the element corresponding to
+the current feature value is “1”, while the remaining elements are “0’s” [20].
+This encoding is applied to all the unique variables in the categorical variables.
+
+2.3.2 Forecasting Models
+When predicting data, several models or algorithms can be used. The most
+used models for time series are Naïve model, Exponential smoothing model,
+ARIMA or SARIMA, Linear regression method, Multi-Layer Perceptron (MLP),
+Recurrent Neural Network (RNN), Long Short-Term Memory (LSTM), Decision
+Trees, XGBoost and AdaBoost. Each model has its own unique algorithm, and
+the accuracy may vary depending on the data being predicted.
+In the study ‘Demand Forecasting Using Coupling Of Machine Learning And
+Time Series Models For The Automotive After Market Sector’, demand for
+automotive products is forecasted through different models using historical
+demand history data along with external factors that influence demand.
+Machine learning models and Time-Series models are split into two sections
+and subcategorised to compare the best model [21]. According to the
+researcher, it was found that the top 3 models of machine learning are ADAboost, XGB boost and GBM. On the other hand, the top 3 models for time
+series models are Auto-ARIMA, Naïve, and Naïve-rept. The best model is then
+selected by calculating the Root Mean Squared Error (RMSE) of each model
+and choosing the approach with the smallest RMSE.
+
+14
+
+2.3.3 Related Studies
+In a study conducted by Akanksha at al. [22],store sales were predicted using
+Linear Regression, Random Forest and XGBoost models. The Linear
+Regression model’s performance was so poor, that it was not included in the
+paper. The dataset used contained approximately 2.94 million observations
+and had 6 variables. In this scenario, the XGBoost gained the best results,
+obtaining an RMSE of 3.86, while Random Forest obtained an RMSE of 5.13.
+As proposed by Huang at al. [23], to forecast cosmetics sales, the most
+appropriate method is LS-SVM. In this paper, the three models which were
+used are BPNN, LS-SVM and AR model. In terms of Mean absolute
+percentage error (MAPE), LS-SVM test resulted in 9.21%, BPNN test resulted
+in 12.56% while the AR model resulted in 17.13%. When evaluating the
+models using the Pearson Correlation Coefficient, LS-SVM had the highest
+correlation of 0.91, BPNN had a correlation of 0.86 while the AR model had the
+least correlation of 0.81.
+In a study conducted by Sajawal at al. [24], it was stated that sales forecasting
+is the most challenging task for the inventory management, marketing,
+customer service and Business financial planning for the retail industry.
+Therefore, they used different machine learning techniques to perform
+predictive analysis of retail sales data. The regression models used were
+Linear regression, Random Forest Regression and Gradient Boosting
+Regression, while the time series models used were ARIMA and LSTM. The
+results show that Gradient Boosting Regression performed best with an RMSE
+of 0.63 followed by Random Forest with an RMSE of 0.69. The model that
+performed the worst in this study was the ARIMA model.
+
+15
+
+Vithitsoontorn and Chongstitvatana [25] researched both statistical and deep
+learning methods when conducting demand forecasting. They concluded that
+both are reliable and are suitable to be used when predicting demand. The
+study showed that ARIMAs predictions of the future were made in an average
+straight line, whereas LSTM predicted the future value based on the
+seasonality and trend of the data. When the model was trained on the monthly
+observations of the data, the model provided better error scores. The ARIMA
+model obtained an RMSE of 21501.66 while the Multivariate LSTM obtained
+an RMSE of 20693.86.
+
+In a study done by Wang at al. [26], they attempted to find a forecasting
+method to balance their purchasing and sales in retail companies. This study
+explores ARIMA, SVM, RNN and LSTM in five dimensions which are predictive
+performance, generalization ability, runtime, cost, and convenience. When it
+comes to accuracy, SVM and LSTM were the best two models to use both
+when working with normalised or non-normalized data. It was also concluded
+that LSTM is the most convenient model to use.
+
+16
+
+Chapter 3: Research Methodology
+In the research methodology, the process and the steps taken to achieve the
+goals is explained in further detail. The first step in the process was gathering
+the data and loading it into Python. Next, data cleaning was performed on the
+data and a new file was created with the cleaned data. PowerBI was used to
+explore the data using some visuals and to make initial predictions. The data
+was then prepared for Machine Learning algorithms such as data training and
+testing, and the first experiments were tried out. Some evaluations were
+outputted by the experiments and the results were documented.
+
+Figure 1: Pipeline
+
+3.1 Data Acquisition
+The data used in this study was acquired from an aesthetic company based in
+London which distributes products mainly to the United Kingdom and Ireland.
+
+17
+
+3.2 Data description
+The data acquired is made up of 86,765 unique records which each refer to a
+unique sale. Each sale is made up of 13 different variables, these are shown in
+Table 1: Variable Description together with a short description of each variable.
+The data includes all the sales made between November 2015 and March
+2022.
+Variable
+Data Entry Date
+Pharmacy
+Year
+Month
+Quarter
+Product
+Qty
+Cust.Name
+
+Comp.Name
+
+Area Code
+
+Sales Rep
+Code
+
+Location
+
+Description
+When the data was inputted in the
+system.
+11 unique pharmacy names.
+The year in which the sale was
+made.
+The month and the year in which the
+sale was made.
+The quarter and the year in which the
+sale was made.
+26 unique product names, each fall
+under one of the six categories.
+Quantity sold for each product.
+4,317 unique customer names which
+identifies who purchased the
+products.
+4,299 unique company names which
+identifies which company purchased
+the products.
+Full Area code that reflects the
+regional code in which the sale was
+made. This is made up of letters and
+numbers.
+Identifies the sales representative
+who handled the sale.
+The code of the area but inly the
+letters are listed. Blank is used for
+countries outside of the UK and
+Ireland.
+10 unique locations in which the
+sales were made identified by a
+number. These represented regions
+
+18
+
+mainly in the UK and Ireland, and
+other countries such as the USA.
+Table 1: Variable Description
+
+3.3 Data Cleaning
+To be able to make a time-series forecasting of sales, the data needs to be in
+a numerical form. To do this, some data cleaning is required so that the data
+will be tailored according to what is needed and clearly understood by the
+algorithm.
+The first step in the data cleaning process was loading the data from the csv
+file into a data frame and making sure that the data was being loaded
+correctly. The data was checked for any null values and the totals for each
+column were displayed. Null values were found to be present in the
+‘Cust.Name’, ‘Comp.Name’ and ‘Code’ columns. The null values were ignored
+and kept in the data as the mentioned columns were not going to be used
+when doing the forecasting. The columns which were not considered that
+important when predicting future sales were the ‘Data Entry Date’,
+‘Cust.Name’, ‘Comp.Name’, ’Sales Rep’, ’Area Code’ and ‘Code. These
+columns were removed so that the forecasting process would be made only on
+the relevant data. The reason why these were irrelevant where because the
+sales were not affected by names or when the sale was inputted in the system.
+Regarding the ‘Area Code’ and ‘Code’ column, the location is enough to apply
+a forecasting algorithm on this data as only the name of the location will be
+taken into consideration when doing the analysis.
+The next step in the data cleaning process was to make changes to the
+‘Month’ column. This column was converted from text values to numeric values
+
+19
+
+to make the data in a numerical form as much as possible. The same process
+was repeated on the ‘Quarter’ column since the data previously included the
+letter ‘Q’ in addition to the quarter number. As a result, these two columns
+were completely changed to numerical forms and could now be used in the
+forecasting process.
+The ’Location’ column contained only a number which represented a specific
+location. This needed to be changed so that the data could be more easily
+interpreted by seeing the real location listed in the records. This was done by
+automatically replacing each number with the specific location value for each
+record found in the data frame.
+The ’Product’ column contained some data inputting errors. Some products
+were typed down differently in certain records such as written all in capital
+letters instead of capitalising the first letter of each word. This resulted in
+having to first extract all the unique values found in the column, and then
+determining which products were doubled. To make the data more practical,
+each original product name was changed to an identifiable name such as the
+type of product and a number added at the end. For the products which were
+duplicated, instead of giving one value to replace, the variations of the
+products were listed.
+A category column was missing from the data. The different products were first
+analysed, and then each product was assigned to one category. Six different
+categories were created, and these were added to the original data frame. The
+new column named ‘Category’ was used to store these values. The next step
+was assigning each product to a category, and this was done by using
+dictionaries found in Python.
+
+20
+
+Since the data contained thousands of unique customer names, a dictionary
+could not be used straightaway to generate the practical names. Therefore, the
+unique names had to be stored in a variable and then an array was created. A
+function was also created so that each name stored in the array would be
+changed to the word ‘company’ and a unique number added at the end. A
+dictionary was then used to replace the customer’s names with the names
+found in the dictionary created. A copy of the dictionary containing old and new
+names was then saved in a csv file so that there would be a reference to the
+real names. The same process was repeated for the company names and the
+pharmacies.
+The final step in the data cleaning process included removing records
+containing negative quantities which represented the samples which were
+given to customers. The new data frame was then saved into a new csv file to
+be used later in the forecasting methods.
+
+3.4 Data Exploration
+The data was explored by plotting it against various plot such as Histograms,
+Boxplots, Pie Charts, and others. The purpose of using a boxplot is to
+determine if the data contains outliers and if so, in what columns are the
+outliers present. The purpose of using a histogram is to be able to have a
+visual representation of how the data is distributed across the different values
+found in a variable while pie chart obtains the same result but displays them in
+a pie chart together with percentages.
+The distribution of variables can be easily identified when the data is plotted
+using Histograms. From the histogram shown in Figure 2: Category
+
+21
+
+Distribution, it can be noted that ‘Profilho’ was the most popular category
+followed by the ‘Dermafiller’ category. In Figure 3: Product Distribution, it is
+evident that ‘Injection 7’ was the most sold product across all times with the
+highest quantities.
+
+Figure 2: Category Distribution
+
+Figure 3: Product Distribution
+
+Using boxplots, it was concluded that from all the categories, ‘Profilho’
+contained the highest number of anomalies, while from the products ‘Injection
+7’ contained the highest number as well. These two variables were filtered out
+and a boxplot was plotted for each scenario. These are show in in Figure 4:
+Category Boxplot and Figure 5: Product Boxplot respectively.
+
+22
+
+Figure 4: Category Boxplot
+
+Figure 5: Product Boxplot
+
+‘Injection 7’ made up 85% of the products sold as shown in the pie chart in
+Table 2: Product Percentage Table. As shown in Table 3: Category
+Percentage TableError! Reference source not found. ‘Profilho’ made up
+85% of the categories sold while ‘Dermafiller’ made up 8%. As seen in Table 4:
+Location Percentage Table 20% of the sales were made in ‘London’ followed
+by 16% made in ‘NorthEast, Midlands’.
+
+23
+
+Product
+Injection 7
+Injection 10
+Injection 3
+Cream 2
+Facemask
+Injection 1
+Injection 5
+Injection 2
+Foundation 2
+Injection 6
+Injection 4
+Foundation 1
+Injection 8
+Make-up Remover
+Skin Booster Needles
+Cream 3
+Injection 13
+Mesotherapy Needles
+Pills
+Injection 14
+Injection 9
+Sunblock
+Injection 11
+Cream 4
+Injection 12
+Cream 1
+
+Percentage
+66.44%
+4.41%
+3.89%
+3.88%
+3.77%
+3.68%
+3.35%
+2.74%
+1.53%
+1.26%
+1.09%
+0.64%
+0.56%
+0.43%
+0.38%
+0.35%
+0.33%
+0.29%
+0.27%
+0.16%
+0.11%
+0.10%
+0.08%
+0.07%
+0.05%
+0.05%
+
+Table 2: Product Percentage Table
+
+Category
+Profilho
+Dermafiller
+Skincare
+Skinbooster
+Needles
+Mesotherapy
+
+Percentage
+67.01%
+16.03%
+11.13%
+4.76%
+0.68%
+0.39%
+
+Table 3: Category Percentage Table
+
+24
+
+Location
+NorthEast, Midlands
+NorthWest
+London
+SouthEast
+Scotland, Newcastle
+Outside London the rest
+SouthWest
+Outside London M25
+Ireland & Norhtern Ireland
+Brazil, USA, Blank, IE, Zimbabwe,
+Zurich
+
+Percentage
+19.57%
+15.40%
+14.28%
+10.92%
+10.42%
+9.83%
+9.56%
+4.78%
+4.68%
+0.56%
+
+Table 4: Location Percentage Table
+
+The trend of the sales data was plotted against a time graph as seen in Figure
+6: Time Graph. While this shows that the sales were increasing and growing
+by time, it also shows very sharp drop in sales during specific times in 2020
+and 2021 which hints that sales were affected by extraordinary events.
+
+Figure 6: Time Graph
+
+25
+
+In the time graph plotted in Figure 7: Time Graph with legend, we can see that
+Profilho had very high sales over the years followed by the Dermafiller
+category. By the end of 2020 the Profilho sales spiked up and went back down
+during the rest of the data.
+
+Figure 7: Time Graph with legend
+
+Seasonality was also plotted against a time graph while also highlighting the
+different months and years of the sales. From the visual shown in Figure 8:
+Seasonality GraphFigure 8: Seasonality Graph, we can conclude that November
+
+seemed to have the highest number of sales as opposed to the month of April.
+
+26
+
+Figure 8: Seasonality Graph
+
+In Figure 9: Different Graphs, the trend and seasonality are plotted against a
+year axis. These visuals help to analyse further if the extraordinary events did
+in fact have an effect on this sales data.
+
+27
+
+Figure 9: Different Graphs
+
+3.5 Data Preparation for machine learning
+To choose the forecasting algorithms, the literature review was reviewed, and
+three algorithms were chosen. The RMSE results from the literature review
+studies were also noted to be compared later to the results obtained from this
+study. To be able to forecast the results, the text data used in the forecasting
+needed to be changed to numerical values. For this reason, as suggested by
+the previous studies [19] and [20], one-hot-encoding was used on the
+categorical values in the columns ‘Category’, ‘Pharmacy’, ‘Product’, and
+‘Location’. After the one-hot-encoding was performed, the data obtained
+needed to be grouped by dates. Since the data only includes the month of the
+sales, all the dates had to be grouped to the first day of the month so that each
+
+28
+
+date is unique and could be used as an index when forecasting. The next step
+taken in this methodology was to create the lagged features in which the
+values at prior timesteps that were considered useful were stored. The lagged
+features go back up to seven time-steps, this means that for each category,
+the model includes the sales quantity values from the previous seven timesteps as features. The ultimate step taken before the splitting and training of
+models was to drop any null values which might be present in the data frame.
+
+3.6 Training of Models
+To train these models, five different types of data splitting were used. The first
+experiment was conducted on a summer period from the data. The dates
+which were selected were between the months of June and September for the
+year 2019. This type of experiment predicted the four selected months of the
+data and was made up of seven different experiments for each algorithm. First
+all the categories were used during the forecasting process, and afterward
+they were predicted one by one.
+A second type of splitting was conducted on a winter period from the data. The
+testing dates were selected between October 2019 and December 2019. This
+type of experiment predicted the three selected months of the data and was
+also made up of seven different experiments for each algorithm like the
+summer experiment. The reason for choosing the summer and winter periods
+from this specific year is because 2019 was the last year before the Covid-19
+pandemic infected the United Kingdom.
+To have an overview of sales made during each month of the year 2019, the
+third type of splitting was conducted using one whole year as testing data and
+
+29
+
+the dates chosen were between January 2019 and December 2019. This type
+of experiment predicted 11 months of the data one by one based on the past
+data from the previous years. The reason for having one less month in the
+results, was that January had to be removed from the testing data as it
+contained null values.
+A different data splitting type that was used, was conducted on one whole year
+during the Covid-19 period which also predicted 11 months of data due to the
+same reason mentioned before. The testing dates selected were between April
+2020 and April 2021, during which two enforced lockdowns happened.
+The last data splitting was conducted by choosing the last four months present
+in the data which were between December 2021 and March 2022. January
+2021 was also not included in the forecasting due to the null values. This was
+conducted to analyse whether the sales had returned to the pre-pandemic
+level of sales or not.
+As suggested by the previously mentioned related studies [22] and [24], to test
+the forecasting of sales, in this study Random Forest and XGBoost algorithms
+were used. An additional supervised algorithm which was also used was
+Neural Networks.
+
+3.7 Testing and Evaluation
+To test these experiments, all the variations of the models were executed on
+cleaned test data. A total of 102 unique experiments were tried one at a time.
+The first test that was tried on each algorithm contained the sales of all of the
+six categories. The tests that followed, included trying each forecasting
+
+30
+
+algorithm on each category one by one to be able to obtain results that make
+more sense since not all the categories make the same number of sales.
+At the end of each experiment, the RMSE, MSE, R^2, Explained Variance and
+Max Error were calculated together with an ‘Actual vs Predicted Sales Data’
+matrix to evaluate how the tests performed. The root-mean-square error
+(RMSE) is a commonly used measure of the differences between values
+predicted by a model and observed values. The mean-square-error (MSE) is
+the value of RMSE before finding the square root while the R^2 is the
+coefficient of determination. R^2 is a statistical measure that indicates the
+proportion of the variance explained by an independent variable in a
+regression model for a dependent variable. The Explained Variance score is
+comparable to the R^2 score, but it does not account for systematic offsets in
+the prediction while the Max Error metric calculates the maximum residual
+error in the regression model. From the results obtained from each experiment,
+an evaluation and conclusion were formulated.
+
+31
+
+Chapter 4: Analysis of Results and Discussion
+This chapter reflects on the results obtained from the experiments that were
+tried out. The best parameters for each algorithm during each testing period
+can be found in the Appendix section. In the Appendix, all the results obtained
+for each category including the differences between the actual and predicted
+values can also be found. As shown in table 5, the Neural Network
+algorithm performed best in 14 of the 30 experiments, followed by XGBoost,
+which performed best in 11 experiments, and Random Forest performed best
+in just five.
+
+Dermafiller
+
+Mesotherapy
+
+Needles
+
+Profilho
+
+Skinbooster
+
+Skincare
+
+Summer
+
+Winter
+
+27.96
+Random
+Forest
+1.67
+Random
+Forest
+1.98
+XGBoost
+
+24.26
+XGBoost
+
+Whole
+Year
+97.84
+XGBoost
+
+4.58
+XGBoost
+
+3.93
+XGBoost
+
+17.72
+Neural
+Network
+1320.98
+XGBoost
+
+15.65
+XGBoost
+
+1.85
+Neural
+Network
+22.03
+XGBoost
+
+1103.03
+Neural
+Network
+61.91
+Neural
+Network
+127.95
+Random
+Forest
+
+818.93
+Neural
+Network
+21.42
+Random
+Forest
+65.80
+Neural
+Network
+
+318.10
+Neural
+Network
+33.95
+Random
+Forest
+33.99
+Neural
+Network
+
+51.87
+Neural
+Network
+97.87
+XGBoost
+
+Covid
+183.05
+XGBoost
+
+Last 3
+Months
+67.94
+Neural
+Network
+0.98
+Neural
+Network
+1.90
+Neural
+Network
+814.83
+Neural
+Network
+23.83
+XGBoost
+19.83
+Neural
+Network
+
+Table 5: Periods-Category RMSE best results
+
+32
+
+4.1 Summer Period
+The summer period is based on the sales made during June 2019 to
+September 2019, which were all pre-pandemic sales. The results obtained
+during these times were quite good considering that only four months of the
+data were predicted. For this time period, the algorithm that obtained the best
+result was Random Forest with an RMSE as low as 1.67, obtained by the
+Mesotherapy category. This algorithm also performed best for three out of the
+six categories. For the Dermafiller category, the RMSE result obtained was
+27.96 and the algorithm that performed the best was Random Forest
+Regression. Even though this category has the second highest number of
+sales in the data, the RMSE obtained is still not as high as some other
+categories. For the Needles category, the algorithm that performed the best
+was XGBoost with an RMSE of 1.98. The Profilho category obtained very high
+RMSE results compared to other categories, with an RMSE of 318.10, due to
+the extremely high number of sales. This category also tends to increase the
+growth of sales constantly, so the algorithm may not have performed the best
+due to this reason. Random Forest was the best algorithm for the Skinbooster
+category during the summer period with an RMSE of 33.95 which is neither the
+best, nor the worst. For the Skincare category, the best algorithm was Neural
+Networks with an RMSE of 33.99 which is very similar to the results obtained
+for the Skinbooster category.
+
+4.2 Winter Period
+The winter period is based on the sales made during October 2019 to
+December 2019, which were also all pre-pandemic sales. The results obtained
+33
+
+during these times were also good considering that only three months of the
+data were predicted. For this time period, the algorithm that obtained the best
+result was XGBoost with an RMSE of 4.58, obtained by the Mesotherapy
+category. This algorithm also performed the best for four out of the six
+categories during the winter months. For the Dermafiller category during the
+winter period, the algorithm that performed the best was XGBoost with an
+RMSE of 24.26 which is very similar to the result obtained during the summer
+period. Neural Networks performed the best for the Needles category with an
+RMSE of 17.72, which is very high when compared to the result obtained
+during the summer period. For the Profilho category the RMSE obtained was
+1320.98 by the XGBoost algorithm. This result was the highest RMSE from all
+the categories and also from all the time periods. This result may have been
+obtained poorly due to the reason that the pandemic having already started
+affecting some countries around the world and the purchasing of aesthetic
+products was not being considered a necessity. The algorithm that performed
+the best on the Skinbooster category was Neural Network with an RMSE of
+51.87, which is considered satisfactory when compared to how the other
+algorithms performed on this category during this time period. XGBoost was
+the algorithm that performed the best on the Skincare category in this test data
+with an RMSE of 97.87.
+
+4.3 Whole Year Period
+The whole year period is based on the sales made between January 2019 and
+December 2019, which was the last pre-pandemic year. The predictions made
+during this period were also satisfactory since there were not any lockdowns
+
+34
+
+present at that time yet. The lowest RMSE obtained for this data splitting was
+3.93 obtained by the XGBoost algorithm for the Mesotherapy category. This
+algorithm performed the best for three out of the six categories during the 2019
+year. For the Dermafiller category, the algorithm that performed the best was
+XGBoost with an RMSE of 97.84. This result is quite high when compared to
+the results of the other time periods obtained for this category excluding the
+covid year. The best RMSE result obtained by the Needles category was 15.65
+and the algorithm that obtained this result was also XGBoost. This result was
+better than the result obtained during the winter period but not as good as the
+result of the summer period. For the Profilho category, the lowest RMSE
+obtained was 1103.03 by the Neural Network algorithm. This result was the
+second highest obtained result from the Profilho category following the winter
+period. This result shows that when the year 2019 was trained on the data
+between 2015 and the end of 2018, the sales did not reflect the past sales.
+The same reasoning applies for the Skinbooster and Skincare category as the
+RMSE is also considered a little high. For the Skinbooster category the best
+algorithm was Neural Network with an RMSE of 61.91 while for the Skincare
+category, the best algorithm was Random Forest with an RMSE of 127.95.
+
+4.4 Covid-19 Period
+The Covid-19 period is based on the sales made between April 2020 and April
+2021, during which two lockdowns happened in the United Kingdom. The first
+lockdown took place between April 2020 and June 2020, while the second
+lockdown took place between January 2021 and March 2021.
+
+35
+
+4.4.1 Dermafiller
+
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Dermafiller – Covid
+RMSE
+MSE
+R^2
+Explained
+Variance
+206.86 42791.74 0.67
+0.79
+
+Max
+Error
+502.46
+
+183.05 33507.03 0.74
+188.81 35648.21 0.73
+
+464.39
+384.63
+
+0.80
+0.82
+
+Table 6: Algorithm Results – Dermafiller – Covid
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+16
+89.17
+-73.17
+
+May
+2020
+80
+116.35
+-36.35
+
+Jun
+2020
+392
+372.24
+19.76
+
+Jul
+2020
+1002
+726.48
+275.52
+
+Aug
+2020
+861
+685.13
+175.87
+
+Sep
+2020
+879
+633.03
+245.97
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+630
+686.40
+-56.4
+
+Nov
+2020
+521
+527.04
+-6.04
+
+Dec
+2020
+737
+653.40
+83.6
+
+Feb
+2021
+122
+161.14
+-39.14
+
+Mar
+2021
+521
+504.25
+16.75
+
+Apr
+2021
+1182
+717.61
+464.39
+
+Table 7: Actual vs Predicted - Dermafiller - Covid
+
+As stated in Table 6: Algorithm Results – Dermafiller – Covid, for the
+Dermafiller category, XGBoost was the algorithm that performed the best with
+an RMSE of 183.05. Neural Network obtained a very close result with an
+RMSE of 188.81 while Random Forest performed the worst with an RMSE of
+206.86.
+In Table 7: Actual vs Predicted - Dermafiller - Covid, the actual sales and the
+predicted sales are shown together with the difference between them. In
+certain months, the algorithm predicted more sales than the actual sales, while
+in other months, the algorithm predicted less sales. For instance, in the month
+of April 2020 the algorithm predicted 73.17 more sales, while in the month of
+36
+
+April 2021 the algorithm predicted 464.39 less sales. For the months of April
+2020 and May 2020, the algorithm predicted way more sales due to the test
+data being trained on the pre-pandemic data, while the test data occurred
+during the first lockdown. This shows that the sales for these two months
+decreased from sales made during the pre-pandemic months.
+
+4.4.2 Mesotherapy
+
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Mesotherapy – Covid
+RMSE MSE R^2 Explained Variance
+3.01
+9.06 0.23
+0.27
+3.28 10.76 0.08
+0.10
+1.85
+3.44 0.71
+0.77
+
+Max Error
+7.93
+6.70
+3.64
+
+Table 8: Algorithm Results – Mesotherapy – Covid
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+1
+1.18
+-0.18
+
+May
+2020
+1
+2.80
+-1.8
+
+Jun
+2020
+2
+3.55
+-1.55
+
+Jul
+2020
+4
+6.05
+-2.05
+
+Aug
+2020
+7
+7.49
+-0.49
+
+Sep
+2020
+4
+6.92
+-2.92
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+9
+7.25
+1.75
+
+Nov
+2020
+9
+8.88
+0.12
+
+Dec
+2020
+5
+8.64
+-3.64
+
+Feb
+2021
+5
+6.92
+-1.92
+
+Mar
+2021
+6
+5.29
+0.71
+
+Apr
+2021
+13
+11.56
+1.44
+
+Table 9: Actual vs Predicted - Mesotherapy – Covid
+
+As stated in Table 8: Algorithm Results – Mesotherapy – Covid, for the
+Mesotherapy category, Neural Network was the algorithm that performed the
+best with a low RMSE of 1.85. Random Forest and XGBoost obtained a very
+close result with an RMSE of 3.01 and an RMSE of 3.28 respectively.
+
+37
+
+For this category, since the sales are very low, the predicted results in Table 9:
+Actual vs Predicted - Mesotherapy – Covid did not differ by much from the
+actual sales. This is the reason why the RMSE results obtained in Table 8:
+Algorithm Results – Mesotherapy – Covid was very small. The largest
+difference happened in the month of December 2020 with a difference of 3.64
+more sales, while the best predicted result was in the month of November
+2020 when there was a difference of only 0.12 less sales than the actual sales.
+After the first lockdown, the sales were as low as 1 while during the second
+lockdown, the sales were also quite low compared to the post-pandemic sales
+such as 13 in the month of April 2021.
+
+4.4.3 Needles
+Needles – Covid
+Algorithm
+RMSE MSE
+R^2 Explained Variance
+Random Forest 22.69 514.94 0.24
+0.43
+XGBoost
+22.03 485.42 0.29
+0.42
+Neural Network 30.75 945.70 -0.39
+0.24
+
+Max Error
+71.09
+68.86
+86.79
+
+Table 10: Algorithm Results – Needles – Covid
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+1
+2.12
+-1.12
+
+May
+2020
+28
+9.72
+18.28
+
+Jun
+2020
+8
+11.82
+-3.82
+
+Jul
+2020
+17
+15.03
+1.97
+
+Aug
+2020
+22
+31.04
+-9.04
+
+Sep
+2020
+105
+36.14
+68.86
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+45
+30.09
+14.91
+
+Nov
+2020
+17
+21.67
+-4.67
+
+Dec
+2020
+36
+17.11
+18.89
+
+Feb
+2021
+9
+9.21
+-0.21
+
+Mar
+2021
+32
+30.22
+1.78
+
+Apr
+2021
+41
+34.43
+6.57
+
+Table 11: Actual vs Predicted - Needles – Covid
+
+38
+
+As stated in Table 10: Algorithm Results – Needles – Covid, XGBoost was the
+best performing algorithm in the Needles category, with an RMSE of 22.03.
+Random Forest achieved an RMSE of 22.69, very identical to the XGBoost
+method, whereas Neural Network achieved an RMSE of 30.75.
+During the first lockdown in the United Kingdom, the Needles category sales
+did not drop considerably. In Table 11: Actual vs Predicted - Needles – Covid
+there were hardly any high differences; the only one resulted a 68.86
+difference for the Month of September 2020. Aesthetic product sales grew
+from prior year data, as seen by the fact that forecasted sales are substantially
+lower in value than actual sales. As an example, during the month of
+September 2020, the forecasted sales totalled 36.14, whereas the actual sales
+totalled 105. On the other hand, the algorithm predicted some correct
+outcomes, such as a forecasted outcome of 2.12 in April 2020 versus the
+actual sales of 1.
+
+4.4.4 Profilho
+
+Algorithm
+
+RMSE
+
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Profilho – Covid
+MSE
+R^2
+
+2501.59 6257969.26 0.39
+
+Explained
+Variance
+0.72
+
+Max
+Error
+6616.18
+
+2228.09 4964391.25 0.51
+818.93 670646.48 0.93
+
+0.75
+0.94
+
+5937.97
+1498.09
+
+Table 12: Algorithm Results – Profilho – Covid
+
+39
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+168
+1085.21
+-917.21
+
+May
+2020
+1121
+1781.72
+-660.72
+
+Jun
+2020
+4008
+4374.84
+-366.84
+
+Jul
+2020
+7895
+6396.91
+1498.09
+
+Aug
+2020
+7215
+6045.02
+1169.98
+
+Sep
+2020
+8289
+7643.40
+645.6
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+7634
+6684.58
+949.42
+
+Nov
+2020
+5786
+5709.61
+76.39
+
+Dec
+2020
+6120
+6484.80
+-364.8
+
+Feb
+2021
+2372
+2846.99
+-474.99
+
+Mar
+2021
+6920
+6240.24
+679.76
+
+Apr
+2021
+11870
+10933.28
+936.72
+
+Table 13: Actual vs Predicted - Profilho – Covid
+
+As stated in Table 12: Algorithm Results – Profilho – Covid, for the Profilho
+category, Neural Network was the algorithm that performed the best with an
+RMSE of 818.93 which is quite u high result. Random Forest and XGBoost
+algorithms performed very poorly with an RMSE result of 2501.59 and 2228.09
+respectively.
+The largest difference in sales happened in July 2020, as seen in Table 13:
+Actual vs Predicted - Profilho – Covid. This resulted in a 1498.09 difference.
+The Neural Network algorithm predicted 917.21 more sales than actual sales
+during the first month of testing. Profilho used to have a very high number of
+sales before the pandemic infected the United Kingdom, but when the
+lockdowns were implemented, sales for this category dropped dramatically.
+This effect primarily impacted April 2020, since sales were not as low in the
+remaining months. The smallest sales difference occurred in November 2020,
+with a difference as small as 76.39, followed by a difference of 364.8 in
+December 2020.
+
+40
+
+4.4.5 Skinbooster
+
+Algorithm
+
+RMSE
+
+Skinbooster – Covid
+MSE
+R^2
+Explained
+Variance
+458.81
+0.96
+0.96
+
+Random
+21.42
+Forest
+XGBoost
+27.98
+783.14
+Neural Network 110.95 12309.57
+
+0.93
+-0.10
+
+0.96
+0.50
+
+Max
+Error
+45.95
+50.11
+194.54
+
+Table 14: Algorithm Results – Skinbooster – Covid
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+14
+32.51
+-18.51
+
+May
+2020
+39
+20.39
+18.61
+
+Jun
+2020
+65
+42.25
+22.75
+
+Jul
+2020
+217
+245.82
+-28.82
+
+Aug
+2020
+267
+283.11
+-16.11
+
+Sep
+2020
+223
+268.95
+-45.95
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+322
+317.39
+4.61
+
+Nov
+2020
+195
+194.04
+0.96
+
+Dec
+2020
+271
+256.33
+14.67
+
+Feb
+2021
+54
+41.8
+12.2
+
+Mar
+2021
+136
+161.01
+-25.01
+
+Apr
+2021
+310
+319.27
+-9.27
+
+Table 15: Actual vs Predicted - Skinbooster – Covid
+
+As stated in Table 14: Algorithm Results – Skinbooster – Covid, for the
+Skinbooster category, Random Forest was the algorithm that performed the
+best with an RMSE of 21.42. XGBoost obtained a very close RMSE result to
+Random Forest, as it obtained an RMSE of 27.98. In this type of experiment,
+Neural Network obtained the worst result with an RMSE of 110.95. The
+Random Forest RMSE obtained by this experiment is quite a good result
+considering the quantity of sales made in this category.
+As stated in Table 15: Actual vs Predicted - Skinbooster – Covid, the
+difference between predicted and actual sales in this category was not
+significant. The greatest difference occurred in September 2020, when the
+41
+
+algorithm predicted 45.95 more sales than actual sales. This outcome could
+possibly be related to the pandemic taking place in the United Kingdom at that
+time. In this experiment, the Random Forest algorithm predicted a fairly close
+outcome with only 0.96 difference in November 2020, when actual sales were
+195 and forecasted sales were 194.04.
+
+4.4.6 Skincare
+
+Algorithm
+Random Forest
+XGBoost
+Neural
+Network
+
+Skincare – Covid
+RMSE
+MSE
+R^2
+Explained
+Variance
+95.19 9061.22 0.72
+0.79
+67.16 4509.87 0.86
+0.88
+65.80 4330.27 0.86
+0.91
+
+Max
+Error
+193.77
+137.10
+177.75
+
+Table 16: Algorithm Results – Skincare – Covid
+
+Actual
+Predicted
+Difference
+
+Apr
+2020
+41
+45.43
+-4.43
+
+May
+2020
+118
+89.57
+28.43
+
+Jun
+2020
+309
+321.67
+-12.67
+
+Jul
+2020
+445
+622.75
+-177.75
+
+Aug
+2020
+477
+569.31
+-92.31
+
+Sep
+2020
+534
+582.48
+-48.48
+
+Actual
+Predicted
+Difference
+
+Oct
+2020
+502
+546.42
+-44.42
+
+Nov
+2020
+448
+497.21
+-49.21
+
+Dec
+2020
+453
+511.19
+-58.19
+
+Feb
+2021
+116
+132.28
+-16.28
+
+Mar
+2021
+178
+160.05
+17.95
+
+Apr
+2021
+564
+575.83
+-11.83
+
+Table 17: Actual vs Predicted - Skincare – Covid
+
+As stated in Table 16: Algorithm Results – Skincare – Covid, for the Skincare
+category, Neural Network was the algorithm that performed the best with an
+RMSE of 65.80. XGBoost obtained a very close RMSE result to Neural
+
+42
+
+Network, as it obtained an RMSE of 67.16. Random Forest produced the worst
+results in this type of experiment, with an RMSE of 95.19.
+The lockdown months did not produce a large number of differences, as
+shown in Table 17: Actual vs Predicted - Skincare – Covid. This does not
+necessarily imply that the Covid-19 epidemic had no effect on this category's
+sales, because in a number of instances, actual sales were lower than
+predicted. There was a substantial difference in between the lockdown periods
+which lasted from July through December 2020. For instance, the biggest
+difference occurred in July 2020, when the algorithm forecasted 177.75 more
+sales than actual sales. On the other hand, the smallest difference occurred in
+April 2020, when the algorithm forecasted only 4.43 more sales than actual
+sales.
+
+4.5 Last 3 Months Period
+The last 3 months period is based on the sales made between December 2021
+and March 2022, which were the last few months of the data. The results
+obtained during this time period were quite good and even contained the
+lowest RMSE obtained from all the experiments.
+
+4.5.1 Dermafiller
+Dermafiller – Last 3 Months
+Algorithm
+RMSE
+MSE
+R^2
+Explained
+Variance
+Random Forest 130.93 17142.74 -0.47
+0.27
+XGBoost
+126.66 16042.45 -0.38
+0.52
+Neural
+67.94 4616.01
+0.60
+0.75
+Network
+
+Max
+Error
+218.95
+207.96
+117.54
+
+Table 18: Algorithm Results - Dermafiller - Last 3 Months
+
+43
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+623
+617.29
+5.71
+
+Feb 2022
+711
+711.06
+-0.06
+
+Mar 2022
+883
+765.46
+117.54
+
+Table 19: Actual vs Predicted - Dermafiller – Last 3 Months
+
+According to Table 18: Algorithm Results - Dermafiller - Last 3 Months, Neural
+Network was the best performing algorithm in the Dermafiller category, with an
+RMSE of 67.94. XGBoost came in second with an RMSE of 126.66, while
+Random Forest came in last with an RMSE of 130.93.
+According to Table 19: Actual vs Predicted - Dermafiller – Last 3 Months, the
+experiment's smallest difference occurred in February 2022, with a difference
+of only 0.06. The algorithm forecasted 117.54 less sales in March 2022 than
+actual sales, indicating that sales began to increase again after the pandemic.
+
+4.5.2 Mesotherapy
+
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Mesotherapy – Last 3 Months
+RMSE MSE R^2 Explained Variance
+0.99
+0.98 -0.46
+-0.43
+1.74
+3.02 -3.53
+-3.33
+0.98
+0.96 -0.44
+0.41
+
+Max Error
+1.50
+2.30
+1.48
+
+Table 20: Algorithm Results - Mesotherapy - Last 3 Months
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+8
+6.52
+1.48
+
+Feb 2022
+7
+7.25
+-0.25
+
+Mar 2022
+9
+9.80
+-0.8
+
+Table 21: Actual vs Predicted - Mesotherapy– Last 3 Months
+
+According to Table 20: Algorithm Results - Mesotherapy - Last 3 Months, the
+Neural Network algorithm performed the best in the Mesotherapy category,
+44
+
+with a very low RMSE of 0.98. Random Forest came in second to Neural
+Network with an RMSE of 0.99, while XGBoost came in last with an RMSE of
+1.74.
+According to Table 21: Actual vs Predicted - Mesotherapy– Last 3 Months, the
+predicted results were quite close to the actual values, with a difference as
+small as 0.25. Therefore, in conclusion, the Mesotherapy category sales did
+not rise or decrease following the Covid-19 lockdowns.
+
+4.5.3 Needles
+
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Needles – Last 3 Months
+RMSE MSE R^2 Explained Variance
+3.17 10.05 0.38
+0.82
+5.35 28.65 -0.77
+0.72
+1.90
+3.62 0.78
+0.99
+
+Max Error
+4.52
+6.78
+2.34
+
+Table 22: Algorithm Results - Needles - Last 3 Months
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+8
+6.18
+1.82
+
+Feb 2022
+9
+6.66
+2.34
+
+Mar 2022
+17
+15.56
+1.44
+
+Table 23: Actual vs Predicted - Needles – Last 3 Months
+
+The Neural Network algorithm performed the best in the Needles category,
+according to Table 22: Algorithm Results - Needles - Last 3 Months, with a low
+RMSE of 1.90. Random Forest finished second to Neural Network with an
+RMSE of 3.17, and XGBoost finished last with an RMSE of 5.35.
+According to Table 23: Actual vs Predicted - Needles – Last 3 Months, the
+predicted values were slightly lower than the actual ones. As a result, sales in
+the Needles category began to slightly rise at the end of the sales data.
+
+45
+
+4.5.4 Profilho
+
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Profilho – Last 3 Months
+RMSE
+MSE
+R^2
+Explained
+Variance
+1751.73 3068542.82 0.61
+0.62
+
+Max
+Error
+2444.21
+
+1990.93 3963801.21 0.49
+814.83 663947.75 0.92
+
+2644.16
+963.92
+
+0.70
+1.00
+
+Table 24: Algorithm Results - Profilho - Last 3 Months
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+10237
+10893.38
+-656.38
+
+Feb 2022
+13809
+14603.91
+-794.91
+
+Mar 2022
+17092
+18055.92
+-963.92
+
+Table 25: Actual vs Predicted - Profilho – Last 3 Months
+
+According to Table 24: Algorithm Results - Profilho - Last 3 Months, the Neural
+Network method performed the best in the Profilho category, with an RMSE of
+814.83, which is still extremely high. Random Forest came in second place to
+Neural Network with an RMSE of 1751.73, while XGBoost came in last with an
+RMSE of 1990.93.
+According to Table 25: Actual vs Predicted - Profilho – Last 3 Months, the
+Neural Network's forecasted values were not close to the actual sales. As a
+result, one may claim that Profilho sales have not yet returned to pre-pandemic
+levels, although this may not be accurate given the category's enormous
+number of sales.
+
+46
+
+4.5.5 Skinbooster
+Skinbooster – Last 3 Months
+Algorithm
+RMSE
+MSE
+R^2 Explained Variance Max Error
+Random Forest 41.11 1690.34 0.60
+0.68
+55.77
+XGBoost
+23.83 568.03 0.86
+0.91
+40.42
+Neural Network 50.13 2513.23 0.40
+0.54
+77.29
+Table 26: Algorithm Results - Skinbooster - Last 3 Months
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+205
+209.49
+-4.49
+
+Feb 2022
+327
+286.58
+40.42
+
+Mar 2022
+354
+346.94
+7.06
+
+Table 27: Actual vs Predicted - Skinbooster – Last 3 Months
+
+According to Table 26: Algorithm Results - Skinbooster - Last 3 Months, the
+XGBoost algorithm performed the best in the Skinbooster category, with an
+RMSE of 23.83. Random Forest and Neural Network obtained similar results in
+this experiment, with RMSEs of 41.11 and 50.13, respectively.
+According to Table 27: Actual vs Predicted - Skinbooster – Last 3 Months, the
+experiment's smallest difference occurred in December 2021, with a difference
+of only 4.49, while the algorithm predicted 40.42 fewer sales than actual sales
+in February 2022. This indicates that the Skinbooster sales began to rise again
+following the pandemic.
+
+47
+
+4.5.6 Skincare
+Skincare – Last 3 Months
+Algorithm
+RMSE
+MSE
+R^2
+Explained
+Variance
+Random Forest 26.52 703.51
+0.29
+0.29
+XGBoost
+43.01 1849.59 -0.86
+0.53
+Neural
+19.83 393.31
+0.60
+0.61
+Network
+
+Max
+Error
+34.86
+61.08
+25.42
+
+Table 28: Algorithm Results - Skincare - Last 3 Months
+
+Actual
+Predicted
+Difference
+
+Dec 2021
+
+Feb 2022
+
+Mar 2022
+
+638
+639.85
+-1.85
+
+582
+607.42
+-25.42
+
+564
+540.97
+23.03
+
+Table 29: Actual vs Predicted - Skincare – Last 3 Months
+
+According to Table 28: Algorithm Results - Skincare - Last 3 Months, Neural
+Network was the best performing algorithm in the Skincare category, with an
+RMSE of 19.83. Random Forest came close to Neural Network in terms of
+RMSE, with a score of 26.52. XGBoost produced the worst results in this
+experiment, with an RMSE of 43.01.
+According to Table 29: Actual vs Predicted - Skincare – Last 3 Months, the
+Neural Network's forecasted values were not all close to actual sales. This
+indicates that the Skincare category has not yet recovered its pre-pandemic
+sales levels.
+
+48
+
+4.6 Research questions results
+
+Figure 10: Covid Forecast
+
+Figure 11: Sales Time Graph by Regions
+
+49
+
+Figure 12: Summer Prediction
+
+50
+
+Figure 13: Last 3 Months Prediction
+
+To answer research questions about the pandemic period, the year in which
+two lockdowns occurred in the United Kingdom was used as testing data.
+According to the findings, Covid-19 did have an effect on the sales of aesthetic
+products. Figure 10: Covid Forecast, depicts this result, which illustrates that
+the forecast was incorrectly predicted due to an unusual event which does not
+follow a trend or seasonality.
+According to the findings of this research, Covid-19 had approximately the
+same impact on all regions in the United Kingdom, as shown in Figure 11:
+Sales Time Graph by Regions between the years 2020 and 2021.
+Finally, it was discovered that machine learning algorithms can be used to
+predict supply based on previous transactions, as illustrated in Figure 12:
+51
+
+Summer Prediction and Figure 13: Last 3 Months Prediction, where the
+prediction line is very close to the actual sales line.
+
+4.7 Comparing findings to previous studies
+When the results of the study were compared to previous studies, the
+algorithms were relatively comparable. The RMSEs values differed because
+the amount of data gathered for this investigation was different from the
+amount of data used in the related studies. Akanksha at al. [22] and Sajawal at
+al. [24], both indicated that XGBoost outperformed Random Forest, which is in
+line with our findings.
+4.8 Additional findings
+According to the data, the biggest increase of 6187 sales occurred between
+March 2021 and April 2021, when there was a total of 7793 and 13980 sales,
+respectively, and the second United Kingdom lockdown had just ended.
+According to the findings, sales began to gradually grow again at the end of
+the sales data. Finally, after analysing the results, it was also found that
+November had the most total sales at 43,261, which was 69.73% greater than
+April, which had the lowest total sales at 25488.
+
+52
+
+Chapter 5: Conclusion and Recommendations
+This study aimed to identify the effects of Covid-19 on products and regions in
+the United Kingdom. It also aimed to investigate whether machine learning
+algorithms can be used to predict supply based on previous transactions.
+Based on a quantitative study of the sales data provided, it is possible to
+conclude that Covid-19 had an unfavourable effect on aesthetic product sales.
+This resulted in a drop in sales between 2020 and 2021. As a result of the
+difference in pre-pandemic and the sales made during the pandemic, the
+research methods used during this time period were not appropriately
+predicted. On the other hand, most of the experiments conducted on prepandemic sales were accurate, particularly in small categories such as
+Mesotherapy.
+This analysis also concluded that the Covid-19 pandemic had roughly the
+same impact on all regions in the UK, since if one region's sales declined, so
+did the others, and vice versa. This discovery was made through using visuals
+to view the sales in a more effective way.
+The last conclusion made from this research was about the use of machine
+learning algorithms when it comes to predicting supply based on previous
+transactions. Since the forecasting model correctly predicted the outcome in
+circumstances where no unusual events happened, we may conclude that
+machine learning algorithms are superior to statistical models for predicting
+supply. This can therefore be used to predict the supply of upcoming seasons
+to avoid over-ordering of products or not reaching customer demands. As a
+result, this can be used to forecast supply for upcoming months with a high
+level of confidence. Since for this study three models were used, these could
+53
+
+be compared between each other and evaluate which model works best on
+this type of data. For this study, Neural Network algorithms performed best,
+followed by XGBoost and Random Forest Respectively. The RMSEs obtained
+by the Neural Network algorithm were as low as 0.98 for the Mesotherapy
+category, while for XGBoost, the lowest RMSE was 1.98 for the Needles
+category. For the Random Forest, the lowest RMSE obtained was of 1.67 for
+the Mesotherapy category.
+
+The research methodology chosen was suitable for this study since it provided
+important insights that aided in answering the research questions proposed
+and confirmed the hypothesis formulated. The goal of this study, which used
+machine learning, was to determine how close the predicted outcomes were to
+the actual sales. The results obtained were as expected, as throughout the
+Covid-19 period, the predictions were not accurate in some tests while they
+were fairly accurate for others. Data cleaning was a very important step in the
+methodology since the data needed to be altered in a way that could be used
+in the prediction algorithms. One-hot-encoding was also a very important
+technique to use to change data from categorical to numerical without causing
+undesired issues such as altering the value of the data. This was critical to the
+study because the experiments were based on both sales amounts and
+category predictors. While random splitting methods do provide a sales
+prediction, it limits the ability to forecast a specific time period. As a result, the
+data experiments for this study were broken down into testing periods based
+on specific dates and the forecast results were between the specified dates.
+The testing experiments tried in this research were also sufficient to answer
+
+54
+
+the research questions stated at the beginning of the study. There was no
+need to explore more prediction variations at this stage, as certain questions
+were also answered by the visuals created. During this study, additional
+findings were discovered that might be utilised by the company in terms of the
+most popular months, categories, and products. In the most recent
+experiment, it was also discovered that sales levels began to revert to prepandemic levels, and they are increasing again.
+
+The limitations of this research in terms of sales data obtained includes a lack
+of recent data. Since the data's latest month was March 2022, this did not
+include for example the summer period after the pandemic. Therefore,
+experiments could not be conducted to compare if the seasonal sales have
+returned to their original state. The only post-pandemic sales in the data are
+between April 2021 and March 2022, which are not enough to train the models
+again. To train the post-pandemic data and be able to make evaluations, at
+least two full years after April 2022 are needed.
+Another limitation of the data is that when the data was inputted into the
+system, the date did not include the day of when the transaction was made. To
+be able to perform forecasting using machine learning algorithms, the dates
+need to be unique. As a result, instead of grouping the dates based on the
+standard format of date variable, the data had to be grouped by month to
+produce the unique date needed.
+Another obstacle encountered throughout this investigation was the short time
+available to accomplish the research. This study, like every other dissertation,
+was bound by a deadline, thus the research had to be well planned and
+
+55
+
+organised to finish and reach the intended results on time. There was not
+enough time to expand and analyse the research beyond than what was
+intended. If the research timeline was based on a longer period, more areas of
+the study could have been evaluated. For example, other suggested
+regression models could have been tried out while also exploring other time
+periods such as choosing seasons from other years. On the other hand, the
+methodology process taken in this study was enough to answer the research
+questions and some other additional findings.
+One last limitation of this study includes the lack of research available on
+predicting supply and demand for aesthetic products using machine learning
+algorithms. In this research field, multiple studies on forecasting supply using
+machine learning can be found, but very little research is directly conducted on
+the ranges of aesthetic products. Most of the studies focused on forecasting
+the supply of aesthetic products mostly use statistical models such as ARIMA.
+There was no study that chose to attempt Neural Network methods, but in this
+situation, it was the best performing model.
+
+Based on these conclusions, if future research is to be attempted, the
+researcher could try out a variation of experiments while also gathering more
+data. The researcher can attempt to collect the most recent data from the
+company to generate more real-time predictions and forecast sales numbers
+for the following months. With the data provided, predictions can still be made
+but they will be even more accurate if more recent data is used. Initial
+experiment can be made using the best performing algorithm which for this
+data was Neural Network, and then try other algorithms.
+
+56
+
+The best performing algorithm for this data, Neural Network, can be used for
+the initial experiments, and subsequently alternative algorithms can be tried. In
+future research, other algorithms suggested by the studies reviewed can also
+be tried out such as ARIMA, SARIMA, SVM and LSTM. Int the other studies,
+when it came to estimating sales data, these models also produced accurate
+outcomes, therefore they should be tried out to obtain an RMSE as close to
+zero as possible.
+A variety of different experiments can also be tried out, such as splitting the
+data by products instead of splitting by the categories. Forecasts will be more
+focused on specific products, and forecasts could be modified to each, and
+every product sold by the company. With the results obtained from such
+experiments, the ordering of products can be more easily made.
+On the other hand, if the experiments are to be tried out on a different dataset,
+the best working algorithm for that data should be found out first, then further
+predictions could be made, since there is no one optimal algorithm for all the
+series.
+
+57
+
+List of References
+
+[1] H. Wei and Q. Zeng, “Research on sales Forecast based on XGBoostLSTM algorithm Model,” Journal of Physics: Conference Series, vol.
+1754, no. 012191, 2021.
+[2] A. Lohani, A. Verma, H. Joshi, N. Yadav and N. Karki, “NanotechnologyBased Cosmeceuticals,” ISRN Dermatology, vol. 2014, no. 843687, pp.
+1-14, 2014.
+[3] J. M. C. d. Mesquita and H. C. Martins, “Retail industry: seasonality in
+sales, and financial results,” Brazilian Business Review, vol. 8, no. 3, pp.
+64-82, 2011.
+[4] S. A. Al-Thaqeb, B. G. Algharabali and K. T. Alabdulghafour, “The
+pandemic and economic policy uncertainty,” Int J Fin Econ, vol. 27, no. 3,
+pp. 2784-2794, 2022.
+[5] R. Fairlie and F. M. Fossen, “The early impacts of the COVID-19
+pandemic on business sales,” Nature Public Health Emergency Collection
+, vol. 58, no. 4, 2021.
+[6] “GDP and events in history: how the COVID-19 pandemic shocked the
+UK economy,” Office for National Statistics, 23 May 2022. [Online].
+[Accessed 4 February 2023].
+[7] N. Bloom, P. Bunn, S. Chen, P. Mizen, P. Smietanka and G. Thwaites,
+“THE IMPACT OF BREXIT ON UK FIRMS,” NATIONAL BUREAU OF
+ECONOMIC RESEARCH, Cambridge, 2019.
+
+58
+
+[8] J. Li, “A Feature Engineering Approach for Tree-based Machine Learning
+Sales Forecast, Optimized by a Genetic Algorithm Based Sales Feature
+Framework,” IEEE, Chengdu, China, 2022.
+[9] R. Brown, “Becoming Human: Artificial Intelligence Magazine,” Medium, 4
+December 2019. [Online]. Available: https://becominghuman.ai/where-isartificial-intelligence-used-today-3fd076d15b68. [Accessed 10 January
+2023].
+[10] G. Bonaccorso, Machine Learning Algorithms, Birmingham: Packt
+Publishing Ltd, 2017.
+[11] P. Popovski, G. Veljanovski, M. Kostov and M. Atanasovski, “Optimizing
+Short Term Load Forecast: A study on Machine Learning Model Accuracy
+and Predictor Selection,” IEEE, Ohrid, North Macedonia , 2022.
+[12] R. Deb, “What are Machine Learning Applications? Top 10 Industry and
+Real-World Use Cases,” Emeritus Online Courses, 19 December 2022.
+[Online]. Available: https://emeritus.org/blog/machine-learning-what-aremachine-learning-applications/. [Accessed 10 January 2023].
+[13] K. R. Dalal, “Analysing the Role of Supervised and Unsupervised
+Machine Learning in IoT,” IEEE, Coimbatore, India, 2020.
+[14] F. Petropoulos, D. Apiletti, V. Assimakopoulos and M. Z. Babai,
+“Forecasting: theory and practice,” International Journal of Forecasting,
+vol. 38, no. 3, 2022.
+[15] D. J. Dalrymple, “Sales forecasting methods and accuracy,” Business
+Horizons, vol. 18, no. 6, pp. 69-73, 1975.
+
+59
+
+[16] B. M. Pavlyshenko, “Machine-Learning Models for Sales Time Series
+Forecasting,” Data, vol. 4, no. 15, 2019.
+[17] R. Khandelwal, “Step by Step Time Series Analysis,” Medium, 11
+September 2019. [Online]. Available:
+https://medium.datadriveninvestor.com/step-by-step-time-series-analysisd2f117554d7e. [Accessed 1 February 2023].
+[18] R. J. Hyndman and G. Athanasopoulos, “Forecasting: Principles and
+Practice (2nd ed),” OTexts, April 2018. [Online]. Available:
+https://otexts.com/fpp2/tspatterns.html . [Accessed 1 February 2023].
+[19] T. Al-Shehari and R. A. Alsowail, “An Insider Data Leakage Detection
+Using One-Hot Encoding, Synthetic Minority Oversampling and Machine
+Learning Techniques,” Entropy , vol. 23, no. 10, 2021.
+[20] M. S. Hossain and H. Mahmood, “Short-Term Load Forecasting Using an
+LSTM Neural Network,” IEE, Champaign, IL, USA, 2020.
+[21] A. K. Sharma, M. Kiran, P. P. S. Jeba, P. Maheshwari and V. Divakar,
+“Demand Forecasting Using Coupling Of Machine Learning And Time
+Series Models For The Automotive After Market Sector,” IEEE, Mysuru,
+India , 2022.
+[22] A. Akanksha, D. Yadav, D. Jaiswal, A. Ashwani and A. Mishra, “Storesales Forecasting Model to Determine Inventory Stock Levels using
+Machine Learning,” IEEE, Nepal, 2022.
+[23] J.-C. Huang, M.-H. Shu, B.-M. Hsu and T.-J. Wu, “A Novel Revenue
+Development and Forecasting Model using Machine Learning,” ijssst,
+China, 2016.
+
+60
+
+[24] M. Sajawal, S. Usman, H. S. Alshaikh, A. Hayat and M. U. Ashraf, “A
+Predictive Analysis of Retail Sales Forecasting using Machine Learning
+Techniques,” LGURJCSIT, 2022.
+[25] C. Vithitsoontorn and P. Chongstitvatana, “Demand Forecasting in
+Production Planning for Dairy Products Using Machine Learning and
+Statistical Method,” IEEE, Thailand, 2022.
+[26] J. Wang, G. Q. Liu and L. Liu, “A Selection of Advanced Technologies for
+Demand Forecasting in the Retail Industry,” IEEE, China, 2019.
+
+61
+
+Appendices
+1. Summer Period
+1.1 All Categories Summer
+All Categories – Summer
+Algorithm
+RMSE
+MSE
+R^2
+Explained
+Variance
+Random Forest 699.14 488800.48 0.40
+0.53
+XGBoost
+594.42 353333.23 0.57
+0.61
+Neural
+452.28 204555.26 0.75
+0.79
+Network
+
+Actual
+Predicted
+Difference
+
+Jun 2019
+7164
+6333.72
+830.28
+
+Jul 2019
+6971
+6875.05
+95.95
+
+Aug 2019
+4878
+5199.93
+-321.93
+
+Max
+Error
+950.69
+811.06
+830.28
+
+Sept 2019
+6613
+6486.43
+126.57
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 5
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+62
+
+1.2 Dermafiller Summer
+Algorithm
+Random
+Forest
+XGBoost
+Neural Network
+
+Actual
+Predicted
+Difference
+
+Dermafiller – Summer
+RMSE
+MSE
+R^2
+Explained
+Variance
+27.96 781.67 0.77
+0.77
+
+Max
+Error
+49.17
+
+42.16
+53.79
+
+70.54
+84.72
+
+1777.74 0.48
+2893.14 0.16
+
+Jun 2019
+487
+484.82
+2.18
+
+Jul 2019
+615
+565.83
+49.17
+
+0.49
+0.20
+Aug 2019
+472
+490.07
+-18.07
+
+Sept 2019
+557
+576.18
+-19.18
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+63
+
+1.3 Mesotherapy Summer
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Actual
+Predicted
+Difference
+
+Mesotherapy – Summer
+RMSE MSE R^2 Explained Variance
+1.67
+2.79 -0.28
+-0.25
+2.21
+4.88 -1.23
+-1.20
+3.14
+9.83 -3.49
+-1.57
+Jun 2019
+4
+5.37
+-1.37
+
+Jul 2019
+3
+3.43
+-0.43
+
+Aug 2019
+6
+3.52
+2.48
+
+Max Error
+2.48
+3.17
+6.14
+Sept 2019
+2
+3.72
+-1.72
+
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: logistic
+Solver: lbfgs
+
+64
+
+1.4 Needles Summer
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Actual
+Predicted
+Difference
+
+RMSE
+2.00
+1.98
+4.80
+
+Needles – Summer
+MSE R^2 Explained Variance
+3.99 0.72
+0.86
+3.93 0.72
+0.83
+23.05 -0.62
+0.66
+
+Jun 2019
+4
+3.32
+0.68
+
+Jul 2019
+5
+3.51
+1.49
+
+Aug 2019
+12
+12.84
+-0.84
+
+Max Error
+3.41
+3.51
+6.71
+Sept 2019
+12
+8.49
+3.51
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: adam
+
+65
+
+1.5 Profilho Summer
+Profilho – Summer
+Algorithm
+RMSE
+MSE
+R^2
+Explained
+Variance
+Random Forest 517.28 267576.27 0.59
+0.77
+XGBoost
+423.05 178973.35 0.73
+0.75
+Neural
+318.10 101185.83 0.84
+0.86
+Network
+
+Actual
+Predicted
+Difference
+
+Jun 2019
+6046
+5435.39
+610.61
+
+Jul 2019
+5717
+5813.70
+-96.7
+
+Aug 2019
+3940
+4085.75
+-145.75
+
+Max
+Error
+741.03
+565.15
+610.61
+
+Sept 2019
+5465
+5428.94
+36.06
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: huber
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+66
+
+1.6 Skinbooster Summer
+Algorithm
+Random
+Forest
+XGBoost
+Neural Network
+
+Actual
+Predicted
+Difference
+
+Skinbooster – Summer
+RMSE
+MSE
+R^2
+Explained
+Variance
+33.95 1152.39 0.50
+0.53
+
+Max
+Error
+44.26
+
+36.26
+58.23
+
+1315.07
+3391.10
+
+Jun 2019
+342
+297.74
+44.26
+
+0.43
+-0.48
+
+0.46
+0.54
+
+51.16
+82.92
+
+Jul 2019
+245
+288.65
+-43.65
+
+Aug 2019
+212
+237.39
+-25.39
+
+Sept 2019
+272
+282.01
+-10.01
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+67
+
+1.7 Skincare Summer
+Algorithm
+Random Forest
+XGBoost
+Neural
+Network
+
+Actual
+Predicted
+Difference
+
+Skincare – Summer
+RMSE
+MSE
+R^2
+Explained
+Variance
+51.55 2657.21 0.09
+0.85
+76.29 5819.75 -1.00
+0.86
+33.99 1155.26 0.60
+0.74
+
+Jun 2019
+287
+252.95
+34.05
+
+Jul 2019
+386
+328.04
+57.96
+
+Aug 2019
+236
+238.27
+-2.27
+
+Max
+Error
+73.15
+99.33
+57.96
+
+Sept 2019
+305
+314.88
+-9.88
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: quantile
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+68
+
+2. Winter Period
+2.1 All Categories Winter
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+All Categories – Winter
+RMSE
+MSE
+R^2
+Explained
+Variance
+1792.80 3214142.17 -11.64
+0.46
+
+Max
+Error
+2136.78
+
+1610.31 2593089.41
+457.41 209220.28
+
+1899.85
+711.11
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+8819
+8107.89
+711.11
+
+-9.20
+0.18
+
+Nov 2019
+8492
+8684.05
+-192.05
+
+0.49
+0.46
+
+Dec 2019
+7624
+7332.28
+291.72
+
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: huber
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+69
+
+2.2 Dermafiller Winter
+Dermafiller – Winter
+Algorithm
+RMSE
+MSE
+R^2 Explained Variance Max Error
+Random Forest 93.22 8690.51 0.23
+0.77
+142.54
+XGBoost
+24.26 588.44 0.95
+0.95
+34.59
+Neural Network 97.11 9430.14 0.16
+0.16
+135.06
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+731
+722.10
+8.9
+
+Nov 2019
+809
+774.41
+34.59
+
+Dec 2019
+555
+577.12
+-22.12
+
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+70
+
+2.3 Mesotherapy Winter
+Algorithm
+Random Forest
+XGBoost
+Neural Network
+
+Mesotherapy – Winter
+RMSE MSE R^2 Explained Variance
+5.60 31.33 -0.20
+0.19
+4.58 20.93 0.19
+0.47
+5.81 33.76 -0.30
+0.15
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+14
+6.09
+7.91
+
+Nov 2019
+5
+5.32
+-0.32
+
+Max Error
+9.65
+7.91
+9.90
+
+Dec 2019
+2
+1.57
+0.43
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: huber
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: logistic
+Solver: adam
+
+71
+
+2.4 Needles Winter
+Algorithm
+Random Forest
+XGBoost
+Neural
+Network
+
+Needles – Winter
+RMSE
+MSE
+R^2
+Explained
+Variance
+30.96 958.77 -0.14
+0.23
+32.36 1047.10 -0.25
+0.15
+17.72 314.10
+0.63
+0.71
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+4
+7.91
+-3.91
+
+Nov 2019
+65
+34.57
+30.43
+
+Max
+Error
+53.63
+56.03
+30.43
+
+Dec 2019
+3
+4.00
+-1
+
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver': adam
+
+72
+
+2.5 Profilho Winter
+Profilho – Winter
+MSE
+R^2
+
+Algorithm
+
+RMSE
+
+Random
+Forest
+XGBoost
+Neural
+Network
+
+1443.81 2084586.86
+1320.98 1744994.71
+1376.40 1894477.23
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+7337
+5706.87
+1630.13
+
+-10.25
+
+Explained
+Variance
+0.76
+
+Max
+Error
+1639.44
+
+-8.42
+-9.23
+
+0.57
+-0.28
+
+1630.13
+1959.08
+
+Nov 2019
+6611
+5668.65
+942.35
+
+Dec 2019
+6312
+5012.15
+1299.85
+
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+73
+
+2.6 Skinbooster Winter
+Skinbooster – Winter
+Algorithm
+RMSE
+MSE
+R^2
+Explained
+Variance
+Random Forest 95.15 9053.49 -4.07
+0.85
+XGBoost
+105.61 11154.25 -5.25
+0.77
+Neural
+51.87 2690.48 -0.51
+0.85
+Network
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+369
+313.50
+55.5
+
+Nov 2019
+405
+339.48
+65.52
+
+Max
+Error
+115.47
+128.05
+65.52
+
+Dec 2019
+303
+276.56
+26.44
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+74
+
+2.7 Skincare Winter
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Skincare – Winter
+RMSE
+MSE
+R^2
+Explained
+Variance
+146.18 21369.34 -1.31
+0.08
+
+Max
+Error
+236.12
+
+97.87 9578.92
+249.76 62380.59
+
+160.44
+363.33
+
+Actual
+Predicted
+Difference
+
+Oct 2019
+364
+415.65
+-51.65
+
+-0.03
+-5.73
+
+0.16
+-0.05
+
+Nov 2019
+597
+436.56
+160.44
+
+Dec 2019
+449
+430.85
+18.15
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: log2
+Min_samples_leaf: 2
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: quantile
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+75
+
+3. Whole Year
+3.1 All Categories Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+All Categories – Whole Year
+RMSE
+MSE
+R^2
+Explained
+Variance
+1876.24 3520264.55 -1.84
+0.22
+
+Max
+Error
+3170.99
+
+1458.24 2126469.87
+462.02 213458.06
+
+2799.59
+1101.31
+
+Actual
+Predicted
+Difference
+
+Feb
+2019
+5304
+5555.62
+-251.62
+
+Mar
+2019
+6638
+6727.33
+-89.33
+
+Actual
+Predicted
+Difference
+
+Aug 2019
+4878
+5388.61
+-510.61
+
+-0.72
+0.83
+
+Apr
+2019
+7144
+7535.84
+-391.84
+
+Sep 2019
+6613
+6410.45
+202.55
+
+0.19
+0.86
+
+May
+2019
+6971
+8072.31
+-1101.31
+
+Oct 2019
+8819
+8311.02
+507.98
+
+Jun
+2019
+7164
+7039.37
+124.63
+
+Nov 2019
+8492
+9012.97
+-520.97
+
+Jul
+2019
+6971
+7167.34
+-196.34
+Dec 2019
+7624
+7465.73
+158.27
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+76
+
+3.2 Dermafiller Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Actual
+Predicted
+Difference
+
+Actual
+Predicted
+Difference
+
+Dermafiller – Whole Year
+RMSE
+MSE
+R^2
+116.41
+
+13552.42
+
+-0.17
+
+Explained
+Variance
+0.48
+
+97.84
+120.33
+
+9571.77
+14480.47
+
+0.17
+-0.25
+
+0.41
+0.26
+
+195.24
+216.33
+
+Jun
+2019
+481
+494.07
+-13.07
+
+Jul
+2019
+615
+541.93
+73.07
+
+Nov 2019
+809
+613.76
+195.24
+
+Dec 2019
+555
+555.01
+-0.01
+
+Feb
+2019
+646
+534.01
+111.99
+
+Mar
+2019
+581
+609.19
+-28.19
+
+Aug 2019
+472
+527.54
+-55.54
+
+Apr
+2019
+775
+593.25
+181.75
+
+Sep 2019
+557
+539.90
+17.1
+
+May
+2019
+560
+572.76
+-12.76
+
+Oct 2019
+731
+622.60
+108.4
+
+Max
+Error
+224.22
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: huber
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+77
+
+3.3 Mesotherapy Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Mesotherapy – Whole Year
+RMSE
+MSE
+R^2
+Explained
+Variance
+4.48
+20.11
+-0.21
+0.06
+
+Max
+Error
+10.72
+
+3.93
+4.70
+
+9.37
+11.63
+
+15.41
+22.11
+
+0.07
+-0.33
+
+0.26
+-0.02
+
+Actual
+Predicted
+Difference
+
+Feb
+2019
+1
+2.32
+-1.32
+
+Mar
+2019
+2
+2.09
+-0.09
+
+Apr
+2019
+3
+3.31
+-0.31
+
+May
+2019
+12
+4.28
+7.72
+
+Jun
+2019
+4
+2.50
+1.5
+
+Jul
+2019
+3
+2.70
+0.3
+
+Sep
+2019
+2
+4.65
+-2.65
+
+Oct 2019
+
+Nov 2019
+
+Dec 2019
+
+Actual
+Predicted
+Difference
+
+Aug
+2019
+6
+3.32
+2.68
+
+14
+4.63
+9.37
+
+5
+3.07
+1.93
+
+2
+1.70
+0.3
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: huber
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: adam
+
+78
+
+3.4 Needles Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Needles – Whole Year
+RMSE
+MSE
+R^2
+15.71
+
+246.86
+
+0.20
+
+Explained
+Variance
+0.28
+
+15.65
+17.50
+
+244.82
+306.10
+
+0.20
+0.00
+
+0.28
+0.12
+
+May
+2019
+2
+2.30
+-0.3
+
+Jun
+2019
+4
+3.00
+1
+
+Max
+Error
+51.33
+50.56
+57.16
+
+Actual
+Predicted
+Difference
+
+Feb
+2019
+7
+1.43
+5.57
+
+Mar
+2019
+1
+1.12
+-0.12
+
+Apr
+2019
+3
+2.12
+0.88
+
+Jul
+2019
+5
+2.03
+2.97
+
+Sep
+2019
+12
+10.04
+1.96
+
+Oct 2019
+
+Nov 2019
+
+Dec 2019
+
+Actual
+Predicted
+Difference
+
+Aug
+2019
+12
+13.39
+-1.39
+
+4
+13.37
+-9.37
+
+65
+14.44
+50.56
+
+3
+1.73
+1.27
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: logistic
+Solver: adam
+
+79
+
+3.5 Profilho Whole Year
+Profhilo – Whole Year
+MSE
+R^2
+
+Algorithm
+
+RMSE
+
+Random
+Forest
+XGBoost
+Neural
+Network
+
+1675.11
+
+2805995.72
+
+1477.46
+1103.03
+
+2182875.99
+1216675.12
+
+Actual
+Predicted
+Difference
+
+Actual
+Predicted
+Difference
+
+Feb
+2019
+4145
+5141.51
+-996.51
+
+Mar
+2019
+5359
+6576.04
+1217.04
+
+Aug 2019
+3940
+4678.68
+-738.68
+
+Apr
+2019
+5625
+6941.26
+1316.26
+
+Sep 2019
+5465
+5682.38
+-217.38
+
+-2.19
+
+Explained
+Variance
+0.27
+
+Max
+Error
+3001.09
+
+-1.48
+-0.38
+
+0.16
+0.29
+
+2750.87
+2346.13
+
+May
+2019
+5749
+8095.13
+2346.13
+
+Jun
+2019
+6046
+7141.58
+1095.58
+
+Jul 2019
+
+Oct 2019
+7337
+7490.43
+-153.43
+
+Nov 2019
+6611
+6500.00
+111
+
+5717
+6901.03
+1184.03
+Dec 2019
+6312
+56347.66
+-50035.7
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+80
+
+3.6 Skinbooster Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Actual
+Predicted
+Difference
+
+Actual
+Predicted
+Difference
+
+Skinbooster – Whole Year
+RMSE
+MSE
+R^2
+Explained
+Variance
+204.98
+42015.89
+-8.91
+-0.04
+
+Max
+Error
+277.52
+
+204.83
+61.91
+
+0.09
+0.54
+
+278.94
+102.10
+
+Jun
+2019
+342
+289.60
+52.4
+
+Jul 2019
+
+Nov 2019
+405
+305.06
+99.94
+
+Dec 2019
+303
+231.12
+71.88
+
+Feb
+2019
+268
+249.81
+18.19
+
+41955.24
+3832.73
+
+Mar
+2019
+400
+335.97
+64.03
+
+Aug 2019
+212
+234.65
+-22.65
+
+-8.90
+0.10
+
+Apr
+2019
+320
+278.00
+42
+
+Sep 2019
+272
+269.53
+2.47
+
+May
+2019
+407
+304.90
+102.1
+
+Oct 2019
+369
+290.91
+78.09
+
+245
+276.99
+-31.99
+
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: huber
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+81
+
+3.7 Skincare Whole Year
+Algorithm
+Random
+Forest
+XGBoost
+Neural
+Network
+
+Actual
+Predicted
+Difference
+
+Actual
+Predicted
+Difference
+
+Skincare – Whole Year
+RMSE
+MSE
+R^2
+127.95
+
+6370.32
+
+-0.46
+
+Explained
+Variance
+0.43
+
+136.68
+349.29
+
+18682.36
+122000.11
+
+-0.66
+-9.87
+
+0.58
+0.00
+
+276.44
+581.08
+
+Jun
+2019
+287
+235.15
+51.85
+
+Jul
+2019
+386
+261.72
+124.28
+
+Nov 2019
+597
+301.04
+295.96
+
+Dec 2019
+449
+287.79
+161.21
+
+Feb
+2019
+237
+213.63
+23.37
+
+Mar
+2019
+295
+253.56
+41.44
+
+Aug 2019
+236
+172.91
+63.09
+
+Apr
+2019
+418
+257.18
+160.82
+
+Sep 2019
+305
+200.43
+104.57
+
+May
+2019
+241
+241.87
+-0.87
+
+Oct 2019
+364
+291.05
+72.95
+
+Max
+Error
+295.96
+
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: huber
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: adam
+
+82
+
+4. Covid Period
+4.1 All Categories Covid
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+4.2 Dermafiller Covid
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+83
+
+4.3 Mesotherapy Covid
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: quantile
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: sgd
+
+4.4 Needles Covid
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: huber
+Max_depth: 5
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: adam
+
+84
+
+4.5 Profilho Covid
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+4.6 Skinbooster Covid
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: quantile
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: relu
+Solver: lbfgs
+
+85
+
+4.7 Skincare Covid
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+5. Last 3 Months
+5.1 Dermafiller Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+86
+
+5.2 Mesotherapy Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: friedman_mse
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: tanh
+Solver: adam
+
+5.3 Needles Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 1
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+87
+
+5.4 Profilho Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: poisson
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 10
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: lbfgs
+
+5.5 Skinbooster Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: friedman_mse
+Max_depth: 10
+Max_features: log2
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+88
+
+5.6 Skincare Last 3 Months
+Best Parameters:
+• Random Forest:
+Criterion: squared_error
+Max_depth: 5
+Max_features: sqrt
+Min_samples_leaf: 1
+•
+
+XGBoost:
+Criterion: squared_error
+Loss: squared_error
+Max_depth: 5
+Max_features: log2
+Min_samples_leaf: 2
+
+•
+
+Neural Network:
+Activation: identity
+Solver: adam
+
+89
+
+

@@ -1,0 +1,1820 @@
+Exploring Alternative, Sustainable and
+Versatile Forms of Electronic Voting
+Delivery Via Secure and Decentralised
+Blockchain Integrations.
+
+Tearlach Magri
+Supervisor: Mr Justin Magri
+
+June - 2023
+A dissertation submitted to the Institute of Information and Communication
+Technology in partial fulfilment of the requirements for the degree of B.Sc. (Hons.)
+Software Development
+
+Authorship Statement
+
+Authorship Statement
+
+This dissertation is based on the results of research carried out by myself, is my
+own composition, and has not been previously presented for any other certified
+or uncertified qualification.
+
+The research was carried out under the supervision of Mr Justin Magri.
+
+Tearlach Magri
+June 5, 2023
+
+i
+
+Copyright Statement
+
+Copyright Statement
+
+In submitting this dissertation to the MCAST Institute of Information and Communication Technology, I understand that I am giving permission for it to be
+made available for use in accordance with the regulations of MCAST and the
+Library and Learning Resource Centre. I accept that my dissertation may be
+made publicly available at MCAST’s discretion.
+
+Tearlach Magri
+June 5, 2023
+
+ii
+
+Acknowledgements
+
+Acknowledgements
+
+First and foremost, I would like to acknowledge and express my gratitude towards my supervisor Mr Justin Magri who made this work possible. His guidance and advice carried me through all the stages of conducting my research.
+
+Last but not least, I would like to give special thanks to my family for their
+continuous support and understanding when undertaking my research.
+
+iii
+
+Abstract
+
+Abstract
+
+Voting is a process used by groups of people to make decisions, particularly in
+relation to public, social, or political issues. The trustworthiness of democracy relies on the fairness and honesty of the election process itself. It is crucial for the
+electoral system to be strong enough to prevent fraudulent practices and transparent and understandable enough for voters and candidates to accept the results. It
+is not uncommon for elections to be manipulated to change the outcome. While
+voting is highly important, traditional manual voting has several drawbacks, the
+most notable being low voter participation. Electronic voting is a potential alternative that also eliminates the need for physical ballots or polling stations,
+allowing authorised individuals to register and vote online using their own devices. The main advantage of these systems is that voters can cast their votes
+from anywhere, without the need to visit specific locations. However, there are
+concerns and perceived risks associated with electronic voting, such as security
+and reliability issues, susceptibility to hacking and fraud, malicious software programming and insecure software transactions. By incorporating blockchain technology into electronic voting, the benefits of the method can be preserved while
+reducing the likelihood of hacking or manipulation. The research concentrates on
+utilising Ethereum’s decentralised platform and employing smart contracts written
+in Solidity to establish a system that is both secure and adaptable. Additionally, two cryptographic techniques, namely ECDSA and the Paillier cryptosystem,
+have been employed to enhance the security of votes and ensure the integrity of
+data. For this research, a mixed-methods approach was employed. A total of
+twelve participants, selected based on their age, occupation, and familiarity with
+blockchain technology, were involved in the study. The participants were divided
+into two groups: the control group and the experimental group, with each group
+comprising six participants. The experimental group had access to the prototype
+being tested, while the control group utilised a traditional paper ballot. Both beiv
+
+Abstract
+
+fore and after the test, participants were asked to complete a questionnaire. The
+initial questionnaire collected general information such as age, technological proficiency, and previous experience with various technologies. The post-test questionnaire focused on participants’ perceptions of safety and confidence during the
+trial. The findings of the study uncover connections between age, voting preferences, technological perception, and the potential benefits of blockchain integration in voting systems. Younger participants faced fewer challenges with e-voting,
+likely due to their familiarity with digital technologies. Conversely, older participants encountered more difficulties, possibly because they were less experienced
+with computerised voting systems. Age also influenced participants’ preference
+for e-voting, with younger individuals being more inclined towards it, recognising
+its advantages over traditional methods. Older participants showed a preference
+for the familiar paper-based voting, possibly due to their comfort and familiarity
+with it. Furthermore, age correlated with participants’ perception of blockchain
+technology, with younger individuals demonstrating greater understanding and acceptance, while older participants exhibited more reservations or limited awareness
+of its capabilities.
+
+Keywords: E-voting, Blockchain, Ethereum, Smart Contract, ECDSA, Paillier cryptosystem.
+
+v
+
+Table of Contents
+
+Table of Contents
+
+Authorship Statement
+
+i
+
+Copyright Statement
+
+ii
+
+Acknowledgements
+
+iii
+
+Abstract
+
+iv
+
+List of Figures
+
+viii
+
+List of Tables
+
+ix
+
+1
+
+Introduction
+1.1 Purpose Statement . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.2 Hypothesis and Research Questions . . . . . . . . . . . . . . . . . .
+1.3 Motivation & Significance . . . . . . . . . . . . . . . . . . . . . . . .
+1.4 Research Outline . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+1
+3
+4
+5
+5
+
+2
+
+Literature Review
+2.1 Awareness of voting process in a variety of settings . . . . . . . .
+2.2 Recurrent issues commonly linked with voting in a variety of contexts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.2.1 Issues associated with long queue times and economical aspect . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.2.2 Issues associated with security and privacy . . . . . . . . . .
+2.3 Electronic voting as a potential alternative to traditional paper-based
+voting . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.3.1 Electronic voting: A promising approach to address said issues . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.3.2 Security and privacy flaws that could potentially derive from
+an electronic voting approach . . . . . . . . . . . . . . . . .
+2.4 Blockchain technology to address aforesaid issues with voting . . .
+2.4.1 The Decentralisation nature of the blockchain: What is it
+and what are the benefits? . . . . . . . . . . . . . . . . . . .
+2.4.2 Hashing and Digital Signatures in Blockchain . . . . . . . .
+2.5 Exploring some integrations for the blockchain electronic voting
+approach . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.5.1 Enabling public-key encryption via the Elliptic Curve Cryptography . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.5.2 Facilitating end-to-end verifiability through the integration
+of Paillier Homomorphic Encryption . . . . . . . . . . . . . .
+
+7
+7
+9
+9
+10
+10
+10
+12
+13
+13
+15
+16
+16
+18
+
+vi
+
+Table of Contents
+
+2.6
+
+Concluding Summary . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+19
+
+3
+
+Research Methodology
+3.1 Basic Research vs Applied Research . . . . . . . . . . . . . . . . . .
+3.2 Quantitative vs Qualitative Research . . . . . . . . . . . . . . . . . .
+3.2.1 Quantitative Research . . . . . . . . . . . . . . . . . . . . . .
+3.2.2 Qualitative Research . . . . . . . . . . . . . . . . . . . . . . .
+3.2.3 Justification of Chosen Method . . . . . . . . . . . . . . . .
+3.3 Prototype Review . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.3.1 Aim of Prototype . . . . . . . . . . . . . . . . . . . . . . . .
+3.3.2 Prototype Pipeline . . . . . . . . . . . . . . . . . . . . . . . .
+3.3.3 Prototype Architecture . . . . . . . . . . . . . . . . . . . . . .
+3.4 Tools, Packages and Technologies . . . . . . . . . . . . . . . . . . .
+3.4.1 Programming Languages and Libraries . . . . . . . . . . . .
+3.4.2 Integrated Development Environment (IDE) . . . . . . . . . .
+3.4.3 Truffle Suite, Ganache and MetaMask . . . . . . . . . . . . .
+3.4.4 Main Packages . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.5 Research Approach . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.6 Ethical Considerations . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.7 Methodology Summary . . . . . . . . . . . . . . . . . . . . . . . . .
+
+20
+20
+21
+21
+22
+22
+23
+23
+24
+26
+28
+28
+28
+29
+29
+30
+31
+32
+
+4
+
+Analysis of Results and Discussion
+4.1 Quantitative Data Analysis . . . . . . . . . . . . . . . . . . . . . . .
+4.1.1 Measurement and Collection of Timings Data . . . . . . . .
+4.1.2 Descriptive Statistics of Timings . . . . . . . . . . . . . . . .
+4.2 Qualitative Data Analysis . . . . . . . . . . . . . . . . . . . . . . . .
+4.2.1 Pre-Test Analysis . . . . . . . . . . . . . . . . . . . . . . . .
+4.2.2 Post-Test Analysis . . . . . . . . . . . . . . . . . . . . . . . .
+4.3 Results & Discussion Summary and Key Findings . . . . . . . . . .
+
+33
+33
+34
+34
+35
+35
+38
+44
+
+5
+
+Conclusions and Recommendations
+5.1 Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.1.1 Ethereum’s Network . . . . . . . . . . . . . . . . . . . . . . .
+5.1.2 Sample Size and Representativeness . . . . . . . . . . . . . .
+5.2 Suggestions for Future Research . . . . . . . . . . . . . . . . . . . .
+5.2.1 Scaling the Blockchain Network . . . . . . . . . . . . . . . .
+5.2.2 Data Gathering Improvements . . . . . . . . . . . . . . . . .
+
+47
+49
+49
+49
+50
+50
+51
+
+List of References
+
+53
+
+Appendix A Control Group Questionnaire
+
+58
+
+Appendix B Experimental Group Questionnaire
+
+61
+
+vii
+
+List of Figures
+
+List of Figures
+
+2.1
+2.2
+
+Valid chain of three blocks . . . . . . . . . . . . . . . . . . . . . . .
+Invalid chain of three blocks . . . . . . . . . . . . . . . . . . . . . .
+
+14
+14
+
+3.1
+3.2
+
+Research Pipeline . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Prototype Architecture . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+24
+26
+
+4.1
+4.2
+4.3
+4.4
+4.5
+4.6
+4.7
+
+Familiarity with electronic voting - Control group . . . . . . . . . .
+Familiarity with electronic voting - Experimental group . . . . . . .
+Confidence level on vote counting . . . . . . . . . . . . . . . . . . .
+Confidence level on vote security . . . . . . . . . . . . . . . . . . .
+Issues or difficulties encountered during testing . . . . . . . . . . . .
+Preference for electronic voting . . . . . . . . . . . . . . . . . . . . .
+Initial perception shift in blockchain technology . . . . . . . . . . .
+
+36
+37
+39
+40
+42
+43
+44
+
+viii
+
+List of Tables
+
+List of Tables
+
+3.1
+
+Main Packages . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+30
+
+4.1
+
+Control and Experimental Groups Voting Times . . . . . . . . . . .
+
+35
+
+ix
+
+Chapter 1. Introduction
+
+Chapter 1: Introduction
+
+Voting is a method by which groups of people make decisions. These decisions
+can be related to public, social, or political matters. Voting is also used to choose
+from different plans of action or to determine who deserves a prize. Therefore,
+voting can be seen as a process that allows a group of people to select from
+various options. Most voting systems are based on the principle of majority rule
+or plurality. For example, a candidate with a plurality receives more votes than
+any other candidate in an election, although not necessarily the majority of all
+votes cast. Elections provide the general public with the opportunity to choose
+their representatives and express their opinions about the kind of government they
+desire.
+The integrity of democracy relies on the integrity of the election process itself. It is crucial for the electoral process to be strong enough to withstand
+fraudulent tactics and transparent and understandable enough for voters and candidates to accept the outcomes. It is not surprising that there have been instances
+where elections have been manipulated to alter the results. A well-designed voting system should meet conflicting requirements, whether it employs electronic
+technology, traditional paper ballots, or mechanical devices.
+
+To protect voters
+
+from malicious candidates and prevent the buying of votes, it is essential for
+voters to remain anonymous when casting their ballots. Having evidence of a
+voter’s choice would enable a candidate to influence the outcome by purchasing
+
+1
+
+Chapter 1. Introduction
+
+votes. The voting system should be accessible to all voters, regardless of age,
+health, or disability. Ensuring accessibility for such a diverse population poses
+significant engineering challenges. If implemented successfully alongside other security measures, electronic voting could be a significant improvement over the
+current paper-based method. However, any issues with these aspects of a voting
+system may lead to unreliable or inaccurate election results.
+Voting is of utmost importance, but traditional manual voting comes with several drawbacks, with low voter turnout being the most notable [1]. There can be
+various reasons for this, but a significant factor is the dislike for long queues,
+which discourages many individuals from voting. Moreover, manual voting poses
+challenges for voters who are unable to be physically present at the designated
+location, and transportation difficulties can also impact elderly and disabled voters, further contributing to the problem. In a study conducted by researchers [2],
+it was found that substantial delays in the election process are common due to
+the time-consuming nature of hand counting each paper ballot. Despite governments’ efforts to promote voter awareness and emphasise the benefits of higher
+voter participation in every election, these factors significantly impact voter interest [1].
+Electronic voting, or e-voting, eliminates the need for physical ballot papers
+and boxes, allowing eligible individuals to register and vote online using their
+personal systems.
+
+The key benefit of e-voting systems is that voters are not
+
+required to visit specific voting centres as they can cast their votes from any
+location. However, there are various drawbacks and concerns associated with e-
+
+2
+
+Chapter 1. Introduction
+
+voting. These include issues of security and reliability, susceptibility to hacking,
+potential fraud, malicious software programming, insecure software transactions,
+and the dominance of central authority in such systems [3].
+Integrating blockchain technology with e-voting can help maintain the advantages of the methodology while reducing the risk of hacking or manipulation. By
+implementing blockchain in the voting system, the fundamental voting process remains unchanged, but it has the potential to enhance voting participation [4].
+This study demonstrates the potential of incorporating blockchain technology
+into e-voting, making the process more sustainable by leveraging its immutable
+and decentralised nature. It highlights that valuable and crucial data, particularly
+when anonymity and incorruptibility are required, can be securely stored on the
+blockchain. The features of blockchain offer a comprehensive solution for these
+needs, as evidenced by multiple researchers. Furthermore, this study aims to significantly address the issues associated with traditional manual voting and electronic voting.
+
+1.1
+
+Purpose Statement
+
+The purpose of this research is to address and mitigate the challenges associated with traditional paper-based voting and e-voting through the development of
+a prototype utilising the Ethereum blockchain. The research focuses on leveraging Ethereum’s decentralised platform and smart contracts written in Solidity to
+create a secure and flexible system. Additionally, the use of Ganache, a personal
+blockchain, allows for development and testing without deploying the application
+
+3
+
+Chapter 1. Introduction
+
+on the actual Ethereum blockchain.
+
+1.2
+
+Hypothesis and Research Questions
+
+Given the purpose of this study, it is hypothesised that blockchain technology
+integrations with the ECDSA and Paillier cryptosystem can viably enhance the
+conventional approach to voting systems in terms of security, versatility and processing which significantly alter the way they are currently being perceived. Following on this hypothesis, the following research questions were identified:
+
+1. How can e-voting systems be more efficient than conventional manual voting systems in terms of processing and security through Blockchain integrations?
+2. What effect does the Elliptic Curve Digital Signature Algorithm (ECDSA)
+in conjunction with Paillier cryptography have on data integrity?
+3. To which extent are e-voting systems instrumental and potentially hindering
+in relation to civic engagement and voter turnout?
+4. How does the blockchain network’s decentralisation minimise the chances
+for vote tampering in e-voting systems?
+5. How can blockchain e-voting systems retain lightweight and cost-effective
+forms in view of sustainable means of e-voting?
+
+4
+
+Chapter 1. Introduction
+
+1.3
+
+Motivation & Significance
+
+This study aims to improve existing e-voting systems by incorporating blockchain
+technology and utilising cryptographic methods to improve security and privacy.
+From the perspective of the voters, the proposed solution involves developing an
+application based on a proof of concept.
+
+This application would provide the
+
+convenience and benefits of an e-voting system, as well as additional benefits.
+Furthermore, the same concept and approach could be advantageous to those in
+charge of managing the voting process as well as the authorities concerned. They
+would also benefit from the advantages provided to the voters, such as improved
+security and privacy. Additionally, there are other benefits that apply specifically
+to the authorities, including cost reduction and the potential to increase voter
+turnout.
+The proposed approach intends to overcome the drawbacks of current e-voting
+systems and offer a more effective and efficient voting experience for both voters
+and those in charge of running the elections by utilising blockchain technology
+and cryptographic algorithms.
+
+1.4
+
+Research Outline
+
+Following the introduction, the study includes a literature review in Chapter 2.
+The literature review explores the awareness and understanding of various voting
+processes in different contexts, highlighting their respective strengths and weaknesses. Additionally, potential alternatives to traditional voting methods are examined. The focus then shifts to the benefits of integrating blockchain technol5
+
+Chapter 1. Introduction
+
+ogy into voting systems, along with a concise overview of the technology itself. The review concludes by examining different applications and integrations
+of blockchain technology in the context of voting.
+The literature review in then followed by the methodology in Chapter 3. This
+chapter provides detailed information on the tools used, as well as the pipeline
+and architecture of the system developed for the study. It discusses the data
+collection process and outlines the approaches and justifications for the chosen
+methodologies.
+In Chapter 4 of the study, the discussion of results is presented. The chapter provides the testing results obtained from the participants. The results are
+examined and analysed, and their implications are discussed in detail. Correlations that have emerged between different variables and factors are also discussed
+and analysed to identify trends and patterns within the data. Finally, the research
+questions and hypothesis are addressed.
+In Chapter 5, the study concludes with an overview of the study and findings. The limitations of the study are acknowledged and discussed in this chapter.
+Both the limitations related to the system presented and the testing process are
+addressed. The chapter also offers suggestions and ideas on how these limitations
+can be addressed or resolved in future research.
+
+6
+
+Chapter 2. Literature Review
+
+Chapter 2: Literature Review
+
+In the following section, different voting methods and their flaws will be discussed. Furthermore, a viable solution consisting of the blockchain technology
+will be explained, together with a concise overview of the technology itself.
+The review will conclude by examining diverse applications and integrations of
+blockchain technology within the context of voting.
+
+2.1
+
+Awareness of voting process in a variety of settings
+
+The traditional and most common way of voting is by using paper ballots. Eligible voters are requested to physically go to voting centres, mark their choices
+of candidates on ballot paper and deposit them in ballot boxes [2]. It is a very
+simple methodology which has been used for a long time however, there are
+many threats to this system [5]. Votes can be manipulated which may lead to
+the election of the wrong head of government. Moreover, ballots can be miscounted, rejected or tampered by the third party responsible for vote counting.
+One of the most significant drawbacks of this method is the low voter turnout,
+which can be attributed to several factors. However, the most prominent reason is
+that many individuals dislike waiting in long lines, which discourages them from
+voting. Furthermore, manual voting for voters who are not physically present at
+the designated place, as well as transportation challenges for elderly and disabled
+voters, are key contributors to this problem. In a study conducted by [2], the au-
+
+7
+
+Chapter 2. Literature Review
+
+thors stated that substantial delays in the election process are typical due to the
+time required to hand count each voting paper. Although governments encourage
+voter awareness and explain the benefits of higher voting in every election, the
+mentioned factors have a significant influence on voter interest [1].
+Paper ballot-based voting is also used in the educational sector, in fact, the
+authors in [6] described the existing system which the Regent University Collage
+of Science use during their school-based elections. The authors explained how a
+registration period is scheduled to begin and expire on a specific day prior to
+election day. Students are made aware of this time period by utilising a variety
+of mass communication tools, such as emails and posters. The electoral commission officer is required to gather the printed copies of all student information
+during that time in order to register them. On the election day, a polling place is
+set up for each of the three departments of the University - Business and Leadership, Informatics and Engineering Technology and Faculty of Arts and Sciences.
+Each polling place is given ballot papers and the list of eligible voters, in this
+case students. In order to keep track of those who voted and to help the Electoral Commission generate a report concerning the number of students who voted
+from each department, the name of the student is cancelled from the list when
+the respective ballot paper is issued out. This process is repeated every day until
+the electoral period ends.
+In [7] the researchers explained how conventional voting can also be found
+in a wider variety of contexts, such as in idea management systems, shareholder
+meetings and family decision making. Voting in these polls can be different from
+
+8
+
+Chapter 2. Literature Review
+
+other larger-scale voting. As mentioned in [8], when a small group of participants are to vote, their identities are publicly known before the voting process
+begins. The authors explained this by mentioning a boardroom election, which
+may involve stakeholders voting to appoint a new director.
+
+2.2
+
+Recurrent issues commonly linked with voting in a variety of contexts
+
+2.2.1
+
+Issues associated with long queue times and economical aspect
+
+Notably, long queue times is the most prominent issue associated with traditional
+paper-based voting [9, 10]. The authors in [5] mention how most people do not
+even go to voting at the voting sites due to the aggravation of waiting in line for
+hours. Spending a lot of time in queue is impractical, thus some voters prefer
+not to vote. Voting for school-based elections can also be very time consuming,
+with students having to queue for a very long time to vote, as explained by the
+authors in [6, 10].
+Another major flaw of this voting system is the economical aspect in which a
+large sum of money is used on paper ballots, voting activity, security and human
+resources [5]. The authors in [11] point out that the paper ballots and boxes are
+a waste for the environment after the elections are finished. Although smaller
+scale voting such as school-based elections are made up of lesser candidates and
+far less voters, the authors in [6] described how school elections for multiple
+institutions are held every year. For each election, a large amount of paper ballots
+and paper boxes are temporarily used, which have no use after the election is
+over.
+
+9
+
+Chapter 2. Literature Review
+
+2.2.2
+
+Issues associated with security and privacy
+
+In the paper ballot voting scheme, security and privacy are two aspects of great
+concern. The authors in [2] described how certain constituencies were allegedly
+capturing and stuffing ballot booths by party loyalists. [5] and [11] also described
+that ballots can be miscounted, rejected and tampered by the third party which
+are counting the votes. The authors in [12] made an important and specific point
+when it comes to the traditional manual voting. They mention how there is a
+centralised distribution. The first distribution happens before the election, where
+the distribution is from the centre of voting to the regions and the second distribution which happens after the election, that is from the regions and back to the
+centre of voting. Studies pertaining school voting are also conducted which point
+out how issues associated with security and privacy are also found during this
+type of smaller scale voting [10]. The authors describe how during the school
+voting, a number of problems are to be dealt with, including voters’ validation,
+the effectiveness of using secrecy folder and paper ballots in casting of votes,
+the authenticity of candidate names written in ballots during the canvassing stage
+and the accuracy of counting and tallying of valid votes per candidates, which
+are recorded using tally sheets.
+
+2.3
+
+2.3.1
+
+Electronic voting as a potential alternative to traditional paper-based voting
+
+Electronic voting: A promising approach to address said issues
+
+As time passes, paper-based voting is becoming obsolete and that electronic voting, also known as e-voting, is becoming more popular. The authors in [13]
+10
+
+Chapter 2. Literature Review
+
+described how with e-voting, there is no need for ballot papers and boxes and
+authorised and eligible individuals can register online and vote by logging into
+their own systems. The primary benefit of these systems is that voters can cast
+their ballots from any location, eliminating the need to go to polling stations.
+The authors in [2] also mention Electronic Voting Machines (EVMs), which are
+simple devices used in some countries that allow eligible voters to make use
+of these machines to cast their votes. Estonia was the first nation to adopt an
+online voting system in 2007, utilising citizens’ national ID cards for identification verification. The system offered voters various functions, with a focus on
+e-voting, allowing them to vote and make changes online. After the voting period
+ended, the votes were transmitted to a counting server that was isolated from the
+network [4]. [10] proposed an e-voting system which is to be used for student
+elections at the university. The researchers explained that several voting kiosks
+are to be integrated into a single database which will synchronise the generation
+of votes. The authors cited various studies concluding that electronic voting has
+overcome the shortcomings of traditional voting methods, leading to greater efficiency, scalability, real-time reporting, cost savings, increased voter satisfaction,
+and higher voter turnout. The authors in [5] described the cost saving aspect
+of e-voting by stating how with this voting methodology, there is no need to
+print and produce paper ballots and boxes, which are wasteful to the environment. The researchers in [2] and [10] described how this methodology is more
+efficient when it comes to the counting process of voting, since the votes are
+not manually counted by individuals, but with technology. In turn, this process
+
+11
+
+Chapter 2. Literature Review
+
+speeds up the gathering of votes, which are also more accurate since there is no
+human error.
+
+2.3.2
+
+Security and privacy flaws that could potentially derive from an electronic voting approach
+
+While e-voting has the potential to offer several benefits over the traditional paperbased voting methods, such as increased speed, convenience and accessibility, it
+also raises several security and privacy concerns. In fact, the authors in [2] stated
+that because of the inherent simplicity nature of e-voting, especially EVMs, technical individuals can easily tamper the devices or software to produce dishonest
+results. The authors referred to another study which reveals that even brief physical access to an EVM is enough for it to be compromised, which results in
+a breach of the essential principals of equality and confidentiality required for
+a secure EVM. E-voting which take place on the voters’ devices are prone to
+cyberattacks, especially official elections which are significant in any business or
+government. The authors in [11] stated that individuals, both from within and
+outside of agencies, as well as organisations, can hack e-voting systems to alter
+results for their own benefit. They progressed into their study by stating that although there are several variations of e-voting systems in use, very few of them
+are trustworthy, transparent and have undergone extensive testing. The authors
+in [12] researched the privacy flaws of e-voting by investigating the use of evoting in the Netherlands. The writers stated that the Dutch government heavily
+relies on private corporations to provide the electronic voting technology used in
+their elections. Only the private company has access to the contents of the voting
+12
+
+Chapter 2. Literature Review
+
+system, meaning that the public cannot control it, leading to the belief that this
+method is not democratic.
+
+2.4
+
+Blockchain technology to address aforesaid issues with voting
+
+2.4.1
+
+The Decentralisation nature of the blockchain: What is it and what are the
+benefits?
+
+The decentralisation aspect of blockchain is one of its defining and crucial features, and it has far-reaching implications for the implementation of blockchain
+technology in various areas, one of which is e-voting. The decentralised nature
+of blockchain means that there is not one central authority that controls the network, thus promoting greater transparency and accountability [4].
+The authors in [14] extensively discussed how conventional e-voting systems
+store all their data in a central database controlled by a single entity, making it
+susceptible to tampering and corruption as voters cannot confirm if their votes
+were recorded correctly. On the other hand, in a blockchain-based e-voting system, the data is stored across multiple nodes in the network, each possessing
+a copy of the complete database. This makes it nearly impossible for a single
+entity to tamper with the data as any changes made to the database must be
+agreed upon by most of the nodes in the network. This network is a transaction
+log database which stores data in the form of blocks that are chained together
+with the help of a cryptographic hash [15]. In order to access the data, all computers have to be accessed and the cryptographic hash will immediately alter if
+the block is modified, signalling that the contents are altered [16]. As seen in
+
+13
+
+Chapter 2. Literature Review
+
+Figure 2.1, each block contains the hash of the previous block which is used to
+link the blocks into a chain.
+
+Figure 2.1: Valid chain of three blocks
+
+Each block has its own hash and knows the hash of the previous block. This
+means that Block 3 points to Block 2 and Block 2 points to Block 1 (see Figure 2.1). The first block is called the Genesis block and is a special block which
+does not point to any previous block, because it is the first one. If a block is
+altered, then this will lead to a change in the hash of the block. If Block 2
+is changed, Block 3 is invalidated, and the following blocks are no longer valid
+(see Figure 2.2).
+
+Figure 2.2: Invalid chain of three blocks
+
+The authors in reference [4] highlight the importance of the decentralisation
+feature of blockchain and its impact on electronic voting. They mention that decentralisation leads to increased transparency and accountability. Unlike traditional
+electronic voting systems where the central entity controlling the database tabu14
+
+Chapter 2. Literature Review
+
+lates the results, making it impossible for voters to verify the accuracy of the
+recorded results, blockchain-based e-voting systems allow for the results to be
+recorded in a transparent and tamper-proof manner. Anybody with access to the
+network can audit the results in real-time, making it much harder for manipulation to occur and providing voters with greater trust in the outcome.
+Furthermore, the use of blockchain technology in e-voting can reduce the expenses associated with running elections. As per the authors in reference [5],
+traditional e-voting systems can incur substantial costs due to the significant infrastructure needed for maintenance. However, with blockchain-based e-voting systems, the network is maintained by its users, eliminating the need for a central
+entity to maintain the infrastructure, thus greatly reducing the costs.
+
+2.4.2
+
+Hashing and Digital Signatures in Blockchain
+
+The use of hashing and digital signatures, which are critical to preserving the
+integrity and security of the voting process, is one of the key features of the
+blockchain technology. The authors in [17] described hashing as a process in
+which a mathematical function is used to transform an input into a fixed-length
+string, known as a hash value. This hash acts as a unique identifier for the input
+and helps to secure the data stored in the blockchain. In e-voting, hashing is
+utilised to ensure the accuracy and integrity of a voter’s ballot, by transforming
+the vote into a hash value which can be verified later.
+Meanwhile, the authors in [18] mention how digital signatures are used to
+validate the authenticity of the data stored in the blockchain.
+
+They work by
+
+encrypting the data with a private key only known to the signer, and then can
+15
+
+Chapter 2. Literature Review
+
+be decrypted by the recipient using the public key, confirming that the data was
+signed by the person who claims to have signed it. In the context of e-voting,
+digital signatures are used to verify that only authorized voters can cast ballots
+and provide evidence that the vote was cast by the individual who claims to have
+done so.
+As per reference [17] and [18], the use of both hashing and digital signatures in blockchain-based e-voting systems offer several benefits over traditional
+systems. Hashing protects the integrity of the data in the blockchain, as any
+tampering will result in a different hash value. Digital signatures, on the other
+hand, guarantee that only authorized users can vote and provide proof that the
+vote was cast by the person who claims it.
+
+2.5
+
+2.5.1
+
+Exploring some integrations for the blockchain electronic voting approach
+
+Enabling public-key encryption via the Elliptic Curve Cryptography
+
+In the realm of blockchain technology, a digital signature serves as an indispensable component that must be present, unless the hash function is deployed,
+a blockchain cannot operate without utilising hashing functions or digital signatures. Therefore, any transaction conducted on the blockchain must be endorsed
+with the sender’s electronic signature through their private key, or alternatively
+hashed via hashing functions. Digital signatures constitute a fundamental building block in blockchains as they are utilised to authenticate the legitimacy of
+transactions. In the event that someone submits a transaction, such as casting
+a vote in an open ballot, they are required to verify their authorisation to ev-
+
+16
+
+Chapter 2. Literature Review
+
+ery node in the system. The blockchain nodes, or miners, who possess knowledge of the voter’s public key, will scrutinise the transaction’s conditions, and
+authenticate the signature’s legitimacy. Once the verification process is successful,
+the block holding the transaction will be set for finalisation by a validator. In
+essence, to digitally sign a message means to provide authentication for its origin. Two of the most commonly employed digital signature algorithms include
+RSA (Rivest–Shamir–Adleman) and ECC (Elliptic Curve Cryptography), of which
+the latter is regarded as more superior [19].
+ECC is a cryptographic method that utilises a public-key system based on an
+elliptical curve. This method is known for producing smaller, faster, and more
+efficient keys for encryption purposes. The keys are generated using the properties of the equation of the elliptical curve. ECC is classified as an asymmetric
+cryptography technique. Despite having the same security level as RSA, ECC is
+generally considered as a better option [20]. The Elliptic Curve Digital Signature
+Algorithm (ECDSA) is a digital signature algorithm derived from ECC, which ensures the authenticity, integrity, non-repudiation, and origin of data. ECDSA can
+operate as both a signature and a verification algorithm. Unlike RSA, ECDSA
+employs shorter keys and requires less computational resources while retaining
+robust security. The authors in [19] explained how a 256-bit ECDSA signature
+provides the same level of security as a 3072-bit RSA signature.
+
+17
+
+Chapter 2. Literature Review
+
+2.5.2
+
+Facilitating end-to-end verifiability through the integration of Paillier Homomorphic Encryption
+
+Homomorphic encryption is an effective cryptographic method that allows specific computations to be conducted directly on ciphertext, ensuring that operations
+carried out on the encrypted data yield the same results as those conducted on
+the plaintext. This technique helps to safeguard data integrity by allowing others to manipulate the encrypted version of the data while making it impossible
+for anyone to access or comprehend the decrypted values. By protecting privacy,
+homomorphic encryption facilitates rapid access to encrypted data.
+Paillier homomorphic encryption is a type of encryption that allows computations to be performed on the encrypted data without the need to decrypt it first.
+This makes it a useful tool for e-voting systems, as it allows for votes to be securely counted without revealing the underlying vote. One of the key benefits of
+Paillier homomorphic encryption in e-voting is that it allows for end-to-end verifiability, which is an important feature of any trustworthy e-voting system. With
+end-to-end verifiability, voters can check that their votes were recorded correctly,
+and election authorities can verify that the results of the election are accurate.
+This encryption scheme contains a few weaknesses, such as the large size of
+the encrypted text and the speed of encrypting plain data, as mentioned by the
+authors in [21].
+Although there are limitations to homomorphic encryption, numerous studies have been conducted to make it practically applicable, as shown in [22]
+and [23]. Homomorphic encryption is highly suitable for e-voting systems be18
+
+Chapter 2. Literature Review
+
+cause votes can be tallied in their encrypted form. This form of encryption allows data to be encrypted into hash numbers using a public key and stored in
+a blockchain network. While homomorphic encryption provides privacy and security, the blockchain database ensures data integrity and transparency. Therefore,
+homomorphic encryption and a blockchain network are complementary in creating
+a fair e-voting system.
+
+2.6
+
+Concluding Summary
+
+In this review, different voting methods and their flaws were discussed. It recognises the need for innovative solutions to address the challenges and shortcomings of traditional voting systems. The integration of blockchain technology into
+e-voting systems is explored as a potential solution to enhance the security, transparency, and efficiency of the voting process.
+Furthermore, the review delves into the discussion of different cryptographic
+algorithms that can be employed to further strengthen the security and privacy
+aspects of blockchain-integrated e-voting systems. By leveraging these algorithms,
+the aim is to improve the overall reliability and trustworthiness of the voting
+system, ensuring that the integrity of votes is preserved and the confidentiality of
+voters is maintained.
+
+19
+
+Chapter 3. Research Methodology
+
+Chapter 3: Research Methodology
+
+The selection of research methods and tools was guided by a thorough review
+of the relevant algorithms and voting practices. Various research paradigms were
+considered, but given the objective of addressing a specific issue, an applied research approach was adopted. In the subsequent sections, a prototype pipeline and
+architecture are presented and delve into the details of the technologies and algorithms employed. Specifically, two algorithms were utilised - ECDSA and Paillier
+Homomorphic encryption - to enhance the security and privacy of the blockchain
+e-voting prototype. ECDSA was used to safeguard the digital signatures, while
+Paillier Homomorphic encryption was utilised to preserve the confidentiality of
+the votes.
+
+3.1
+
+Basic Research vs Applied Research
+
+In conducting research, a multitude of methods can be employed. Among them is
+basic research, an approach that seeks to advance the knowledge within a particular field of study. This method is highly focused on developing a comprehensive
+understanding of a subject matter and is primarily theoretical in nature. Basic
+research is motivated by curiosity and the desire to uncover new insights rather
+than solving a specific problem. Its goal is to expand the knowledge base of a
+given field and to provide a strong foundation for future studies.
+Applied research, in contrast, seeks to offer practical solutions to real-world
+
+20
+
+Chapter 3. Research Methodology
+
+problems.
+
+This type of research involves empirical investigation and employs
+
+solution-oriented approaches to explore a given phenomenon. With the focus of
+this research being to solve specific issues related to traditional paper-based and
+e-voting systems, applied research is particularly well-suited to address the hypothesis put forth in this study. This study aims to suggest practical solutions to
+enhance the voting process by considering the viewpoints of both the voters and
+the organisers.
+
+3.2
+
+Quantitative vs Qualitative Research
+
+In data collection, various methods can be employed, including quantitative and
+qualitative research.
+
+Quantitative research relies heavily on numerical data to
+
+generate insights, while qualitative research focuses on capturing thoughts and
+feelings to provide explanations for the phenomenon under investigation. Consequently, the results and structure of data obtained from these two approaches
+will differ significantly.
+
+3.2.1
+
+Quantitative Research
+
+Quantitative research is a systematic investigation method of social phenomena
+that involves the use of statistical or numerical data, as defined by [24]. This
+type of research relies on measurement, assuming that the phenomena being studied can be quantified, and the resulting data can be analysed to identify relationships and trends, as well as verify the accuracy of the measurements taken. The
+data collected includes both easily measured information, such as dimensions and
+quantities, and more complex data, such as emotions and thoughts of individuals
+21
+
+Chapter 3. Research Methodology
+
+at a particular time. This type of research can be carried out through various
+methods such as surveys and questionnaires.
+
+3.2.2
+
+Qualitative Research
+
+Qualitative research is a method of data collection that does not involve numerical or statistical data. Instead, this approach seeks to understand human experiences, feelings, and opinions, and to make sense of them. According to [25],
+this is achieved through three types of data collection: open-ended interviews that
+document people’s experiences and opinions, direct observations of people’s behaviours and actions, and analysis of written documents, such as organisational
+or clinical records, surveys and questionnaires. Unlike quantitative research, qualitative research provides unique results for each input, as it allows individuals to
+express their thoughts and feelings freely.
+
+3.2.3
+
+Justification of Chosen Method
+
+This study uses a mixed methodology approach to investigate the effectiveness
+of the e-voting system developed using blockchain. The quantitative part of the
+study involves collecting numerical data, such as the time taken to complete the
+voting process and analysing it statistically to compare the control and experimental groups.
+The qualitative part of the study involves gathering subjective opinions and
+feedback from the participants using forms to gain a more detailed understanding of their experiences and perceptions of the voting systems. By using both
+quantitative and qualitative methods, the study aims to provide a comprehensive
+22
+
+Chapter 3. Research Methodology
+
+understanding of the effectiveness of the e-voting system and how it compares to
+other voting systems.
+
+3.3
+
+Prototype Review
+
+3.3.1
+
+Aim of Prototype
+
+The primary objective of this research is to address the challenges faced by conventional voting methods and e-voting systems, as well as to eliminate the vulnerability of centralised systems to hacking. To achieve maximum security and
+privacy, the study employs two cryptographic techniques. The first technique, the
+Elliptic Curve Digital Signature Algorithm, ensures the authenticity and integrity
+of the blockchain voting transactions. The second technique, Paillier’s cryptosystem, encrypts the voter’s vote before transmitting it to the blockchain, thus preventing unauthorised access while allowing the administrator to decrypt the votes
+after the election process is completed.
+
+23
+
+Chapter 3. Research Methodology
+
+3.3.2
+
+Prototype Pipeline
+
+Figure 3.1: Research Pipeline
+
+Pipeline Explained
+The prototype pipeline for this study has three main phases that represent the
+main stages of the process. The first phase is the preparation stage, where candidates and voters are registered. The administrator registers the names of the
+candidates into the system and saves them on the blockchain. To protect privacy, voters only submit their public key to verify their identity. At this stage,
+the administrator creates Paillier’s public and private keys, making the public key
+available for the voters to encrypt their votes and keeping the private key secure
+for later use in decrypting the votes.
+The second stage is the actual voting process, where eligible voters choose
+24
+
+Chapter 3. Research Methodology
+
+their preferred candidate and cast their vote. This involves two stages: signing
+the vote to create a digital signature and encrypting the vote and submitting it to
+the blockchain. The digital signature is verified on-chain using ECDSA and if it
+is correct, the encrypted vote is added to the blockchain.
+The final stage is the end of the election process, which includes terminating the voting process and the decrypting the results. This process can only be
+achieved by the administrator, and when the voting process is terminated, the
+encrypted votes are decrypted using Paillier’s private key and displayed to the
+public.
+
+25
+
+Chapter 3. Research Methodology
+
+3.3.3
+
+Prototype Architecture
+
+Figure 3.2: Prototype Architecture
+
+Architecture Explained
+In this study, a software architecture called the three-tier architecture is being
+used. This type of architecture divides an application into three interconnected
+layers or tiers, with each layer providing specific functionality and services to
+other layers. The top layer is called the presentation tier, also known as the
+
+26
+
+Chapter 3. Research Methodology
+
+User Interface (UI) tier. This layer is responsible for displaying information to
+the user. The middle layer is called the logic tier or the application/business
+tier. It is the layer that contains the application logic, which is responsible for
+processing user requests and perform the required computations. It interacts with
+the data tier to retrieve or store data, and with the presentation tier to provide
+the necessary output. Lastly, the data tier, also known as the data access or
+database tier, which is the bottom most layer of the architecture that deals with
+the storage and retrieval of data.
+In this research, both the voters and administrator use the presentation layer.
+Initially, the administrator adds candidates which are sent to the logic tier for
+validation. The logic tier, which is a smart contract containing all the necessary
+logic, then sends the validated candidates to the data tier. In this case, the data
+tier is the blockchain itself. The process for voter registration is similar to that
+of candidate registration. The voter uses the presentation layer to register, and
+the administrator verifies the user’s details. If correct, the voter is added to the
+blockchain.
+After registering, the voter can now cast the vote. The encryption process
+takes place off-chain and the ECDSA signature is verified by the smart contract on the logic tier. If the verification is successful, the vote is added to the
+blockchain.
+Using the presentation layer, the administrator can terminate the voting process, which sends a command to the blockchain via the logic tier. The blockchain
+returns the encrypted votes, which are then decrypted off-chain using the private
+
+27
+
+Chapter 3. Research Methodology
+
+key. This helps to reduce the amount of computational power and resources required by Paillier’s cryptosystem off the blockchain. The decrypted votes are then
+made public.
+
+3.4
+
+Tools, Packages and Technologies
+
+In order to develop the proposed system, a variety of resources were utilised.
+This included programming languages and framework, a private blockchain and
+various packages that were necessary for implementing the cryptographic algorithms and facilitating interactions with the blockchain network.
+
+3.4.1
+
+Programming Languages and Libraries
+
+During this research, the prototype was comprised of two components: the frontend and the back-end. The programming language chosen for the back-end was
+Solidity, which is an object-oriented language designed to implement smart contracts on different blockchain platforms, with Ethereum being the most popular.
+Solidity’s language features and the supportive community of available tools and
+libraries made it a suitable choice for constructing smart contracts. ReactJS was
+employed for the front-end, a free and open-source JavaScript library that allows
+for the creation of user interfaces using components.
+
+3.4.2
+
+Integrated Development Environment (IDE)
+
+Visual Studio Code, a widely used Integrated Development Environment (IDE),
+was utilised in the development of the research system for this study. This IDE
+not only boasts a user-friendly interface, but also offers a multitude of advan28
+
+Chapter 3. Research Methodology
+
+tages, including support for debugging, syntax highlighting, intelligent code completion, a built-in terminal and embedded Git. These features proved to be very
+helpful tools for the development of the system.
+
+3.4.3
+
+Truffle Suite, Ganache and MetaMask
+
+Truffle Suite is a comprehensive environment and testing platform that facilitates
+the creation and deployment of blockchain applications based on Ethereum. Its
+wide range of features and tools enables developers to write and test smart contracts, manage project dependencies and test applications with ease. The Suite
+comprises several components, including Truffle, which is the core development
+framework for Ethereum, and Ganache, a personal and private blockchain for
+Ethereum development that emulates the Ethereum blockchain.
+To enable users to use the blockchain, a crypto wallet called MetaMask is
+utilised. This is a browser extension that lets users interact with decentralised
+applications (dApps) that are on the Ethereum network. MetaMask is not just a
+wallet, it also serves as an entry point to the decentralised web. It provides a
+safe way for users to access dApps and interact with them, by connecting them
+securely to the Ethereum blockchain. Users can also use their wallets to sign and
+send transactions directly.
+
+3.4.4
+
+Main Packages
+
+Node Package Manager (npm), a library and registry for JavaScript software packages was used to install the various packages used for this prototype. The main
+packages installed can be shown in Table 3.1.
+29
+
+Chapter 3. Research Methodology
+
+Package
+
+Purpose
+
+Version
+
+web3.js
+
+Interact with Ethereum
+
+1.9.0
+
+paillier-bigint
+
+Public Key Cryptography
+
+3.4.0
+
+Table 3.1: Main Packages
+
+3.5
+
+Research Approach
+
+As previously stated, a mixed methodology approach was chosen for this study.
+To accomplish this, twelve participants of diverse ages, occupations and levels
+of blockchain knowledge were recruited. Furthermore, to ensure and safeguard
+neutrality and data assembly, the following participants were targeted:
+• Persons with knowledge of conventional, non-blockchain related e-voting systems
+• Persons without knowledge of conventional, non-blockchain related e-voting
+systems
+• Persons with knowledge of blockchain e-voting systems
+• Persons without knowledge of blockchain e-voting systems
+• Persons with knowledge of conventional manual voting systems
+• Persons without knowledge of conventional manual voting systems
+Based on the parameters mentioned above, the study consisted of two groups:
+the control group and the experimental group, with 6 participants in each group
+and a total of 12 participants overall. This means that each parameter mentioned
+earlier is represented by two individuals. The experimental group was provided
+30
+
+Chapter 3. Research Methodology
+
+with the experimental prototype and was subjected to modifications in the independent variable being tested. The values of the independent variable and its
+effects on the dependent variable were recorded. On the other hand, the control
+group was separated from the rest of the experiment, ensuring that the independent variable being tested did not influence the results. This isolated the effects
+of the independent variable on the study and eliminated other explanations for
+the experimental results.
+The participants were asked to fill out a questionnaire both before and after
+the test. Prior to the test, the questionnaire asked for general information such as
+age, level of technological proficiency and experience with various technologies.
+After the test, participants were asked about their sense of security and level of
+confidence during the experiment. This information was collected and recorded
+for analysis purposes.
+
+3.6
+
+Ethical Considerations
+
+Data used in this research will be treated with utmost confidentiality. Information such as the number of votes for specific candidates or fictional candidate
+names will not be disclosed to the public. In the case of both qualitative and
+quantitative research methods, all data will be anonymized to ensure the privacy
+of participants. Furthermore, any data utilised will not be published on a real
+blockchain but will be stored locally for research purposes only. This research
+will uphold ethical principles and will not violate personal beliefs or values of
+the participants. Consequently, data collection will not include attributes such as
+
+31
+
+Chapter 3. Research Methodology
+
+religion, cultural origins, beliefs, ethnicity, race or any related sensitive information. Moreover, users of the prototype will not be required to provide personal
+details such as ID card information or any other sensitive data. For this research,
+participants are not obliged to use personal information, as the primary objective
+is to demonstrate how blockchain technology can address issues associated with
+both manual voting and e-voting. Additionally, no real individuals will be used
+as candidates in the prototype. Instead, candidate profiles will consist of fictional
+names and surnames to ensure the privacy of individuals involved.
+
+3.7
+
+Methodology Summary
+
+In this chapter, different research methods were discussed, with the justification
+of the chosen approach being presented. Furthermore, the aims of the prototype
+were also explained, and the tools, packages, and technologies used in the study
+were justified. Different cryptographic techniques were discussed and their relevance to the study was explained. Finally, the research approach for selecting
+participants and obtaining data as well as any ethical considerations were explained.
+
+32
+
+Chapter 4. Analysis of Results and Discussion
+
+Chapter 4: Analysis of Results and Discussion
+
+The approach for data collection was discussed, together with the results of the
+tests conducted followed by a discussion of each finding. The research questions
+and the correlations that emerged from the tests were also discussed. Finally, a
+summary of the key findings together with an addressing to the hypothesis was
+presented.
+
+4.1
+
+Quantitative Data Analysis
+
+As mentioned in Chapter 3, a mixed-methods approach was utilised for this research. A total of twelve participants with varying backgrounds in terms of age,
+occupation, and knowledge of blockchain were selected to take part in the study.
+The participants were divided into two groups: the control group and the experimental group, each group consisting of six participants. The experimental group
+was given access to the experimental prototype, while the control group made
+use of a traditional paper ballot. This group separation enabled for the effects
+of the independent variable on the study to be isolated, hence removing other
+potential factors that could explain the experimental results.
+
+Participants were
+
+instructed to answer a questionnaire both before and after the test.
+
+The first
+
+questionnaire gathered general information such as age, technological proficiency,
+and prior experience with various technologies. The post-test questionnaire inquired about participants’ feelings of safety and confidence during the trial. A
+
+33
+
+Chapter 4. Analysis of Results and Discussion
+
+comprehensive understanding of the participants’ experiences and viewpoints was
+achieved by collecting data from these surveys.
+
+4.1.1
+
+Measurement and Collection of Timings Data
+
+A stopwatch was used to collect time data for both the control and experimental
+groups. This method was used to keep the study environment free of bias. The
+starting and the end points of the voting process were determined by the participants themselves. The stopwatch was started when the participants were ready to
+begin, and it was stopped once the vote was cast, either through the experimental prototype or by placing the paper ballot into the ballot box. Each participant
+was examined separately to prevent any potential interference or influence from
+others in order to obtain exact and trustworthy timing data. The goal of this
+strategy was to keep the timing measurements accurate and valid throughout the
+investigation.
+
+4.1.2
+
+Descriptive Statistics of Timings
+
+Table 4.1 presents the recorded timings for both the control and experimental
+groups. The average voting time for the experimental group was 56 seconds,
+while for the control group it was 37.7 seconds. Although the averages are relatively close, the experimental group had a slightly higher average. Several factors may explain this discrepancy. Firstly, participants in the control group who
+used the traditional pen and paper method may have been more accustomed to
+this voting approach, whereas participants in the experimental group using the evoting system may have required some time to familiarise themselves with the
+34
+
+Chapter 4. Analysis of Results and Discussion
+
+given system, resulting to slightly longer voting durations.
+The verification process also played a role in the longer voting durations. The
+experimental group participants had to go through additional verification steps to
+ensure the integrity and authenticity of their votes, whereas the control group
+did not require such measures. Also, the experimental prototype made use of a
+crypto wallet which is used to interact with the application, where each transaction that was being made to the blockchain require the user to confirm the
+transaction. These additional verification procedures could have contributed to the
+slightly longer voting times in the experimental group.
+Participant
+
+Experimental Group
+
+Control Group
+
+1
+
+49s
+
+35s
+
+2
+
+58s
+
+33s
+
+3
+
+55s
+
+41s
+
+4
+
+1m 12s
+
+39s
+
+5
+
+58s
+
+38s
+
+6
+
+44s
+
+40s
+
+Table 4.1: Control and Experimental Groups Voting Times
+
+4.2
+
+4.2.1
+
+Qualitative Data Analysis
+
+Pre-Test Analysis
+
+The control group participants were surveyed about their familiarity with traditional paper-based voting. As expected, all participants expressed a high level of
+familiarity with this type of voting. Many participants mentioned having used it
+for General Elections, Local Council Elections, as well as school or work-related
+35
+
+Chapter 4. Analysis of Results and Discussion
+
+voting. Additionally, the participants were asked about their familiarity with electronic voting, and the average level of familiarity was considerably lower. Most
+participants mentioned that they rarely engage in electronic voting. However, it is
+worth noting that even among those who stated they rarely participate in electronic voting, many mentioned their participation in online voting, particularly
+in social media polls. Figure 4.1 illustrates the familiarity of the control group
+participants with electronic voting, showing that younger participants tend to be
+more familiar with this form of voting. When asked to share their experiences
+with e-voting, older participants mentioned rarely participating in such voting,
+while younger participants mentioned their engagement in social media, school,
+and work-related e-voting activities.
+
+Figure 4.1: Familiarity with electronic voting - Control group
+
+Figure 4.2 displays the experimental group’s familiarity with e-voting. The
+figure reveals that, similar the control group, younger participants in the experimental group were more familiar with electronic voting. The older participants
+in this group also mentioned using e-voting occasionally, but the younger partici36
+
+Chapter 4. Analysis of Results and Discussion
+
+pants reported using e-voting for job or school related tasks.
+
+Figure 4.2: Familiarity with electronic voting - Experimental group
+
+Security was recognised as an essential consideration in both the control and
+experimental groups, with all participants emphasising its importance. When asked
+to comment on their reasons for emphasising security, participants’ responses varied, but the majority underlined the importance of high security to protect the
+privacy and anonymity of their votes. They emphasised the need of keeping secrecy and making certain that their decisions cannot be traced back to them. Furthermore, participants underlined the importance of a secure system in maintaining fairness and preventing potential manipulation or interference with the voting
+process.
+Similarly, all participants in both groups stated that transparency was crucial.
+Each participant mentioned the importance of transparency in the voting process.
+When asked to explain reasons for this emphasis, the participants had various
+responses, but a consistent thread emerged. Participants emphasised the need of
+transparency in ensuring that votes are not manipulated or tampered with. They
+37
+
+Chapter 4. Analysis of Results and Discussion
+
+expressed a desire for a system or a methodology that allows full visibility into
+the whole voting process, from the vote submission to the tallying of results. The
+participants believed that transparency would promote trust and confidence in the
+electoral process’s integrity.
+
+4.2.2
+
+Post-Test Analysis
+
+Upon completing the tests, the participants were questioned about their confidence
+in the confidentiality of vote counting in the voting method used. The participants in the control group expressed a lack of complete confidence as illustrated
+in Figure 4.3, highlighting concerns regarding the inability to verify whether their
+votes had been counted accurately. They emphasised the absence of proof or
+mechanisms to ensure that those responsible for vote counting performed their
+duties correctly. This raised doubts about the transparency and accuracy of the
+vote counting process, leading to a sense of uncertainty and scepticism among
+the participants. On the other hand, the participants in the experimental group
+expressed a high level of confidence. This finding is strongly pushing the relevance of Research Question No. 4 as the participants who are knowledgeable
+about the blockchain technology are aware of the perceived effectiveness of decentralisation in minimising the chances for vote tampering in e-voting systems.
+
+38
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.3: Confidence level on vote counting
+
+The confidence felt regarding the security level of the vote was also asked.
+As shown in Figure 4.4, similar responses were expressed by the participants,
+where the control group members re-emphasised the fact that there is no way
+to verify whether their votes had been counted accurately. Contrarily, the experimental group members expressed a high level of confidence, stating that they
+are knowledgeable or have heard about the benefits of the blockchain technology
+when it comes to security. Such findings are strongly pushing the relevance of
+Research Question No. 1 when it comes to security, as the participants making
+use of the blockchain technology felt more secure using this voting technology
+while also feeling more confident. Research Question No. 2 is also very relevant
+here, as the effect of the additional cryptographic algorithms utilised in this study
+strengthens the data integrity. Although these algorithms are not clearly visible to
+the users as they are used for the processing of the application on the backend, the participants still acknowledged the benefits which made them feel more
+secure.
+39
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.4: Confidence level on vote security
+
+When questioned about whether the voting experience met their expectations,
+most participants acknowledged that the traditional paper-based voting practice,
+while functional, is an outdated method that has been employed for a significant
+period. Participants recognised the potential for enhancements and improvements
+in the traditional voting process. Contrarily, participants in the experimental group
+expressed their opinion regarding e-voting by stating that it provides many benefits over the traditional paper-based voting method, such as flexibility. The findings on the importance of voting security and transparency significantly support
+the relevance and comprehension of Research Question No. 3. An e-voting system’s flexibility has the potential to promote civic participation and voter turnout.
+An e-voting system can provide a convenient and trustworthy platform for citizens to engage in the political process by addressing participants’ concerns about
+security and transparency. The adaptability of such a system, combined with rigorous security measures and transparent procedures, can assist overcome barriers
+to participation and encourage more people to vote.
+40
+
+Chapter 4. Analysis of Results and Discussion
+
+Concerns were made by individuals from both groups regarding voting issues.
+A control group participant emphasised the inherent uncertainty of handwritten
+voting, since there is always the potential that their vote would be interpreted
+incorrectly by those in charge of vote counting. Two experimental group participants, on the other hand, experienced a similar problem. Both participants
+claimed that they were unfamiliar with digital crypto wallets and found them difficult to use at the beginning. Both participants, however, stated that while it was
+an inconvenience for them, it should not be considered a problem. Figure 4.5
+presents a diagram displaying the number of challenges discovered based on the
+participant’s age. The graph clearly shows a link between people’s ages and the
+issues that they encountered during both tests. The frequency of reported difficulties appears to increase with age. Younger participants, shown by the lower
+age range, had no difficulties during the tests while older participants, indicated
+by the higher age range, reported some issues. This relationship shows that age
+may play a factor in the ease with which people adjust to new technologies or
+voting procedures.
+
+41
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.5: Issues or difficulties encountered during testing
+
+In response to the question about their preference for future voting methods,
+the participants in the control group expressed similar opinions. While they indicated that they would not mind utilising the traditional paper-based voting method
+if it were the only option available, they also expressed openness to exploring
+other means of voting. This suggests a willingness to consider and embrace alternative voting methods, indicating a degree of flexibility and adaptability among
+the participants. The experimental group had also similar viewpoints, however
+they emphasised the benefits of using e-voting by mentioning the potential for
+reducing the costs associated with e-voting systems. This strongly supports Research Question No. 5 since the participants are aware of the lightweight and
+cost-effective nature of these systems. In Figure 4.6, an illustration is showing a
+graph which represents the preference with the age. The data indicates a correlation between the preference for electronic voting and participants’ age. Younger
+participants expressed a greater acceptance and preference for e-voting compared
+to older participants. This correlation suggests that younger individuals, who are
+42
+
+Chapter 4. Analysis of Results and Discussion
+
+generally more accustomed to digital technologies, may be more open to embracing electronic voting as a viable option.
+
+Figure 4.6: Preference for electronic voting
+
+Furthermore, there is a correlation between the importance of vote security
+and the preference for electronic voting in the future. Participants who emphasised the significance of a secure voting system were more likely to express a
+preference for electronic voting. This correlation suggests that individuals who
+prioritise vote security see electronic voting as a potential solution to address
+their concerns regarding the integrity and confidentiality of their votes.
+The additional question regarding the shift in perception and comprehension
+of the blockchain-based voting system yielded interesting results among the experimental group. Figure 4.7 illustrates that one participant experienced a shift in
+their perception after being introduced to the technology. This participant mentioned that they were previously unaware of blockchain technology but now have
+a better understanding and appreciation for it. Furthermore, the graph suggests a
+correlation between the age of the individual and their perception of blockchain
+43
+
+Chapter 4. Analysis of Results and Discussion
+
+technology. Older participants generally showed a greater shift in perception, indicating that they may have been less familiar with blockchain technology prior
+to the study. Younger participants, who are likely to be more exposed to digital
+technologies, may have already had some prior knowledge or familiarity with the
+blockchain technology.
+
+Figure 4.7: Initial perception shift in blockchain technology
+
+4.3
+
+Results & Discussion Summary and Key Findings
+
+This chapter presents description on how data was collected from the participants
+used for testing as well as the results obtained from such tests. The research
+questions were also addressed. The timing for each voting method was also analysed, showing that the participants making use of the blockchain e-voting prototype had a significant higher timing however, the reasons for this were discussed.
+The familiarity with each voting method was also analysed, and the results
+were similar, most of the participants were very familiar with the traditional
+paper-based voting and some were also familiar with e-voting methods. Secu44
+
+Chapter 4. Analysis of Results and Discussion
+
+rity and transparency were two factors that both groups expressed a high level of
+importance to. When the participants elaborated on such matter, the main reasons
+were that the voters want to remain anonymous when it comes to voting while
+they expressed the need for a voting method which can provide them with transparency. This was clearly shown when asked about their confidence in the vote
+counting and in the security of their vote. Participants making use of the traditional paper-based voting expressed a low level of confidence, stating that there
+is no way to verify that the people in charge of vote counting counted their
+vote correctly, while participants making use of the blockchain e-voting system
+expressed a high level of satisfaction when it comes to this matter.
+This trend of age-related differences continued when participants were asked
+to elaborate on their voting experiences and expectations. Most participants acknowledged that the traditional paper-based voting practice, although functional,
+is outdated and has been used for a considerable period. They recognised the
+need for enhancements and improvements in the traditional voting process. In
+contrast, participants in the experimental group expressed their opinions regarding
+e-voting and highlighting the benefits it offers over the traditional paper-based
+voting method. They emphasised the flexibility provided by e-voting, suggesting
+that it allows for more convenient and accessible voting options.
+Some difficulties and issues were also apparent, where a participant from the
+control group expressed a concern when it comes to handwriting, while two participants from the experimental group expressed their issues when it comes to
+digital wallets. Though, the participants stated that the issues encountered or men-
+
+45
+
+Chapter 4. Analysis of Results and Discussion
+
+tioned should not be considered as a problem.
+The study’s findings revealed various connections that shed light on the relationship between age, voting preferences, technological perception, and the possible benefits of blockchain integration in voting systems. Firstly, there was a link
+between the people’ ages and the problems they had during both tests. Younger
+participants had fewer problems with e-voting, maybe due to their familiarity with
+digital technologies. Older participants, on the other hand, encountered more difficulties, which could be related to their lack of experience with computerised
+voting systems. Secondly, there was a link found between age and preference for
+e-voting. Younger participants were more inclined to use e-voting, recognising its
+advantages over traditional paper-based voting. Older participants, on the other
+hand, preferred the old voting technique, probably due to knowledge and comfort
+with it.
+Additionally, a correlation was found between the age of the participants and
+their perception of blockchain technology. Younger participants demonstrated a
+greater understanding and acceptance of blockchain, while older participants had
+more reservations or limited awareness of its capabilities.
+These findings support the hypothesis that the blockchain integrations can viably enhance the conventional approach to voting systems by addressing concerns
+related to security, versatility and processing. These findings suggest that adopting
+technology and incorporating blockchain solutions can improve voter perception
+and potentially increase voter turnout.
+
+46
+
+Chapter 5. Conclusions and Recommendations
+
+Chapter 5: Conclusions and Recommendations
+
+This study investigated the problems and issues associated with the traditional
+paper-based voting and e-voting systems and how can they be mitigated with
+the use of the blockchain technology. In order to investigate this and answer
+the research questions, a blockchain-based e-voting prototype was built and two
+cryptographic algorithms, the ECDSA and Paillier cryptosystem, were integrated
+to add additional security and protect privacy.
+For data acquisition, a mixed-methods approach was utilised for this research.
+A total of twelve participants with varying backgrounds in terms of age, occupation, and knowledge of blockchain were selected to take part in the study. The
+participants were divided into two groups: the control group and the experimental group, each group consisting of six participants. The experimental group was
+given access to the experimental prototype, while the control group made use of
+a traditional paper ballot. Data was also gathered using pre and post questionnaires. The first questionnaire gathered general information such as age, technological proficiency, and prior experience with various technologies. The post-test
+questionnaire inquired about participants’ feelings of safety and confidence during the trial. A comprehensive understanding of the participants’ experiences and
+viewpoints was achieved by collecting data from these surveys.
+The study revealed significant trends and correlations. Both groups emphasised
+the importance of security and transparency. Participants expressed a desire for
+
+47
+
+Chapter 5. Conclusions and Recommendations
+
+anonymity in voting and a need for a transparent voting method.
+
+Traditional
+
+paper-based voters lacked confidence in the accuracy of vote counting, while evoting participants were highly satisfied with the transparency.
+Age-related differences persisted when participants discussed their voting experiences. Many acknowledged the outdated nature of paper-based voting and called
+for advancements in the traditional process. In contrast, the experimental group
+praised e-voting for its flexibility and accessibility.
+Some difficulties were reported, such as concerns about handwriting in the
+control group and issues with digital wallets in the experimental group. However,
+participants believed these challenges were not significant problems.
+The study’s findings highlighted the relationship between age, voting preferences, technological perception, and the potential benefits of blockchain integration in voting systems. Younger participants had fewer issues with e-voting, likely
+due to their familiarity with technology.
+
+Older participants encountered more
+
+difficulties, possibly due to their limited experience with computerised voting.
+Younger participants showed a preference for e-voting, recognising its advantages,
+while older participants preferred the traditional method. Additionally, younger
+participants had a better understanding and acceptance of blockchain technology
+compared to their older counterparts.
+These findings support the hypothesis that blockchain integration can enhance
+voting systems by addressing security concerns and providing versatility. Adopting
+technology and incorporating blockchain solutions can improve voter perception
+and potentially increase turnout.
+
+48
+
+Chapter 5. Conclusions and Recommendations
+
+5.1
+
+5.1.1
+
+Limitations
+
+Ethereum’s Network
+
+The scalability challenge of the Ethereum network remains an ongoing issue. According to the researchers [26], as the number of participants and transactions
+increases, congestion can occur, leading to delays and higher transaction costs.
+This scalability problem can impact the performance of the e-voting system, particularly during times of high demand like large-scale elections. The reliability
+of the Ethereum network relies on the underlying infrastructure and consensus
+mechanism employed. Any disruptions or network outages can potentially affect
+the availability and accessibility of the e-voting system, compromising its reliability and trustworthiness. Apart from Ethereum’s network, the internet itself is
+another weakness, as described in [3], as performing e-voting through secure and
+reliable internet requires significant security measures.
+
+5.1.2
+
+Sample Size and Representativeness
+
+The study acknowledged that the sample size was small, with only 12 participants, which may limit the findings’ generalizability. Small sample sizes are a
+common constraint in research studies, and it is critical to recognise them when
+interpreting the results. Despite efforts to recruit people from a variety of backgrounds, the small number of participants may not properly represent the general
+population. The results of this study were interpreted in accordance with the
+small sample size and participant characteristics. These findings, however, can be
+viewed as a preliminary step for future study with larger sample sizes to validate
+49
+
+Chapter 5. Conclusions and Recommendations
+
+and expand on the initial findings.
+
+5.2
+
+Suggestions for Future Research
+
+To summarise, while these restrictions are a part of the challenges addressed
+throughout the construction of this research, they do present many possibilities
+for future research to solve or improve upon. This section will address a few
+possibilities for overcoming these restrictions, which should highlight numerous
+ways in which this research might be expanded upon.
+
+5.2.1
+
+Scaling the Blockchain Network
+
+The authors in [26] presented a solution to scalability issues in blockchain-based
+applications by implementing a technology known as sharding. Instead of having all nodes validate every transaction and block, sharding involves dividing the
+data in a blockchain network into numerous segments or shards. This segmentation enables each shard to process transactions separately, resulting in greater
+network concurrency and scalability. The researchers suggested applying sharding
+to various blockchain platforms, including Bitcoin, Ethereum, Hyperledger Fabric,
+Litecoin, Ripple, Dogecoin, among others. The goal was to divide the workload
+across numerous shards, allowing for parallel processing and improving overall
+system performance.
+By adopting sharding, the researchers aimed to overcome the restrictions of
+standard blockchain networks, which require all participating nodes to verify each
+transaction and block, resulting in scalability issues. By permitting parallel processing of transactions over numerous shards, sharding has the potential to im50
+
+Chapter 5. Conclusions and Recommendations
+
+prove the throughput and scalability of blockchain networks. It was noted that
+the effectiveness and specificity of sharding can vary based on the blockchain
+platform and its design. Further research and development are required to investigate and optimize sharding solutions for various blockchain systems in order to
+fully address scalability challenges.
+
+5.2.2
+
+Data Gathering Improvements
+
+Expanding the participant sample size to improve representativeness and generalizability of the findings could be a future enhancement to gain an improved
+understanding of the voters’ thoughts and feedback. The study can capture a
+wider range of viewpoints, experiences, and perspectives by increasing the number of participants, resulting in a better level of representativeness. The findings
+are more likely to be generalizable to the general population if the sample size
+is larger.
+A bigger sample size of participants provides far more accurate statistical
+analysis and increases the confidence of the study’s findings. It lessens the impact of individual differences and gives a more complete understanding of the
+topic under investigation. Furthermore, a higher sample size can aid in identifying distinct subgroups within the population, allowing for more complex data
+analysis and interpretation.
+With more participants, it is possible to identify minor, but significant, effects
+or variations in voters’ beliefs or behaviours. This improves the research findings’
+reliability and validity, as well as the overall quality of the analysis. A higher
+sample size also increases the reliability and robustness of the data acquired. Out51
+
+Chapter 5. Conclusions and Recommendations
+
+liers or extreme reactions have less of an impact on the overall findings, which
+reduces the potential impact of individual variation or measurement errors.
+Expanding the participant sample size can be accomplished through various
+methods, such as increasing the recruitment efforts, extending the study duration
+or working with numerous research institutions or organizations. However, while
+establishing the ideal sample size for a study, it is critical to consider realistic
+constraints such as time, resources and feasibility.
+
+52
+
+List of References
+
+List of References
+
+[1] Ashish Singh Parihar, Devendra Prasad, Aishwarya Singh Gautam, and Swarnendu Kumar Chakraborty. Proposed end-to-end automated e-voting through
+blockchain technology to increase voter’s turnout. In Manish Prateek, T. P.
+Singh, Tanupriya Choudhury, Hari Mohan Pandey, and Nguyen Gia Nhu, editors, Proceedings of International Conference on Machine Intelligence and Data
+Science Applications, pages 55–71, Singapore, 2021. Springer Singapore.
+[2] Sudharsan B, Rishi Tharun V, Nidhish Krishna M P, Boopathi Raj J, Surya
+Arvindh M, and Dr. M. Alagappan. Secured electronic voting system using the concepts of blockchain. In 2019 IEEE 10th Annual Information Technology, Electronics and Mobile Communication Conference (IEMCON), pages
+0675–0681, 2019.
+[3] Ruhi Taş and Ömer Tanrıöver. A systematic review of challenges and opportunities of blockchain for e-voting. Symmetry, 12:1328, 08 2020.
+[4] Kriti Patidar and Swapnil Jain.
+blockchain.
+
+Decentralized e-voting portal using
+
+In 2019 10th International Conference on Computing, Communi-
+
+cation and Networking Technologies (ICCCNT), pages 1–4, 2019.
+[5] Kamran, Muhammad Hammad Nasir, Muhammad Imran, and Joon-Sung
+Yang. Study on e-voting systems: A blockchain based approach. In 2021
+
+53
+
+List of References
+
+IEEE International Conference on Consumer Electronics-Asia (ICCE-Asia), pages
+1–4, 2021.
+[6] Samuel Quist, Leonard Amegatse, and Dilys Dickson. Conceptual design of
+e-voting system for academic institution. International Journal for Innovation
+Education and Research, 4:96–109, 12 2016.
+[7] Vasillis Vlachokyriakos, Paul Dunphy, Nick Taylor, Rob Comber, and Patrick
+Olivier. Ballotshare: An exploration of the design space for digital voting in
+the workplace. Computers in Human Behavior, 41:433–443, 12 2014.
+[8] Patrick McCorry, Siamak Shahandashti, and Feng Hao. A Smart Contract for
+Boardroom Voting with Maximum Voter Privacy, pages 357–375. 01 2017.
+[9] Cosmas Krisna Adiputra, Rikard Hjort, and Hiroyuki Sato. A proposal of
+blockchain-based electronic voting system. In 2018 Second World Conference
+on Smart Trends in Systems, Security and Sustainability (WorldS4), pages 22–27,
+2018.
+[10] Giovanni N. de los Santos, Jessie Richie N. de los Santos, and Lorna G.
+de los Santos. e-voting kiosk: A network architecture school-based registration and voting system. In 2020 IEEE 12th International Conference on Humanoid, Nanotechnology, Information Technology, Communication and Control,
+Environment, and Management (HNICEM), pages 1–5, 2020.
+[11] Muhammad Ali Khan and Hafiz Shahbaz Rasheed. Secure internet voting
+using blockchain technology. In 2021 International Conference on Cyber Warfare and Security (ICCWS), pages 82–86, 2021.
+54
+
+List of References
+
+[12] Alfonso Brolin Sihite and Muhammad Salman. E-voting and e-recap verification and validation schemes for indonesia utilizing cryptographic hash
+function message authentication codes (mac) and public key infrastructure
+(pki). In 2019 International Conference on Informatics, Multimedia, Cyber and
+Information System (ICIMCIS), pages 29–34, 2019.
+[13] Ramya Govindaraj, P Kumaresan, and K. Sree harshitha. Online voting system using cloud. In 2020 International Conference on Emerging Trends in Information Technology and Engineering (ic-ETITE), pages 1–4, 2020.
+[14] Valentin Sliusar, Aleksei Fyodorov, Aleksandr Volkov, Pyotr Fyodorov, and
+Vladislav Pascari.
+
+Blockchain technology application for electronic voting
+
+systems. In 2021 IEEE Conference of Russian Young Researchers in Electrical
+and Electronic Engineering (ElConRus), pages 2257–2261, 2021.
+[15] Hrithvick Rao Rewatkar, Devansh Agarwal, Anmol Khandelwal, and Subho
+Upadhyay. Decentralized voting application using blockchain. In 2021 10th
+IEEE International Conference on Communication Systems and Network Technologies (CSNT), pages 735–739, 2021.
+[16] M. Ramalingam, D. Saranya, and R. ShankarRam. An efficient and effective blockchain-based data aggregation for voting system.
+
+In 2021 Inter-
+
+national Conference on System, Computation, Automation and Networking (ICSCAN), pages 1–4, 2021.
+[17] Ashok Kumar Yadav.
+
+Significance of elliptic curve cryptography in
+
+blockchain iot with comparative analysis of rsa algorithm.
+
+In 2021 Inter55
+
+List of References
+
+national Conference on Computing, Communication, and Intelligent Systems (ICCCIS), pages 256–262, 2021.
+[18] Shashie Dilhara. A review on application of hash functions and digital signatures in the blockchain industry. 09 2021.
+[19] Marek Woda and Zen Huzaini. A Proposal to Use Elliptical Curves to Secure
+the Block in E-voting System Based on Blockchain Mechanism, pages 466–476.
+05 2021.
+[20] Marwa Chaieb, Souheib Yousfi, Pascal Lafourcade, and Riadh Robbana.
+Verify-your-vote: A verifiable blockchain-based online voting protocol.
+
+In
+
+Marinos Themistocleous and Paulo Rupino da Cunha, editors, Information
+Systems, pages 16–30, Cham, 2019. Springer International Publishing.
+[21] Hyunyeon Kim, Kyung Kim, Soohan Park, and Jongsoo Sohn.
+
+E-voting
+
+system using homomorphic encryption and blockchain technology to encrypt
+voter data, 11 2021.
+[22] Craig Gentry and Shai Halevi. Implementing gentry’s fully-homomorphic encryption scheme. In Kenneth G. Paterson, editor, Advances in Cryptology –
+EUROCRYPT 2011, pages 129–148, Berlin, Heidelberg, 2011. Springer Berlin
+Heidelberg.
+[23] Michael Naehrig, Kristin Lauter, and Vinod Vaikuntanathan. Can homomorphic encryption be practical? pages 113–124, 10 2011.
+[24] Roger Watson. Quantitative research. Nursing standard, 29:44–48, 2015.
+
+56
+
+List of References
+
+[25] Michael Patton. Qualitative Research. 10 2005.
+[26] Uzma Jafar, Mohd Aziz, and Zarina Shukur. Blockchain for electronic voting
+system—review and open research challenges. Sensors, 21:5874, 08 2021.
+
+57
+
+Appendix A
+
+Chapter A: Control Group Questionnaire
+
+58
+
+Appendix A
+
+59
+
+Appendix A
+
+60
+
+Appendix B
+
+Chapter B: Experimental Group Questionnaire
+
+61
+
+Appendix B
+
+62
+
+Appendix B
+
+63
+
+

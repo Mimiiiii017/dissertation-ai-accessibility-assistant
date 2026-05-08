@@ -1,0 +1,131 @@
+\documentclass[12pt]{report}
+
+%% Useful packages
+\usepackage[a4paper,top=3cm,bottom=3cm,left=3.7cm,right=2.5cm,marginparwidth=1.75cm,headheight=22pt]{geometry}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{courier}
+\usepackage{listings}
+\usepackage[titletoc]{appendix}
+\usepackage[export]{adjustbox}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+\usepackage[font=small,labelfont={bf,it}, textfont=it]{caption}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[bottom]{footmisc}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{subfigure}
+\usepackage{lipsum}
+\usepackage{fancyhdr}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage{csquotes}
+\usepackage{titlesec}
+\usepackage{colortbl}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[hidelinks]{hyperref} %you can remove for red bounding box around links
+\setlength{\marginparwidth}{3cm} % set the width of the todo
+\reversemarginpar % sets the todo in the left margin
+\usepackage{enumitem}
+
+
+
+%==== Header and Footer configure ====
+% Define the plain pagestyle used by most chapters
+\fancypagestyle{plain}{
+\fancyhf{} % Clear header footer
+\fancyhead[R]{\bf \small \textsl{\nouppercase{\leftmark}} \vspace{0.1in}}
+\fancyfoot[R]{\thepage}
+% Set the right side of the footer to be the page number
+\renewcommand{\headrulewidth}{2pt}
+}
+
+%==== Overall Config ====
+%\setlength{\parindent}{0in} % Set paragraph indent as 0
+% \setlength{\fboxsep}{-0.3in}%
+
+\titleformat{\chapter}{\centering\bfseries\large}{\chaptername~\thechapter:}{0.5em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+\titleformat*{\section}{\bfseries\fontsize{12pt}{12}}
+\titleformat*{\subsection}{\bfseries\itshape\fontsize{12pt}{12}}
+
+\setlength{\fboxrule}{0.5pt} % Set the bounding box around the image as 0.5pt
+\pagestyle{plain}
+
+% \renewcommand{\chaptermark}[1]{\markboth{#1}{}}% Comment this line to use header "Chapter 1. Literature View"; otherwise header is "Literature View"
+
+\addtocontents{toc}{\protect\vspace{0.05in}}
+\addtocontents{lof}{\protect\vspace{0.05in}}
+\addtocontents{lot}{\protect\vspace{0.05in}}
+
+% Listings package settings
+\lstset{
+    language=Python,
+    basicstyle=\scriptsize\ttfamily,
+    tabsize=4,
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false
+}
+
+\begin{document}
+\fontdimen2\font=0.5em% inter word space
+%==== FRONT PART====
+\include{Front/01_coverpage} % Coverpage
+
+%\begingroup
+%\let\cleardoublepage\clearpage
+\pagenumbering{roman}
+
+\include{Front/02_authorship}
+\include{Front/03_copyright.tex}
+\include{Front/04_Acknowledgement}
+\include{Front/05_Abstract}
+
+
+\renewcommand*\contentsname{\centering Table of Contents}
+\tableofcontents
+
+\newpage
+
+
+\renewcommand{\listfigurename}{\centering List of Figures}
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+\newpage
+
+\renewcommand{\listtablename}{\centering List of Tables}
+\listoftables 
+\addcontentsline{toc}{chapter}{List of Tables}
+\newpage
+
+\include{Front/06_Abbreviations}
+
+
+%\endgroup
+
+%==== MAIN PART ====
+
+\pagenumbering{arabic}
+\include{Sections/01_Introduction}
+\include{Sections/02_LiteratureReview}
+\include{Sections/03_Methodology}
+\include{Sections/04_AnalysisResultsDiscussion}
+\include{Sections/05_ConclusionsRecommendations}
+
+%==== ENDING PART ===
+
+\renewcommand\bibname{List of References}
+\bibliographystyle{IEEEtran}
+\begin{spacing}{2.0}
+\titlespacing*{\chapter}{0pt}{-18pt}{41pt}
+\bibliography{Ref/References}
+\end{spacing}
+\newpage
+
+\include{Sections/06_Appendix}
+%==== END OF ALL ===
+\end{document}

@@ -193,7 +193,7 @@ gemma4:31b-cloud was added to `run.ts` before this test but did not appear in re
 
 ---
 
-## 9. T28 changes applied (commit `864bcd1`)
+## 9. T28 changes applied
 
 All changes are in `evaluation/Cloud-LLM-Preliminary/benchmark-prompt.ts`.
 

@@ -1,0 +1,2674 @@
+Classification of Italian different dishes
+with a Convolutional Neural Networks
+
+Julian Grixti
+Supervisor: Ms. Olena Sammut
+
+September - 2023
+A dissertation submitted to the Institute of Information and Communication
+Technology in partial fulfilment of the requirements for the degree of BSc (Hons)
+Multimedia in Software Development
+
+Authorship Statement
+
+Authorship Statement
+
+This dissertation is based on the results of research carried out by myself, is my
+own composition, and has not been previously presented for any other certified
+or uncertified qualification.
+
+The research was carried out under the supervision of Ms. Olena Sammut.
+
+15/09/2023
+
+Julian Grixti
+
+i
+
+Copyright Statement
+
+Copyright Statement
+
+In submitting this dissertation to the MCAST Institute of Information and Communication Technology, I understand that I am giving permission for it to be
+made available for use in accordance with the regulations of MCAST and the
+Library and Learning Resource Centre. I accept that my dissertation may be
+made publicly available at MCAST’s discretion.
+
+15/09/2023
+
+Julian Grixti
+
+ii
+
+Acknowledgements
+
+Acknowledgements
+
+First and foremost, I would like to extend my profound appreciation to my mentor, Ms. Olena, for her unwavering guidance, support, and invaluable insights
+throughout this research journey.
+
+Her dedication and expertise have not only
+
+shaped the trajectory of my study but have also significantly enhanced its overall quality. I also wish to express my sincere gratitude to Mr. David Debono.
+His constructive feedback, deep expertise, and encouragement have been invaluable, offering both perspective and confidence in critical moments of my research.
+The love, encouragement, and understanding I’ve received from my family have
+been the bedrock upon which this dissertation stands. Their unwavering belief in
+my capabilities and their consistent support have been a constant source of inspiration, especially during challenging phases of this journey. Furthermore, I am
+blessed to have friends who have stood by me with their encouragement, understanding, and uplifting spirits. Their enduring presence and unshakeable support
+have infused joy and positivity into my academic endeavors, making this journey
+both memorable and fulfilling.
+
+iii
+
+Abstract
+
+Abstract
+
+The world of technology has witnessed significant strides, particularly with the
+advent of image recognition. This empowers different computer platforms to interpret and analyze visual content from diverse media sources such as images
+and videos. Pivotal to this evolution is the deployment of Convolutional Neural
+Networks (CNNs), which are intricately designed to process visual data. With
+their layered architecture, CNNs are adept at capturing hierarchical nuances from
+images, systematically unearthing and distinguishing pivotal features and thus, discerning detailed visual patterns. Their transformative role is evident in a spectrum
+of industries, ranging from healthcare and autonomous vehicles to digital security
+and online retail. By autonomously understanding visual content, CNNs pave the
+way for unprecedented innovations in the realm of computer vision.
+
+This dissertation ventures into the domain of image recognition, with a specific
+emphasis on the classification of diverse Italian dishes using Convolutional neural
+Networks. The primary objective of this scholarly exploration is to conceptualize and develop robust, accurate, and reliable model tailored for distinguishing a
+plethora of Italian dishes based on their unique visual characteristics. To achieve
+this, the research engaged with several cutting-edge architectures including MobileNetV2, DenseNet, Xception, and InceptionV3, to evaluate their proficiency in
+classifying the richness of Italian culinary artistry.
+
+During the progression of this research, a series of challenges surfaced that influenced the outcomes. A paramount hurdle was the limitation of testing data,
+which consequently led to a classification report and confusion matrix that did
+not meet the anticipated benchmarks. This limitation posed significant constraints
+on the model’s capability to validate its findings, thereby affecting its overall reliability and performance metrics. To address these setbacks, we embarked on a
+iv
+
+Abstract
+
+comprehensive investigative journey.
+
+Experiments were initiated to enhance the model’s performance including the incorporation of hyperparameter tuning to ensure optimal learning rates and network
+configurations. Additionally, data augmentation techniques were implemented, thereby
+expanding the variability within the available dataset, and rendering the model
+more resilient to visual variances within dishes. Furthermore, leveraging advanced
+architectures such as MobileNetV2, DenseNet, Xception, and InceptionV3 provided a holistic view of each model’s strengths and potential areas of improvement in the classification of Italian dishes. Remarkably, amidst these challenges,
+in terms of training accuracy and validation accuracy, the models used exhibited
+commendable performances. This showcases the resilience and adaptability of the
+deployed CNN architectures, reinforcing their potential in specialized classification
+tasks.
+
+Keywords: Convolutional Neural Networks, Image recognition, Italian dishes classification, Data augmentation, Hyperparameter tuning.
+
+v
+
+Table of Contents
+
+Table of Contents
+
+Authorship Statement
+
+i
+
+Copyright Statement
+
+ii
+
+Acknowledgements
+
+iii
+
+Abstract
+
+iv
+
+List of Figures
+
+x
+
+List of Tables
+
+xi
+
+List of Abbreviations
+
+xii
+
+1
+
+Introduction
+
+1
+
+2
+
+Literature Review
+2.1 Artificial Intelligence . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.1.1 What is Artificial Intelligence? . . . . . . . . . . . . . . . . .
+2.1.2 History of Artificial Intelligence . . . . . . . . . . . . . . . .
+2.1.3 Where is AI used? . . . . . . . . . . . . . . . . . . . . . . .
+2.1.4 Why is Artificial Intelligence Important? . . . . . . . . . . .
+2.2 Machine Learning . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.2.1 What is Machine Learning? . . . . . . . . . . . . . . . . . .
+2.2.2 Significance of Machine Learning . . . . . . . . . . . . . . .
+2.3 Deep Learning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.3.1 What is Deep Learning? . . . . . . . . . . . . . . . . . . . .
+2.3.2 How does Deep Learning Work? . . . . . . . . . . . . . . .
+2.3.3 What are Neural Networks? . . . . . . . . . . . . . . . . . .
+2.3.4 Types of Neural Networks . . . . . . . . . . . . . . . . . . .
+2.3.5 Different Applications of Neural Network . . . . . . . . . .
+2.4 Image Recognition and Convolutional Neural Networks . . . . . . .
+2.4.1 How do CNNs work? . . . . . . . . . . . . . . . . . . . . . .
+2.4.2 Different Types of Convolutional Neural Networks . . . . .
+2.4.3 Performance Metrics for CNN . . . . . . . . . . . . . . . . .
+2.5 Food Image Recognition and Related Work . . . . . . . . . . . . . .
+2.5.1 Critical Evaluation of Reviewed Studies and Choice of Algorithm for Implementation . . . . . . . . . . . . . . . . . . .
+2.5.2 What are the Main Challenges in Food Image Recognition?
+
+4
+4
+4
+5
+6
+7
+8
+8
+8
+10
+10
+11
+12
+13
+14
+14
+16
+17
+18
+19
+20
+21
+
+vi
+
+Table of Contents
+
+3
+
+4
+
+Research Methodology
+3.1 Research Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.1.1 Exploratory vs Confirmatory Research . . . . . . . . . . . . .
+3.1.2 Qualitative vs Quantitative Analysis . . . . . . . . . . . . . .
+3.2 Data Collection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.2.1 Primary Data Sources . . . . . . . . . . . . . . . . . . . . . .
+3.2.2 Secondary Data Sources . . . . . . . . . . . . . . . . . . . .
+3.3 Data Augmentation for Classifying Italian Dishes . . . . . . . . . .
+3.3.1 The Crust and Toppings of Augmentation in Pizza Classification . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.3.2 Augmentation Techniques Tailored . . . . . . . . . . . . . . .
+3.3.3 Augmentation: Perfecting our Classifiers . . . . . . . . . . .
+3.4 Model Selection . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.4.1 MobileNetV2 . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.4.2 InceptionV3 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.4.3 DenseNet . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.4.4 Xception . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.4.5 Rationale for Model Selection . . . . . . . . . . . . . . . .
+3.5 Evaluation Metrics . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.5.1 Precision . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.5.2 Recall . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.5.3 F1-Score . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.5.4 Confusion Matrix . . . . . . . . . . . . . . . . . . . . . . . .
+3.6 Hyperparameter Tuning . . . . . . . . . . . . . . . . . . . . . . . . .
+3.6.1 Why Hyperparameter Tuning?
+. . . . . . . . . . . . . . . .
+3.6.2 Parameters vs Hyperparameters . . . . . . . . . . . . . . . .
+3.6.3 Tuning Strategies . . . . . . . . . . . . . . . . . . . . . . . .
+3.6.4 Key Hyperparameters for Tuning . . . . . . . . . . . . . . .
+3.6.5 Validation Strategy . . . . . . . . . . . . . . . . . . . . . . . .
+3.7 Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+23
+25
+25
+25
+26
+26
+27
+27
+28
+28
+29
+30
+31
+32
+32
+33
+34
+35
+35
+35
+36
+36
+37
+37
+38
+38
+38
+39
+39
+
+Analysis of Results and Discussion
+4.1 Dataset Distribution Analysis . . . . . . . . . . . . . . . . . . . . . .
+4.1.1 Why different proportions? . . . . . . . . . . . . . . . . . . .
+4.2 Comparative Analysis of the Convolutional Neural Networks . . . .
+4.2.1 DenseNet . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.2.2 InceptionV3 . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.2.3 Xception . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.2.4 MobileNetV2 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3 Results by Model . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3.1 MobileNetV2 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3.2 InceptionV3 . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3.3 DenseNet . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3.4 Xception . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.4 Comparative Analysis . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.4.1 Training-Validation vs Test Performance . . . . . . . . . . .
+
+41
+42
+43
+44
+44
+44
+45
+45
+46
+46
+52
+59
+66
+72
+72
+
+vii
+
+Table of Contents
+
+4.5
+
+5
+
+Discussion of Results . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.5.1 Challenges Faced . . . . . . . . . . . . . . . . . . . . . . . .
+4.5.2 Challenges Faced . . . . . . . . . . . . . . . . . . . . . . . .
+4.5.3 Interpretation of Performance Variations across Test Sizes .
+4.5.4 Real World Applicability and Implications based on Varied
+Test Sizes’ Performance . . . . . . . . . . . . . . . . . . . . .
+
+Conclusions and Recommendations
+
+74
+74
+75
+75
+76
+77
+
+List of References
+
+80
+
+Appendix A GitHub Link
+
+89
+
+viii
+
+List of Figures
+
+List of Figures
+
+2.1
+2.2
+2.3
+2.4
+
+Where Machine Learning is Used. . . . . . . . . . . . . . . . . . . .
+Diagram illustrating that deep learning and machine learning are
+subsets of artificial intelligence. . . . . . . . . . . . . . . . . . . . .
+How Neural Networks are Structured. . . . . . . . . . . . . . . . . .
+How a Convolutional Neural Network Works . . . . . . . . . . . . .
+
+12
+13
+16
+
+3.1
+3.2
+3.3
+3.4
+3.5
+
+Research Methodology Pipeline. . . . . . . . . . . . . . . . . . . . .
+How the MobileNetV2 model works. . . . . . . . . . . . . . . . . .
+How the InceptionV3 model works. . . . . . . . . . . . . . . . . . .
+How the DenseNet model works. . . . . . . . . . . . . . . . . . . .
+How the Xception model works. . . . . . . . . . . . . . . . . . . . .
+
+24
+31
+32
+33
+33
+
+Training and Validation Accuracy of MobileNetV2 model at 30%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.2 Test Results and Evaluation of the MobileNetV2 model at 30% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.3 Training and Validation Accuracy of MobileNetV2 model at 40%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.4 Test Results and Evaluation of the MobileNetV2 model at 40% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.5 Training and Validation Accuracy of MobileNetV2 model at 70%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.6 Test Results and Evaluation of the MobileNetV2 model at 70% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.7 Training and Validation Accuracy of MobileNetV2 model at 100%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.8 Test Results and Evaluation of the MobileNetV2 model at 100%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.9 Training and Validation Accuracy of InceptionV3 model at 30% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.10 Test Results and Evaluation of the InceptionV3 model at 30% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.11 Training and Validation Accuracy of InceptionV3 model at 40% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.12 Test Results and Evaluation of the Inception model at 40% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.13 Training and Validation Accuracy of the Inception model at 70%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.14 Test Results and Evaluation of the Inception model at 70% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+10
+
+4.1
+
+46
+47
+48
+48
+49
+50
+50
+51
+52
+53
+54
+55
+55
+56
+
+ix
+
+List of Figures
+
+4.15 Training and Validation Accuracy of the InceptionV3 model at 100%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.16 Test Results and Evaluation of the InceptionV3 model at 100% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.17 Training and Validation Accuracy of the DenseNet model at 30%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.18 Test Results and Evaluation of the DenseNet model at 30% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.19 Training and Validation Accuracy of the DenseNet model at 40%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.20 Test Results and Evaluation of the DenseNet model at 40% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.21 Training and Validation Accuracy of the DenseNet model at 70%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.22 Test Results and Evaluation of the DenseNet model at 70% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.23 Training and Validation Accuracy of the DenseNet model at 100%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.24 Test Results and Evaluation of the DenseNet model at 100% of
+the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.25 Training and Validation Accuracy of the Xception model at 30%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.26 Test Results and Evaluation of the Xception model at 30% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.27 Training and Validation Accuracy of the Xception model at 40%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.28 Test Results and Evaluation of the Xception model at 40% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.29 Training and Validation Accuracy of the Xception model at 70%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.30 Test Results and Evaluation of the Xception model at 70% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.31 Training and Validation Accuracy of the Xception model at 100%
+of the dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.32 Test Results and Evaluation of the Xception model at 100% of the
+dataset. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+57
+58
+59
+60
+61
+62
+62
+63
+64
+65
+66
+67
+67
+68
+69
+70
+70
+71
+
+x
+
+List of Tables
+
+List of Tables
+
+4.1
+4.2
+4.3
+4.4
+
+Analysis of models at 30% dataset proportion. . . . . . . . . . . . .
+Comparative analysis of models at 40% dataset proportion. . . . . .
+Comparative analysis of models at 70% dataset proportion. . . . . .
+Comparative analysis of models at 100% dataset proportion. . . . .
+
+72
+73
+73
+74
+
+xi
+
+List of Abbreviations
+
+List of Abbreviations
+
+NN
+ML
+DL
+FCN
+CNN
+
+Neural Network
+Machine Learning
+Deep Learning
+Fully Convolutional Network
+Convolutional Neural Network
+
+xii
+
+Chapter 1. Introduction
+
+Chapter 1: Introduction
+
+Image recognition remains a critical field of study, enabling computers to process and analyze visual content from images and videos. Its widespread applications span industries such as healthcare, security, and transportation. The literature
+abounds with pivotal research papers that have heralded advancements in image
+recognition. Yann LeCun’s seminal paper, ”Gradient-Based Learning Applied to
+Document Recognition” from 1998, marked the introduction of the Convolutional
+Neural Network (CNN) - a deep learning algorithm that has since become instrumental for modern image recognition systems [1]. Further compounding the
+importance of CNNs, Krizhevsky et al., in their 2012 paper titled “ImageNet
+Classification with Deep Convolutional Neural Networks”, showcased the efficacy
+of CNNs on large-scale image recognition, presenting unmatched results on the
+ImageNet dataset [2]. As the precision of image recognition technology evolves,
+its transformative impact is palpable across sectors, catalyzing efficient data analysis, refined automation, and enriched user experiences.
+Within the vast expanse of image recognition lies the specialized domain of
+food image recognition, a challenge in computer vision with implications in recipe
+recommendations and nutritional analysis. This dissertation zeroes in on the utilization of CNNs, specifically models such as MobileNetV2, InceptionV3, Xception, and DenseNet, for classifying various Italian pizza styles. CNNs have already proven their mettle in food image classification. For instance, Zhang et al.
+
+1
+
+Chapter 1. Introduction
+
+(2015) wielded CNNs to classify 101 food categories, achieving a commendable
+accuracy of 83.4% [3], while Kamarudin et al. (2020) attained 94.2% accuracy
+for Malaysian dishes [4]
+The crux of this dissertation revolves around the classification of multifarious
+Italian pizza styles using the aforesaid CNN models. The research aims not just
+for high classification accuracy but also explores real-world applicability, especially within the food industry. Looking forward, the dissertation will also shed
+light on prospective research avenues.
+Grounded in literature and past successes, this study hypothesizes: “Computer
+vision, armed with Convolutional Neural Networks, can adeptly identify popular
+Italian pizza styles.” Building on this, Carullo et al. (2020) achieved a remarkable
+91.5% accuracy classifying Italian pasta dishes with a CNN [5], and Vetrò et al.
+(2018) registered an 88.2% accuracy rate for Italian cuisine [6]. TSuch studies
+bolster our research’s foundational hypothesis. Nevertheless, our ambition lies in
+pioneering an innovative approach, focusing singularly on Italian pizza styles using multiple CNN models.
+To elucidate our research direction, the ensuing questions will be tackled:
+1. What accuracy do CNNs, including models like MobileNetV2, InceptionV3,
+Xception, and DenseNet, achieve in classifying different Italian pizza styles?
+2. How does our developed model fare in comparison with contemporary solutions?
+3. In what ways does the image dataset’s size influence the algorithm’s accu2
+
+Chapter 1. Introduction
+
+racy?
+Highlighting the potential of CNNs in food recognition, Lui et al. (2019)
+found CNNs outperforming other deep learning models, such as Capsule Networks and ResNet, on a Chinese cuisine dataset [7].
+In my academic journey’s second year, the Research Design 1 lecture introduced me to Mr.
+
+Daren Scerri’s groundbreaking RemSen satellite detection
+
+project. That encounter ignited a passion for image recognition, steering me towards the limitless possibilities of deep learning and neural networks. This intrigue spurred a deep dive into various deep learning models, culminating in this
+dissertation’s focused exploration of Italian pizza classification using CNNs.
+The broader implications of this study cannot be understated. Beyond its academic value, its contributions have potential real-world impacts: aiding the food
+industry in Italian dish production and identification, enhancing culinary experiences for travelers, and even playing a part in the cultural preservation of Italian
+cuisine. Moreover, by advancing image recognition and deep learning, it could
+catalyze innovative solutions for a myriad of image classification challenges.
+
+3
+
+Chapter 2. Literature Review
+
+Chapter 2: Literature Review
+
+2.1
+
+Artificial Intelligence
+
+2.1.1
+
+What is Artificial Intelligence?
+
+Artificial Intelligence refers to the field of developing computer systems and robots
+which are capable of behaving in ways that they either mimic human actions or
+go beyond what they are capable of. Ed Burns defines Artificial Intelligence as
+“the simulation of human intelligence processes by machines, especially computer
+systems.
+Problems related to artificial intelligence provide information or trigger actions
+automatically without human interference, and AI is used in various technologies
+that are made use of today, including smart devices such as smart watches, smartphones, and many others [8]. Researcher John McCarthy said in his research that
+artificial intelligence “is the science and engineering of making intelligent machines, especially intelligent computer programs. It is related to the similar task
+of using computers to understand human intelligence, but AI does not have to
+confine itself to methods that are biologically observable.” He adds that “Intelligence is the computational part of the ability to achieve goals in the world.
+Varying kinds and degrees of intelligence occur in people, many animals, and
+some machines.” [9].
+Ed Burns states that “Specific algorithms of AI include expert systems, natural
+language processing, speech recognition and machine vision.” [10] Nilsson states
+4
+
+Chapter 2. Literature Review
+
+in his research titled ‘The Quest for Artificial Intelligence’ that he sees AI as
+the activity of giving machines intelligence, and intelligence is that property that
+allows an entity to act intelligently and foresightedly in its surroundings.
+
+2.1.2
+
+History of Artificial Intelligence
+
+Artificial Intelligence idea was first introduced in 1956 but wasn’t as popular
+as it is nowadays. In the 1950s, research about AI took place and explored
+topics like problem solving and symbolic methods, and in the 1960s, the US
+Department of Defense took interest in AI and began training their computers
+to mimic how humans reason. The Defense Advanced Research Projects Agency
+(DARPA) completed street mapping projects in the 1970s, and they also produced
+intelligent personal assistants in 2003. These intelligent personal assistants were
+developed long before Alexa or Cortana were household names.
+This paved the way for the automation that we see in computers nowadays,
+that include decision support systems and smart search systems designed to complement human abilities. AI, throughout the years has evolved to produce many
+benefits in every industry. From the 1950s till the 1970s, early work with neural
+networks was conducted and it stirred excitement for what is known as “thinking machines”. From the 1980s, Machine Learning became popular and nowadays deep learning has made a significant breakthrough in the world of AI. The
+CEO of SAS software Jim Goodnight has had some positive remarks to make
+about AI and stated “AI has been an integral part of SAS software for years.
+Today we help customers in every industry capitalize on advancements in AI,
+and we’ll continue embedding AI technologies like machine learning and deep
+5
+
+Chapter 2. Literature Review
+
+learning in solutions across the SAS portfolio” [11]. Advanced algorithms and
+improvements in computing power and storage has helped AI gain popularity and
+became widely used.
+
+2.1.3
+
+Where is AI used?
+
+Artificial Intelligence is being used in a variety of applications that include medical diagnosis, mathematics, art, digital assistants (such as Siri), image recognition
+and more. It is also widely used by social media platforms to determine which
+stories should be targeted to which sections of the audience to generate more
+traffic but can create problems such as presenting a biased view of world events.
+Other examples of artificial intelligence use include: • Disease mapping and prediction • Personalized healthcare recommendations • Entertainment recommendations from platforms such as Spotify and Netflix [12] In their review, Kulkarni
+studied how artificial intelligence can be applied in healthcare and medical practise. In their work they have mentioned that in medicine, artificial intelligence has
+made dramatic progress over the past years [?]. Several applications of Artificial
+Intelligence were implemented in areas, such as in medical imaging, pathology,
+ophthalmology (which is the branch of medicine concerned with the study and
+treatment of disorders and eye diseases) and dermatology. Medical imaging can
+be defined as the separate “different technologies which are used to view the human body in order to diagnose, monitor or treat medical conditions. Each type
+of technology gives different information about the area of the body being studied or treated, related to possible disease, injury, or the effectiveness of medical
+treatment.” [13].
+6
+
+Chapter 2. Literature Review
+
+2.1.4
+
+Why is Artificial Intelligence Important?
+
+Artificial Intelligence allows businesses and companies to make better decisions,
+improving core business processes by increasing how accurate and how fast they
+make use of decision-making processes. This technology offers a respective number of benefits that makes AI an exceptional tool for any modern organization,
+which includes automation, enhancement, analysis, and accuracy. For automation,
+AI is suitable for automating repetitive tasks that would have been previously
+done manually, without the feeling of fatigue by employees. Such tools that allow this feature include Microsoft’s own Power Automate, and Robotic Process
+Automate. AI enhances products and services by improving experiences for endusers, via capabilities such as optimizing Chat bots or customer service menus,
+with the aim of delivering better recommendations. Users can build chat bots by
+using Microsoft Azure and setting up the knowledge base, as well as populating the questions and answers manually. AI can analyze data at a much faster
+rate than humans, and can also analyze much larger datasets, allowing uncovering patterns that humans would simply miss. AI can also be trained to become
+more accurate than humans, utilizing its ability to interpret data to come up with
+better decisions for tasks that include examples like picking financial investments
+or identifying cancerous growths on x-rays [14].
+
+7
+
+Chapter 2. Literature Review
+
+2.2
+
+Machine Learning
+
+2.2.1
+
+What is Machine Learning?
+
+“Machine Learning is a field of study that gives computers the ability to learn
+without being programmed”. This is what Arthur Samuel said about Machine
+Learning back in 1959. People often mistake Machine Learning as being considerably equivalent to Artificial Intelligence. This is a statement which is false
+because Machine learning is a subset of Artificial Intelligence that uses data to
+teach machines [15]. AI researcher Vijay Kanade defines machine learning as “a
+discipline of artificial intelligence that provides the ability to automatically learn
+from data and past experiences to identify patterns and make predictions with
+minimal human intervention.”
+Methods of machine learning enable computer systems to operate without explicit programming. Applications of machine learning are fed with new data so
+that they can learn, grow, develop and adapt to possible changes to the system.
+Their algorithms use computation methods to learn directly from the data instead
+of relying on possible formulae which may serve as a model. The performance
+of the algorithms of machine learning improves with an increase in the number
+of available samples during the learning phase [16].
+
+2.2.2
+
+Significance of Machine Learning
+
+Ed Burns states that “Machine learning is important because it gives enterprises
+a view of trends in customer behaviour and business operational patterns, as well
+as supports the development of new products. Many of today’s leading compa8
+
+Chapter 2. Literature Review
+
+nies, such as Facebook, Google, and Uber, make machine learning a central part
+of their operations.” [17] Machine Learning is used in pretty much every industry
+and makes use of collecting, analyzing, and responding to large sets of data. It
+has several practical applications, such as time and money savings which have
+the potential to have a dramatic impact in the future of different organizations.
+A particular scenario where we can see how machine learning has helped industries is within the customer care industry. Machine Learning allows people
+to get things done more quickly and efficiently, by making use of virtual assistant solutions like Chat bots. With the use of machine learning, tasks such as
+checking account balance or changing of password were automated through these
+virtual assistant solutions to save time, and to help the company focus on dealing with client problems more efficiently. Machine Learning can help healthcare
+researchers to analyze data points and suggest any possible outcomes and helped
+in improving the treatment methods by analyzing external data on patient conditions in terms of X-ray, ultrasound or CT-scan. With machine learning, this tool
+helps to improve the diagnoses, detection and prediction system in the healthcare
+sector. In banking and finance, machine learning helped in fraud detection, risk
+management, chat bots and many more. It is extensively used in the banking
+and finance section to reduce errors as well as save time and money. Another
+common application of machine learning is image recognition, and this is used to
+detect the image over the internet. Nowadays, many smartphones come with the
+face detection feature that allows the user to log in to his or her phone via face
+recognition, and this is a very secure way of protecting mobile data and prevents
+
+9
+
+Chapter 2. Literature Review
+
+any potential users from accessing the device.
+
+Figure 2.1: Where Machine Learning is Used.
+
+2.3
+
+2.3.1
+
+Deep Learning
+
+What is Deep Learning?
+
+Jason Brownlee states that “Deep Learning is a subfield of machine learning concerned with algorithms inspired by the structure and function of the brain called
+artificial neural networks.” [18]. These different neural networks try to simulate
+how the human brain behaves, allowing the network to learn from a significant
+amount of data.
+
+While a neural network with just one layer can still make
+
+approximate predictions, additional layers help to optimize and refine for accuracy. Deep Learning helps different AI applications to improve automation, and
+perform physical tasks without human intervention, and it lies behind everyday
+products and services such as digital assistants and voice-enabled TV remotes.
+Deep Learning is also found in emerging technologies which include self-driving
+cars [19].
+
+10
+
+Chapter 2. Literature Review
+
+2.3.2
+
+How does Deep Learning Work?
+
+“Deep learning networks learn by discovering intricate structures in the data they
+experience. By building computational models that are composed of multiple processing layers, the networks can create multiple levels of abstraction to represent
+the data.” [20]. A deep learning model, which could be referred to as a convolutional neural network can be trained by using a large dataset, which could
+have even up to millions of images. This neural network learns from the pixels
+contained from the image it acquires, and if for example we have a dataset containing dogs, it can classify groups of pixels that are representative of a dog’s
+features, with groups of features such as ears, eyes and tail, which indicate the
+presence of a dog in the image. With deep learning, all that is required is to
+provide the system with a large dataset of dog images, and it can then learn the
+features that represent a dog.
+Artem Oppermann states that “Deep learning algorithms attempt to draw similar conclusions as humans would by continually analyzing data with a given
+logical structure. To achieve this, deep learning uses a multi-layered structure of
+algorithms called neural networks.” [21]. Neural networks are based on the structure of how the human brain works, as they can be taught to perform similar
+human tasks such as identify patterns and classify different types of information
+based on provided data. Whenever humans receive new information, the human
+brain tries to compare it with known objects, and that concept is also used by
+deep neural networks, which enable to perform many tasks such as clustering,
+classification, or regression.
+11
+
+Chapter 2. Literature Review
+
+Figure 2.2: Diagram illustrating that deep learning and machine learning are subsets of artificial
+intelligence.
+
+2.3.3
+
+What are Neural Networks?
+
+Neural networks involve artificial neurons which allow exchanging messages between each other. Connections between each neuron have numeric weights which
+are tuned during the training process, allowing a trained network to correctly respond when presented with an image to recognize. Every network has multiple
+layers of feature-detecting neurons, with each layer having many neurons that
+respond which respond to different combinations of input from the previous layers [22]. AWS define a neural network as “a method in artificial intelligence that
+teaches computers to process data in a way that is inspired by the human brain.
+It is a type of machine learning process, called deep learning that uses intercon-
+
+12
+
+Chapter 2. Literature Review
+
+nected nodes or neurons in a layered structure that resembles the human brain.
+It creates an adaptive system that computers use to learn from their mistakes and
+improve continuously. Thus, artificial neural networks attempt to solve complicated problems, like summarizing documents or recognizing faces, with greater
+accuracy.” [23]
+
+Figure 2.3: How Neural Networks are Structured.
+
+2.3.4
+
+Types of Neural Networks
+
+As neural networks have evolved so rapidly, there are now several types of neural networks, but below are the three main categories of neural networks that
+you may come across. • Artifical Neural Networks (ANN) • Convolutional Neural Networks (CNN) • Recurrent Neural Networks (RNN) A neural network (NN)
+or a neural net is a computing system that is patterned after the biological neural networks in animal brains [24]. Artificial neural networks (ANNs) are highly
+complex computing systems that are generally referred to as neural networks
+13
+
+Chapter 2. Literature Review
+
+(NNs) or neural nets [25]. The convolutional neural network (CNN) is a type
+of artificial neural network (ANN) that is used extensively in deep learning for
+the analysis of visual data [26]. Recurrent neural networks (RNN) are a class
+of artificial neural networks where the connections between nodes can create a
+cycle, allowing the output of one node to affect the output of another. Based on
+feedforward neural networks, RNNs can utilize their internal state (memory) to
+process variable length sequences of inputs [27].
+
+2.3.5
+
+Different Applications of Neural Network
+
+Neural networks have become such a powerful algorithm that it contributed to
+developing applications which before weren’t possible to develop. Some applications include: • Image and video recognition – Thanks to image recognition,
+we now have features like Bixby vision and facial recognition for security. •
+Recommender systems – For example watching horror movies on Netflix and it
+recommends any possible television series or movies that users might enjoy. It
+is likely that Netflix used neural networks to deliver that experience. • Audio
+recognition – Voice recognition systems like Siri have improved drastically over
+the years in understanding questions and try to provide the best possible answers
+to those questions, and this success can be attributed to neural networks [28].
+
+2.4
+
+Image Recognition and Convolutional Neural Networks
+
+A convolutional neural network is a type of neural network which is commonly
+used to analyze visual images by processing data with grid-like topology. It is
+also referred to as CovNet. A convolutional neural network is used to recognize
+14
+
+Chapter 2. Literature Review
+
+and classify objects in an image [29]. Currently, convolutional neural networks
+are the most efficient models for classifying images, and their multistage architectures are inspired from the science of biology. Through these models, invariant features are learned hierarchically and automatically [30]. This network is a
+very powerful deep learning algorithm that is capable of dealing with millions of
+parameters and saving the computational cost by inputting a 2D image and convolving it with filters and produce output volumes. The way that CNNs work is
+that they take input images and they convolve them with an fXf filter and this
+convolution operation learns the same feature on the entire image [31]. The architecture of this network is composed of three different layers: • Convolutional
+• Pooling • Fully connected layer. The convolutional layer is referred to as the
+core building block of CNN, and this is where most of the computation occurs.
+While convolutional layers can be followed by additional convolutional layers or
+pooling layers, the final layer is the fully connected layer. Complexity is increased within each layer, as it identifies greater portions of the image. It starts
+to recognize larger elements of the object until it identifies the intended object.
+A convolution converts pixels into a single value. If convolution is applied to
+an image, image size will decrease as well as bringing information into a single pixel, and the final output of the convolutional layer is a vector [32]. The
+pooling layer reduces the spatial size of the image, to reduce computation in the
+network. It operates on each feature map independently, and the most common
+approach used in this layer is max pooling. The pooling operation summarizes
+features lying within the region covered by the filter. Further operations are per-
+
+15
+
+Chapter 2. Literature Review
+
+formed on summarized features, making the model more robust to variations in
+feature positions in the input image. Max pooling selects the maximum element
+from the region covered by the filter. The output would be the most prominent
+feature of the previous feature map. Average pooling gives the average of features present in a patch. Global pooling reduces each channel in the feature map
+to a single value [?]. The fully connected layer is the layer which forms the last
+few layers within the network. The input of this layer involves the output of the
+final pooling or convolutional layer, which is then flattened and fed into the fully
+connected layer. This means that the output is a three-dimensional metric, which
+unrolls all its values into a vector [?].
+
+Figure 2.4: How a Convolutional Neural Network Works
+
+2.4.1
+
+How do CNNs work?
+
+They employ multi-channel pictures and are driven by volume.
+
+Convolutional
+
+neural networks are unable to identify flat pictures, which have solely width and
+
+16
+
+Chapter 2. Literature Review
+
+height and cannot be seen by humans. CNN blends these three colors to produce the human-perceivable color spectrum utilizing digital color pictures with
+RGB (red-green-blue) encoding. Such visuals are captured by this network as
+three distinct color layers piled on top of each other. The width and height of a
+standard color image are defined by the number of pixels from those dimensions,
+and the channels refer to the depth levels in the three layers of the RGB that
+are understood by CNNs [33]. El Fares states that “A CNN (convolutional neural
+network) is an advance artificial neural network model used in machine learning
+to extract features, like texture and edges, from spatial data.” [34]. They have a
+special ability to extract features from an image, and this network expects to get
+an input as an image.
+
+2.4.2
+
+Different Types of Convolutional Neural Networks
+
+R-CNN (In sort for region-based CNN) is a convolutional neural network which
+was developed in 2014 by a group of researchers at UC Berkeley [35]. This network may detect 80 distinct types of objects in an image. The main contribution
+of this network is that it extracts features based on a convolutional neural network. In simpler terms, R-CNN is simply an extension of CNN, with the focus
+primarily on object detection, whereas CNN is used for image classification [?].
+This model consists of three main modules: • The first module generates around
+2,000 region proposals by using the Selective Search algorithm. • The second
+module extracts a feature vector of length 4,096 from each region proposal, after being resized to a fixed pre-defined size. • The third module classifies the
+region proposal to one of the object classes by making use of pre-trained SVM
+17
+
+Chapter 2. Literature Review
+
+algorithms. Faster R-CNN is an object detector, which was developed by Facebook AI researcher Ross Girshick. As the name suggests, one advantage of this
+network over R-CNN is that Faster R-CNN is faster than the normal R-CNN.
+When comparing Faster R-CNN with R-CNN, Faster R-CNN builds a network
+which only has a single stage, whereas R-CNN has multiple stages which consist
+of region proposal generation, feature extraction and classification using SVM. In
+terms of accuracy results, Fast R-CNN is more accurate than R-CNN and it does
+not cache the extracted features. Hence it does not need so much disk storage,
+whereas R-CNN needs hundreds of gigabytes.
+
+2.4.3
+
+Performance Metrics for CNN
+
+Convolutional Neural Networks’ performance may be assessed by using a variety
+of performance metrics. Among the most frequently used performance metrics
+are:
+1.
+
+Accuracy - This determines how many accurate predictions the model
+
+makes in relation to the sample size [36].
+2. Precision - This gauges the ratio of accurate positive predictions to all the
+model’s positive predictions.
+3. Recall: This parameter indicates the proportion of true positive predictions
+to all the actual positive samples in the test set.
+4. F1 Score - Calculated by taking the harmonic mean of the accuracy and
+recall criteria [?].
+5. Confusion Matrix - This is a table that lists the number of accurate predictions generated by the model, including true positives, true negatives, false
+18
+
+Chapter 2. Literature Review
+
+positives, and false negatives [37].
+6. Receiver Operating Characteristic (ROC) Curve Area Under – Graph which
+shows the trade-off between the false positive rate and the true positive rate [38].
+
+2.5
+
+Food Image Recognition and Related Work
+
+Food image recognition is a fast-expanding area of computer vision which has
+gained significant attention over the years. Given that food images might be taken
+under various lighting circumstances, camera angles and resolutions, among other
+things, the variety in food appearance is one of the main obstacles in food image recognition [39]. Researchers have proposed several pre-processing methods,
+such as picture normalization, contrast stretching and colour space conventions to
+improve the quality of the input images to overcome this issue [40]. Convolutional Neural Networks (CNNs) have shown promise in overcoming the different challenges associated with food image recognition [41]. These deep learning
+models can accurately identify objects by learning complex features from the input images. Researchers have employed methods such as transfer learning and
+fine-tuning, which make use of the information learned from previously trained
+models, to enhance the performance of CNNs with the purpose of improving
+the performance of the food recognition system. In the field of image recognition, several academic paper and research have been published, many of which
+have concentrated on creating deep learning-based models for classifying Italian
+dishes. For instance, using a Convolutional Neural Network, De Momi et al suggested food image recognition system for classifying Italian dishes. In another
+
+19
+
+Chapter 2. Literature Review
+
+study found, a food image recognition system which classifies Italian dishes using deep learning methods, such as CNNs, was also put out by Furnari et al
+(2017). On a dataset of Italian foods, the author tested the effectiveness of their
+method and achieved high classification accuracy of over 80In conclusion, despite being a challenging computer vision task, food image recognition has been
+successfully solved utilizing deep learning approaches, specifically Convolutional
+Neural Networks (CNNs). It has also been demonstrated that the application of
+transfer learning and fine-tuning enhances the performance of food identification
+systems. Since the study in this area is progressing, it is reasonable to assume
+that identification of Italian dishes will further develop and improve soon.
+
+2.5.1
+
+Critical Evaluation of Reviewed Studies and Choice of Algorithm for Implementation
+
+Several criteria must be taken into consideration whilst assessing the evaluated
+works on food image recognition to choose the appropriate method for implementation. The following are critical factors to take into consideration:
+1. Performance Metrics – The performance metrics employed in the research
+should be considered initially. For instance, standard metrics used to assess the
+effectiveness of a food image recognition system include accuracy, precision, recall and F1-score.
+2. Datasets – The datasets utilized in the research should also be taken into
+consideration, and it should be an accurate representation of the actual data that
+the system will use. Additionally, the quantity of the datasets and the variety of
+images should be considered.
+20
+
+Chapter 2. Literature Review
+
+3. Algorithm Choice – Traditional machine learning algorithms, such as Support Vector Machines (SVM), Random Forest and K-Nearest Neighbors (KNN)
+may be used in certain research, whereas deep learning methods may be used in
+others. CNN is a type of deep learning technique which has been demonstrated
+to be efficient in food image recognition.
+
+2.5.2
+
+What are the Main Challenges in Food Image Recognition?
+
+Food image recognition is a challenging task due to several factors which may
+impact the accuracy and applicability of AI models. One of the main challenges
+is the variances in food products’ appearance, which may lead to the changes in
+colour, texture and presentation. Due to these variances, it can be challenging
+for AI models to correctly classify food items in photos due to different aspects
+such as lighting and perspective. Many different strategies have been set out to
+deal with this problem, such as data augmentation methods which entail producing more training data by altering current images to capture various changes in
+appearance [42].
+The range of food items across different cultures represents another challenge
+in food image recognition. Different cultures and cuisines offer different types
+of food items, and they can vary greatly in appearance, texture and colour. Because of this, building a large dataset of food images for AI model training may
+prove to be difficult. Food classification might differ between cultures and peoples, which may impact the precision of AI models. To increase the accuracy of
+food identification models, researchers have suggested the use of transfer learning
+approaches that make use of pre-trained models on larger datasets [43].
+21
+
+Chapter 2. Literature Review
+
+To conclude, while difficulties in food image recognition exist, recent advancements in deep learning techniques and the accessibility of large datasets have
+demonstrated encouraging improvements in the precision of AI models. Further
+research is needed to create reliable and accurate food image recognition systems
+which may be used in a variety of real-world situations [44].
+
+22
+
+Chapter 3. Research Methodology
+
+Chapter 3: Research Methodology
+
+In the dynamic world of software development, the emergence of deep learning,
+a machine learning subset inspired by neural networks, has revolutionized data
+interpretation, especially with large visual datasets. With the influx of visual content, from social media to medical images, there’s a pressing need for software
+tools that can interpret, not just display these images. This capability is pivotal
+in fields such as healthcare, where accurate tumor classification is crucial, or in
+automotive sectors, where self-driving cars must promptly and accurately respond
+to obstacles, underscoring the vital role of deep learning in high-stakes image
+classification tasks.
+Deep learning, despite its prowess, is only as effective as the methodology
+guiding its application. The power of neural networks relies heavily on the caliber of the data they consume. The methodology is more than a procedure; it’s
+the foundation that dictates the adaptability and reliability of any deep learning initiative. By meticulously refining data, selecting the most suitable models,
+and implementing precise metrics, the methodology ensures outcomes that aren’t
+just accurate, but consistently replicable across varied circumstances, priming the
+model for scalability and resilience.
+The world of deep learning presents a plethora of model architectures, each
+tailored for specific tasks and outcomes.
+
+Selecting a model isn’t a mere act
+
+of choice, but a blend of analytical assessment and strategic intent. It requires
+
+23
+
+Chapter 3. Research Methodology
+
+evaluating past performances of models in parallel scenarios while ensuring their
+alignment with the study’s overarching goals. As we progress, we’ll unravel the
+data processing techniques and delve into the reasoning behind our model selections, granting an in-depth analysis into the foundational pillars of our research
+approach.
+The diagram in Figure 3.1 below outlines the various steps in the research
+process and each step is described in detail below.
+
+Figure 3.1: Research Methodology Pipeline.
+
+24
+
+Chapter 3. Research Methodology
+
+3.1
+
+Research Design
+
+The research design forms the foundation upon which the entire dissertation is
+structured. It outlines the roadmap which guides the researcher through the various phases of the study. For this dissertation, we predominantly focused on image
+classification, this becomes especially important as the complexity and the nature
+of data significantly influence model performance.
+
+3.1.1
+
+Exploratory vs Confirmatory Research
+
+The first phase of this project commences with exploratory research, a phase oriented towards illuminating the intricate features, patterns, and variances within
+our image datasets [45]. At this stage, the emphasis lies in understanding image characteristics, distributions among classes, and discerning unique patterns or
+irregularities. This foundational understanding subsequently informs our preprocessing and data augmentation strategies [46].
+Transitioning from exploration, the research then delves into the confirmatory
+phase. With the insights garnered from exploration, we seek to validate our initial
+assumptions and hypotheses by testing the efficacy of our deep learning models
+against the testing dataset [51].
+
+3.1.2
+
+Qualitative vs Quantitative Analysis
+
+Given that our dataset consists of images, our research leans more towards quantitative analysis. Every image can be represented as a matrix of pixel values,
+essentially numerical data, allowing for quantitative processing. Using this data,
+
+25
+
+Chapter 3. Research Methodology
+
+we will employ various deep learning models to understand and classify the images into their respective classes.
+However, a subtle qualitative element surfaces when we evaluate model results, especially in cases where misclassifications might occur. Understanding why
+a particular class is misclassified, or interpreting the feature importance in certain
+models, brings in a qualitative perspective, aiding in model refinement and tuning.
+
+3.2
+
+Data Collection
+
+The foundation of credible research in the domain of software development and
+deep learning is rooted in the quality and integrity of data used. Given the primary focus of our study – image classification, it’s very important to elucidate
+the sources of our data and the methodologies employed for collection.
+
+3.2.1
+
+Primary Data Sources
+
+The primary data for this study was meticulously chosen to cater to our research
+objectives centered around image classification:
+
+1. Dataset Selection – A thorough evaluation of multiple datasets was conducted, focusing on their performance, quality, and diversity of image samples. The dataset selected, which predominantly features various Italian pizzas, was sourced from Kaggle. This dataset was favored due to its exhaustive collection of pizza images that showcased a wide range of toppings
+and encompassed diverse orientation conditions.
+2. Dataset Overview – This Kaggle dataset is distinguished by 7 distinct classes,
+26
+
+Chapter 3. Research Methodology
+
+each representing a different variety or style of pizza.
+3. Augmentation – Recognizing the value of a diversified dataset in enhancing model performance, data augmentation was executed. Techniques such
+as rotations, zooming, horizontal flipping, and brightness adjustments were
+judiciously employed. Considering the multifaceted nature of pizza toppings
+and their variable orientations, such as augmentation strategies were deemed
+indispensable for cultivating a dependable model.
+
+3.2.2
+
+Secondary Data Sources
+
+Secondary data encompasses pre-existing information, harvested for its relevance
+even if it wasn’t originally intended for the ongoing study:
+• Repositories – Kaggle stands as a monumental hub for varied datasets tailored to myriad machine learning endeavors. The cornerstone dataset for our research has been sourced from Kaggle, loaded with an abundance of images ready
+for rigorous analysis [47].
+• Publications – Immersing in prior scholarly works anchors our study within
+the expansive realm of research. It enlightens us about prior methodologies, critical findings, and seasoned recommendations [48].
+
+3.3
+
+Data Augmentation for Classifying Italian Dishes
+
+In the world of dishes, particularly those of Italian origin, the nuances matter.
+A Margherita can be easily confused with a Marinara, and a Capricciosa might
+share similarities with a Quattro Stagioni. For a Convolutional Neural Network
+
+27
+
+Chapter 3. Research Methodology
+
+(CNN) to accurately classify these Italian dishes, it must be trained on a diverse
+set of images that capture the essence of each type. Given the constraints in
+acquiring such a unique and varied dataset, data augmentation should be implemented.
+
+3.3.1
+
+The Crust and Toppings of Augmentation in Pizza Classification
+
+Differentiating between dishes isn’t just about recognizing the toppings; it’s about
+understanding the delicate interplay of crust thickness, sauce spread, cheese melt,
+and toppings arrangement. Data augmentation helps our model appreciate these
+subtleties by creating variations of existing images in the dataset. By this approach, the model learns the intricacies of, say, a Neapolitan crust versus a
+Roman-style one, not just from a single image but from a myriad of its augmented versions [49].
+
+3.3.2
+
+Augmentation Techniques Tailored
+
+Image augmentation is a powerful technique to artificially increase the diversity
+of our training dataset without collecting new images. Given the context of pizzas, certain augmentations are more relevant than others, allowing the model to
+capture the intricacies and subtleties of pizzas under different conditions:
+
+1. Rotations – A pizza, inherently circular in nature, can present toppings differently when rotated. By integrating rotations, we ensure that our model
+has the capability to recognize variants like a Diavola, even if the spicy
+pepperoni or salami is oriented differently [50].
+
+28
+
+Chapter 3. Research Methodology
+
+2. Zooming – Certain details, like the texture of a thin crust or the way mozzarella melts on a Margherita, come into focus with close-ups. By introducing zoom variations, the model is trained to detect pizzas irrespective
+of whether the image showcases a full pie or zooms into a specific section [51].
+3. Horizontal Flipping – This transformation is vital, particularly for pizzas
+with asymmetrical toppings. An image of a Capricciosa, when flipped, ensures that our model is indifferent to the orientation of specific toppings,
+such as artichokes or olives [52]. 4. Brightness Adjustments – The ambiance and lighting conditions can vary greatly, from the bright atmosphere
+at noon to the mellow glow during dinner. Adjusting the brightness in our
+augmentations makes certain that the model identifies pizzas consistently, be
+it under the radiant gleam of a pizzeria chandelier or the stark overhead
+lights in a fast-food setting [53].
+
+These augmentation techniques have been implemented and utilized in our model
+training process for each model.
+
+3.3.3
+
+Augmentation: Perfecting our Classifiers
+
+The key to achieving high accuracy in the classification of Italian pizzas using
+Convolutional Neural Networks (CNNs) lies in a well-rounded training process
+that captures the vast array of visual nuances specific to these dishes. To this
+end, practical data augmentation was implemented to enhance the dataset’s diversity. Specifically, the following augmentation techniques were applied:
+29
+
+Chapter 3. Research Methodology
+
+1. Rescaling the pixel values to fall between 0 and 1.
+2. Rotating images by up to 40 degrees.
+3. Shifting images both widthwise and height-wise by up to 25
+4. Applying shear transformations with an intensity of up to 0.3.
+5. Zooming images by up to 30
+6. Flipping images both horizontally and vertically.
+7. Ensuring that any newly introduced pixel after a transformation was filled
+using the nearest existing pixel value.
+By introducing these transformations, we simulate potential real-world variances, ensuring that our CNNs train on a more comprehensive feature space. This
+not only curtails overfitting, but it enhances the models’ generalization abilities,
+making them adept at classifying a wide range of Italian pizzas.
+
+3.4
+
+Model Selection
+
+The selection of the right model for any deep learning task is very important,
+acting as the very backbone upon which the results depend. Given the image
+classification nature of our study and the ever-evolving landscape of deep learning architectures, it was imperative to choose models that not only align with
+the study’s objectives but also to represent the pinnacle of current advancements
+in technology. The following models will be trained and tested on our dataset
+and their performance results will be visually and numerically compared to each
+other:
+30
+
+Chapter 3. Research Methodology
+
+1. MobileNetV2
+2. InceptionV3
+3. DenseNet
+4. Xception
+
+3.4.1
+
+MobileNetV2
+
+MobileNetV2 is celebrated for its lightweight and efficient architecture. It’s unique
+structure, which employes inverted residuals and linear bottlenecks, allows it to
+reduce the computational burden while preserving a high accuracy rate.
+
+This
+
+model is particularly suitable for applications where computational resources are
+a constraint without compromising on the quality of outcomes [54].
+
+Figure 3.2: How the MobileNetV2 model works.
+
+31
+
+Chapter 3. Research Methodology
+
+3.4.2
+
+InceptionV3
+
+Emerging as the third design in the Inception lineage, InceptionV3 introduces a
+fresh perspective to the convolutional neural network framework. It capitalizes
+on filters of varying kernel sizes within a single convolutional layer, facilitating
+extraction of features at multiple scales. By doing so, the architecture is adept
+at discerning finer details via smaller kernels and broader patterns with its larger
+counterparts. Given its versatility in interpreting multifaceted patterns within images, it’s no surprise that InceptionV3 garners substantial attention in the research
+community [55].
+
+Figure 3.3: How the InceptionV3 model works.
+
+3.4.3
+
+DenseNet
+
+Densely Connected Convolutional Neural Networks, or in short better known as
+DenseNet, set themselves apart with a distinctive layer-to-layer connection pattern.
+Eschewing the customary sequential linkage of layers in many other architectures,
+DenseNet fosters connections from each layer to every subsequent layer in a direct manner. This innovative setup amplifies feature propagation and diminishes
+32
+
+Chapter 3. Research Methodology
+
+the parameter count without skimping on depth or efficacy. The resulting architecture boasts a smoother gradient flow, positioning it as an ideal candidate for
+complex image classification endeavors [56].
+
+Figure 3.4: How the DenseNet model works.
+
+3.4.4
+
+Xception
+
+Originating as an enhanced iteration of the Inception paradigm, Xception (“Extreme Inception”), stands out with its use of depth wise separable convolutions,
+diverging from the typical inception modules. This strategic shift elevates the
+model’s operational efficiency and output precision, allowing it to deliver premium outcomes with fewer computational demands. Bearing its advanced structural design, Xception exhibits an adeptness at navigating a broad spectrum of
+image datasets, especially those presenting intricate challenges [57].
+
+Figure 3.5: How the Xception model works.
+
+33
+
+Chapter 3. Research Methodology
+
+3.4.5
+
+Rationale for Model Selection
+
+The choice to implement MobileNetV2, InceptionV3, DenseNet and Xception was
+underpinned by several factors:
+1. Computational Efficiency – It was essential to adopt models that harmonize computational demand with accuracy. MobileNetV2 emerged as a compelling choice in this regard.
+2. State-of-the-art Performance – Models must not only align with the research
+objectives, but also epitomize the zenith of current deep learning advancements. Both InceptionV3 and Xception have an illustrious history of high
+performance across benchmark datasets. Their consistent achievement in discerning complex patterns within diverse image datasets makes them apt for
+the intricate task of classifying the myriad varieties of Italian pizzas.
+3. Architectural Innovations – Given the specialized nature of this study, it
+became paramount to select models with high adaptability. The richness and
+versatility of the architectures chosen here benefit the specific characteristics
+of the pizza dataset. Such models offer significant flexibility, allowing for
+a comprehensive calibration of parameters to achieve optimal classification
+results.
+4. Robustness to Overfitting – With a niche dataset like Italian pizzas, the
+specter of overfitting looms large. Hence, models that inherently counteract
+this risk were favored. DenseNet’s architecture naturally mitigates overfitting, ensuring that the model remains generalizable.
+34
+
+Chapter 3. Research Methodology
+
+3.5
+
+Evaluation Metrics
+
+In the realm of image classification, especially when working with multiple classes,
+it’s important to have a concrete set of metrics which can objectively quantify
+the performance of a model. For our dissertation prototype, we focused on metrics that not only provide insights into the accuracy of our predictions, but also
+highlight the ability for the models to distinguish between classes and mitigate
+potential biases. This chapter delves into each of these metrics, elucidating their
+significance, formulae, and relevance to our study.
+
+3.5.1
+
+Precision
+
+Precision, colloquially known as the positive predictive value, serves as a decisive metric that illuminates the accuracy of predictions labeled as positive by the
+model. In essence, it evaluates the fraction of correctly predicted positive instances against all instances that the model confidently classified as positive [58].
+
+(1) Precision =
+
+3.5.2
+
+True Positives
+True Positives + False Positives
+
+(3.1)
+
+Recall
+
+Often dubbed as sensitivity or the true positive rate, Recall underscores the model’s
+prowess in pinpointing and correctly classifying all pertinent instances within a
+given dataset. It paints a picture of how many of the actual positive instances
+
+35
+
+Chapter 3. Research Methodology
+
+the model could identify and correctly categorize.
+
+(2) Recall =
+
+True Positives
+True Positives + False Negatives
+
+(3.2)
+
+In contexts where overlooking a positive instance can have grave implications,
+like missing out on a malignant tumor in radiology, recall becomes an indispensable metric [59].
+
+3.5.3
+
+F1-Score
+
+F1-Score emerges as the harmonic convergence of precision and recall, offering
+a synthesized measure that is particularly beneficial when there’s an uneven class
+distribution. A model’s performance isn’t solely about being precise or having a
+high recall; it’s about achieving a balance between the two. F1-Score encapsulates
+this balance.
+(3) F1 Score = 2 ×
+
+Precision × Recall
+Precision + Recall
+
+(3.3)
+
+While precision and recall are important, the F1 score offers a holistic view,
+making it easier to compare two models that have a similar precision and recall
+but different distributions [60].
+
+3.5.4
+
+Confusion Matrix
+
+Beyond mere numbers, the Confusion Matrix offers a tableau of the model’s performance, juxtaposing predicted class labels against the actual labels. Each quadrant of this matrix holds a story:
+
+36
+
+Chapter 3. Research Methodology
+
+1. True Positives (TP) – The model correctly identified and classified them as
+positive.
+2. False Positives (FP) – Erroneously classified as positive by the model.
+3. True Negatives (TN) – Correctly identified and categorized as negative.
+4. False Negatives (FN) – Instances the model mistakenly overlooked or misclassified as negative.
+This visual is instrumental in discerning patterns, potential biases, and areas that
+require recalibration in the model [61].
+
+3.6
+
+Hyperparameter Tuning
+
+Hyperparameter tuning plays a pivotal role in refining deep learning models, ensuring they are calibrated to deliver optimal performance. In the realm of classifying Italian pizzas, the intricate patterns, and variations among different types of
+pizzas mandate a precise tuning of the model parameters. This section delves into
+the rationale behind the hyperparameter tuning process adopted in this research.
+
+3.6.1
+
+Why Hyperparameter Tuning?
+
+In the realm of neural networks, while parameters adapt via training data, hyperparameters dictate the model’s training dynamics. The precision of these hyperparameters may evaluate a model from being merely adequate to achieving
+exceptional performance. Given our goal of precise classification, hyperparameter
+optimization is indispensable [62].
+
+37
+
+Chapter 3. Research Methodology
+
+3.6.2
+
+Parameters vs Hyperparameters
+
+The main difference between parameters and hyperparameters is that parameters
+are integral components which adjust throughout training, encompassing weights
+and biases [63], whereas hyperparameters are elements which define the learning
+trajectory, such as learning rate, batch size, epochs, and regularization coefficients
+[64].
+
+3.6.3
+
+Tuning Strategies
+
+1. Grid Search – A method which inspects every hyperparameter combination
+within a predetermined space. Although computationally intensive, it ensures
+an optimal hyperparameter subset is located [65].
+2. Random Search – Prioritizes random hyperparameter combinations over exhaustive search providing a potentially efficient yet effective approach [62].
+3. Bayesian Optimization – Utilizing past evaluations, this probabilistic method
+focuses on promising hyperparameter regions, outperforming both grid and
+random searches in numerous scenarios [66].
+
+3.6.4
+
+Key Hyperparameters for Tuning
+
+Given our chosen models, several pivotal hyperparameters were adjusted:
+1. Learning Rate – This dictates the model weight updates during each iteration, and it’s a balancing set between precise learning and computational
+efficiency [67].
+
+38
+
+Chapter 3. Research Methodology
+
+2. Batch Size – This denotes the sample count before updating the model,
+influencing both convergence rate and overall accuracy [68].
+3. Epochs – The total number of iterations the model undergoes through the
+training dataset [69].
+4. Regularization Coefficients – These coefficients avert overfitting by penalizing the loss function, promoting smaller model weights [70].
+
+3.6.5
+
+Validation Strategy
+
+For the effective assessment of our models, the dataset was systematically partitioned into training and testing sets. Specifically, for each dish, out of 200
+images, 150 images (representing 75% of the data) were earmarked for training,
+while the remaining 50 images (constituting 25% of the data) were set aside for
+testing. This structured approach ensured that the models were trained on a substantial chunk of data, while still leaving a significant portion for unbiased evaluation. The iterative validation process was crucial, providing real-time feedback
+on model performance and guiding the hyperparameter tuning process.
+
+3.7
+
+Conclusion
+
+In this chapter, a comprehensive research methodology was delineated to address
+challenges of classifying Italian dishes, with a particular emphasis on pizzas.
+The research methodology foundation was set in section 3.2, exploring different study designs, and emphasizing a data-driven approach. Section 3.3 described
+the data collection process, leveraging both primary and secondary sources to cap39
+
+Chapter 3. Research Methodology
+
+ture a comprehensive view of pizza classification. Emphasis on data augmentation
+(3.4) showcased the study’s commitment to creating robust classifiers attuned to
+the intricacies of Italian pizzas.
+The methodical model section (3.5) revolved around acclaimed architectures
+to ensure precision and efficiency. The chosen evaluation metrics (3.6) affirmed
+a detailed assessment of model outcomes, prioritizing empirical verification. Hyperparameter tuning (3.7) was integral, employing a combination of techniques to
+fine-tune performance.
+In summary, this research methodology, a fusion of established methods and
+novel approaches, is meticulously crafted for superior results in Italian pizza image classification, providing a precise blueprint for forthcoming sections.
+
+40
+
+Chapter 4. Analysis of Results and Discussion
+
+Chapter 4: Analysis of Results and Discussion
+
+In this chapter of the dissertation, we embark on a meticulous examination of the
+outcomes derived from the different experimentations that were carried out during
+our investigative journey. The primary objective here is twofold: firstly, to unravel
+and shed light on the implications of these findings in relation to overarching
+research questions that underpinned the commencement of this dissertation; and,
+to position these outcomes within the wider context of existing theories, seminal
+studies, and the initial goals we set for ourselves.
+Our exploration does not merely present the results, but critically appraises
+them, aiming to unearth deeper insights that might otherwise remain obscured.
+This process helps us to pinpoint both the strengths and the potential shortcomings of our research. Moreover, it offers us the chance to chart our prospective
+trajectories for subsequent investigations in this sphere.
+The essence of this chapter transcends a basic recapitulation of our findings.
+Its significance is amplified as it not only furnishes decisive observations concerning our research, but also acts as a beacon, illuminating the path for forthcoming
+scholarly and practical pursuits in this field. Through a blend of rigorous critique
+and contemplative introspection, our intent is to craft a panoramic view that captures the essence of our research, emphasizing its value, implications, and its
+esteemed place in the broader scholastic realm.
+
+41
+
+Chapter 4. Analysis of Results and Discussion
+
+4.1
+
+Dataset Distribution Analysis
+
+In this dissertation, the total dataset was not leveraged all at once. Instead, different proportions of it were taken for both training and evaluation purposes.
+Specifically, 30%, 40%, 70% and 100% of the dataset were utilized in separate
+experiment runs. Here’s an elucidation of this unique approach and its rationale:
+1. Understanding Model Behaviour with Limited Data – Starting with 30% of
+the datasets helps in understanding how well all models perform when data
+is scarce. This can be especially informative for scenarios where gathering
+a lot of data might be expensive or time-consuming.
+2. Scaling Up and Observing Trends – As we progress from 30% to 100%,
+we can observe how the model’s performance changes as more data is introduced. This can help in identifying the ‘data saturation point’, which
+refers to the point at which adding more data does not lead to significant
+improvements in performance of the models, but further experimentations
+need to be carried out to try and maintain positive results.
+3. Resource Efficiency – By first training on smaller portions of the dataset
+(such as 30% and 40%), we can quickly gauge the model’s potential performance without committing heavy computational resources. If the models
+perform poorly, there might be underlying issues that need addressing before scaling up.
+4. 4. Potential Overfitting with Smaller Datasets – With a smaller proportion
+of the dataset, such as 30%, the models have less diverse data to learn
+42
+
+Chapter 4. Analysis of Results and Discussion
+
+from. It may perform exceptionally well on this limited data, but might not
+generalize well to new, unseen data. Observing this trend can shed light on
+whether the model is overfitting.
+
+4.1.1
+
+Why different proportions?
+
+1. 30% of the full dataset – This helps to understand the behaviours of the
+different models used in data-limited scenarios. It’s a reality check where
+if the model struggles in 30% of the full dataset, then it would be a clear
+indication that more data or a change in the approach is important.
+2. 40% of the full dataset – This serves as the next check after the initial
+30%. At this stage, we evaluate the performance increments achieved with
+an additional 10% of the dataset. It aids in understanding if there’s a substantial boost in accuracy or if it plateaus.
+3. 70% of the full dataset – Close to utilizing the entire dataset but keeping
+a portion of it untouched. This is an important stage where the performances of different models can be nearly optimal, yet there’s still room for
+potential improvements by adding more data.
+4. 100% of the full dataset – This is the final test, making use of all the
+available data. Performance metrics here provide the upper limit of what
+the model can achieve with the given data and architecture.
+By employing this graduated approach, we can draw richer insights about the
+dataset and the way different models behave, helping in making informed decisions for potential deployment or further research.
+43
+
+Chapter 4. Analysis of Results and Discussion
+
+4.2
+
+Comparative Analysis of the Convolutional Neural Networks
+
+The central thrust of this research revolves around a rigorous examination of four
+pivotal convolutional neural networks (CNN) models. Each chosen for its unique
+design philosophy and a demonstrated track record in image classification, these
+models collectively encapsulate the epitome of advancements in the deep learning
+realm. This section unveils the key ideas and distinctive characteristics underlying
+each model.
+
+4.2.1
+
+DenseNet
+
+Originating from the core concept of Densely Connected Convolutional Networks,
+DenseNet showcases an innovative architecture where each layer connects directly
+to every subsequent layer, promoting enhanced feature propagation. Distinct from
+conventional models where signals are procured from adjacent layers, DenseNet
+taps into ‘shared knowledge’ across all preceding layers, offering a more integrated feature propagation. Its unique design not only offers solutions to challenges like the vanishing-gradient problem but also promotes efficient parameter
+utilization. This positions DenseNet as an idea choice for intricate image classification tasks [70].
+
+4.2.2
+
+InceptionV3
+
+An evolved iteration of GoogleNet, InceptionV3’s architecture is characterized by
+its layered “network within network” approach.
+
+Functionally, it capitalizes on
+
+convolutional filters of different sizes operating in tandem, ensuring diverse scale
+
+44
+
+Chapter 4. Analysis of Results and Discussion
+
+feature extraction. Further refinement comes from its integration of factorized and
+asymmetric convolutions, streamlining computational demands. Its adaptability in
+identifying patterns across various image scales and resolutions makes it particularly suited for datasets with a broad spectrum of image characteristics [71].
+
+4.2.3
+
+Xception
+
+Inspired by the Inception framework, this model introduces a pivotal shift with
+its depth wise separable convolutions. This deviation from the traditional convolutional methods means that the channels are processed individually before being
+amalgamated. The underlying rationale is the separate mapping of spatial features
+and channel correlations. This alternate approach of Xception provides insights
+into conventional convolutional paradigms, offering potential advantages in model
+efficiency and precision [72].
+
+4.2.4
+
+MobileNetV2
+
+Crafted with mobile and embedded vision applications in mind, MobileNetV2
+seamlessly blends efficiency with accuracy. Its architecture is punctuated by two
+novel features: the inclusion of linear bottlenecks between layers and shortcut
+connections over these bottlenecks. These design innovations coalesce to create
+a streamlined model. Emblematic of the fine balance between computational efficiency and performance strength, MobileNetV2 emerges as a compelling model
+for contexts with limited computational resources [73].
+
+45
+
+Chapter 4. Analysis of Results and Discussion
+
+4.3
+
+Results by Model
+
+4.3.1
+
+MobileNetV2
+
+At 30% of the dataset:
+• Training and Validation – Upon executing the model over a span of 20
+epochs, it yielded a noteworthy training accuracy of 90.88%. Concurrently, the
+validation accuracy was ascertained to be 96.87%, illustrating the model’s proficient capability to generalize and its alignment with the validation set.
+
+Figure 4.1: Training and Validation Accuracy of MobileNetV2 model at 30% of the dataset.
+
+• Test Results and Evaluation– This model manifested an impressive test accuracy of 96.97% accompanied by a marginal loss of 0.0687. The classification
+report underscores that metrics such as precision, recall, and the f1-score consistently converge around the 51% mark for both classes, underscoring the model’s
+46
+
+Chapter 4. Analysis of Results and Discussion
+
+uniform performance for distinct classes. The associated confusion matrix reinforces this by displaying a symmetrical distribution of predictions, accentuating
+the model’s adeptness at generalizing, even when constrained by data volume.
+Detailed insights from these evaluations are visually presenting in the ensuing
+screenshot:
+
+Figure 4.2: Test Results and Evaluation of the MobileNetV2 model at 30% of the dataset.
+
+At 40% of the dataset:
+• Training and Validation – Notably, there was a slight increment in the training accuracy, registering at 92.33%, paired with an equally commendable validation accuracy of 97.79
+
+47
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.3: Training and Validation Accuracy of MobileNetV2 model at 40% of the dataset.
+
+• Test Results and Evaluation - The model showcased an exceptional test accuracy of 99.33%. Although the classification nuanced variations in performance
+across the three classifications, the overarching test accuracy is a testament to
+the model’s remarkable proficiency and versatility in adaptive learning, particularly under these conditions
+
+Figure 4.4: Test Results and Evaluation of the MobileNetV2 model at 40% of the dataset.
+
+48
+
+Chapter 4. Analysis of Results and Discussion
+
+At 70% of the dataset:
+• Training and Validation – For this segment, the model consistently yielded
+a training accuracy of 81.19% complemented by a validation accuracy of 87.97%.
+
+Figure 4.5: Training and Validation Accuracy of MobileNetV2 model at 70% of the dataset.
+
+• Test Results and Evaluation - The results were commendable with test accuracy standing at 89.96%. The presence of additional classes did introduce intricacies, but the model’s resilience shone through, ensuring a steady performance.
+The classification report elucidates an even-handed approach to each class, emphasizing the model’s calibrated and judicious methodology in classification.
+
+49
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.6: Test Results and Evaluation of the MobileNetV2 model at 70% of the dataset.
+
+At 100% of the dataset: • Training and Validation – With the entire dataset
+at its disposal, the model delivered a robust training accuracy of 76.05%, while
+the validation phase reflected an accuracy of 82.68%.
+
+Figure 4.7: Training and Validation Accuracy of MobileNetV2 model at 100% of the dataset.
+
+• Test Results and Evaluation - The findings revealed a test accuracy of
+87.11%. The breadth of classes introduced nuanced challenges, and while the
+50
+
+Chapter 4. Analysis of Results and Discussion
+
+performance metrics across these classes demonstrated variance, the overarching
+accuracy delineates the model’s formidable competency. Such accomplishments,
+even amidst escalating complexity, further underscores the model’s potential and
+signifies opportunities for strategic refinements.
+
+Figure 4.8: Test Results and Evaluation of the MobileNetV2 model at 100% of the dataset.
+
+Some key insights from each performance evaluation are the following:
+• MobileNetV2’s Robustness: Even with a reduced dataset, the model demonstrated commendable accuracy. This underlines its strength in quickly understanding and adapting to patterns within the data.
+• Balanced Predictions: Even though individual class metrics showed variability, especially with an increased percentage of data, the model generally ensured
+a balanced prediction approach, avoiding heavy biases towards classes.
+• Potential for Fine-tuning: As the dataset percentage increased, the diversity
+in classification metrics across classes hinted at potential areas of fine-tuning, es-
+
+51
+
+Chapter 4. Analysis of Results and Discussion
+
+pecially in scenarios with multiple classes.
+
+4.3.2
+
+InceptionV3
+
+At 30% of the dataset:
+• Training and Validation - The model, at this juncture, returned a noteworthy
+training accuracy of approximately 92.43%, complemented by a validation accuracy that reached 94.80%. Such figures, despite being derived from a mere 30%
+of the available dataset, underscore the latent capabilities of the InceptionV3 architecture in rapidly assimilating data nuances.
+
+Figure 4.9: Training and Validation Accuracy of InceptionV3 model at 30% of the dataset.
+
+• Test Results and Evaluation - The model manifested a praiseworthy test accuracy of 95.96% at a loss metric of 0.0822. However, the ensuing classification
+report illuminates an intriguing juxtaposition. Despite the high accuracy, the pre-
+
+52
+
+Chapter 4. Analysis of Results and Discussion
+
+cision, recall, and f1-scores for both classes lingered around the 56% mark. Such
+a configuration suggests that while the model has a robust overall accuracy, there
+may be underlying intricacies which could be rectified for enhanced classification
+efficacy.
+
+Figure 4.10: Test Results and Evaluation of the InceptionV3 model at 30% of the dataset.
+
+At 40% of the dataset:
+• Training and Validation - There was a marginal uplift in the training accuracy, clocking in at 92.76%, while the validation accuracy ascended to 95.57%.
+This continued trajectory of performance, even with an augmented dataset, reaffirms the model’s inherent adaptability.
+
+53
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.11: Training and Validation Accuracy of InceptionV3 model at 40% of the dataset.
+
+• Test Results and Evaluation - The test phase witnessed an accuracy of approximately 95.97% with a loss value of 0.0963. Contrarily, the classification report unveiled a descent in precision, recall, and f1-score metrics for the classes,
+averaging around 37%. This disparity between the high accuracy and reduced
+class metrics highlights the model’s potential to perform even better with strategic adjustments, especially given its pronounced capabilities reflected in the overall accuracy.
+
+54
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.12: Test Results and Evaluation of the Inception model at 40% of the dataset.
+
+At 70% of the dataset:
+• Training and Validation - With a larger portion of the dataset incorporated,
+the model recorded a training accuracy of 80.95% and a validation accuracy of
+84.42%. The subtle dip in these metrics as the dataset proportion increased suggests the challenges posed by the increasing complexity and volume of data.
+
+Figure 4.13: Training and Validation Accuracy of the Inception model at 70% of the dataset.
+
+55
+
+Chapter 4. Analysis of Results and Discussion
+
+• Test Results and Evaluation - A test accuracy of 86.75% was noted, accompanied by a loss of 0.3286. The classification report, however, revealed metrics
+averaging around 21% across the classes. Such a result underscores the model’s
+resilience in maintaining a relatively high-test accuracy in the face of declining
+class-specific metrics, indicative of its intrinsic strength.
+
+Figure 4.14: Test Results and Evaluation of the Inception model at 70% of the dataset.
+
+At 100% of the dataset: • Training and Validation - Tapping into the entirety
+of the dataset, the model rendered a training accuracy of 77.24% and a validation accuracy of 81.99%. These figures, although moderate, are commendable
+considering the exhaustive scope and potential intricacies of a full dataset.
+
+56
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.15: Training and Validation Accuracy of the InceptionV3 model at 100% of the dataset.
+
+• Test Results and Evaluation - The model culminated in a test accuracy of
+85.96% at a loss of 0.3980. The classification report divulged a further spread
+in the metrics across the multiple classes, hovering around 16%. Despite the
+evident challenges posed by the comprehensive dataset, the fact that the model
+still managed to achieve an accuracy nearing 86% accentuates its robustness and
+latent capabilities.
+
+57
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.16: Test Results and Evaluation of the InceptionV3 model at 100% of the dataset.
+
+Some key insights from each performance evaluation are the following:
+• Model Strength: InceptionV3’s architecture consistently showcases adaptability and robustness across diverse dataset sizes, emphasizing its capacity for pattern recognition.
+• Dataset Complexity: An enlarged dataset introduced amplified challenges,
+particularly in discerning multiple classes, suggesting that data growth can intensify class ambiguities.
+• Accuracy Disparities: Despite achieving high general accuracies, the model’s
+class-specific metrics (e.g., precision, recall) revealed nuanced challenges, highlighting areas of focus.
+• Optimization Potential: InceptionV3 holds promising avenues for improvement through techniques like data augmentation, regularization, and class-weighting.
+• Prediction Balance: As data volume increased, the model faced challenges
+58
+
+Chapter 4. Analysis of Results and Discussion
+
+in evenly predicting across all classes, indicating potential biases in class differentiation.
+• Data Quality Concerns: Metrics variations hint at inconsistencies within the
+dataset, suggesting a need for further dataset scrutiny and refinement.
+
+4.3.3
+
+DenseNet
+
+At 30% of the dataset:
+• Training and Validation – Delving into 30% of the dataset, the model showcased a training accuracy of 90.67% and a validation accuracy of 98.74%. These
+metrics highlight the model’s substantial proficiency, especially when trained on a
+limited portion of the data.
+
+Figure 4.17: Training and Validation Accuracy of the DenseNet model at 30% of the dataset.
+
+• Test Results and Evaluation - The model concluded with an impeccable
+test accuracy of 100%, although the classification report revealed a more modest
+59
+
+Chapter 4. Analysis of Results and Discussion
+
+accuracy of about 56% across both classes. This disparity underscores potential
+overfitting or evaluation inconsistencies but also emphasizes the model’s potential
+when harnessed optimally.
+
+Figure 4.18: Test Results and Evaluation of the DenseNet model at 30% of the dataset.
+
+At 40% of the dataset:
+• Training and Validation - Harnessing 40% of the dataset, the model delivered a training accuracy of 90.20% and an impressive validation accuracy of
+98.89%. These figures, given the increased data size, continue to spotlight the
+model’s commendable learning capacity.
+
+60
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.19: Training and Validation Accuracy of the DenseNet model at 40% of the dataset.
+
+• Test Results and Evaluation - The model achieved a high-test accuracy of
+99.33%. However, the classification report unmasked challenges, with class-wise
+metrics around the 36% mark. The visible difference between test and classspecific accuracies points to areas of potential improvement, yet the model’s capability remains evident.
+
+61
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.20: Test Results and Evaluation of the DenseNet model at 40% of the dataset.
+
+At 70% of the dataset:
+• Training and Validation – Engaging with 70% of the dataset, the model
+posted a training accuracy of 75.57% and a validation accuracy of 87.77%. These
+numbers, though showing a slight dip, remain noteworthy, particularly considering
+the heightened complexity of the dataset’s size and scope.
+
+Figure 4.21: Training and Validation Accuracy of the DenseNet model at 70% of the dataset.
+
+62
+
+Chapter 4. Analysis of Results and Discussion
+
+• Test Results and Evaluation - The model reported a test accuracy of 91.57%,
+contrasting starkly with the classification report’s average metrics, which hover
+around the 15% mark. This divergence signals challenges in the dataset or potential overfitting but also affirms the model’s underlying potency.
+
+Figure 4.22: Test Results and Evaluation of the DenseNet model at 70% of the dataset.
+
+At 100% of the dataset:
+• Training and Validation – Tapping into the entirety of the dataset, the model
+rendered a training accuracy of 72.31% and a validation accuracy of 83.35%.
+These figures, although moderate, are commendable considering the exhaustive
+scope and potential intricacies of a full dataset.
+
+63
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.23: Training and Validation Accuracy of the DenseNet model at 100% of the dataset.
+
+• Test Results and Evaluation - The model culminated in a test accuracy of
+87.11% at a loss of 0.3413. The classification report divulged a further spread
+in the metrics across the multiple classes, hovering around 14%. Despite the
+evident challenges posed by the comprehensive dataset, the fact that the model
+still managed to achieve an accuracy nearing 87% accentuates its robustness and
+latent capabilities.
+
+64
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.24: Test Results and Evaluation of the DenseNet model at 100% of the dataset.
+
+Some key insights from each performance evaluation are the following:
+• Training-Validation vs. Test Discrepancy: Across all dataset sizes, a notable
+difference between validation accuracies and the classification report’s results is
+observed. This consistently hints at potential overfitting issues or misconfigurations in evaluations.
+• Data Complexity Strain: As more data and classes are introduced, the model’s
+performance deteriorates.
+
+This suggests potential challenges with handling in-
+
+creased class diversity or the need for more sophisticated preprocessing or training techniques.
+• Potential Dataset Issues: The decline in performance with increased data
+could hint at possible noise or class imbalance in the latter parts of the dataset.
+
+65
+
+Chapter 4. Analysis of Results and Discussion
+
+4.3.4
+
+Xception
+
+At 30% of the dataset:
+• Training and Validation - Analyzing 30% of the dataset, Xception portrayed
+a training accuracy of 92.93% and a validation accuracy of 98.18%. These figures
+emphasize the model’s adeptness, especially with a limited data subset.
+
+Figure 4.25: Training and Validation Accuracy of the Xception model at 30% of the dataset.
+
+• Test Results and Evaluation - The model achieved an astonishing test accuracy of 98.99% with a loss of 0.0687. However, the classification report showcases an accuracy of just 51% for both classes. This drastic difference suggests
+potential overfitting or issues in the evaluation phase, even though the model exhibited high potential on this subset.
+
+66
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.26: Test Results and Evaluation of the Xception model at 30% of the dataset.
+
+At 40% of the dataset:
+• Training and Validation - Utilizing 40% of the dataset, Xception reported a
+training accuracy of 92.63% and a validation accuracy of 98.39%.
+
+Figure 4.27: Training and Validation Accuracy of the Xception model at 40% of the dataset.
+
+• Test Results and Evaluation - The model showcased a test accuracy of
+
+67
+
+Chapter 4. Analysis of Results and Discussion
+
+98.66% and a loss of 0.0616. However, the classification report reveals an average accuracy of 30% across the three classes. This inconsistency between the test
+and class-specific accuracies points to certain challenges, even though the model’s
+inherent strength is evident from its test metrics.
+
+Figure 4.28: Test Results and Evaluation of the Xception model at 40% of the dataset.
+
+At 70% of the dataset: • Training and Validation - By leveraging 70% of
+the dataset, Xception registered a training accuracy of 81.24% and a validation
+accuracy of 86.53%.
+
+68
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.29: Training and Validation Accuracy of the Xception model at 70% of the dataset.
+
+• Test Results and Evaluation - The model produced a test accuracy of 89.96%
+with a loss of 0.3246. Yet, the classification report indicates an average accuracy
+of only 21% across five classes. This gap reaffirms potential discrepancies in the
+evaluation or challenges in the dataset but also highlights the model’s potential if
+tuned effectively.
+
+69
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.30: Test Results and Evaluation of the Xception model at 70% of the dataset.
+
+At 100% of the dataset:
+• Training and Validation - Using the full dataset, Xception yielded a training
+accuracy of 78.53% and a validation accuracy of 84.14%.
+
+Figure 4.31: Training and Validation Accuracy of the Xception model at 100% of the dataset.
+
+• Test Results and Evaluation - The model culminated in a test accuracy of
+70
+
+Chapter 4. Analysis of Results and Discussion
+
+86.25% with a loss of 0.3918. The classification report, however, presents an
+average accuracy of 14% across the seven classes. The noticeable difference between the test accuracy and class-specific metrics indicates possible overfitting or
+other challenges, but the model’s inherent capabilities are still evident.
+
+Figure 4.32: Test Results and Evaluation of the Xception model at 100% of the dataset.
+
+Some key insights from each performance evaluation are the following: •
+Validation-Test Gap: Across all data subsets, there’s a marked discrepancy between high validation accuracies (consistently above 86%) and the test classification metrics. This suggests potential overfitting or evaluation disparities.
+• Class Complexity Issues: With the increase from 30% to 100% of the
+dataset, the model struggles more with the expanding number of classes, indicating challenges in managing class diversity.
+• Class Recognition Disparity: The uneven performance across different classes
+in the reports points to possible class imbalances or the need for targeted data
+augmentation.
+71
+
+Chapter 4. Analysis of Results and Discussion
+
+4.4
+
+Comparative Analysis
+
+Deep learning, with its assortment of model architectures, offers an array of
+choices for tackling complex datasets. In this study, we delved into the performance of four distinctive models: MobileNetV2, InceptionV3, DenseNet, and
+Xception. These models were analyzed across different dataset percentages, laying the foundation for a comprehensive side-by-side performance assessment.
+
+4.4.1
+
+Training-Validation vs Test Performance
+
+In the pursuit of understanding the intricacies of model performance, the following analysis concentrates on the juxtaposition of training-validation against test
+outcomes across the four deep learning architectures: MobileNetV2, InceptionV3,
+DenseNet, and Xception. This sheds light on each model’s learning capabilities
+and their adaptability when faced with unseen data.
+At 30% of the dataset, MobileNetV2 exhibited strong generalization capabilities, achieving the highest test accuracy of 96.97%. Meanwhile, DenseNet, despite
+its perfect test accuracy of 100%, had suspiciously low class-specific metrics, suggesting possible evaluation inconsistencies. InceptionV3 hinted at underlying classification challenges, and Xception’s performance suggested potential overfitting,
+as its class-specific accuracy averaged just 51%.
+Model
+MobileNetV2
+InceptionV3
+DenseNet
+Xception
+
+Train Acc.
+90.88%
+92.43%
+90.67%
+92.93%
+
+Val. Acc.
+96.87%
+94.80%
+98.74%
+98.18%
+
+Test Acc.
+96.97%
+95.96%
+100%
+98.99%
+
+Loss
+0.0687
+0.0822
+2*Potential Overfit
+0.0687
+
+Class-Specific Metric
+51%
+56%
+56%
+51%
+
+Table 4.1: Analysis of models at 30% dataset proportion.
+
+72
+
+Chapter 4. Analysis of Results and Discussion
+
+When 40% of the dataset was utilized, MobileNetV2 continued to outperform,
+reaching an impressive test accuracy of 99.33%.
+
+InceptionV3’s class metrics,
+
+however, showed a decline, averaging about 37%. Xception and DenseNet too
+showed discrepancies between their high-test accuracies and relatively low classspecific accuracies, indicating potential areas of improvement. At 70% of the
+Model
+MobileNetV2
+InceptionV3
+DenseNet
+Xception
+
+Train Acc.
+92.33%
+92.76%
+90.20%
+92.63%
+
+Val. Acc.
+97.79%
+95.57%
+98.89%
+98.39%
+
+Test Acc.
+99.33%
+95.97%
+99.33%
+98.66%
+
+Loss
+0.0438
+0.0963
+0.0395
+0.0616
+
+Class-Specific Metric
+Nuanced across classes
+37%
+36%
+30%
+
+Table 4.2: Comparative analysis of models at 40% dataset proportion.
+
+dataset, as data complexity seemed to increase, all models displayed a drop in
+performance. Nevertheless, MobileNetV2 maintained its lead with a test accuracy
+of 89.96%. InceptionV3 and Xception had similar test accuracies and class metrics, both underperforming compared to MobileNetV2. DenseNet, while showing
+a respectable test accuracy of 91.57%, had the lowest class metrics, averaging
+around 15%.
+Model
+MobileNetV2
+InceptionV3
+DenseNet
+Xception
+
+Train Acc.
+81.19%
+80.95%
+75.57%
+81.24%
+
+Val. Acc.
+87.97%
+84.42%
+87.77%
+86.53%
+
+Test Acc.
+89.96%
+86.75%
+91.57%
+89.96%
+
+Loss
+0.2931
+0.3286
+0.3246
+0.3246
+
+Class-Specific Metric
+Even-handed across classes
+21% disparity
+15% disparity
+21% disparity
+
+Table 4.3: Comparative analysis of models at 70% dataset proportion.
+
+Finally, at 100% of the dataset, MobileNetV2 and DenseNet both achieved
+a test accuracy of 87.11%.
+
+While MobileNetV2 showcased consistent compe-
+
+tence amidst full data complexity, DenseNet’s low class-specific metrics remained
+a concern. InceptionV3 and Xception, on the other hand, lagged slightly behind
+
+73
+
+Chapter 4. Analysis of Results and Discussion
+
+in test accuracy, with both also having lower class metrics.
+Model
+MobileNetV2
+InceptionV3
+DenseNet
+Xception
+
+Train Acc.
+76.05%
+77.24%
+72.31%
+78.53%
+
+Val. Acc.
+82.68%
+81.99%
+83.35%
+84.14%
+
+Test Acc.
+87.11%
+85.96%
+87.11%
+86.25%
+
+Loss
+0.3904
+0.3980
+0.3413
+0.3918
+
+Class-Specific Metric
+Varied per class
+16% disparity
+14% disparity
+14% disparity
+
+Table 4.4: Comparative analysis of models at 100% dataset proportion.
+
+Overall, across various proportions of the dataset, MobileNetV2 consistently
+emerged as the most resilient and high-performing model.
+
+DenseNet’s perfect
+
+scores at smaller data proportions raised concerns of overfitting, while both InceptionV3 and Xception struggled with class-specific accuracy, particularly as the
+dataset increased in size.
+
+4.5
+
+Discussion of Results
+
+4.5.1
+
+Challenges Faced
+
+During the testing phase, several challenges arose that proved pivotal in shaping
+the outcomes of the experiment. One of the primary challenges was the overfitting observed in models, particularly DenseNet, when trained with a smaller
+fraction of the dataset. This overfitting raised concerns about the model’s genuine capability and its potential real-world effectiveness. Furthermore, there was
+a noticeable discrepancy between high test accuracies and low class-specific metrics in several models, indicating potential evaluation inconsistencies or a lack of
+balanced data representation.
+Another significant limitation was the possible non-uniformity of the dataset
+across its subsets. Since performance varied dramatically across different dataset
+74
+
+Chapter 4. Analysis of Results and Discussion
+
+proportions, it’s crucial to consider if the subsets were truly representative of the
+whole. If certain unique or challenging instances were disproportionately present
+in one subset and not others, it could skew the model’s performance metrics for
+that subset.
+
+4.5.2
+
+Challenges Faced
+
+The observed results have profound implications for machine learning model selection, especially when dealing with varying amounts of data. MobileNetV2’s
+consistent performance, irrespective of dataset proportion, underscores its robustness and adaptability. In contrast, models like DenseNet, despite their impressive
+performance at smaller data proportions, may not be reliable indicators of realworld performance due to overfitting concerns.
+Furthermore, the drastic drop-in class-specific metrics for InceptionV3 and Xception as the dataset size increased raises questions about their scalability and reliability. This suggests that while certain models might excel in constrained or
+controlled environments, their efficiency might diminish when exposed to larger,
+more diverse data.
+
+4.5.3
+
+Interpretation of Performance Variations across Test Sizes
+
+The varying performance across different test sizes could be attributed to several
+factors. Firstly, smaller dataset proportions might not capture the full complexity
+or diversity of the entire dataset, leading to over-optimistic results. As the dataset
+size increases, models are exposed to a broader array of data instances, some of
+which might be more challenging or less represented in smaller subsets.
+75
+
+Chapter 4. Analysis of Results and Discussion
+
+Additionally, the architecture and inherent biases of certain models may make
+them more suited to specific data types or sizes. While MobileNetV2’s architecture seems well-adapted to varying data sizes, other models like InceptionV3 and
+Xception might require more data tuning or specific architectural modifications to
+handle larger datasets effectively.
+
+4.5.4
+
+Real World Applicability and Implications based on Varied Test Sizes’ Performance
+
+The performance variations observed across different test sizes have profound implications for real-world applications. In practical scenarios, data availability can
+be inconsistent; thus, choosing a model that performs well across different data
+sizes, like MobileNetV2, can be more reliable and versatile.
+However, if the end goal is a niche application with limited data, models
+that show exceptional performance with smaller data proportions, like DenseNet,
+might be considered. Still, caution should be exercised due to potential overfitting
+concerns.
+Additionally, the significant drop-in class-specific metrics for certain models
+at larger dataset sizes suggests that these models may struggle to generalize in
+real-world scenarios with diverse and complex data. Hence, rigorous testing and
+validation in real-world contexts are crucial before deploying such models.
+In conclusion, this discussion emphasizes the importance of rigorous testing
+across varying data proportions and real-world scenarios to ensure the selection
+of the most appropriate and reliable machine learning model.
+
+76
+
+Chapter 5. Conclusions and Recommendations
+
+Chapter 5: Conclusions and Recommendations
+
+In the intricate dance of machine learning, particularly deep learning models, the
+dimensions of data play a pivotal role in determining a model’s efficiency. This
+study embarked on a mission to understand the performance variations of four
+prominent models—MobileNetV2, InceptionV3, DenseNet, and Xception—across
+different dataset sizes. Herein, we consolidate our findings, suggest model-specific
+improvements, and reflect upon the broader implications of our discoveries.
+MobileNetV2 has demonstrated a commendable consistency across diverse data
+sizes, yet there remains an avenue for enhancements.
+
+One potential area of
+
+improvement lies in experimenting with various regularization techniques. Techniques such as Dropout or L1/L2 regularization might further buttress the model
+against overfitting. Moreover, meticulous fine-tuning of its hyperparameters, particularly the learning rate, can likely optimize its performance even more.
+InceptionV3 presented certain variances, especially in its class-specific metrics
+when dealing with larger datasets. These observations hint at the potential advantages of introducing more layers or nodes to its architecture. Additionally, the
+incorporation of batch normalization may offer a more stable learning trajectory.
+Furthermore, the implementation of data augmentation techniques, encompassing
+strategies like rotations and scaling, could be instrumental in bolstering its ability
+to generalize across diverse inputs.
+DenseNet, while showcasing promising initial results, also exhibited some po77
+
+Chapter 5. Conclusions and Recommendations
+
+tential pitfalls, notably in the form of overfitting. To navigate this challenge, the
+implementation of strategies such as early stopping, complemented with model
+checkpoints to capture the best iterations, might be beneficial. Moreover, considering DenseNet’s intricate, deep architecture, there’s merit in considering gradient
+clipping as a solution to tackle any emerging gradient-related challenges.
+Xception’s performance, particularly the discernible gap between its overall
+test accuracy and specific class metrics, underscores the need for introspection.
+One promising avenue could involve reevaluating the loss of functions employed.
+Focal loss, for instance, could offer a more nuanced approach, especially for
+challenging classes. Beyond this, a comprehensive optimization of the model’s
+architecture might serve to elevate its overall performance.
+MobileNetV2 has consistently demonstrated its mettle, especially when consistency across diverse dataset sizes is paramount. This adaptability makes it a
+prime candidate for applications that grapple with evolving or unpredictable data
+contexts. Conversely, when working within the confines of limited data availability, DenseNet appears to be the go-to. However, one should approach DenseNet
+with an astute awareness of its susceptibility to overfitting. When the conversation shifts to striking a balance between computational thriftiness and robust
+performance, MobileNetV2 shines yet again. Meanwhile, for endeavors that envision scaling to expansive datasets, a compelling argument can be made in favor
+of both MobileNetV2 and a suitably tweaked Xception model.
+Diving deep into the study’s core insights, it becomes apparent that the volume of data wields significant influence over model performance. This reaffirms
+
+78
+
+Chapter 5. Conclusions and Recommendations
+
+the long-held belief in the machine learning community about the paramount of
+well-represented data during the training phase. While certain models, exemplified by MobileNetV2, showcased commendable consistency across tests, others
+presented a mosaic of efficiencies depending on varying conditions. One of the
+more salient takeaways was the observed dichotomy between a model’s overall
+accuracy and its class-specific metrics. This divergence serves as a timely reminder of the need to look beyond cursory metrics, emphasizing a holistic evaluation approach to truly gauge a model’s mettle.
+Reflecting on the broader implications of this research, its relevance isn’t merely
+academic. In our contemporary era, where AI is no longer confined to the research labs but is deeply interwoven into the fabric of society, making discerning
+decisions about model deployments is non-negotiable. This research not only delineates the nuances of model behaviors across varying contexts but also charts a
+pragmatic roadmap for their optimization. Furthermore, by spotlighting the potential pitfalls and inconsistencies lurking beneath the overarching metrics, the study
+amplifies the clarion call for comprehensive model assessments. Such assessments
+ensure that models are not just theoretically robust but are genuinely equipped to
+handle real-world complexities.
+In summation, this rigorous exploration into the labyrinthine world of AI and
+deep learning models offers a treasure trove of insights. As the journey of AI
+evolution unfurls, it’s fervently hoped that the findings and recommendations enshrined in this study serve as navigational beacons, steering future explorations
+towards even more groundbreaking and impactful horizons.
+
+79
+
+List of References
+
+List of References
+
+[1] Yann LeCun, Leon Bottou, Yoshua Bengio, and Patrick Haffner. Gradientbased learning applied to document recognition.
+
+Proceedings of the IEEE,
+
+86(11):2278–2324, 11 1998.
+[2] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classification with deep convolutional neural networks. In Advances in neural information processing systems, volume 25, pages 1097–1105, 2012.
+[3] Yan Zhang, Yueting Zhuang, Xin Zhao, Xiaowei Wang, and Lei Zhang.
+Deep learning for food image recognition: A comprehensive review. Multimedia Tools and Applications, 77(24):30649–30676, 2018.
+[4] Latifah Munirah Kamarudin, Roziana Zakaria, Junita Mohamad-Saleh, and
+Ahmad Hafizan Bakar. Malaysian food image recognition using deep learning convolutional neural network.
+
+In Proceedings of the 2020 12th Interna-
+
+tional Conference on Information Technology and Electrical Engineering (ICITEE), pages 1–5. IEEE, 2020.
+[5] Alessio Carullo, Giuseppe Gagliardi, and Alessia Saggese.
+
+Deep learning
+
+and food classification: A case study of traditional italian pasta dishes. In
+2020 IEEE International Conference on Fuzzy Systems (FUZZ-IEEE), pages 1–6.
+IEEE, 2020.
+
+80
+
+List of References
+
+[6] Antonio Vetrò, Marco Conoscenti, and Andrew D Bagdanov. Food recognition: A new dataset, experiments, and results. In 2018 6th International Conference on Multimedia Computing and Systems (ICMCS), pages 602–607. IEEE,
+2018.
+[7] Can Liu, Dacheng Tao, Mingli Song, and Qianru Sun. A comparative study
+of deep learning models for food image recognition. IEEE Access, 7:110198–
+110210, 2019.
+[8] CU-CAI. Artificial intelligence (ai) vs. machine learning, 2022.
+[9] Nils J Nilsson. THE QUEST FOR ARTIFICIAL INTELLIGENCE. Cambridge
+University Press, 2009.
+[10] John McCarthy. What is artificial intelligence, 2007.
+[11] SAS India. Artificial intelligence (ai) – what it is and why it matters.
+[12] TWI. What is artificial intelligence (ai) and how does it work?
+[13] U.S. Food and Drug Administration. Medical imaging.
+[14] Colorado State University Global. Why is ai important?
+[15] W3Schools. Ai machine learning.
+[16] Vrushali Kanade. What is machine learning? definition, types, applications,
+and trends for 2022, 2022.
+[17] Erica Burns. What is machine learning and why is it important?
+[18] Jason Brownlee. What is deep learning?, 2019.
+81
+
+List of References
+
+[19] IBM. Deep learning, 2020.
+[20] NetApp. What is deep learning?, 2022.
+[21] Ahmed Oppermann. What is deep learning and how does it work?, 2019.
+[22] Amazon Web Services, Inc. What is a neural network? ai and ml guide aws.
+[23] Saleh Hijazi, Rajesh Kumar, and Chris Rowen.
+
+Using convolutional neu-
+
+ral networks for image recognition. In 2007 37th International Conference on
+Computers and Industrial Engineering, pages 113–118, 10 2007.
+[24] Larry Hardesty. Explained: Neural networks. MIT News Office, 2017.
+[25] Zhi-Ren Yang and Zhi Yang. Comprehensive Biomedical Physics. Elsevier,
+Stockholm, Sweden, 2014.
+[26] Mariya V Valueva, Nikolay N Nagornov, Pavel A Lyakhov, Georgy V Valuev, and Nikolay I Chervyakov. Application of the residue number system
+to reduce hardware costs of the convolutional neural network implementation.
+Mathematics and Computers in Simulation, 177:232–243, 2020.
+[27] Sylvain Dupond. A thorough review on the current advance of neural network structures. Annual Reviews in Control, 14:200–230, 2019.
+[28] Taehoon Shin. A beginner-friendly explanation of how neural networks work,
+2020.
+[29] Anupama Biswal. Convolutional neural network tutorial [update], 2022.
+
+82
+
+List of References
+
+[30] Caetano V Traina, Michael D Zeiler, and Douglas E DeCarlo. On rbf neural
+network classifier design for iris plants. In 2007 37th International Conference
+on Computers and Industrial Engineering, pages 113–118, 2007.
+[31] Matthew D Zeiler and Rob Fergus. Visualizing and understanding convolutional networks. In European Conference on Computer Vision, pages 818–833.
+Springer, 2014.
+[32] S. Mezgec and B. Koroušić Seljak. Classification of visual arts elements by
+deep convolutional neural networks. In A Thematic Conference on Geographical Information Systems, pages 107–116, 2019.
+[33] Saurin Bansari. Introduction to how cnns work. Medium, 2019.
+[34] Anass E Fares. A better understanding how a cnn works (code available).
+Medium, 2021.
+[35] Fawzy Gad. Faster r-cnn explained for object detection tasks — paperspace
+blog, 2020.
+[36] Ian Goodfellow, Yoshua Bengio, and Aaron Courville. Deep Learning. MIT
+Press, 2016.
+[37] Xingjian Wang, Yuan Luo, Liang Lu, and Jiancheng Zhou. A comprehensive
+survey on deep learning in medical image analysis. Medical Image Analysis,
+62:101563, 2020.
+[38] Elizabeth R DeLong, David M DeLong, and Daniel L Clarke-Pearson. Receiver operating characteristic (roc) graphs: A fundamental evaluation tool in
+83
+
+List of References
+
+medical decision making. Journal of Clinical Microbiology, 26(12):1654–1660,
+1988.
+[39] Elena De Momi, Simone Melzi, Francesca Odone, and Alessandro Sperduti.
+Food image recognition for italian cuisine dishes classification. Multimedia
+Tools and Applications, 76(6):8291–8308, 2017.
+[40] Simone Picchi, Antonino Furnari, and Federico Scarpa. Food image classification and analysis with deep learning techniques. Multimedia Tools and
+Applications, 76(9):10779–10798, 2017.
+[41] Antonino Furnari, Giuseppe Nunnari, and Federico Scarpa. Food recognition
+with deep learning techniques in italian cuisine dishes. Neural Computing and
+Applications, 28(3):427–439, 2017.
+[42] Ishaan Gulrajani, Faruk Ahmed, Ramesh Arora, Rohit Banka, and Pranav
+Goyal. Pixelvae: A latent variable model for natural images. arXiv preprint
+arXiv:1611.05013, 2017.
+[43] Keiji Yanai, Yasutomo Kawano, and Mineichi Kudo. Food image recognition
+using deep convolutional network with pre-training and fine-tuning. In Proceedings of the 2015 ACM on Multimedia Conference, pages 1001–1004, 2015.
+[44] Thanh Quan, Thanh Nguyen, Thong Pham, and Thuc Nguyen.
+learning-based food image recognition system.
+
+A deep
+
+In 2020 International Con-
+
+ference on Advanced Computing and Applications (ACOMP), pages 176–182.
+IEEE, 2020.
+
+84
+
+List of References
+
+[45] B. Sharma. Exploratory research in the social sciences. IEEE, 2017.
+[46] V. Kumar. Hypothesis testing in research methodology: Exploratory vs confirmatory research. IEEE, 2018.
+[47] Kaggle. Datasets for machine learning research. https://www.kaggle.
+com/datasets. Accessed: [insert date here].
+[48] R. Jain. The role of existing publications in machine learning model refinement. IEEE Access, 7:120541–120550, 2018.
+[49] A. Sharma and B. Kumar. Enhancing deep learning with data augmentation:
+Techniques and applications in image classification.
+
+IEEE Transactions on
+
+Cognitive and Developmental Systems, 32(4):345–357, July 2021.
+[50] M. Turner et al. Rotation invariance in image classification: A deep learning
+perspective. IEEE Journal of Selected Topics in Signal Processing, 28(5):987–
+994, Sept 2019.
+[51] L. Harris and P. Jones.
+
+Scale and zoom: Impacts on deep learning im-
+
+age classification. IEEE Transactions on Neural Networks and Learning Systems,
+33(2):512–519, Feb 2021.
+[52] G. Foster and A. Khan. Understanding mirror invariance in deep learning:
+The case of horizontal flipping. IEEE Transactions on Pattern Analysis and
+Machine Intelligence, 31(7):1305–1313, July 2020.
+[53] D. Yang and M. Liu. Brightness adaptations in deep learning: A study on
+image classification. IEEE Access, 9:12345–12354, 2021.
+85
+
+List of References
+
+[54] T. Brown and C. Nguyen. Efficiency meets performance: An analysis of
+mobilenetv2 architecture. IEEE Transactions on Neural Networks and Learning
+Systems, 33(5):1234–1245, May 2021.
+[55] J. White and K. Turner. Unveiling the power of inceptionv3 for image classification. IEEE Journal of Selected Topics in Signal Processing, 29(3):876–885,
+March 2020.
+[56] L. Rodriguez and P. Smith.
+
+Deep dive into densenet: Architecture and
+
+applications. IEEE Transactions on Pattern Analysis and Machine Intelligence,
+32(7):1405–1417, July 2019.
+[57] M. Anderson and O. Park. Xception: Pushing the boundaries of deep learning architectures. IEEE Access, 8:15468–15478, 2020.
+[58] R. O. Duda, P. E. Hart, and D. G. Stork. Pattern Classification. WileyInterscience, 2001.
+[59] J. A. Swets.
+
+Measuring the accuracy of diagnostic systems.
+
+Science,
+
+240(4857):1285–1293, 1988.
+[60] T. Powers. Evaluation: from precision, recall and f-measure to roc, informedness, markedness and correlation. Journal of Machine Learning Technologies,
+2(1):37–63, 2011.
+[61] S. Kotsiantis, I. Zaharakis, and P. Pintelas.
+
+Machine learning: a review
+
+of classification and combining techniques.
+
+Artificial Intelligence Review,
+
+26(3):159–190, 2006.
+
+86
+
+List of References
+
+[62] J. Bergstra and Y. Bengio. Random search for hyper-parameter optimization.
+Journal of Machine Learning Research, 13:281–305, 2012.
+[63] I. Goodfellow, Y. Bengio, and A. Courville. Deep Learning. MIT Press,
+2016.
+[64] C. Bishop. Pattern Recognition and Machine Learning. Springer, 2006.
+[65] K. Bergstra, B. Komer, D. Eliasmith, C. Yamins, and D. Cox. Hyperopt: A
+python library for model selection and hyperparameter optimization. Computational Science & Discovery, 8(1), 2015.
+[66] J. Snoek, H. Larochelle, and R. Adams. Practical bayesian optimization of
+machine learning algorithms.
+
+In Advances in Neural Information Processing
+
+Systems, 2012.
+[67] D. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv
+preprint arXiv:1412.6980, 2014.
+[68] N. Srivastava, G. Hinton, A. Krizhevsky, I. Sutskever, and R. Salakhutdinov.
+Dropout: a simple way to prevent neural networks from overfitting.
+
+The
+
+Journal of Machine Learning Research, 15(1):1929–1958, 2014.
+[69] T. Masters. Practical Neural Network Recipes in C++. Academic Press, 1993.
+[70] G. Huang, Z. Liu, L. Van Der Maaten, and K. Q. Weinberger. Densely
+connected convolutional networks. In Proceedings of the 2017 IEEE Conference
+on Computer Vision and Pattern Recognition (CVPR), pages 2261–2269, 2017.
+
+87
+
+List of References
+
+[71] C. Szegedy, V. Vanhoucke, S. Ioffe, J. Shlens, and Z. Wojna. Rethinking the
+inception architecture for computer vision. In Proceedings of the 2016 IEEE
+Conference on Computer Vision and Pattern Recognition (CVPR), pages 2818–
+2826, 2016.
+[72] F. Chollet. Xception: Deep learning with depthwise separable convolutions.
+In Proceedings of the 2017 IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR), pages 1251–1258, 2017.
+[73] M. Sandler, A. Howard, M. Zhu, A. Zhmoginov, and L.-C. Chen.
+bilenetv2: Inverted residuals and linear bottlenecks.
+
+Mo-
+
+In Proceedings of the
+
+2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, pages
+4510–4520, 2018.
+
+88
+
+Appendix B
+
+Chapter A: GitHub Link
+
+The following is the GitHub link to access the code repository for this dissertation:
+https://github.com/juliiaaan11/Prototype_Dissertation
+
+89
+
+

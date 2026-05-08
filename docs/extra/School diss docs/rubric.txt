@@ -1,0 +1,947 @@
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+Document Number
+
+376
+
+Page 1 of 6
+
+C
+
+Document Revision
+
+Date Issued
+
+17.08.2021
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+N.B. This rubric is applicable only to dissertations that include an IT project.
+GRADING CRITERIA
+APTITUDE, PROACTIVITY AND
+CREATIVITY
+
+K1: Demonstrate initiative,
+proactivity, creativity and
+critical self-reflective
+aptitude.
+
+COMMITMENT, TIME
+MANAGEMENT AND FOLLOWUP ON MEETINGS
+
+K2: Show commitment, time
+management and ability to
+follow-up on supervisor
+comments and
+recommendations.
+
+RESEARCH QUESTIONS AND
+OBJECTIVES
+
+K3: Outline a clear set of
+research questions and
+objectives that specifically
+address the problem within
+the given context
+
+LEVEL OF PERFORMANCE (MARKS)
+2-3
+
+0
+
+1
+
+4-5
+
+Student showed no initiative
+or creativity. Work on the
+research was mostly passive.
+No participation was
+demonstrated during
+supervisor meetings. There
+was a general inability to
+identify strengths and
+limitations in the research
+plan and no dissertation
+ideas were developed.
+
+Student showed a moderate amount
+of initiative and creativity. Proactivity
+in terms of research work was
+average. While a moderate amount of
+participation was shown, student had
+a fair understanding of the hypothesis.
+Some strengths and weaknesses were
+identified within the research plan and
+one or more dissertation ideas were
+developed with the assistance of the
+supervisor
+
+Student demonstrated good creativity and
+initiative. S/he proactively showed a solid
+understanding of the hypothesis and
+actively participated during supervisor
+meetings. S/he identified most strengths
+and weaknesses of the research within the
+research plan. Constructive suggestions for
+improvement were also provided. Selfreflective ability was also shown through
+innovative research methods and/or dataanalysis methods that were designed.
+
+Student showed no
+commitment to the final
+output of the dissertation.
+There was no attempt to
+adhere to milestones and
+was unaware of what
+backup strategies are. A
+general inability to follow up
+on supervisor
+recommendations was
+identified.
+
+Student showed a general lack of
+initiative and creativity. Work on
+the research was somewhat
+passive and minimal participation
+was shown. Suggestions were
+mostly provided by the supervisor.
+There was a slight inability to
+identify potential strengths and
+weaknesses in the research plan.
+An idea was partially developed
+with the assistance of the
+supervisor
+Student showed minimal
+commitment to the final output of
+the dissertation. There was
+minimal attempt to adhere to
+some of the milestones. Student
+relies on the supervisor for
+feasible backup strategies. A
+proper follow up on supervisor
+recommendations was not always
+possible due to lack of
+understanding
+
+Student was moderately committed to
+the final output of the dissertation.
+Most (but not all) of the milestones
+were adhered to. Backup strategies
+were provided but were not always
+feasible. A proper follow up on
+supervisor recommendations was not
+always possible either due to lack of
+time or understanding
+
+Student was very committed to maximising
+the output and insight of the dissertation.
+Most milestones were adhered to.
+Milestones were mostly adhered to and
+where necessary feasible backup strategies
+were provided. There were regular follow
+ups on supervisor recommendations were
+made. Queries related to research the
+problem were also done to third parties.
+
+Research questions and
+objectives were not
+researchable and the
+research outline was absent.
+No research context was
+defined and no connection
+to existing research was
+established.
+
+Most of the research questions
+and objectives were either badly
+formulated or not researchable.
+The research outline was
+somewhat weak. The research
+context was vaguely defined
+however a connection to existing
+research was not established.
+
+Most (but not all) of the research
+questions and objectives were clear
+and concise. The context of the
+research was properly defined
+however a connection to existing
+research was only established where
+the student was recommended (by the
+supervisor) to do so.
+
+All research questions were meticulously
+formulated and provided a clear set of
+objectives. Additionally, the scope of the
+research was clearly defined. A novel area
+was identified within the research context
+and further insight was provided throughout
+the dissertation.
+
+Student
+score
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+376
+
+Document Number
+
+GRADING CRITERIA
+0
+DOCUMENT STRUCTURE
+AND REFERENCING
+
+K4: Reproduce a wellstructured document
+that conforms to the
+college guidelines
+while also containing
+the textual quality and
+referencing style
+required of a
+dissertation.
+
+RESEARCH DOMAIN
+
+K5: Show sufficient
+knowledge of the
+domain and
+demonstrate the
+ability to convey the
+purpose of the
+research.
+
+C
+
+Document Revision
+
+1
+
+Page 2 of 6
+Date Issued
+
+LEVEL OF PERFORMANCE (MARKS)
+2-3
+
+17.08.2021
+
+4-5
+
+Document does not conform to
+the college guidelines.
+Document is badly-structured.
+Information was presented in
+the wrong locations. Level of
+detail was not sufficient.
+Textual quality is very port.
+Most of the document
+contained spelling and
+grammatical errors thus making
+it unreadable. Referencing is
+mostly lacking and/or is not
+used properly if present.
+
+Document mostly does not conform to
+college guidelines. Information in the
+document is placed in different areas of
+the dissertation. Sections rarely follow
+any logical order and lack the required
+level of detail (e.g. missing, inconsistent,
+irrelevant information). Textual quality is
+poor. Numerous spelling and
+grammatical errors are present making
+the document difficult to understand.
+Student made minimal use of the
+referencing framework. More often
+references are lacking.
+
+Document mostly conforms to college
+guidelines. While most of the dissertation
+structure is correct, not all the
+information is located correctly. Sections
+do not always follow the logical order of
+the document hierarchy. The level of
+detail across all sections is inconsistent.
+Some sections are redundant. Textual
+quality of the document is fair with a
+number of spelling and grammatical
+errors. The text may be equivocal in the
+meaning being conveyed. Student made
+proper use of the referencing framework
+in the dissertation.
+
+Document conforms to college
+guidelines. Overall, the dissertation is
+well-structured. All information is
+located correctly. Sections are unique,
+concise, serve a specific purpose and
+follow an ordered hierarchy with a
+gradual increase in the level of detail
+(where necessary). Textual quality of
+the dissertation is praiseworthy. A
+good command of the English language
+is demonstrated throughout the entire
+document. Very few (if any) spelling
+and grammatical errors. Student made
+proper use of the referencing
+framework in the dissertation.
+
+The abstract was not provided
+or does not conform to the
+standards being proposed.
+Does not include any relevant
+information that attempts to
+summarise the dissertation
+document. Poor content quality
+
+Abstract is a poor representation of most
+the dissertation. Around half (or less) of
+the following were covered with a poor
+level of detail: research domain,
+introduction, statement of the problem,
+objectives, research methodology,
+measures used, sample, results,
+conclusions and future
+recommendations.
+
+Abstract Includes a fair (to above
+average) representation of most aspects
+of the dissertation. Contains most (but
+not all) of the following: research
+domain, introduction, statement of the
+problem, objectives, research
+methodology, measures used, sample,
+results, conclusions and future
+recommendations.
+
+(MARKS: 0)
+The Introduction was not
+provided or somewhat does
+not tap into the research
+domain in any manner. Poor
+level of content provided and
+does not adhere to dissertation
+standards.
+
+(MARKS: 0.5)
+A poor (to average) introduction was
+provided. Barely taps into the research
+domain and is for the majority lacking
+detail or misses out on sections such as:
+overview of the research domain,
+problem statement, motivation,
+hypothesis, research questions,
+objectives and outline of the research
+(MARKS: 0.5)
+
+(MARKS: 1-1.5)
+An average (to good) introduction was
+produced. Sections such as: overview of
+the research domain, statement of the
+problem, motivation, hypothesis,
+research questions, objectives and
+outline of the research were competently
+covered however some sections lacked
+the required level of detail.
+(MARKS: 1-1.5)
+
+Abstract includes a good (to excellent)
+representation of all the aspects of the
+dissertation. A good description of the
+research domain, introduction,
+Statement of the problem, objectives,
+research methodology, measures used,
+sample, results, conclusions and
+recommendations for future research
+were provided. The abstract is very
+concise yet meticulous throughout.
+(MARKS: 2-2.5)
+A very good (to excellent) introduction
+was produced. Sections such as:
+overview of the research domain,
+statement of the problem, motivation,
+hypothesis, research questions,
+objectives and outline of the research
+were all rigorously covered.
+
+(MARKS: 0)
+
+Student
+score
+
+(MARKS: 2-2.5)
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+Document Number
+
+376
+
+GRADING CRITERIA
+
+A1: Analyse, process,
+compare and contrast
+relevant sources to
+construct a solid review of
+literature.
+CANDIDATE TECHNIQUES
+
+A2: Identify, analyse and
+document candidate
+techniques that are of
+relevance to the present
+study.
+DATA ACQUISITION,
+PROCESSING AND
+INTERPRETATION
+
+A3: Apply procedures of
+data acquisition,
+processing and
+interpretation based on
+the appropriate research
+methodology.
+TESTING
+
+A4: Adapt relevant
+measures of testing and
+validation to the present
+research.
+
+Date Issued
+
+17.08.2021
+
+LEVEL OF PERFORMANCE (MARKS)
+0
+
+LITERATURE REVIEW
+
+C
+
+Document Revision
+
+Page 3 of 6
+
+1-3
+
+4-5
+
+6-7
+
+Student was unable to
+organize literature and
+come up with a valid
+synthesis.
+
+Student was able to organize the
+literature in the form of a basic
+comparison. It contains a limited
+amount of sources. Therefore, the
+synthesis does not necessarily
+provide proper insights, hypotheses
+or conclusions.
+
+Student was able to organize literature in the
+form of a good comparison. A good number of
+sources were used. Adequate comparison was
+provided in the final version of the literature
+review. The synthesis contains valid insights,
+hypotheses or conclusions.
+
+Student was able to organize literature
+which includes a vast array of sources.
+The comparison and critical evaluation
+of the literature was very good to
+excellent. The final version of the
+literature review is very clear and
+concise.
+
+No information regarding
+established candidate
+techniques was provided
+within the dissertation
+document as part of the
+literature review and
+methodology.
+No methodological basis
+was selected and applied.
+Student was unable to
+collect, process, and/or
+interpret data.
+
+Some valid information regarding
+established candidate techniques
+relevant to the present study was
+provided. Poor level of detail was
+provided as part of the literature
+review and methodology.
+
+Valid information regarding established
+candidate techniques relevant to the present
+study was provided. Fair level of detail was
+provided as part of the literature review and
+methodology.
+
+Detailed information regarding
+established candidate techniques
+relevant to the present study was
+provided. Good level of detail was
+provided as part of the literature
+review and methodology.
+
+Research methodology was
+selected and applied, Student was
+able to organize the data, and
+provide some basic interpretations
+of it. Minimal to no data
+processing was performed. This led
+to minimal contribution towards
+the research question/s.
+
+Research methodology was well selected and
+applied. The student was able to collect,
+process and interpret the data correctly.
+This led a valid contribution towards the
+research question/s
+
+A very good to excellent research
+methodology was applied. Student was
+able to collect, process and interpret
+the data and was also able to perform
+elaborate checks on the data.
+Additional measures to ensure noise
+reduction in the data.
+
+Student was unable to
+setup and/or execute any
+measures of testing /
+validation.
+
+Student was able to setup and/or
+execute some testing measures.
+Errors were made, thus invalidating
+(part of) the test. Supervision was
+required.
+
+Student was able to execute testing measures
+that have been used in existing literature. Due
+consideration was given to error and
+uncertainty while testing. Some form of pilot
+testing has also been implemented.
+
+Student was able to execute and adapt
+testing measures to the present
+research. Quantitative consideration of
+sources of error and uncertainty were
+taken into account. Execution of the
+experiment was flawless. Additional
+testing (such as pilot testing) was made
+to ensure the validity of the techniques
+used.
+
+Student
+score
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+Document Number
+
+376
+
+Document Revision
+
+IMPLEMENTATION
+
+Student was unable to
+produce a prototype for the
+present research.
+
+Student was able to produce a
+prototype and was also able to
+make minor modifications to an
+existing model. Errors were
+present in the output. No
+validation was provided.
+
+A5: Produce a prototype
+that targets the research
+objectives utilising a
+relevant technique.
+
+GRADING CRITERIA
+0
+THEORETICAL
+FRAMEWORK
+
+S1: Compile and utilise
+a list of sources which
+comprise the
+theoretical
+underpinnings of the
+present research.
+
+IMPLEMENTATION
+
+S2: Develop a
+research artefact in a
+logical and meticulous
+manner
+
+Page 4 of 6
+
+C
+
+Date Issued
+
+Student was able to produce a prototype and
+was able to make major modifications to an
+existing model based on literature. Minimal to
+no errors were present. Some basic validation
+was provided
+
+LEVEL OF PERFORMANCE (MARKS)
+1-3
+4-5
+
+No discussion of
+underlying theories was
+provided in the
+dissertation document.
+Reference list contained
+a minimal number of
+sources and were
+barely used in context.
+
+There is some discussion of
+underlying theories within
+the dissertation document.
+In some instances, the
+information provided is
+inaccurate. Reference list
+contained a small number
+of sources. Some of the
+sources included were
+relevant.
+
+Theories relevant to the research
+were identified and discussed in the
+dissertation document. No
+theories were adapted to the
+requirements of the present study.
+Reference list contained a fair
+number of sources. A fair number
+of sources included were relevant.
+
+Student was unable to
+produce a research
+artefact that addressed
+the objectives. No core
+techniques were
+implemented.
+
+Student was able to
+produce a research artefact
+and one core technique
+was implemented but failed
+to address any research
+objectives.
+
+Student was able to produce a
+research artefact and one core
+technique was implemented that
+addressed one or more research
+objectives. This is because, the
+student was in part unable to adapt
+the core technique to the present
+research.
+
+17.08.2021
+
+Student was able to produce a
+prototype completely from scratch
+and/or added a core functionality to an
+existing model such that it is better
+suited for the research objectives of
+the present study. Excellent technical
+background was demonstrated.
+Advanced validation was provided.
+
+6-7
+
+8-10
+
+Theories relevant to the
+research were identified
+and discussed in the
+dissertation document.
+Theories were partially
+adapted to the
+requirements of the
+present study. Reference
+list contained a fair to good
+number of sources. Most
+of the sources included
+were relevant.
+Student was able to
+produce a research artefact
+that was partially adapted
+to the research objectives.
+One core technique was
+implemented. Good
+technical background was
+demonstrated. More than
+half the research objectives
+were addressed.
+
+Theories relevant to the research
+were identified and discussed in
+the dissertation document. A
+complete overview of relevant
+theories was provided Theories
+were completely adapted to the
+requirements of the present
+study. Reference list contained a
+good number of sources
+(including a number of peerreviewed papers). All sources
+included were relevant.
+Student was able to produce a
+research artefact that is
+completely adapted to the
+research objectives. More than
+one technique was implemented
+to determine the most optimal
+outcome. Excellent technical
+background was demonstrated.
+All research objectives were
+addressed.
+
+Student
+score
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+Document Number
+
+RESULTS AND
+DISCUSSION
+
+S3: Evaluate, challenge
+and discuss the
+research findings and
+limitations of the
+present study.
+
+SUMMARY OF FINDINGS
+AND CONCLUSIONS
+
+S4: Synthesize and
+present appropriate
+argumentations,
+conclusions and
+recommendations for
+further research and
+development.
+
+376
+Discussion section was
+completely missing in
+final submission or was
+not tapping onto the
+key points.
+
+Summary of Findings,
+conclusions and
+recommendations for
+further research were
+missing or did not meet
+expected standard. No
+connection between
+research questions,
+results and conclusions
+was provided.
+
+Document Revision
+
+Discussion section was very
+poor and limited. Answers
+to the original questions
+were not addressed
+properly. Student identified
+only some possible
+limitations which were
+either irrelevant or nonexistent. Poor critical
+evaluation of the results
+with almost no references
+to existing literature.
+Summary of findings,
+conclusions and
+recommendations for
+future research were very
+poorly formulated. In many
+cases only partial answers
+to the research questions
+were provided. Conclusions
+were a mere repetition of
+the results.
+
+Discussion section was fair and
+somewhat limited. Research
+questions were answered but some
+arguments were not wellconstructed. Student indicated
+most limitations in the research,
+but did not weigh their impact on
+the main results. Fair critical
+evaluation of the results with some
+references to existing literature
+were made.
+Fair level of detail in summary of
+findings, conclusions and
+recommendations for further
+research was provided. Most (but
+not all) research questions were
+addressed. Some conclusions were
+substantiated by results while some
+others were not.
+
+C
+
+Page 5 of 6
+Date Issued
+
+A good discussion section
+with some minor flaws in
+writing and clarity of
+arguments. Student
+indicated most limitations
+in the research and also
+weighed their impact on
+the main results. Good
+critical evaluation of the
+results with references to
+existing literature was
+provided
+Good level of detail in
+summary of findings,
+conclusions and
+recommendations for
+further research was
+provided. All research
+questions were addressed.
+Most (but not all)
+conclusions were
+substantiated by results.
+
+17.08.2021
+
+An impeccable discussion of
+results with very concise and
+clear arguments. Student was
+able to identify all possible
+limitations in the research and
+also indicated which limitations
+affect the conclusions most.
+Student critically evaluated the
+results and rigorously referred to
+existing literature. In case of
+differences, a possible reason for
+the discrepancy is provided.
+Excellent level of detail in
+summary of findings, conclusions
+and recommendations for further
+research was provided. Very
+good links to all the research
+questions were substantiated by
+result highlights. All conclusions
+were clearly-defined.
+Recommendations were welllinked to the findings.
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+Document Title
+
+PROGRAMMING CODE BASED PROJECTS DISSERTATION RUBRIC (IICT – MQF LV 6)
+
+376
+
+Document Number
+
+Document Revision
+
+Page 6 of 6
+
+C
+
+Date Issued
+
+17.08.2021
+
+LEVEL OF PERFORMANCE – VIVA (to be completed by the viva board – tick only one )
+Student was unable to defend or discuss
+the dissertation. Knowledge of the
+document was very poor. Student was
+unable to explain anything related to the
+document.
+
+Student found it difficult to defend or discuss the
+dissertation. Knowledge of the document was
+poor. Student was unable to explain most parts
+of the document.
+
+TOTAL SCORE
+
+Student was able to defend the dissertation.
+Knowledge of the document was fair. Certain parts
+of the document were explained with a good level
+of detail; however certain other parts could not be
+explained properly.
+
+Student was very confident in defending the
+dissertation. Knowledge of the document is very
+good. Student was able relate the findings in the
+dissertation existing research and was also able to
+convey the practical implications of the findings.
+
+FINAL GRADE
+
+Reference Documents
+- DOC 100 Dissertation Guidelines
+
+_____________________________________________________________________________________________________________________________________________________
+MCAST Controlled and approved document
+
+Unauthorised copying and communication strictly prohibited
+
+

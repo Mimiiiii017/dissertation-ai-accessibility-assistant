@@ -517,7 +517,7 @@ async function main() {
 
   // Kimi+Qwen multi-stage voting with all conditions (testing alternative model pair - T42)
   if (opts.multiStageVotingKimiQwen && opts.allConditions) {
-    const kimiModel = 'kimi-k2.6:cloud';
+    const kimiModel = 'kimi-k2.5:cloud';
     const qwenModel = 'qwen3.5:397b-cloud';
 
     if (!ALL_MODELS.includes(kimiModel) || !ALL_MODELS.includes(qwenModel)) {

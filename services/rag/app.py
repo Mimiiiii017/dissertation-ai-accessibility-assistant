@@ -2,10 +2,9 @@ from pathlib import Path
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
 import chromadb
-from chromadb.utils import embedding_functions
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 import re
 import os
-from transformers import AutoTokenizer
 from rank_bm25 import BM25Okapi
 import pickle
 
@@ -23,28 +22,14 @@ DB_DIR = Path(__file__).resolve().parent / "chroma_db"
 
 app = FastAPI(title="AI Accessibility Assistant - RAG Service")
 
-# ─── Embedding model (overridable via EMBED_MODEL env var) ───────────────────
-# Supported values and their token limits:
-#   all-MiniLM-L6-v2       → 256 tokens  (default)
-#   all-mpnet-base-v2      → 512 tokens
-#   nomic-ai/nomic-embed-text-v1  → 2048 tokens (practical: 1024)
-EMBED_MODEL = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+# ─── Embedding model ────────────────────────────────────────────────────────
+# Uses ChromaDB's DefaultEmbeddingFunction (all-MiniLM-L6-v2 via onnxruntime).
+# No PyTorch required — runs on CPU with onnxruntime only.
+embed_fn = DefaultEmbeddingFunction()
 
-# HuggingFace model ID for tokenizer (may differ from sentence-transformers name)
-_HF_TOKENIZER_MAP = {
-    "all-MiniLM-L6-v2":  "sentence-transformers/all-MiniLM-L6-v2",
-    "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
-    "nomic-ai/nomic-embed-text-v1": "nomic-ai/nomic-embed-text-v1",
-}
-_tokenizer_id = _HF_TOKENIZER_MAP.get(EMBED_MODEL, EMBED_MODEL)
-
-_embed_kwargs = {}
-if "nomic" in EMBED_MODEL:
-    _embed_kwargs["trust_remote_code"] = True
-embed_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-    model_name=EMBED_MODEL, **_embed_kwargs
-)
-_tokenizer = AutoTokenizer.from_pretrained(_tokenizer_id)
+# Character-based token approximation (≈4 chars per token for English prose)
+def _approx_tokens(text: str) -> int:
+    return max(1, len(text) // 4)
 
 client = chromadb.PersistentClient(path=str(DB_DIR))
 
@@ -56,7 +41,7 @@ MAX_CHUNK_TOKENS = int(os.environ.get("MAX_CHUNK_TOKENS", "128"))
 OVERLAP_TOKENS   = int(os.environ.get("OVERLAP_TOKENS", str(max(1, MAX_CHUNK_TOKENS // 10))))
 MIN_CHUNK_CHARS  = 80    # discard/merge chunks shorter than this
 
-print(f"[RAG] EMBED_MODEL={EMBED_MODEL}  MAX_CHUNK_TOKENS={MAX_CHUNK_TOKENS}  OVERLAP_TOKENS={OVERLAP_TOKENS}")
+print(f"[RAG] embed=DefaultEmbeddingFunction(all-MiniLM-L6-v2/onnx)  MAX_CHUNK_TOKENS={MAX_CHUNK_TOKENS}  OVERLAP_TOKENS={OVERLAP_TOKENS}")
 
 
 class IndexResponse(BaseModel):
@@ -90,7 +75,7 @@ def iter_kb_files(kb_type: str):
             yield p
 
 def count_tokens(text: str) -> int:
-    return len(_tokenizer.encode(text, add_special_tokens=False))
+    return _approx_tokens(text)
 
 def extract_file_metadata(text: str) -> dict:
     """

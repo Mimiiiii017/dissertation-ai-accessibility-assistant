@@ -1,0 +1,1634 @@
+Recreating School for a user’s purpose
+
+Samuel Agius
+Supervisor: Dr. Owen Sacco
+
+June, 2022
+A dissertation submitted to the Institute of Information and Communication
+Technology in partial fulfilment of the requirements for the degree of BSc (Hons)
+in Software Development
+
+Authorship Statement
+
+Authorship Statement
+
+This dissertation is based on the results of research carried out by myself, is my
+own composition, and has not been previously presented for any other certified
+or uncertified qualification.
+
+The research was carried out under the supervision of Dr. Owen Sacco.
+
+. . .June
+. . . . . .5th
+. . . .2023
+........
+
+.....................
+
+Date
+
+Signature
+
+i
+
+Copyright Statement
+
+Copyright Statement
+
+In submitting this dissertation to the MCAST Institute of Information and Communication Technology, I understand that I am giving permission for it to be
+made available for use in accordance with the regulations of MCAST and the
+Library and Learning Resource Centre. I accept that my dissertation may be
+made publicly available at MCAST’s discretion.
+
+June 5th 2023
+.....................
+
+.....................
+
+Date
+
+Signature
+
+ii
+
+Acknowledgements
+
+Acknowledgements
+
+I would like to extend my heartfelt gratitude to Dr. Owen Sacco, my esteemed
+mentor, for his invaluable guidance throughout the months dedicated to working
+on my dissertation. I am immensely grateful to my family and friends for their
+unwavering support and invaluable advice. Additionally, I would like to express
+my deep appreciation to all the participants who generously devoted their time
+and efforts to assist me in my research.
+
+iii
+
+Abstract
+
+Abstract
+
+In this study, the immersive exploration of the campuses of MCAST and University of Malta (UOM) through a digital game is investigated. The digital game
+incorporates realistic artificial intelligence, beautifully rendered non-player characters, and meticulously designed construction environments. The main goal of this
+research is to assist a specific student in locating their ideal campus and course.
+The project aims to provide users with an unparalleled opportunity to engage in
+an interactive educational experience facilitated by the power of Unreal Engine.
+Through careful investigation, various educational opportunities within this project
+have been discovered, allowing users to adapt and grow. The outcomes of the
+study will be evaluated using a quantitative approach to assess the success of the
+digital game. A group of 100 individuals will complete a pre-questionnaire before
+participating in the game, while another group of 100 individuals will complete
+a post-questionnaire after their engagement. This strategy will provide insightful information regarding the influence and efficacy of the immersive exploration
+on the participants’ preferences and educational options. In terms of future research, this digital game can be converted into a virtual reality (VR) game as
+a cutting-edge approach in an effort to push the boundaries of educational discovery. With this in mind, we can explore the potential of this game-changing
+technology by immersing players in an exploration of the MCAST and University
+of Malta (UOM) campuses. Another future change which could be implemented,
+instead of doing a quantitative approach of 100 people questionnaires, interviews
+could be held in order to unlock a new dimension of understanding and provide
+participants with a more authentic and engaging research experience.
+
+Keywords: Unreal Engine, Blender.
+
+iv
+
+Table of Contents
+
+Table of Contents
+
+Authorship Statement
+
+i
+
+Copyright Statement
+
+ii
+
+Acknowledgements
+
+iii
+
+Abstract
+
+iv
+
+List of Figures
+
+viii
+
+1
+
+Introduction
+1.1 Aims & Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.2 Hypothesis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.3 Research Questions . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.4 Dissertation Overview . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.4.1 Literature Review . . . . . . . . . . . . . . . . . . . . . . . .
+1.4.2 Methodology . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.4.3 Analysis of Results and Discussion . . . . . . . . . . . . . .
+1.4.4 Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+1
+1
+2
+2
+3
+3
+3
+3
+4
+
+2
+
+Literature Review
+2.1 Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.2 Game Development and Game Engines . . . . . . . . . . . . . . . .
+2.2.1 The start of Game Development . . . . . . . . . . . . . . . .
+2.2.2 The present of Game Development . . . . . . . . . . . . . .
+2.2.3 The future of Game Development . . . . . . . . . . . . . . .
+2.3 Opportunities for Game Developers . . . . . . . . . . . . . . . . . .
+2.4 History and different types of categories of Video Games . . . . .
+2.5 The advancement of 3D video games and what is used to make
+such games . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.6 Comparing both campuses in short. . . . . . . . . . . . . . . . . . .
+2.7 Enhancing student’s mental well-being through gaming . . . . . . .
+2.8 How games add immersion . . . . . . . . . . . . . . . . . . . . . . .
+2.9 Unreal Engine VS Unity . . . . . . . . . . . . . . . . . . . . . . . .
+2.10 Similar Work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+6
+6
+8
+8
+9
+10
+12
+13
+
+Research Methodology
+3.1 Introduction to Methodology . . . . . . . . . . . . . . . . . . . . . .
+3.2 Quantitative & Qualitative Research Design . . . . . . . . . . . . . .
+3.2.1 Quantitative Research . . . . . . . . . . . . . . . . . . . . . .
+3.2.2 Qualitative Research . . . . . . . . . . . . . . . . . . . . . . .
+
+23
+23
+25
+25
+25
+
+3
+
+15
+17
+18
+19
+20
+21
+
+v
+
+Table of Contents
+
+3.2.3 Justification for Quantitative Research . . . . . . . . . . . . .
+Unreal Engine . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Blender . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+UE’S Blueprints and Widgets . . . . . . . . . . . . . . . . . . . . . .
+Unreal Engine Actors . . . . . . . . . . . . . . . . . . . . . . . . .
+Unreal Engine Characters . . . . . . . . . . . . . . . . . . . . . . . .
+Unreal Engine AI . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+25
+26
+27
+31
+34
+35
+36
+
+4
+
+Analysis of Results and Discussion
+4.1 Pre-Evaluation Questionnaire: Analysing Students Feedback . . . . .
+4.2 Post-Evaluation Questionnaire: Analysing Students Feedback . . . .
+4.3 Results: Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+39
+39
+42
+45
+
+5
+
+Conclusions and Recommendations
+5.1 Concluding Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.2 Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.3 Future Recommendations . . . . . . . . . . . . . . . . . . . . . . . .
+
+46
+46
+47
+47
+
+3.3
+3.4
+3.5
+3.6
+3.7
+3.8
+
+List of References
+
+49
+
+Appendix A Pre-Evaluation-Appendix
+A.1 Pre-Evaluation: A digital Reality Campus Experience for aiding
+Students selecting their preferred school and course . . . . . . . .
+
+53
+
+Appendix B Post-Evaluation-Appendix
+B.1 Post-Evaluation: A Digital Reality Campus Experience for aiding
+Students selecting their preferred school and Course . . . . . . . . .
+
+57
+
+53
+
+57
+
+vi
+
+List of Figures
+
+List of Figures
+
+2.1
+
+Literature Map. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+8
+
+3.1 Methodology Pipeline. . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.2 Unreal Engine Menu. . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.3 Pre-Build Mcast Building. . . . . . . . . . . . . . . . . . . . . . . . .
+3.4 Post-Build Mcast Building. . . . . . . . . . . . . . . . . . . . . . . .
+3.5 Pre-Build UOM Building. . . . . . . . . . . . . . . . . . . . . . . . .
+3.6 Post-Build UOM Building. . . . . . . . . . . . . . . . . . . . . . . .
+3.7 MALE BP Blueprint. . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.8 Character Selection Widget Designer. . . . . . . . . . . . . . . . . .
+3.9 Character Selection Widget Blueprint. . . . . . . . . . . . . . . . . .
+3.10 Tree Actor. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.11 AI Skeletal Mesh. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.12 Male-BP Blend Space Animation. . . . . . . . . . . . . . . . . . . .
+3.13 AI Event Graph. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.14 AI Nav-Mesh Bounds. . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+24
+27
+29
+29
+30
+30
+32
+33
+34
+35
+36
+36
+37
+38
+
+4.1
+4.2
+4.3
+4.4
+4.5
+4.6
+4.7
+4.8
+4.9
+
+Pre-Result 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Pre-Result 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Pre-Result 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Pre-Result 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Post-Result 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Post-Result 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Post-Result 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Post-Result 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Post-Result 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+39
+40
+41
+41
+42
+43
+43
+44
+44
+
+A.1
+A.2
+A.3
+A.4
+A.5
+A.6
+A.7
+
+Pre-Questionnaire: Question 1 . . . . . . . . . . . . . . . . . . . . .
+Pre-Questionnaire: Question 2 . . . . . . . . . . . . . . . . . . . . .
+Pre-Questionnaire: Question 3 . . . . . . . . . . . . . . . . . . . . .
+Pre-Questionnaire: Question 5 - Responses 1 . . . . . . . . . . . . .
+Pre-Questionnaire: Question 6 - Responses 2 . . . . . . . . . . . . .
+Pre-Questionnaire: Question 7 - Responses 3 . . . . . . . . . . . . .
+Pre-Questionnaire: Question 8 - Responses 4 . . . . . . . . . . . . .
+
+53
+53
+54
+54
+55
+55
+56
+
+B.1
+B.2
+B.3
+B.4
+B.5
+B.6
+
+Post-Questionnaire: Question 1 . . . . . . . . . . . . . . . . . . . . .
+Post-Questionnaire: Question 2 . . . . . . . . . . . . . . . . . . . . .
+Post-Questionnaire: Question 3 . . . . . . . . . . . . . . . . . . . . .
+Post-Questionnaire: Question 4 . . . . . . . . . . . . . . . . . . . . .
+Post-Questionnaire: Question 6 . . . . . . . . . . . . . . . . . . . . .
+Post-Questionnaire: Question 9 . . . . . . . . . . . . . . . . . . . . .
+
+57
+57
+58
+58
+58
+59
+
+vii
+
+List of Figures
+
+B.7 Post-Questionnaire: Question 9 - Responses 1 . . . . . . . . . . . .
+B.8 Post-Questionnaire: Question 10 . . . . . . . . . . . . . . . . . . . .
+B.9 Post-Questionnaire: Question 10 - Responses 2 . . . . . . . . . . . .
+B.10 Post-Questionnaire: Question 11 . . . . . . . . . . . . . . . . . . . .
+B.11 Post-Questionnaire: Question 11 - Responses 3 . . . . . . . . . . . .
+
+59
+60
+60
+61
+61
+
+viii
+
+Chapter 1. Introduction
+
+Chapter 1: Introduction
+
+1.1
+
+Aims & Objectives
+
+The study of research is based on Recreating School for a user’s purpose. Students frequently find it tough to distinguish the distinctive qualities and experiences linked with each institution while evaluating several schools and their offers. Due to a lack of information, students may find it difficult to make educated decisions, which causes students to choose educational paths that do not
+meet their needs and objectives. The motivation for this research came from a
+personal experience when I didn’t have a clue on what course I wanted to pursue and no real explanation and difference was shown from all the institutions
+I researched. This research study offers an innovative solution to this problem
+which is an immersive digital campus made with Unreal Engine that features the
+main institutions of the University Of Malta (UOM) and Mcast.
+The goal of this research project is to determine the degree of user satisfaction
+and judgment with the obstacles in the digital game. The study intends to assess the success of the game in satisfying user expectations, improving decisionmaking abilities, and offering an enjoyable and gratifying experience by analyzing
+user input and impressions. Finally, this thesis investigates the general issue of
+how a digital game can help students make decisions. The game acts as a tool to
+equip students with the required knowledge and experiential learning opportunities
+that enhance decision-making by submerging players in a dynamic and interactive
+
+1
+
+Chapter 1. Introduction
+
+digital game environment. This thesis aims to shed light on the possibility of
+a digital game developed using Unreal Engine to aid students in navigating the
+challenges of choosing an educational institution through the examination of these
+research issues. The digital game strives to empower students to make educated
+decisions that are in line with their personal goals and academic ambitions by
+offering an enjoyable and educational experience.
+
+1.2
+
+Hypothesis
+
+The main hypothesis motivating this research study is that by giving students the
+chance to explore and traverse different digital campuses, they will develop a
+better grasp of the distinctive qualities and educational opportunities of each institution. Users will be able to immerse themselves in a digital video game world
+that accurately represents how the campuses function in real life by assuming the
+role of a student character within the game. By allowing them to become familiar with the daily routines, academic lessons, and course-specific characteristics of
+each institution, this experiential learning strategy hopes to aid students in their
+decision-making process.
+
+1.3
+
+Research Questions
+
+Several research questions have been developed to address the above hypothesis:
+- How will the digital game help a student in their own particular needs?
+- How will artificial intelligence be implemented in school digital game?
+- How much questions and answers lead to different experiences in the digital
+
+2
+
+Chapter 1. Introduction
+
+game?
+- How will this digital game help the user face multiple obstacles?
+- Will the user be satisfied with the challenges faced ahead?
+- How can a digital game help anyone make a decision?
+
+1.4
+
+Dissertation Overview
+
+1.4.1
+
+Literature Review
+
+The Literature review section will discuss the major areas of research that are
+important to the creation of educational games and the potential of gaming in
+enhancing student’s mental well-being.
+
+1.4.2
+
+Methodology
+
+The methodology section outlines the game engine that was used to create this
+digital game and the program that created the realistic digital campuses.
+
+1.4.3
+
+Analysis of Results and Discussion
+
+In order to evaluate the research project’s effectiveness, two questionnaires were
+given out. A pre-questionnaire was designed to gather background data on participants’ perceptions, knowledge, and decision-making processes related to choosing
+educational institutions. The goal of the post-questionnaire was to evaluate how
+the gameplay experience affected the players’ comprehension, ability to make decisions, and happiness with the game. Insights into the usefulness of the online
+game in answering the study questions and its potential as a tool for prospective
+
+3
+
+Chapter 1. Introduction
+
+students’ decision-making will emerge from the analysis of these questionnaires,
+which includes both quantitative data.
+
+1.4.4
+
+Conclusion
+
+Lastly, the conclusion will summarise the results and recommend some future
+studies for this research project.
+The study of research is based on Recreating School for a user’s purpose.
+Students frequently find it tough to distinguish the distinctive qualities and experiences linked with each institution while evaluating several schools and their
+offers. Due to a lack of information, students may find it difficult to make educated decisions, which causes students to choose educational paths that do not
+meet their needs and objectives. The motivation for this research came from a
+personal experience when I didn’t have a clue on what course I wanted to pursue and no real explanation and difference was shown from all the institutions
+I researched. This research study offers an innovative solution to this problem
+which is an immersive digital campus made with Unreal Engine that features the
+main institutions of the University Of Malta (UOM) and Mcast.
+The goal of this research project is to determine the degree of user satisfaction
+and judgment with the obstacles in the digital game. The study intends to assess the success of the game in satisfying user expectations, improving decisionmaking abilities, and offering an enjoyable and gratifying experience by analyzing
+user input and impressions. Finally, this thesis investigates the general issue of
+how a digital game can help students make decisions. The game acts as a tool to
+equip students with the required knowledge and experiential learning opportunities
+4
+
+Chapter 1. Introduction
+
+that enhance decision-making by submerging players in a dynamic and interactive
+digital game environment. This thesis aims to shed light on the possibility of
+a digital game developed using Unreal Engine to aid students in navigating the
+challenges of choosing an educational institution through the examination of these
+research issues. The digital game strives to empower students to make educated
+decisions that are in line with their personal goals and academic ambitions by
+offering an enjoyable and educational experience.
+
+5
+
+Chapter 2. Literature Review
+
+Chapter 2: Literature Review
+
+2.1
+
+Overview
+
+This literature review seeks to propose a new method for any student that just
+finished their O’levels to pick their preferred campus. The approach of this will
+be carried out with two different campuses which will be Mcast and the University f Malta (UOM). In order for this method to be carried out, some factors have to validated which are what drives the student to choose their preferred campus. In my opinion, there are three main factors which drive the student to continue their studies. The first factor is the student life and resources
+which measures what the student wants to accomplish. Mcast for example offers courses with apprenticeships and study abroad programs whilst University of
+Malta (UOM) doesn’t offer apprenticeships. Another factor which drives a student is location, which plays a significant role in the student’s decision-making
+process. Finally, the most important factor which drives a student to make a
+decision is the academics and reputation of the campus. When choosing the preferred campus, a major consideration must be decided by the student which is
+based upon the quality and reputation of a school’s history and present. Matthew
+Michael Morano [1] clarified that choosing a college major can be a significant
+decision for students and this can be accompanied by anxiety and uncertainty for
+many students, as they navigate through various factors and academic strengths.
+Proceeding to what the thesis proposes, as said before two different campuses
+
+6
+
+Chapter 2. Literature Review
+
+will be constructed and implemented for the student to test. Another way to
+enhance students into trying newer things, game-based learning, is to increase
+student retention of information and make learning more interesting and engaging than it would be through more conventional means. This has been utilized
+in a variety of learning environments from typical classrooms to online learning
+environments. In both these campuses, libraries, laboratories and modern facilities are provided and each campus its own extracurricular activities and community involvement in order to include something which is not learn-based. In
+order for the student to select their preferred campus between Mcast and University of Malta (UOM), one must follow these four major factors. These major
+factors happen to be career goals, course offerings, mode of study and faculty
+resources. The Mcast [2] Campus is perfect for students who desire a practical, hands-on career in a technical and vocational field in terms of career goals.
+Mcast [2] offers multiple courses in various institutions and offers to ascertain
+which one best suits their academic interest and objective. In terms of mode of
+study, Mcast might be the preferable option for a student who is willing to go to
+school full-time and focus only on the studies applied. Finally, Mcast [2] possess
+an institution with multiple faculties such as research facilities, libraries, career
+services and much more. On the other hand, the University of Malta (UOM) [3]
+is another alternative for a student who is interested in a more academically or
+scientifically oriented job and each institution in this campus promotes an objective in the student’s academic life. The mode of study in this campus may be a
+better fit for a student that fancies a more flexible schedule because this campus
+
+7
+
+Chapter 2. Literature Review
+
+offers both full-time and part-time opportunities. The last major factor which is
+University of Malta’s (UOM) greatest faculty provides a highly qualified and experienced faculty which includes a library system which has journals and online
+resources, a career service that provide a range of services and support to all
+students and much more.
+
+In Figure 2.1, a literature map has been created in order to show this research’s literature review process from start to finish.
+
+Figure 2.1: Literature Map.
+
+2.2
+
+2.2.1
+
+Game Development and Game Engines
+
+The start of Game Development
+
+The game ”Maze War,” which was developed in the early 1970s, is usually regarded as having the first gaming engine. First-person shooter game Maze War
+
+8
+
+Chapter 2. Literature Review
+
+offered multiplayer participation in a common virtual setting. The software used
+in Maze War’s game engine was a framework for the game’s mechanics, including graphic rendering, player input management, and player network connectivity.
+A group of computer scientists at NASA’s Ames Research Center, including Steve
+Colley, Bruce Baumgart, and others, developed the engine. Although it was primarily created for research objectives, it immediately became well-liked and frequently used by computer enthusiasts. Following Maze War, game engines continued to develop, gaining new features for networking, physics, and visuals. From
+straightforward mobile games to intricate AAA titles, a variety of video games
+are being created using game engines. Unity, Unreal Engine, and CryEngine are
+a few examples of well-known gaming engines.
+
+2.2.2
+
+The present of Game Development
+
+Guner Koc Aytekin [4] mentioned that every single day, advancements and breakthroughs in our age of globalization are reported on behalf of knowledge. Since
+the brilliant mathematician John von Neumann initially put out the idea of using games to explain human behavior, significant research has been done in this
+area, and great progress has been made. The field of game creation is one that is
+always changing and expanding in novel and fascinating ways. Technology developments, such as quicker processors, better graphics capabilities, and more potent
+game engines, are what drive the industry. The growth of independent games is
+one of the largest trends in game production right now. Instead of huge game
+production studios or individual creators, these games are created by smaller, independent studios. Indie games frequently emphasize distinctive gameplay me9
+
+Chapter 2. Literature Review
+
+chanics, imaginative storytelling, and artistic flair, and thus have a devoted fan
+base. The increasing acceptance of games that use virtual and augmented reality
+is another trend in game development. Players of these games can have immersive experiences that make them feel as though they are actually in the game
+world thanks to cutting-edge technology. The usage of cloud gaming, which enables players to access and play games on any device with an internet connection
+without having to download the actual game, is also becoming more and more
+common in game production. Additionally, game designers are putting more of
+an emphasis on making games that are usable by a broader spectrum of players, including those who have disabilities. New tools and technologies that make
+games more accessible and inclusive have been created as a result of this.
+
+2.2.3
+
+The future of Game Development
+
+The main topic discussed regarding the future of game development has to be the
+metaverse. Players in a persistent world that keeps changing even when they are
+offline can create their own characters, buy virtual products, explore enormous
+landscapes, and communicate with other players in a metaverse. The creation
+of a metaverse aims to blur the distinction between the actual world and the virtual world by offering a completely immersive and compelling experience. Recent
+years have seen a substantial increase in interest in the idea of a metaverse, with
+big internet firms like Facebook and Microsoft investing heavily in its creation.
+Xiulian Cao. [5] mentioned that in order to improve metaverse, the underlying
+technology must be kept updated in order to meet the needs of the metaverse
+operation. The potential uses of the metaverse go far beyond gaming, with many
+10
+
+Chapter 2. Literature Review
+
+people considering it to be a brand-new platform for communication, education,
+and commerce. The rising application of cutting-edge technology like artificial intelligence, machine learning, and blockchain is one of the most important trends
+in game creation. AI and machine learning are being utilized to make non-player
+characters more intelligent and lifelike, improve aesthetics, and tweak game dynamics. With the use of blockchain technology, new methods of game revenue
+generation are being developed, such as through the use of cryptocurrencies. The
+popularity of cross-platform gaming is another noteworthy trend. This makes it
+possible for gamers to access the same game on several platforms, including PCs,
+gaming consoles, and mobile phones, making for a more seamless gaming experience. Games based on virtual and augmented reality are also anticipated to gain
+appeal going forward, with the possibility of ever more immersive experiences as
+technology develops. This can involve the use of haptic feedback, which enables
+gamers to experience feelings like pressure or vibration in the game world. There
+is a growing emphasis on game design that aims to produce games that are more
+inclusive and available to a wider range of players. This includes making games
+that are accessible to players with impairments as well as games that appeal to a
+wider range of players. In addition, more players are anticipated to access games
+through streaming services rather of downloading them to their devices, as cloud
+gaming continues to grow. New commercial opportunities and business models for
+game developers may result from this. Overall, the future of game development
+is promising, with the potential for players to engage in even more cutting-edge
+and immersive experiences.
+
+11
+
+Chapter 2. Literature Review
+
+2.3
+
+Opportunities for Game Developers
+
+Murphy-Hill et al. [6] mentioned that game developers who have also had no
+non-game software development had to demonstrate a striking difference as game
+developers and eventually ended up working in the game development industry.
+For aspiring game producers, the video game industry offers a variety of opportunities. Mobile gaming has grown significantly as a result of the popularity
+of smartphones, and game developers may now produce titles for both the iOS
+and Android operating systems. Additionally growing in popularity are virtual
+and augmented reality technologies, which game developers can use to create immersive experiences. Independent game creators can create games with original
+concepts and release them through stores like Steam or the App Store, which
+have grown in popularity in recent years. Additionally, game creators can create
+games that are especially made for competitive play thanks to the fast-expanding
+eSports market. Alexander K. Gibson mentioned that the chapter explores the
+real-world encounters that one teacher had during his 14-year career as a teacher
+and student mentor and looks at how varsity esports programs can encourage
+student participation during extracurricular activities and how video games can be
+used to connect and educate students. The anecdotal experiences will act as a
+case study to assist other educators in locating tools and charting a course for
+setting up esports opportunities in their own educational institutions. Last but not
+least, game designers can produce serious games for a range of sectors, including
+healthcare and education. In general, the video game industry is always changing,
+and game designers have many chances to provide gamers unique and interesting
+12
+
+Chapter 2. Literature Review
+
+experiences.
+
+2.4
+
+History and different types of categories of Video Games
+
+James D. Ivory [7] stated that historical overview of the development of video
+games with a quick glimpse at the patterns in study on the social impact of
+video games throughout the history of the medium. People will be better prepared to attempt to comprehend the contemporary societal significance of video
+games if they keep in mind that the inspirations and developments leading to the
+modern video game landscape were diverse. Video games have such a dominant
+social, cultural, and commercial influence in the electronic media landscape. It
+is simple to presume that the technological and sociological advancements leading to what people call video games were not the result of a single evolutionary
+pathway because the phrase ”video game” is used as a talismanic catch-all for
+almost any type of interactive digital entertainment. Convergent evolution is the
+theory put out by evolutionary biologists to explain why comparable features can
+be found in creatures that are otherwise very different and only distantly related.
+Before video games, there were still some forms of electronic entertainment with
+toys, video cassette recorders, cable television with television series such as MTV
+which started around the year 1981 and blockbuster films. The first video game
+that was developed around the year 1970’s attracted the wide-scale public attention was Pong by Atari which was developed as a 2D-sports game designed to
+simulate a table tennis game. The concept of Pong required 2 players which one
+of them moves a paddle across the left side of the screen by moving it verti-
+
+13
+
+Chapter 2. Literature Review
+
+cally and the other player which is on the right moves vertically as well. The
+object was for each player to accumulate eleven points before their rival. With
+the popularity of 2D games, in the year 1980, Atari which is the same company
+that invented Pong developed the first ever 3D game which was called “Battlezone” which was an arcade tank shooter that was playable on home computers
+debuted a year later with 3D Monster Maze. The developer Shane Mooney and
+Brady Games [8] stated that main purpose of “Battlezone” provides a perspective
+from within the tank that the player controls and is pitted against other tanks as
+well as occasional flying saucers and guided missiles. The player can also use
+three-dimensional stationery geometric objects for cover within the game to shield
+the tank from enemy fire. “Battlezone” is played with two joysticks for control
+of the tank and firing of its weapons. With these different campuses, multiple
+variabilities will be manifested and both campuses will show their entire configuration. With these configurations, a collection of two digital campuses with be
+constructed in 3D and implemented in a way where the student feels like she/he
+is experiencing the campus for the first time. There were some other games that
+were developed before “Battlezone”, but since “Battlezone” is known for its popularization of first-person perspective to ports of the game to a number of home
+systems. In fact, the game kept getting updated till the year 2016 because of
+high demand from the fans. With the amount of work that “Battlezone” developers had put into this video game that Shane Mooney quoted “I ended up losing
+three months of my life, spending every waking minute at Atari, coming home
+at 1 a.m., going int at 6 a.m. The game got done.” [8]. This means that every
+
+14
+
+Chapter 2. Literature Review
+
+single developer at Atari worked day and night for the whole development of
+“Battlezone” which resulted in a big success. In contrast to the history of video
+games, categories are a bit part of video games for each fan that plays. The first
+category that was introduced was sports since Pong was a table tennis game and
+sports was the only big form of entertainment at that time. After the sports category, another hugely popular category was the adventure category which started
+with the first video game called “Adventure” which was a Colossal Cave adventure created in the 1970’s. Dennis Jerz [9] stated that the text-based game
+”Adventure” was the first in a line of ”interactive fiction” titles that stress plot,
+puzzles, and exploration; these titles often take place in a fantasy environment
+and had a huge cultural impact in the late 1970s and early 1980s. In this day
+and age there are multiple categories such as Sandbox, Shooters, Simulation and
+Sports and Real-time strategy. Every single year, a “Game of the Year” competition is made in order to announce the best game of the year which each game
+must consist of ratings from each video game media, the sales of the video game
+and lastly the most important thing the critical evaluation of the video game itself.
+
+2.5
+
+The advancement of 3D video games and what is used to make such games
+
+Ragib Hasan [10] mentioned that the performance of video games is greatly affected by 3D video game assets, which range in size from simple objects to
+enormous meshes. Game assets that aren’t optimized might not be able to display on a variety of devices. Many people desire to play video games but are
+
+15
+
+Chapter 2. Literature Review
+
+unable to do so due to their outdated gear. 3D video games have expanded
+in these last few years since technology is advancing. 3D in video games feature three main directional dimensions which consist of height, weight and depth
+whilst 2D consist of x-axis and y-axis directional dimensions. This 3D effect that
+will be implemented in the video game Is implemented in a way for the student
+to feel authentic like actual life. A real-time rendering environment for 3D objects is offered by the game engine Unreal Engine. Unreal Engine allows for the
+importation of 3D models so that they can be animated, illuminated, and given
+texture. The engine renders the scene in real-time using a combination of hardware and software, enabling the user to observe and interact with the 3D world
+in real-time. Evan Snider [11] stated that an examination of how we utilize, perceive, and interpret the worlds of contemporary video games and transition to 3D
+graphics marks a significant aesthetic and technological advancement in the history of video games and raises the possibility of a wider transformation of games
+as media. The behaviour and interactions of objects in the scene are specified by
+the engine using a unique scripting language called Blueprint. Once the scene
+is finished, it can be exported and used in other projects or as a stand-alone
+game or application. With this in mind every model and asset in Unreal Engine
+is imported in 3D with operations executed. In Unreal Engine, every model will
+have a texture or material attached in order to release certain reality aspect and
+give a colour to every model created. An important software that will be used
+is Blender 3D which is used for modelling capabilities, texturing, animation and
+lighting and multiple 3D tools for creation. An interesting fact about Blender 3D
+
+16
+
+Chapter 2. Literature Review
+
+is that a NASA employer by the name Siddi [12] said that his experience using
+Blender 3D and said “I started using Blender personally about six year ago as
+a free alternative to Maya and Max when I started my own business modelling
+and selling aircraft for Microsoft Flight Simulator after being laid-off my job in
+the video game industry, I decided to try an all open source route and found
+the tools very capable”. Once the results are present, the statistical difference between the Mcast Campus and University Of Malta (UOM) will be calculated and
+manifested.
+
+2.6
+
+Comparing both campuses in short.
+
+When comparing both campuses from both their main websites at the year 2021
+the University Of Malta (UOM) which has 14 faculties, 8 institutes, 13 centres
+and 3 schools proves that it has a higher student count following a course. As
+indicated from the University Of Malta (UOM) main website, the student count is
+around 11300, with 1500 international students and 600 overseas students following a full-time or part-time degree and diploma courses. Approximately around
+2000 pre-tertiary students are registered from the Ġ.F. Abela Junior College which
+is located at Msida. The main University Of Malta (UOM) building is located
+at Msida Campus which is between 5000 and 6000 square metres. The University Library has a collection of nearly 1 million volumes and subscribes to
+over 60,000 e-journals, 196 printed journal titles and 16,554 e-books. The most
+important aspect of this comparison is how many students graduated, which in
+University of Malta’s (UOM) case is around 3500 students in various disciplines
+
+17
+
+Chapter 2. Literature Review
+
+annually University of Malta (UOM) [3]. On the other hand, Mcast has 7 institutes, 1 centre and 2 schools. As indicated on Mcast’s main website, at the
+year 2021, the student count is around 7818 with full-time and part-time courses.
+There are over 96 different student nationalities and over 1359 international students. In the year 2021, Mcast had over 2753 graduates in multiple different
+courses Malta College of Arts, Science and Technology [2].
+
+2.7
+
+Enhancing student’s mental well-being through gaming
+
+Bogost [13] states that video games “temporarily interrupt and set aside ordinary
+life”. With this in mind, video games tend to aid people which are struggling
+to continue in their life and in some cases even cured medical conditions like
+depression and anxiety disorders. In a study researched “playing video games
+forces gamers to deeply stimulate multiple different areas of his or her brain,
+which leads to the development of a large handful of various beneficial tasks
+and dimensions of thinking” Barnardo’s [14] which is briefed to mean that any
+type of person can benefit from playing video games mentally and physically in
+some cases. McGonigal, J. [15] summarises how video games motivate any individual mentally by stating that: “Games tap into several intrinsic desires and
+drives, such as achievement, social connection and learning. When desires are
+satisfied, players are motivated to keep playing, often for hours at a time.” On
+the other hand, McGonigal, J. [15] also stated that: “Games can also motivate
+us to exercise our bodies. A growing number of games use physical activity as
+the controller, such as Dance Dance Revolution and Wii Fit and even traditional
+
+18
+
+Chapter 2. Literature Review
+
+games like soccer and basketball can provide physical motivation for play.” In
+this case the purpose of this video game is to direct the student and provide a
+solution to continue his/her studies. In this video game, both campuses will be
+mapped out in 3D with the exact replica of the actual buildings. Dianne Zielinski [16] mentioned that when students tried out games in order to train their
+brain, sensation and perception, human growth, learning, motivation, IQ, personality, and mental illnesses. To varied degrees, students successfully applied all of
+the themes to the game play. The brain and intelligence were extensively explored in student debates. The topics of personality and psychological illnesses
+received comparatively little attention. Students were able to relate topics to their
+experiences playing games.
+
+2.8
+
+How games add immersion
+
+Michal Mochoki [17] declared that video games offer authentic heritage experiences that are similar to going to a heritage site in person. This is comparable
+to the experience of a student visiting the campus for the first time which is
+mostly aimed to create huge immersion between the player and how the video
+game is accurate. The best ranked game that has the biggest immersion is called
+“The Elder Scrolls V: Skyrim” which is a large and intricate world which can be
+explored in an open-world role-playing game, the detailed environments, moody
+soundtrack, interesting quests and the ability to customize the character’s backstory and interactions within the game world all end up contributing to its immersive features Bethesda Game Studios [18].
+
+19
+
+Chapter 2. Literature Review
+
+2.9
+
+Unreal Engine VS Unity
+
+Jonas Vedsted Sorensen [19] stated that the capabilities for modeling the environment, surrounding water, and lighting are provided by Unreal Engine 5. The
+Unreal Engine ecosystem also offers a wealth of content, including 3D graphics
+and game logic plugins, which facilitates the production of digital twins. The
+findings demonstrate the significant potential for the creation of digital twins and
+user interfaces for interacting with them in Unreal Engine 5. Since the two most
+widely used gaming engines today are Unreal Engine and Unity a detailed section must be addressed. They have certain key distinctions that make them more
+appropriate for various applications. The programming language used in each is
+one of the key distinctions between them. Compared to Unreal Engine, which
+combines C++ and Blueprints, Unity mostly employs C#. The ability to generate images in real time and enable sophisticated features like dynamic lighting
+and post-processing effects make Unreal Engine stand out among other rendering
+engines. Strong graphics are also a feature of Unity, albeit it could take more
+work to get the same effects. While Unity uses PhysX, Unreal Engine features
+a built-in physics engine. Compared to Unreal Engine, Unity offers support for
+more platforms, including mobile and web browsers. Zhenzhen Teng [20] mentioned that the IP expansion of cultural and creative items has placed a strong
+emphasis on game creation. Currently, Unity 3D technology is the foundation for
+the majority of game production. The creation of the game’s three-dimensional
+scenes is the most crucial aspect of game development. In light of the foregoing context, this paper comprehensively investigates the application of Unity
+20
+
+Chapter 2. Literature Review
+
+technology in the creation of three-dimensional scenes by examining the threedimensional scene creation of artistic and cultural games.
+
+Unity is a popular
+
+option for beginners because it also has a larger user base and more comprehensive documentation. Finally, Unity offers both a free edition and paid versions
+with more features and support, whereas Unreal Engine is free to use but levies
+a royalty fee on any commercial items created with the engine. In the end, the
+project-specific requirements will determine which game engine is used. While
+Unity may be more appropriate for cross-platform game development and mobile
+games, Unreal Engine may be a better option for complicated simulations and
+high-end graphics. With my thesis I believe Unreal Engine’s real-time rendering
+technology and support for cutting-edge features like dynamic lighting and postprocessing effects to be superior to Unity’s graphical capabilities, I prefer using
+Unreal Engine for my game development projects. Additionally, I believe that
+Unreal Engine’s built-in physics engine and support for sophisticated simulations
+are a better fit for the demands of my project. Despite the fact that Unity has
+more users and great cross-platform support, I believe that Unreal Engine is better suited for the objectives for this particular project.
+
+2.10
+
+Similar Work
+
+When researching for my thesis, some similar work that is compared to the two
+campuses for a user’s selected college so they can continue their studies by using
+a game that displays two 3D models of the campus and allows the user to play
+as a student. For instance, Tengku Siti Meriam Tengku Wook [21] talked about
+
+21
+
+Chapter 2. Literature Review
+
+the usage of virtual campus visits to assist students in choosing their colleges.
+The use of game-based learning in a university course and its effects on student
+engagement and learning outcomes have also been examined by Claudia Schrader
+[22]. While Rula al azawi [23] highlighted the possibilities of virtual reality for
+career education and training, Darina Dicheva, Christo Dichev, Gennady Agre and
+Galia Angelova [24] gave an overview of the current state of gamification in
+higher education.
+
+22
+
+Chapter 3. Research Methodology
+
+Chapter 3: Research Methodology
+
+3.1
+
+Introduction to Methodology
+
+In order to compare the efficiency of two distinct campus designs for instructing
+game development courses using Unreal Engine, this study’s methodology uses a
+mixed-methods approach. To determine the critical elements that support successful instructional design and student engagement, the study will start with a qualitative survey of the literature on game development education that already exists.
+The two campus environments will then be compared using a quasi-experimental
+research method, with one group of students studying in each setting. Participants will be drawn from students from both campuses using a pre-questionnaire.
+Questionnaires based on students’ possibilities will all be utilized to gather data,
+which will then be analyzed using both quantitative techniques.
+
+23
+
+Chapter 3. Research Methodology
+
+In Figure 3.1, a methodology pipeline has been created in order to show this
+research’s methodology process from start to finish.
+
+Figure 3.1: Methodology Pipeline.
+
+24
+
+Chapter 3. Research Methodology
+
+3.2
+
+3.2.1
+
+Quantitative & Qualitative Research Design
+
+Quantitative Research
+
+Manual J. Ibarra [25] stated that in the journal “Serious Games for Learning:
+A Quantitative Review of Literature” a scientific literature review was published
+that contained descriptions and publications of a sizable number of digital games.
+Some of these digital games were referred to as serious games, which was the
+main objective of these games which took a different turn from the usual sheer
+enjoyment and educational purpose. In this context, this work includes a quantitative literature assessment on earlier papers connected to digital games for learning
+that were published in peer-reviewed conference proceedings or journals.
+
+3.2.2
+
+Qualitative Research
+
+On the other hand, Hannah R. Gerber [26] spoke about qualitative research which
+was analyzed on how COTS video games can alter students’ classroom literacy
+instruction, which investigates the effects of integrating COTS video games into a
+high school curriculum that has been built using a connected learning framework.
+This can guide anyone to understand how to enact new learning styles and new
+ways of making meaning in any classroom space.
+
+3.2.3
+
+Justification for Quantitative Research
+
+In order to investigate the efficacy of a digital game that simulates two campuses in a learning environment, a quantitative approach was used.
+
+The ap-
+
+proach started with 100 individuals given a pre-questionnaire to complete before
+25
+
+Chapter 3. Research Methodology
+
+testing the game, and the same individuals but 75 of them were given a postquestionnaire to complete after playing the game. With the quantitative approach,
+multiple benefits were gathered like an objective method for gathering numerical
+data, enabling statistical analysis and the creation of insightful conclusions.
+
+3.3
+
+Unreal Engine
+
+When the digital game idea was figured, a game engine had to be chosen in
+order to develop the school experience. That game engine was Unreal Engine
+which is a potent game creation engine created by Epic Games as seen in Figure 3.2. Some in-depth tools are provided for building immersive 3D experiences,
+such as digital games, virtual reality, augmented reality, architectural visualizations
+and more. Unreal Engine 5, which was announced for release in 2020, features
+notable developments in rendering and graphics technology. With the help of crucial elements like Nanine, Lumen and Virtualized Geometry, extremely detailed
+sceneries, realistic lighting effects and fluid transitions are made possible. Beyond
+the creation of digital games, Unreal Engine also finds use in augmented reality, virtual reality, cinema and animation and training simulations. In fact, Rui
+Yao [27] stated that Unreal Engine’s future is anticipated to continue improving,
+adopting new technology and satisfying industry expectations with constant upgrades and improvements. In this project the third-person template was built in
+Unreal Engine for the students as an immersive learning environment. Students
+can explore classrooms, halls and other parts of the campus with the use of
+pre-configured character controller. Objectives and conversing with AI-controlled
+
+26
+
+Chapter 3. Research Methodology
+
+NPCs that serve as teachers and other students. Dynamic lighting, visual effects
+and ambient sounds are created in order to create a realistic classroom environment using Unreal Engine’s strong audio-visual features. With this third-person
+template, an immersive virtual school experience can interest multiple students.
+This will be an encouraging learning, exploration and engagement in a virtual
+learning school environment.
+
+Figure 3.2: Unreal Engine Menu.
+
+3.4
+
+Blender
+
+Many different industries, including game development, film production, animation, architecture, and engineering, use Blender, a free and open-source 3D modelling program. For the creation of 3D models, animations, visual effects, and
+simulations, it offers a vast array of features and tools. Users may build and
+
+27
+
+Chapter 3. Research Methodology
+
+manipulate 3D models, characters, and objects using Blender, which also offers
+sophisticated tools like sculpting, texturing, lighting, and rendering. In fact, J.P.
+Naiman [28], stated that Blender was a powerful versatile tool for his “AstroBlend astrophysical visualization project”. Additionally, it has a built-in pipeline
+for seamless integration with other software programs like Unreal Engine, Unity,
+and Maya, and it supports a variety of file formats. In my case, Blender was
+used in order to create multiple models for both Mcast and the University Of
+Malta (UOM). As previously said, Blender is a fantastic tool for building intricate models, so when I was given the assignment to build the Mcast Campus
+and the University Of Malta (UOM) Campus, it was the right decision. I started
+by importing the college’s architectural designs into Blender, which enabled me
+to make a 3D model of the complete complex. The Mcast Campus and University Of Malta (UOM) Campus is a sizable complex with numerous buildings,
+courtyards, and walkways, therefore Blender’s capacity for handling huge models was essential to this project. As seen in Figure 3.3 and Figure 3.5, after the
+base model was made, the powerful texture and material creation tools in Blender
+were used to give the model a realistic appearance and feel. I was able to add
+textures to the structures. Last but not least, Blender’s capability to quickly render big models enabled me to produce breath-taking visualizations of the Mcast
+Campus and the University Of Malta (UOM) Campus from various views and
+angles. The outcome was a 3D model of the Mcast Campus and University Of
+Malta (UOM) Campus that was extremely accurate and was used for planning,
+design, and promotional materials. Overall, Blender’s versatility, strength, and use
+
+28
+
+Chapter 3. Research Methodology
+
+made it the perfect tool for building a model this size and complexity.
+
+Figure 3.3: Pre-Build Mcast Building.
+
+Figure 3.4: Post-Build Mcast Building.
+
+29
+
+Chapter 3. Research Methodology
+
+Figure 3.5: Pre-Build UOM Building.
+
+Figure 3.6: Post-Build UOM Building.
+
+30
+
+Chapter 3. Research Methodology
+
+Overall, Blender is a strong and flexible piece of software that gives users the
+ability to produce 3D content of the highest quality for a variety of purposes.
+Its availability to a wider audience, including students and independent makers,
+is facilitated by its free and open-source nature.
+
+3.5
+
+UE’S Blueprints and Widgets
+
+A visual programming language called Blueprints is used in Unreal Engine to
+create gameplay mechanics, user interfaces, and other interactive aspects for games.
+The advantage of blueprints over conventional programming languages like C++
+is that they let programmers design complicated behaviors without actually writing any code. Instead, they can connect nodes that stand in for code blocks using
+a drag-and-drop interface, which makes it simpler to see and design sophisticated
+reasoning. As shown in Figure 3.7, all necessary elements are included in this
+blueprint which includes a skeletal mesh, an animation blueprint and fundamental
+movement. Male BP is one of the main characters which can be played by the
+user which includes multiple events like running, interacting, and looking which
+are mostly altered to suit the demands of the game. Figure 3.7 shows the enhanced input move, sprint and interact which are common features developed in
+the event graph. In order to create event triggers and logic for each action incorporate these elements into the main character’s event graph. To manage mobility,
+for instance, the user would need to monitor player input and then use that input
+to modify the character’s position. Similarly to this, sprinting would require more
+input detection and a faster movement speed for the character. The ability to take
+
+31
+
+Chapter 3. Research Methodology
+
+different actions depending on the type of object being dealt with would also require additional collision detection algorithms, which would be needed for object
+interaction. They can be easily modified and updated, blueprints are especially
+helpful for designing user interfaces and menus.
+
+Figure 3.7: MALE BP Blueprint.
+
+Since Blueprints are very essential for user interfaces, developers can design
+their game by using Unreal Engine’s Widgets visual interface. As shown in Figure 3.8, widgets can be created, updated, and added to the game’s user interface
+(UI) using a straightforward drag-and-drop interface in the Blueprint editor. Widgets enable developers to construct unique text fields, sliders, buttons, and other
+user interface components that can be used to interact with the game. In Figure
+3.8, a character selection screen must be implemented with the use of a designer
+user widget blueprint. Firstly, construct a widget blueprint that lists all of the
+
+32
+
+Chapter 3. Research Methodology
+
+available characters along with any pertinent details like their names which in
+this user widget blueprint are Leonard and Kate. The user can choose a character and go to the subsequent game stage by using buttons or other interactive
+components that are included in the widget.
+
+Figure 3.8: Character Selection Widget Designer.
+
+In Figure 3.9, logic has been implemented which shows if any character is
+selected by the user, It will still automatically proceed to the Level selection
+user widget blueprint and proceed to the main game with that selected character.
+Logic in the widget blueprint that manages the user input and modifies the game
+state was appropriately implemented. This can entail implementing functions that
+alter the selected character based on user input, setting up event triggers for button presses, or changing the underlying data structures of the game to reflect the
+user’s selections. All things considered, the designer user widget blueprint may
+
+33
+
+Chapter 3. Research Methodology
+
+be a potent tool for developing interesting and interactive user interfaces in UE5,
+such as a character selection screen that aids players in selecting the character
+they wish to play as.
+
+Figure 3.9: Character Selection Widget Blueprint.
+
+3.6
+
+Unreal Engine Actors
+
+Actors in Unreal Engine are numerous items or entities that are represented in
+a game world created by the developer which could include trees, buildings and
+many more. Each actor is a unique being with unique characteristics like its
+architecture, interior and functionality, whereas a tree actor might have traits like
+its size, type and look shown in Figure 3.10. With this tree actor, a grouping
+process was made in order to speed up and expedite the level design process.
+Secondly, this can increase performance optimization and can assist lower the
+amount of draw calls and boost overall efficiency in Unreal Engine.
+
+34
+
+Chapter 3. Research Methodology
+
+Figure 3.10: Tree Actor.
+
+3.7
+
+Unreal Engine Characters
+
+Figure 3.11 shows us skeletal meshes which can represent players, artificial intelligence (AI) and other interacting aspects in games can be called Unreal Engine
+Characters. Characters can be changed in terms of their look, skills and actions,
+giving game designers the freedom to design original and captivating gameplay.
+With tools like animation bleeding and physics-based interactions, Unreal Engine
+offers a strong framework for character animation as seen in Figure 3.12. This
+increases player and user immersion and interaction in the whole in game world.
+
+35
+
+Chapter 3. Research Methodology
+
+Figure 3.11: AI Skeletal Mesh.
+
+Figure 3.12: Male-BP Blend Space Animation.
+
+3.8
+
+Unreal Engine AI
+
+The AI blueprint system for Unreal Engine is a potent tool that gives programmers the ability to design artificial intelligence (AI) interactions and behaviours
+for their simulations and games. As illustrated in Figure 3.14, the incorporation
+of a navmesh bound allows AI characters to move and travel in the game word
+36
+
+Chapter 3. Research Methodology
+
+intelligently, which is a key component of this technology. The navmesh bound
+specifies a region in which the AI characters may move, ensuring that they take
+realistic routes and avoid hazards. In Figure 3.13, an event graph of the AI character is shown and is managed by developers which use a variety of nodes and
+methods. Firstly, a “Get Actor Location” node in the event graph can be used to
+the get the current location of the AI actor. After a random spot within a certain radius of where the AI character is now located was created using the “Get
+Random Reachable Point in Radius” function which works within the navmesh
+bounds. The “AI Move To” node was used to direct the AI character to walk
+in which in that direction once the random point has been achieved. With this
+procedure this was repeatedly triggered by specific circumstances to produce a
+continuous roaming behaviour making sure that the AI character continually explores various locations of the campuses.
+
+Figure 3.13: AI Event Graph.
+
+37
+
+Chapter 3. Research Methodology
+
+Figure 3.14: AI Nav-Mesh Bounds.
+
+38
+
+Chapter 4. Analysis of Results and Discussion
+
+Chapter 4: Analysis of Results and Discussion
+
+The hypothesis will be guided by the questionnaires, which will be able to answer all the research questions.
+
+4.1
+
+Pre-Evaluation Questionnaire: Analysing Students Feedback
+
+As mentioned in the Methodology section, the results were configured and assembled by creating a pre-questionnaire that users fill in before testing the game
+and filling a post-questionnaire after the game to give feedback about both digital
+campuses. When the results were finalized, the pre-questionnaire results resulted
+in Figure 4.1. Pre-Result 1, a wide range of participants participated in the study,
+including (28%) from Mcast, (29%) from the University Of Malta (UOM) and
+the remaining (11%) who are still deciding on a new campus.
+
+Figure 4.1: Pre-Result 1
+
+In Figure 4.2. Pre-Result 2, a wide range of (63%) who were asked if choosing a higher education school was tough said ”no”, demonstrating that the majority of participants did not believe the decision to be difficult, but mostly selected
+”no” because they said that ”I knew already what I wanted” which results in the
+
+39
+
+Chapter 4. Analysis of Results and Discussion
+
+student knowing the course and campus of their choice to continue their studies.
+On the other hand, (37%) acknowledged the decision-making process as challenging which is what I felt when coming to a decision into choosing my ideal
+course and campus.
+
+Figure 4.2: Pre-Result 2
+
+In Figure 4.3. Pre-Result 3, a different question was asked which was ”Solution: Making use of Video Game Engines in order to make a digital campus in
+a virtual world/game, multiple steps must be analysed and solved accordingly by
+finding and selecting the right type of higher education institution of that user’s
+particular desire. Do you think this system will benefit students into making a
+better decision?” which concluded to an overwhelming (88%) of participants believed that this system would benefit students in making better decisions. This
+high percentage suggests that majority of participants percieve the potential advantages of exploring and experiencing campuses virtually to aid their decisionmaking-process.
+
+40
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.3: Pre-Result 3
+
+Moreover, in Figure 4.4. Pre-Result 4, when asked if they would be interested
+in trying out the proposed solution, a significant (85%) responded positively. This
+shows that students are really eager to interact with the digitalcampuses, which
+adds credence to the idea that such a strategy might be advantageous. Overall, the pre-questionnaire results suggest a high degree of enthusiasm and interest among students for the development of digital campuses created by a video
+game engine. The results reveal that by giving students an immersive and engaging experience, this creative approach could effectively help them make selections
+regarding their higher education school that are more informed.
+
+Figure 4.4: Pre-Result 4
+
+41
+
+Chapter 4. Analysis of Results and Discussion
+
+4.2
+
+Post-Evaluation Questionnaire: Analysing Students Feedback
+
+Based on the examination of the post-questionnaire replies from 75 participants,
+the Mcast and University Of Malta (UOM) campuses’ digital campus experience
+received overwhelmingly good feedback. (68%) of participants who were asked to
+assess their enjoyment of the experience on a scale of 1 to 5 chose the highest
+score possible, 5, indicating a high level of satisfaction. Moreover, only (25.3%)
+of participants chose a rating of 3, while (6.7%) chose a rating of 4. All of
+these statistics shown are shown in Figure 4.5. Post-Result 1.
+
+Figure 4.5: Post-Result 1
+
+The outcomes for navigating the digital campus of were also encouraging.
+Participants in choice 5 strongly agreed that it was simple to navigate in a large
+(64%) of cases, showing that the option’s user-friendliness and intuitive design
+are of a very high caliber. A slightly lower percentage (25.3%) chose option
+4 and (10.7%) chose option 3. This proves that Unreal Engine’s virtual worlds
+were successful in enabling the players’ natural exploration and mobility. All of
+these statistics shown are shown in Figure 4.6. Post-Result 2.
+
+42
+
+Chapter 4. Analysis of Results and Discussion
+
+Figure 4.6: Post-Result 2
+
+An astonishing (60%) of participants chose option 5, indicating that they strongly
+agreed that the differences in teaching methods and educational experiences between the two campuses had a positive impact on decision-making. (24%) selected option 4, while (14.7%) picked option 3. This implies that the immersive
+nature of the digital campus experience enabled students to recognize distinctive
+features of each institution, helping them to make more informed decisions about
+their preferred educational path. All of these statistics shown are shown in Figure
+4.7. Post-Result 3.
+
+Figure 4.7: Post-Result 3
+
+In Figure 4.8. Post-Result 5, the question was, ”Would you suggest the digital
+campus experience to others?” which Option 5 received (73.3%) of participants’
+high agreement. The remaining (24%) went with option 4, only (1.3%) went with
+option 3 and (1.3%) with option 2. This suggests that the participants were extremely happy and enthusiastic, further proving the beneficial effects of the digital
+43
+
+Chapter 4. Analysis of Results and Discussion
+
+campus exploration on their decision-making process.
+
+Figure 4.8: Post-Result 4
+
+In the final question in Figure 4.9. Post-Result 5, the question was ”How
+could the digital reality campus experience be improved in the future?”. Some of
+the responses regarding the enhancement of the digital campus experience offer
+insightful information for future improvement. Participants expressed a wish to
+use virtual reality (VR) technology, which would provide a more engrossing and
+dynamic environment, to increase the immersion. Another idea was to increase
+the variety of courses that were offered, allowing students to investigate a wider
+range of educational options. Participants also emphasized the usefulness of including voice-overs from actual lecturers or students to offer in-person encounters
+and educational comments.
+
+Figure 4.9: Post-Result 5
+
+44
+
+Chapter 4. Analysis of Results and Discussion
+
+4.3
+
+Results: Conclusion
+
+Based on all these responses, it can be concluded that there was considerable interest among the participants, which thought that using such an immersive system
+will help students choose their preferred higher education institution and course
+more wisely. These encouraging pre-questionnaire results lay a solid foundation
+for the achievement of the digital campus experience.
+When concluding all the post-questionnaire results confirmed the success of the
+digital campuses. The vast majority of participants thought the experience was
+fun and simple to test. The fact that a sizable majority of participants strongly
+agreed that the variations in teaching methods and educational experiences across
+the two campuses had aided them in making decisions implies that the digital
+campus had yielded insightful information. Additionally, a high degree of endorsement and happiness is shown by the substantial likelihood of strongly recommending the experience to others.
+Overall, it can be said that the digital campus experience was a success given
+the extremely positive responses from both the pre- and post-questionnaires. The
+participants’ high degree of enjoyment, ease of navigation, perception of the experience’s value in helping them make decisions, and willingness to endorse it
+show how useful it is in helping students make educated decisions regarding their
+higher education institution and their courses.
+
+45
+
+Chapter 5. Conclusions and Recommendations
+
+Chapter 5: Conclusions and Recommendations
+
+5.1
+
+Concluding Analysis
+
+The digital campus game was the technique that allowed the student to a have
+clearer view or to have a better impression of the two campuses provided in
+terms of the hypothesis and research questions. As a result of this project having achieved all of its intended goals, it stands as a noteworthy accomplishment.
+The results, which are shown in Figure Post-Result / and Figure Post-Result /,
+are convincing proof that the digital school building used in the game was carefully processed and created, creating a setting that is both immersive and interesting. Additionally, the incorporation of artificial intelligence into the digital
+campus experience was a resounding success, successfully bridging the gap between the online game and the traditional classroom environment and creating a
+comfortable and real-world learning environment for the users. The thorough consideration given to each element of the digital school, ensuring that objects and
+structures were accurately translated into the digital game, can be credited with
+the project’s overall success. The project’s successes are further supported by user
+interaction and feedback, with users feeling a strong sense of familiarity and connection when interacting with the virtual environment. This initiative has created
+intriguing opportunities for individualized and immersive learning experiences by
+providing an innovative and adaptive approach to education.
+
+46
+
+Chapter 5. Conclusions and Recommendations
+
+5.2
+
+Limitations
+
+First of all, it might be difficult to achieve total realism in the virtual surroundings since Unreal Engine’s visual capabilities might not be able to faithfully represent the campuses in real life. The scale and scope of the project may also
+be constrained by time and resource constraints, mandating a concentration on
+particular campuses’ buildings or locations. Gathering accurate and current information on the schools could be difficult because the interactivity and functionality
+of the digital campus environments might not exactly replicate the experience of
+being on a campus. Additionally, user experience and feedback may differ, and
+technical restrictions like hardware requirements may restrict accessibility. By understanding these restrictions, this research project can offer a thorough evaluation
+of the potential benefits and drawbacks of using Unreal Engine to produce digital
+content.
+
+5.3
+
+Future Recommendations
+
+Looking toward the future, one exciting improvement lies in the realm of Virtual Reality (VR). As VR technology continues to advance, integrating it into
+the digital gaming experience could unlock even greater potential for engagement
+and immersion. Imagine students being able to explore the digital school environment in a fully immersive VR setting, where they can interact with objects,
+engage in collaborative activities with classmates, and have a truly transformative
+learning experience. VR has the potential to revolutionize education by providing
+an even more realistic and interactive platform for knowledge acquisition. Some
+47
+
+Chapter 5. Conclusions and Recommendations
+
+shortcomings that can be addressed are that the supplied technique which has
+strengths including a mixed-methods approach and thorough consideration of ethical considerations. There are some possible drawbacks such as a risk of bias
+in participant selection and relying entirely on questionnaires for data collection.
+By extending the study to more locations, making sure that participant selection
+criteria are balanced, and taking into account different data-gathering techniques
+like interviews or observation, these limitations might be overcome.
+
+48
+
+List of References
+
+List of References
+
+[1] How students choose a major: The effect of a college major decision making course on a student’s anxiety - ProQuest.
+[2] MCAST – The Malta College of Arts, Science & Technology, March 2021.
+[3] L.-Università ta’ Malta. L-Università ta’ Malta.
+[4] Güner Koç Aytekin. Game Theory and John Forbes Nash in the History of
+Economic Thought. In Şefika Şule Erçetin and Nihan Potas, editors, Chaos,
+Complexity and Leadership 2017, Springer Proceedings in Complexity, pages
+213–230, Cham, 2019. Springer International Publishing.
+[5] Qihan Fei. Innovation and Development in The Metaverse under The Digital
+Economy — Takes Tencent as An Example. BCP Business & Management,
+36:106–115, January 2023.
+[6] Björn Berg Marklund, Henrik Engström, Marcus Hellkvist, and Per Backlund. What Empirically Based Research Tells Us About Game Development.
+The Computer Games Journal, 8(3):179–198, December 2019.
+[7] A Brief History of Video Games | 1 | The Video Game Debate | James D.
+[8] Battlezone. Archive Location: world.
+[9] Somewhere Nearby is Colossal Cave: Examining Will Crowther’s Original
+“Adventure” in Code and in Kentucky - ProQuest.
+49
+
+List of References
+
+[10] Ragib Hasan, Sumittra Chakraborti, Md. Zonieed Hossain, Taukir Ahamed,
+Md. Abdul Hamid, and M. F. Mridha. Character and Mesh Optimization of
+Modern 3D Video Games. In Mohan L. Kolhe, Shailesh Tiwari, Munesh C.
+Trivedi, and Krishn K. Mishra, editors, Advances in Data and Information Sciences, Lecture Notes in Networks and Systems, pages 655–666, Singapore,
+2020. Springer.
+[11] Evan Snider. Review of Video Game Spaces: Image, Play, and Structure in
+3D Game Worlds. Eludamos: Journal for Computer Game Culture, 5(1):101–
+103, July 2011. Number: 1.
+[12] Blender Foundation. NASA’s Experience Curiosity.
+[13] For the Love of Games!: Narrative Role-Playing Games and Interactive Fiction & Media.
+[14] Why gaming is better for your mental health than you might think, April
+2021.
+[15] Michael Sailer, Jan Ulrich Hense, Sarah Katharina Mayr, and Heinz Mandl.
+How gamification motivates: An experimental study of the effects of specific game design elements on psychological need satisfaction. Computers in
+Human Behavior, 69:371–380, April 2017.
+[16] Dianne Zielinski. Can Playing Games Help Students Master Concepts from
+General Psychology Classes?
+
+International Journal of Game-Based Learning
+
+(IJGBL), 9(2):55–72, 2019. Publisher: IGI Global.
+
+50
+
+List of References
+
+[17] Heritage Sites and Video Games: Questions of Authenticity and Immersion
+- Michał Mochocki, 2021.
+[18] Bethesda Game Studios.
+[19] Jonas Vedsted Sørensen, Zheng Ma, and Bo Nørregaard Jørgensen. Potentials
+of game engines for wind power digital twin development: an investigation
+of the Unreal Engine. Energy Informatics, 5(4):39, December 2022.
+[20] Research on three-dimensional scene production methods of cultural and creative games based on Unity technology | IEEE Conference Publication |
+IEEE Xplore.
+[21] Tengku Siti Meriam Tengku Wook, Intan Yusrina Zairon, Noraidah Sahari@Ashaari,
+
+Mushrifah Idris,
+
+Nor Azan Mat Zin,
+
+Hairulliza Mo-
+
+hamad Judi, and Norleyza Jailani. Campus Virtual Tour Design to Enhance
+Visitor Experience and Interaction in a Natural Environment. The International journal of Multimedia & Its Applications, 10(1/2/3):77–92, June 2018.
+[22] Claudia Schrader. Serious Games and Game-Based Learning. pages 1255–
+1268. January 2023.
+[23] Rula Al-Azawi, Ali Albadi, Raziyeh Moghaddas, and Jonathan Westlake. Exploring the Potential of Using Augmented Reality and Virtual Reality for
+STEM Education. In Lorna Uden, Dario Liberona, Galo Sanchez, and Sara
+Rodrı́guez-González, editors, Learning Technology for Education Challenges,
+Communications in Computer and Information Science, pages 36–44, Cham,
+2019. Springer International Publishing.
+51
+
+List of References
+
+[24] Darina Dicheva, Christo Dichev, Gennady Agre, and Galia Angelova. Gamification in Education: A Systematic Mapping Study. Journal of Educational
+Technology & Society, 18(3):75–88, 2015. Publisher: International Forum of
+Educational Technology & Society.
+[25] Manuel J. Ibarra, Vladimiro Ibañez, Ismar Frango Silveira, Cesar A. Collazos, Günter Wallner, and Matthias Rauterberg. Serious Games for Learning:
+A Quantitative Review of Literature. In Minhua Ma, Bobbie Fletcher, Stefan
+Göbel, Jannicke Baalsrud Hauge, and Tim Marsh, editors, Serious Games,
+Lecture Notes in Computer Science, pages 164–174, Cham, 2020. Springer
+International Publishing.
+[26] From Mario to FIFA: what qualitative case study research suggests about
+games-based learning in a US classroom: Educational Media International:
+Vol 51, No 1.
+[27] Rui Yao, Wanqi Zhang, and Huaqun Liu. Design and Implementation of
+Real-Time 3d Interactive System Based on Unreal Engine. In Proceedings
+of the 8th International Conference on e-Society, e-Learning and e-Technologies,
+ICSLT ’22, pages 30–36, New York, NY, USA, September 2022. Association
+for Computing Machinery.
+[28] J. P. Naiman.
+
+AstroBlend:
+
+An astrophysical visualization package for
+
+Blender. Astronomy and Computing, 15:50–60, April 2016.
+
+52
+
+Appendix A. Pre-Evaluation-Appendix
+
+Chapter A: Pre-Evaluation-Appendix
+
+A.1
+
+Pre-Evaluation: A digital Reality Campus Experience for aiding Students
+selecting their preferred school and course
+
+Figure A.1: Pre-Questionnaire: Question 1
+
+Figure A.2: Pre-Questionnaire: Question 2
+
+53
+
+Appendix A. Pre-Evaluation-Appendix
+
+Figure A.3: Pre-Questionnaire: Question 3
+
+Figure A.4: Pre-Questionnaire: Question 5 - Responses 1
+
+54
+
+Appendix A. Pre-Evaluation-Appendix
+
+Figure A.5: Pre-Questionnaire: Question 6 - Responses 2
+
+Figure A.6: Pre-Questionnaire: Question 7 - Responses 3
+
+55
+
+Appendix A. Pre-Evaluation-Appendix
+
+Figure A.7: Pre-Questionnaire: Question 8 - Responses 4
+
+56
+
+Appendix B. Post-Evaluation-Appendix
+
+Chapter B: Post-Evaluation-Appendix
+
+B.1
+
+Post-Evaluation: A Digital Reality Campus Experience for aiding Students
+selecting their preferred school and Course
+
+Figure B.1: Post-Questionnaire: Question 1
+
+Figure B.2: Post-Questionnaire: Question 2
+
+57
+
+Appendix B. Post-Evaluation-Appendix
+
+Figure B.3: Post-Questionnaire: Question 3
+
+Figure B.4: Post-Questionnaire: Question 4
+
+Figure B.5: Post-Questionnaire: Question 6
+
+58
+
+Appendix B. Post-Evaluation-Appendix
+
+Figure B.6: Post-Questionnaire: Question 9
+
+Figure B.7: Post-Questionnaire: Question 9 - Responses 1
+
+59
+
+Appendix B. Post-Evaluation-Appendix
+
+Figure B.8: Post-Questionnaire: Question 10
+
+Figure B.9: Post-Questionnaire: Question 10 - Responses 2
+
+60
+
+Appendix B. Post-Evaluation-Appendix
+
+Figure B.10: Post-Questionnaire: Question 11
+
+Figure B.11: Post-Questionnaire: Question 11 - Responses 3
+
+61
+
+

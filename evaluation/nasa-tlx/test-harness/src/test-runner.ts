@@ -37,19 +37,19 @@ const TEST_SUITE: TestCase[] = [
     name: 'Low accessibility barriers (2 issues)',
     fixtureName: 'html-low',
     issues: EXAMPLE_TEST_ISSUES['html-low'],
-    expectedTlxRange: [10, 35],
+    expectedTlxRange: [15, 45],
   },
   {
     name: 'Medium accessibility barriers (4 issues)',
     fixtureName: 'html-medium',
     issues: EXAMPLE_TEST_ISSUES['html-medium'],
-    expectedTlxRange: [25, 60],
+    expectedTlxRange: [20, 55],
   },
   {
     name: 'High accessibility barriers (8 critical/high issues)',
     fixtureName: 'html-high',
     issues: EXAMPLE_TEST_ISSUES['html-high'],
-    expectedTlxRange: [50, 85],
+    expectedTlxRange: [55, 90],
   },
 ];
 

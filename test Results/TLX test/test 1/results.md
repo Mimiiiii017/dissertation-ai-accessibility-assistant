@@ -169,6 +169,61 @@ Use **kimi-qwen voting with rag-think** as the primary configuration. It peaks o
 
 ---
 
+## Model Improvements Applied After Test 1
+
+The following changes were made to `nasa-tlx-test-harness.ts` after reviewing Test 1 results. These improve the calibration of the TLX prediction model for future runs.
+
+### 1. Severity Weighting
+
+Previously all issues were treated equally regardless of the `severity` field on each `AccessibilityIssue`. A critical keyboard trap was weighted the same as a low-severity colour issue.
+
+**Fix:** Each issue now contributes a severity-weighted count before logarithmic scaling:
+
+| Severity | Weight |
+|---|:---:|
+| critical | 2.0 |
+| high | 1.5 |
+| medium | 1.0 |
+| low | 0.5 |
+
+This corrects the underestimation documented in `TEST-RESULTS.md` (predicted TLX 27 vs actual 66 for an 8-issue high-density fixture), where all issues were critical/high.
+
+### 2. Extended WCAG SC Matching in Barrier Classification
+
+Previously `classifyIssueBarrier()` matched only a narrow set of English keywords. LLM outputs that describe violations using WCAG Success Criterion numbers (e.g. `"1.4.3 insufficient contrast"`, `"2.4.1 skip link missing"`) or slightly different phrasings would fall through to the generic `cluttered-layout` fallback.
+
+**Fix:** Expanded matching to cover:
+- WCAG SC number patterns via regex (e.g. `\b1\.4\.3\b`, `\b2\.4\.1\b`) for each barrier type
+- British and American English variants (`colour` / `color`)
+- Additional LLM output phrases seen in Test 1 (e.g. `aria-`, `live region`, `status message`, `bypass`, `alt`, `reading order`)
+
+### 3. Raised Per-Barrier Caps and Added Density Penalty
+
+Per-barrier dimension caps were too conservative (mental/effort capped at 40, frustration at 45), making it impossible to reach the empirically observed TLX range for high-density fixtures regardless of how many critical issues were present.
+
+**Fix:**
+- Raised caps: mental demand 40 → 55, effort 40 → 55, temporal 35 → 40, frustration 45 → 60
+- Added a **density penalty** applied after per-barrier scoring:
+  - Temporal demand: +1.5 pts per issue (capped at 18)
+  - Performance: −1.5 pts per issue (capped at 25)
+
+This ensures the model can reach TLX ≈ 60–70 for fixtures with 20–30 issues, consistent with real developer ratings.
+
+### 4. Language Difficulty Modifier
+
+JavaScript and TypeScript/React fixtures consistently scored the lowest F1 across all Test 1 configurations (JS avg F1 ≈ 0.30 vs HTML ≈ 0.40). Accessibility issues in these languages involve more complex reasoning — dynamic ARIA state, event handlers, React component semantics — and impose higher cognitive burden when surfaced. The original model applied an identical scoring formula regardless of language.
+
+**Fix:** A post-scoring multiplier is applied to `raw_tlx` based on fixture language:
+
+| Language | Modifier |
+|---|:---:|
+| JavaScript | ×1.20 |
+| TypeScript / TSX | ×1.10 |
+| CSS | ×0.95 |
+| HTML | ×1.00 (baseline) |
+
+---
+
 ## Quick Reference — All Configurations
 
 | Config | Condition | Fixture | F1 | Precision | Recall | TLX | RT (s) |
