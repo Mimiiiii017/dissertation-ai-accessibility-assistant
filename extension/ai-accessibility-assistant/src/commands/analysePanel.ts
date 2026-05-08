@@ -6,8 +6,8 @@
 import * as vscode from "vscode";
 import {
   FIXED_MODEL,
+  SECONDARY_MODEL,
   ollamaGenerateStream,
-  resolveAnalysisPreset,
 } from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildRagQuery } from "../utils/rag/ragQueryBuilder";
@@ -51,6 +51,65 @@ import { aiIssueToDiagnostic } from "../utils/analysis/diagnostics";
 import { buildRelevantExcerpt } from "../utils/code/excerptBuilder";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
+import type { AiIssue } from "../utils/types";
+
+// ─── Multi-stage voting helpers ─────────────────────────────────────────────
+
+function normalizeIssueTitle(title: string): Set<string> {
+  const stop = new Set(['a','an','the','is','are','was','were','has','have','had','be','been',
+    'with','for','on','at','by','from','in','of','to','and','or','not','no','this','that','it','its']);
+  return new Set(
+    title.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !stop.has(w))
+  );
+}
+
+function issueTitlesMatch(a: AiIssue, b: AiIssue): boolean {
+  if (!a.title || !b.title) { return false; }
+  const wa = normalizeIssueTitle(a.title);
+  const wb = normalizeIssueTitle(b.title);
+  if (wa.size === 0 || wb.size === 0) { return false; }
+  const overlap = [...wa].filter(w => wb.has(w)).length;
+  const union = new Set([...wa, ...wb]).size;
+  return (overlap / union) >= 0.3;
+}
+
+/**
+ * Multi-stage voting merge:
+ *   Stage 1 — issues found by BOTH kimi and qwen → "verified" (high confidence)
+ *   Stage 2 — issues found by only ONE model      → "review-recommended"
+ */
+function mergeMultiStageIssues(
+  kimiIssues: AiIssue[],
+  qwenIssues: AiIssue[],
+): { verified: AiIssue[]; reviewRecommended: AiIssue[] } {
+  const verified: AiIssue[] = [];
+  const reviewRecommended: AiIssue[] = [];
+  const usedQwen = new Set<number>();
+
+  for (const ki of kimiIssues) {
+    let matched = false;
+    for (let qi = 0; qi < qwenIssues.length; qi++) {
+      if (usedQwen.has(qi)) { continue; }
+      if (issueTitlesMatch(ki, qwenIssues[qi])) {
+        verified.push(ki);
+        usedQwen.add(qi);
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) { reviewRecommended.push(ki); }
+  }
+
+  // Unmatched qwen issues are also review-recommended
+  for (let qi = 0; qi < qwenIssues.length; qi++) {
+    if (!usedQwen.has(qi)) { reviewRecommended.push(qwenIssues[qi]); }
+  }
+
+  return { verified, reviewRecommended };
+}
 
 export async function analyseFileForPanel(
   logger: PanelLogger,
@@ -64,14 +123,14 @@ export async function analyseFileForPanel(
 
   const doc = editor.document;
   const text = doc.getText();
-  const { ollamaHost, analysisPreset, ragEndpoint } = getExtensionConfig();
+  const { ollamaHost, ragEndpoint } = getExtensionConfig();
   const model = FIXED_MODEL;
-  const preset = resolveAnalysisPreset(analysisPreset);
+  const qwenModel = SECONDARY_MODEL;
 
   logger.log("═══ Accessibility Analysis ═══");
   logger.log(`File: ${doc.fileName}`);
   logger.log(`Language: ${doc.languageId}  |  Lines: ${doc.lineCount}  |  Chars: ${text.length}`);
-  logger.log(`Model: ${model}  |  Profile: ${preset.label} (${preset.id})  |  RAG: ${ragEndpoint}`);
+  logger.log(`Models: ${model} + ${qwenModel}  |  RAG: ${ragEndpoint}`);
   logger.log("");
 
   diagnostics.delete(doc.uri);
@@ -84,8 +143,9 @@ export async function analyseFileForPanel(
     issues.push(...baselineIssues);
   }
 
-  // AI analysis
-  let fullResponse = "";
+  // AI analysis — multi-stage voting: kimi (recall) + qwen (precision)
+  let kimiResponse = "";
+  let qwenResponse = "";
   try {
       const excerpt = buildRelevantExcerpt(doc);
       const ragQuery = buildRagQuery(doc.languageId, excerpt);
@@ -126,13 +186,25 @@ export async function analyseFileForPanel(
       let streamedText = "";
 
       logger.postMessage({ type: "streamStart" });
+      logger.log(`Stage 1: ${model} (recall) + ${qwenModel} (precision) running in parallel…`);
+
+      // Run qwen silently in the background while kimi streams to the panel
+      const qwenPromise = ollamaGenerateStream(
+        ollamaHost,
+        qwenModel,
+        prompt,
+        (chunk) => { qwenResponse += chunk; },
+        SYSTEM_PROMPT
+      ).catch((err: Error) => {
+        logger.log(`  ⚠ ${qwenModel} error: ${err?.message ?? err}`);
+      });
 
       await ollamaGenerateStream(
         ollamaHost,
         model,
         prompt,
         (chunk) => {
-          fullResponse += chunk;
+          kimiResponse += chunk;
           if (firstTokenMs === null) {
             firstTokenMs = Date.now() - t0;
           }
@@ -157,27 +229,40 @@ export async function analyseFileForPanel(
             logger.streamChunk(issueText);
           }
         },
-        SYSTEM_PROMPT,
-        preset.id
+        SYSTEM_PROMPT
       );
+
+      // Wait for qwen to finish (may still be running after kimi)
+      await qwenPromise;
 
       logger.postMessage({ type: "streamEnd" });
       logger.log(`\nCompleted in ${Date.now() - t0} ms (first token: ${firstTokenMs} ms)`);
 
-      const rawIssues = parseTextResponse(fullResponse);
-      const aiIssues = deduplicateIssues(rawIssues);
+      // Parse both model responses
+      const kimiIssues = deduplicateIssues(parseTextResponse(kimiResponse));
+      const qwenIssues = deduplicateIssues(parseTextResponse(qwenResponse));
+      logger.log(`${model}: ${kimiIssues.length} issue(s)  |  ${qwenModel}: ${qwenIssues.length} issue(s)`);
 
-      for (const ai of aiIssues) {
+      // Multi-stage voting: merge by title-similarity
+      const { verified, reviewRecommended } = mergeMultiStageIssues(kimiIssues, qwenIssues);
+      logger.log(`Verified (both agree): ${verified.length}  |  Review-recommended (one model): ${reviewRecommended.length}`);
+
+      const allAiIssues = [...verified, ...reviewRecommended];
+
+      for (const ai of allAiIssues) {
         issues.push(...aiIssueToDiagnostic(doc, ai));
       }
 
       // Structured summary — rendered as a card in the webview
-      if (rawIssues.length > 0) {
+      if (allAiIssues.length > 0) {
         logger.postMessage({
           type: "summary",
-          aiCount: aiIssues.length,
+          aiCount: allAiIssues.length,
           totalCount: issues.length,
-          issues: rawIssues.map(ai => ({ title: ai.title, severity: ai.severity })),
+          issues: [
+            ...verified.map(ai => ({ title: ai.title, severity: ai.severity, confidence: 'verified' as const })),
+            ...reviewRecommended.map(ai => ({ title: ai.title, severity: ai.severity, confidence: 'review' as const })),
+          ],
         });
       }
   } catch (e: any) {
@@ -206,8 +291,8 @@ export async function analyseFileForPanel(
 
       logger.log("Continuing with baseline-only results.");
 
-    if (fullResponse.length > 0) {
-      logger.log(`  (received ${fullResponse.length} chars before error)`);
+    if (kimiResponse.length > 0 || qwenResponse.length > 0) {
+      logger.log(`  (received kimi=${kimiResponse.length} chars, qwen=${qwenResponse.length} chars before error)`);
     }
   }
 

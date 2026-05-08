@@ -1,12 +1,13 @@
 // ollama.ts — sends prompts to the Ollama server and streams the response back
 // All communication with Ollama.
+// Both cloud models (kimi-k2.5 + qwen3.5:397b) use think mode with identical
+// cloud-safe options: num_predict=32000, temperature=0.6, top_p=0.95
 // Exposes:
-//   FIXED_MODEL                 — fixed model used for all analyses
-//   getAnalysisPresetSummaries  — preset list for the webview dropdown
-//   resolveAnalysisPreset       — resolves selected preset to generation options
-//   ollamaListModels            — fetches available model names (/api/tags)
-//   ollamaWarmup                — pre-loads a model to reduce first-analysis latency
-//   ollamaGenerateStream        — streams the chat response chunk-by-chunk (/api/chat)
+//   FIXED_MODEL      — primary model (kimi-k2.5:cloud — high recall)
+//   SECONDARY_MODEL  — secondary model (qwen3.5:397b-cloud — precision)
+//   ollamaListModels — fetches available model names (/api/tags)
+//   ollamaWarmup     — pre-loads a model to reduce first-analysis latency
+//   ollamaGenerateStream — streams the chat response chunk-by-chunk (/api/chat)
 // Used by: commands/analysePanel.ts, commands/tlxPanel.ts, commands/selectModelPanel.ts
 
 type OllamaTagsResponse = { models: { name: string }[] };
@@ -19,172 +20,36 @@ type OllamaGenerateResponse = {
   done?: boolean;
 };
 
-// Ollama model parameters for fine-tuning generation behavior
-export interface OllamaOptions {
-  num_predict?: number; // Max tokens to generate (higher = more complete but slower). Range: 100-50000
-  num_ctx?: number; // Context window size (higher = better memory but more RAM). Range: 512-131072. Note: cloud models ignore this and use their native context window.
-  temperature?: number; // Randomness (0.0=deterministic, 2.0=creative). Lower for consistency. Range: 0.0-2.0
-  top_p?: number; // Nucleus sampling (considers top% probability). Range: 0.0-1.0
-  top_k?: number; // Sample from top K tokens. Range: 1-100
-  repeat_penalty?: number; // Penalize repeated tokens (higher = less repetition). Range: 0.0-2.0
-  repeat_last_n?: number; // How far back to check for repetition. Range: 0-2048
-  frequency_penalty?: number; // Penalize based on token frequency. Range: 0.0-2.0
-  presence_penalty?: number; // Penalize if token appeared before. Range: 0.0-2.0
-  seed?: number; // Random seed for reproducible results (useful for testing)
-  mirostat?: number; // 0=disabled, 1=Mirostat v1, 2=Mirostat v2 (alternative sampling, usually leave at 0)
+// Cloud-safe model options (only these three fields are accepted by the cloud gateway;
+// sending num_ctx / top_k / repeat_penalty etc. causes HTTP 500).
+// Both models use think (CoT) mode — recommended settings from Moonshot AI / Alibaba docs.
+type CloudOptions = { num_predict: number; temperature: number; top_p: number };
+
+export const FIXED_MODEL = "kimi-k2.5:cloud";      // Stage 1 — high recall
+export const SECONDARY_MODEL = "qwen3.5:397b-cloud"; // Stage 2 — precision
+
+// kimi-k2.5 think mode: Moonshot AI recommended temperature=0.6 for CoT reasoning
+const KIMI_OPTIONS: CloudOptions    = { num_predict: 32000, temperature: 0.6, top_p: 0.95 };
+// qwen3.5:397b think mode: Alibaba recommended temperature=0.6 for CoT reasoning  
+const QWEN_OPTIONS: CloudOptions    = { num_predict: 32000, temperature: 0.6, top_p: 0.95 };
+const DEFAULT_OPTIONS: CloudOptions = { num_predict: 32000, temperature: 0.6, top_p: 0.95 };
+
+function getModelOptions(model: string): CloudOptions {
+  const m = model.toLowerCase();
+  if (m.includes('kimi')) return KIMI_OPTIONS;
+  if (m.includes('qwen')) return QWEN_OPTIONS;
+  return DEFAULT_OPTIONS;
 }
 
-export const FIXED_MODEL = "gpt-oss:120b-cloud";
+// ─── Dead-code tombstone — intentionally removed ──────────────────────────
+// ANALYSIS_PRESETS, AnalysisPresetId, DEFAULT_ANALYSIS_PRESET, ANALYSIS_OPTIONS,
+// resolveAnalysisPreset, getAnalysisPresetSummaries, isAnalysisPresetId
+// These were removed when the extension switched to the fixed kimi+qwen dual-model
+// pipeline. There is no user-facing model/preset selection dropdown.
 
-export type AnalysisPresetId = "balanced" | "strict" | "thorough" | "quick" | "reasoning" | "performance";
 
-type AnalysisPreset = {
-  label: string;
-  description: string;
-  options: OllamaOptions;
-};
 
-export const DEFAULT_ANALYSIS_PRESET: AnalysisPresetId = "balanced";
 
-export const ANALYSIS_PRESETS: Record<AnalysisPresetId, AnalysisPreset> = {
-  balanced: {
-    label: "Balanced",
-    description: "General-purpose profile for most files.",
-    options: {
-      num_predict: 20000,
-      num_ctx: 32768,
-      temperature: 0.15,
-      top_p: 0.85,
-      top_k: 30,
-      repeat_penalty: 1.1,
-      repeat_last_n: 128,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-  strict: {
-    label: "Strict",
-    description: "More deterministic and conservative issue reporting.",
-    options: {
-      num_predict: 18000,
-      num_ctx: 32768,
-      temperature: 0.05,
-      top_p: 0.75,
-      top_k: 20,
-      repeat_penalty: 1.15,
-      repeat_last_n: 192,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-  thorough: {
-    label: "Thorough",
-    description: "Longer, deeper analysis with more detailed coverage.",
-    options: {
-      num_predict: 26000,
-      num_ctx: 65536,
-      temperature: 0.1,
-      top_p: 0.8,
-      top_k: 25,
-      repeat_penalty: 1.12,
-      repeat_last_n: 256,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-  quick: {
-    label: "Quick",
-    description: "Faster pass with shorter responses.",
-    options: {
-      num_predict: 8000,
-      num_ctx: 16384,
-      temperature: 0.2,
-      top_p: 0.9,
-      top_k: 40,
-      repeat_penalty: 1.05,
-      repeat_last_n: 96,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-  reasoning: {
-    label: "Reasoning",
-    description: "High-quality analysis for complex ARIA patterns and deep DOM structures.",
-    options: {
-      num_predict: 32000,
-      num_ctx: 131072,
-      temperature: 0.7,
-      top_p: 0.95,
-      top_k: 40,
-      repeat_penalty: 1.1,
-      repeat_last_n: 256,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-  performance: {
-    label: "Performance",
-    description: "Speed-optimised using the top_k=100 GPT-OSS speed hack. Best for large files.",
-    options: {
-      num_predict: 10000,
-      num_ctx: 32768,
-      temperature: 0.3,
-      top_p: 0.9,
-      top_k: 100,
-      repeat_penalty: 1.1,
-      repeat_last_n: 96,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      seed: 42,
-      mirostat: 0,
-    },
-  },
-};
-
-// Backward-compatible alias used in older code paths.
-export const ANALYSIS_OPTIONS: OllamaOptions = ANALYSIS_PRESETS[DEFAULT_ANALYSIS_PRESET].options;
-
-export function isAnalysisPresetId(value: string): value is AnalysisPresetId {
-  return value in ANALYSIS_PRESETS;
-}
-
-export function resolveAnalysisPreset(
-  presetId?: string
-): { id: AnalysisPresetId; label: string; description: string; options: OllamaOptions } {
-  const id = presetId && isAnalysisPresetId(presetId)
-    ? presetId
-    : DEFAULT_ANALYSIS_PRESET;
-
-  const preset = ANALYSIS_PRESETS[id];
-  return {
-    id,
-    label: preset.label,
-    description: preset.description,
-    options: preset.options,
-  };
-}
-
-export function getAnalysisPresetSummaries(): Array<{
-  id: AnalysisPresetId;
-  label: string;
-  description: string;
-}> {
-  return (Object.keys(ANALYSIS_PRESETS) as AnalysisPresetId[]).map((id) => ({
-    id,
-    label: ANALYSIS_PRESETS[id].label,
-    description: ANALYSIS_PRESETS[id].description,
-  }));
-}
 
 // Strip trailing slashes so URL construction never produces double-slashes
 function normalizeHost(host: string): string {
@@ -250,13 +115,12 @@ export async function ollamaGenerateStream(
   model: string,
   prompt: string,
   onChunk: (text: string) => void,
-  systemPrompt?: string,
-  presetId?: string
+  systemPrompt?: string
 ): Promise<void> {
   const url = `${normalizeHost(host)}/api/chat`;
-  
-  // Resolve options from selected analysis profile preset.
-  const modelOptions = resolveAnalysisPreset(presetId).options;
+
+  // Derive cloud-safe options from the model name (kimi vs qwen).
+  const modelOptions = getModelOptions(model);
 
   const messages: { role: string; content: string }[] = [];
   if (systemPrompt) {

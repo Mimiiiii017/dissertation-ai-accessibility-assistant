@@ -9,7 +9,6 @@ import * as vscode from "vscode";
 
 export interface ExtensionConfig {
   ollamaHost: string;     // Base URL of the Ollama server
-  analysisPreset: string; // Selected analysis profile preset id
   ragEndpoint: string;    // Base URL of the RAG retrieval service
 }
 
@@ -17,8 +16,7 @@ export interface ExtensionConfig {
 export function getExtensionConfig(): ExtensionConfig {
   const cfg = vscode.workspace.getConfiguration("aiAccessibilityAssistant");
   return {
-    ollamaHost:      String(cfg.get("ollamaHost", "http://localhost:11434")).replace(/\/$/, ""),
-    analysisPreset:  String(cfg.get("analysisPreset", "balanced")),
-    ragEndpoint:     String(cfg.get("ragEndpoint", "http://127.0.0.1:8000")).replace(/\/$/, ""),
+    ollamaHost:  String(cfg.get("ollamaHost", "http://localhost:11434")).replace(/\/$/, ""),
+    ragEndpoint: String(cfg.get("ragEndpoint", "http://127.0.0.1:8000")).replace(/\/$/, ""),
   };
 }

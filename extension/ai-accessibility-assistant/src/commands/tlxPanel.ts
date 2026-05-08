@@ -7,7 +7,6 @@ import * as vscode from "vscode";
 import {
   FIXED_MODEL,
   ollamaGenerateStream,
-  resolveAnalysisPreset,
 } from "../utils/llm/ollama";
 import { ragRetrieve, formatRagContext, RAG_CONFIG, ragCache } from "../utils/rag/rag";
 import { buildTlxRagQuery } from "../utils/rag/ragQueryBuilder";
@@ -27,14 +26,13 @@ export async function analyseFileForTlx(
 
   const doc = editor.document;
   const text = doc.getText();
-  const { ollamaHost, analysisPreset, ragEndpoint } = getExtensionConfig();
+  const { ollamaHost, ragEndpoint } = getExtensionConfig();
   const model = FIXED_MODEL;
-  const preset = resolveAnalysisPreset(analysisPreset);
 
   logger.log("═══ NASA TLX Cognitive Workload Analysis ═══");
   logger.log(`File: ${doc.fileName}`);
   logger.log(`Language: ${doc.languageId}  |  Lines: ${doc.lineCount}  |  Chars: ${text.length}`);
-  logger.log(`Model: ${model}  |  Profile: ${preset.label} (${preset.id})  |  RAG: ${ragEndpoint}`);
+  logger.log(`Model: ${model}  |  RAG: ${ragEndpoint}`);
   logger.log("");
 
   let fullResponse = "";
@@ -105,8 +103,7 @@ export async function analyseFileForTlx(
           logger.streamChunk(tlxText);
         }
       },
-      TLX_SYSTEM_PROMPT,
-      preset.id
+      TLX_SYSTEM_PROMPT
     );
 
     logger.postMessage({ type: "streamEnd" });

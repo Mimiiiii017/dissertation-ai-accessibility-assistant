@@ -1,78 +1,43 @@
-// selectModelPanel.ts — analysis profile selection logic for the webview panel
+// selectModelPanel.ts — model warmup logic for the webview panel
 // Exports two helpers:
-//   fetchPresetsForPanel – list available profile presets and push them to the webview
-//   applyPresetForPanel  – persist the choice, update the badge, and warm up
+//   fetchPresetsForPanel – warms up both models and logs active configuration
+//   applyPresetForPanel  – no-op (preset selection removed; models are fixed)
 // Used by: webview/AccessibilityPanel.ts
 
 import * as vscode from "vscode";
 import {
   FIXED_MODEL,
-  getAnalysisPresetSummaries,
+  SECONDARY_MODEL,
   ollamaWarmup,
-  resolveAnalysisPreset,
 } from "../utils/llm/ollama";
 import { getExtensionConfig } from "../utils/config";
 import type { PanelLogger } from "../webview/panelLogger";
 
 /**
- * Send the list of analysis profile presets to the webview
- * so the dropdown can be populated.
+ * Warm up both models and log the active configuration.
+ * Called when the panel is first opened so first-analysis latency is lower.
  */
 export async function fetchPresetsForPanel(logger: PanelLogger): Promise<void> {
-  const { ollamaHost, analysisPreset } = getExtensionConfig();
-  const currentPreset = resolveAnalysisPreset(analysisPreset);
-  const presets = getAnalysisPresetSummaries();
+  const { ollamaHost } = getExtensionConfig();
 
-  try {
-    logger.postMessage({
-      type: "setPresets",
-      presets,
-      current: currentPreset.id,
-      fixedModel: FIXED_MODEL,
-    });
+  logger.log(`Stage 1 model: ${FIXED_MODEL}`);
+  logger.log(`Stage 2 model: ${SECONDARY_MODEL}`);
+  logger.log("Warming up models…");
 
-    logger.log(`Using fixed model: ${FIXED_MODEL}`);
-    logger.log(`Active profile preset: ${currentPreset.label}`);
-
-    logger.log("Warming up fixed model…");
-    await ollamaWarmup(ollamaHost, FIXED_MODEL).catch(() => {});
-    logger.log("Model ready.");
-  } catch (e: any) {
-    logger.log(`Failed to set profile presets: ${String(e?.message ?? e)}`);
-    logger.postMessage({
-      type: "setPresets",
-      presets: [],
-      current: currentPreset.id,
-      fixedModel: FIXED_MODEL,
-    });
-  }
+  await Promise.allSettled([
+    ollamaWarmup(ollamaHost, FIXED_MODEL),
+    ollamaWarmup(ollamaHost, SECONDARY_MODEL),
+  ]);
+  logger.log("Models ready.");
 }
 
 /**
- * Persist a preset choice, update the panel, and warm the fixed model.
- * Called when the user picks a profile preset from the webview dropdown.
+ * No-op — model and parameter selection is fixed.
+ * Kept for interface compatibility with AccessibilityPanel.ts.
  */
 export async function applyPresetForPanel(
-  logger: PanelLogger,
-  presetId: string
+  _logger: PanelLogger,
+  _presetId: string
 ): Promise<void> {
-  const { ollamaHost } = getExtensionConfig();
-  const selectedPreset = resolveAnalysisPreset(presetId);
-
-  await vscode.workspace
-    .getConfiguration("aiAccessibilityAssistant")
-    .update("analysisPreset", selectedPreset.id, vscode.ConfigurationTarget.Global);
-
-  logger.postMessage({
-    type: "setPreset",
-    preset: selectedPreset.id,
-    label: selectedPreset.label,
-    fixedModel: FIXED_MODEL,
-  });
-  logger.log(`Profile preset set to: ${selectedPreset.label}`);
-  logger.log(`Using fixed model: ${FIXED_MODEL}`);
-
-  logger.log("Warming up fixed model…");
-  await ollamaWarmup(ollamaHost, FIXED_MODEL).catch(() => {});
-  logger.log("Model ready.");
+  // Models are fixed to kimi-k2.5 + qwen3.5:397b — nothing to apply.
 }

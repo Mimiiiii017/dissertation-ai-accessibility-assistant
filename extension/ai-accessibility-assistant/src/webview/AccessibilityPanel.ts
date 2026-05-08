@@ -7,7 +7,7 @@
 import * as vscode from "vscode";
 import { analyseFileForPanel } from "../commands/analysePanel";
 import { analyseFileForTlx } from "../commands/tlxPanel";
-import { fetchPresetsForPanel, applyPresetForPanel } from "../commands/selectModelPanel";
+import { fetchPresetsForPanel } from "../commands/selectModelPanel";
 import { FIXED_MODEL } from "../utils/llm/ollama";
 import type { PanelLogger } from "./panelLogger";
 
@@ -42,15 +42,13 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtml();
 
-    // Populate the profile preset dropdown as soon as the panel is ready
-    this._sendPresets();
+    // Warm up both models as soon as the panel is ready
+    this._warmupModels();
 
     webviewView.webview.onDidReceiveMessage(async (msg) => {
       switch (msg.type) {
         case "analyseFile":   await this._runAnalysis(); break;
         case "tlxFile":       await this._runTlxAnalysis(); break;
-        case "selectPreset":  await this._applyPreset(msg.preset); break;
-        case "refreshPresets": await this._sendPresets(); break;
         case "clear":         break; // handled client-side
       }
     });
@@ -70,7 +68,7 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
 
   public async selectProfileFromCommand(): Promise<void> {
     this._view?.show?.(true);
-    await this._sendPresets();
+    await this._warmupModels();
   }
 
   // Private wrappers
@@ -105,13 +103,8 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async _sendPresets(): Promise<void> {
+  private async _warmupModels(): Promise<void> {
     await fetchPresetsForPanel(this._logger());
-  }
-
-  private async _applyPreset(preset: string): Promise<void> {
-    if (!preset) { return; }
-    await applyPresetForPanel(this._logger(), preset);
   }
 
   // Logger factory

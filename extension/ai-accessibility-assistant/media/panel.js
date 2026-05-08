@@ -6,7 +6,6 @@
   const spinner      = document.getElementById("spinner");
   const status       = document.getElementById("statusText");
   const modelName    = document.getElementById("modelName");
-  const presetSelect = document.getElementById("modelSelect");
   const btnAnalyse   = document.getElementById("btnAnalyse");
   const btnTlx       = document.getElementById("btnTlx");
   const btnClear     = document.getElementById("btnClear");
@@ -20,12 +19,6 @@
   });
   btnTlx.addEventListener("click", () => {
     vscode.postMessage({ type: "tlxFile" });
-  });
-  presetSelect.addEventListener("change", () => {
-    const selected = presetSelect.value;
-    if (selected) {
-      vscode.postMessage({ type: "selectPreset", preset: selected });
-    }
   });
   btnClear.addEventListener("click", () => {
     output.innerHTML = "";
@@ -276,31 +269,6 @@
         status.textContent = "Idle";
         break;
 
-      case "setPresets": {
-        // Populate the dropdown with available profile presets
-        presetSelect.innerHTML = "";
-        if (msg.presets.length === 0) {
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.disabled = true;
-          opt.selected = true;
-          opt.textContent = "No presets found";
-          presetSelect.appendChild(opt);
-        } else {
-          msg.presets.forEach(function (preset) {
-            const opt = document.createElement("option");
-            opt.value = preset.id;
-            opt.textContent = preset.label;
-            opt.title = preset.description || "";
-            if (preset.id === msg.current) { opt.selected = true; }
-            presetSelect.appendChild(opt);
-          });
-        }
-        // Badge shows the fixed model used for every request
-        modelName.textContent = msg.fixedModel || modelName.textContent;
-        break;
-      }
-
       case "tlxSummary": {
         const el = document.createElement("div");
         el.className = "tlx-summary-card";
@@ -332,12 +300,6 @@
         output.scrollTop = output.scrollHeight;
         break;
       }
-
-      case "setPreset":
-        modelName.textContent = msg.fixedModel || modelName.textContent;
-        // Sync the dropdown selection
-        if (msg.preset) { presetSelect.value = msg.preset; }
-        break;
 
       case "summary": {
         const el = document.createElement("div");
