@@ -18,13 +18,13 @@ import { buildRagQuery } from "../utils/rag/ragQueryBuilder";
 // Running five focused queries and deduplicating gives the model relevant, specific
 // context for whichever issues are actually present in the developer's file.
 const HTML_SWEEP_QUERIES = [
-  'link accessible name aria-label non-descriptive text nav landmark multiple label ARIA11',
+  'link accessible name aria-label non-descriptive text "click here" "read more" nav landmark multiple label ARIA11',
   'button accessible name aria-expanded toggle disclosure accordion hamburger menu show hide',
   'form input label accessible name autocomplete personal data given-name email tel address SC 1.3.5',
   'image alt attribute missing non-text content table header scope heading level skip hierarchy WCAG 1.1.1 1.3.1',
   'aria-labelledby aria-describedby aria-controls broken reference id does not exist SC 4.1.2',
 ];
-const HTML_RAG_MAX_CHUNKS = 8;
+const HTML_RAG_MAX_CHUNKS = 10;
 const HTML_RAG_DISTANCE_THRESHOLD = 0.5;
 
 async function retrieveHtmlRag(
@@ -35,7 +35,7 @@ async function retrieveHtmlRag(
   for (const q of HTML_SWEEP_QUERIES) {
     if (all.length >= HTML_RAG_MAX_CHUNKS) { break; }
     try {
-      const res = await ragRetrieve(ragEndpoint, q, 2, 'accessibility', HTML_RAG_DISTANCE_THRESHOLD);
+      const res = await ragRetrieve(ragEndpoint, q, 3, 'accessibility', HTML_RAG_DISTANCE_THRESHOLD);
       for (const chunk of res.chunks) {
         if (all.length >= HTML_RAG_MAX_CHUNKS) { break; }
         if (!seen.has(chunk.id)) { seen.add(chunk.id); all.push(chunk); }
@@ -44,7 +44,6 @@ async function retrieveHtmlRag(
   }
   return all;
 }
-import { runBaselineChecks } from "../utils/analysis/baseline";
 import { SYSTEM_PROMPT, buildAiPrompt } from "../utils/prompts/prompt";
 import { parseTextResponse, deduplicateIssues } from "../utils/analysis/parser";
 import { aiIssueToDiagnostic } from "../utils/analysis/diagnostics";
@@ -111,6 +110,26 @@ function mergeMultiStageIssues(
   return { verified, reviewRecommended };
 }
 
+function formatIssueForPanel(issue: AiIssue, index: number): string {
+  const sev = (issue.severity || 'med').toUpperCase();
+  const title = issue.title || 'Accessibility issue';
+  const lineText = issue.lineHints && issue.lineHints.length > 0
+    ? issue.lineHints.join(', ')
+    : issue.lineHint
+      ? String(issue.lineHint)
+      : 'unknown';
+  const problem = issue.explanation || 'No explanation provided.';
+  const fix = issue.fix || 'No fix provided.';
+
+  return [
+    `Issue ${index}: ${title}`,
+    `  Severity: ${sev}`,
+    `  Line: ${lineText}`,
+    `  Problem: ${problem}`,
+    `  Fix: ${fix}`,
+  ].join('\n');
+}
+
 export async function analyseFileForPanel(
   logger: PanelLogger,
   diagnostics: vscode.DiagnosticCollection
@@ -135,13 +154,6 @@ export async function analyseFileForPanel(
 
   diagnostics.delete(doc.uri);
   const issues: vscode.Diagnostic[] = [];
-
-  // Baseline checks
-  const baselineIssues = runBaselineChecks(doc);
-  if (baselineIssues.length > 0) {
-    logger.log(`Baseline: ${baselineIssues.length} issue(s) found`);
-    issues.push(...baselineIssues);
-  }
 
   // AI analysis — multi-stage voting: kimi (recall) + qwen (precision)
   let kimiResponse = "";
@@ -180,12 +192,7 @@ export async function analyseFileForPanel(
       const prompt = buildAiPrompt(doc.languageId, excerpt, contextBlock);
       const t0 = Date.now();
       let firstTokenMs: number | null = null;
-      let issueStreamStarted = false;
-      let preIssueBuffer = "";
-      let stopStreaming = false;
-      let streamedText = "";
 
-      logger.postMessage({ type: "streamStart" });
       logger.log(`Stage 1: ${model} (recall) + ${qwenModel} (precision) running in parallel…`);
 
       // Run qwen silently in the background while kimi streams to the panel
@@ -208,26 +215,6 @@ export async function analyseFileForPanel(
           if (firstTokenMs === null) {
             firstTokenMs = Date.now() - t0;
           }
-
-          if (issueStreamStarted) {
-            if (stopStreaming) { return; }
-            streamedText += chunk;
-            if (streamedText.match(/\bFinal\s+Answer\s*:/i)) {
-              stopStreaming = true;
-              return;
-            }
-            logger.streamChunk(chunk);
-            return;
-          }
-
-          preIssueBuffer += chunk;
-          const issueIdx = preIssueBuffer.search(/Issue\s+\d+\s*:/i);
-          if (issueIdx >= 0) {
-            issueStreamStarted = true;
-            const issueText = preIssueBuffer.slice(issueIdx);
-            streamedText = issueText;
-            logger.streamChunk(issueText);
-          }
         },
         SYSTEM_PROMPT
       );
@@ -235,7 +222,6 @@ export async function analyseFileForPanel(
       // Wait for qwen to finish (may still be running after kimi)
       await qwenPromise;
 
-      logger.postMessage({ type: "streamEnd" });
       logger.log(`\nCompleted in ${Date.now() - t0} ms (first token: ${firstTokenMs} ms)`);
 
       // Parse both model responses
@@ -247,23 +233,19 @@ export async function analyseFileForPanel(
       const { verified, reviewRecommended } = mergeMultiStageIssues(kimiIssues, qwenIssues);
       logger.log(`Verified (both agree): ${verified.length}  |  Review-recommended (one model): ${reviewRecommended.length}`);
 
-      const allAiIssues = [...verified, ...reviewRecommended];
+      if (verified.length > 0) {
+        logger.postMessage({ type: "streamStart" });
+        const rendered = verified.map((ai, idx) => formatIssueForPanel(ai, idx + 1)).join("\n\n");
+        logger.streamChunk(rendered);
+        logger.postMessage({ type: "streamEnd" });
+      }
 
-      for (const ai of allAiIssues) {
+      for (const ai of verified) {
         issues.push(...aiIssueToDiagnostic(doc, ai));
       }
 
-      // Structured summary — rendered as a card in the webview
-      if (allAiIssues.length > 0) {
-        logger.postMessage({
-          type: "summary",
-          aiCount: allAiIssues.length,
-          totalCount: issues.length,
-          issues: [
-            ...verified.map(ai => ({ title: ai.title, severity: ai.severity, confidence: 'verified' as const })),
-            ...reviewRecommended.map(ai => ({ title: ai.title, severity: ai.severity, confidence: 'review' as const })),
-          ],
-        });
+      if (verified.length === 0) {
+        logger.log("\nNo consensus issues (both models) found.");
       }
   } catch (e: any) {
       const msg = String(e?.message ?? e);

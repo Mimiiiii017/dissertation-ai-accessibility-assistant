@@ -42,11 +42,6 @@ export function runBaselineChecks(doc: vscode.TextDocument): vscode.Diagnostic[]
   return diags;
 }
 
-// Escape special regex characters so we can safely use user input in regex
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 // Check for images without alt text (basic regex-based validation)
 export function findImgMissingAlt(doc: vscode.TextDocument): vscode.Diagnostic[] {
   const diags: vscode.Diagnostic[] = [];
@@ -56,13 +51,13 @@ export function findImgMissingAlt(doc: vscode.TextDocument): vscode.Diagnostic[]
   let match: RegExpExecArray | null;
   while ((match = imgTagRegex.exec(text)) !== null) {
     const tag = match[0];
-    const altMatch = tag.match(/\balt\s*=\s*["']([^"']*)["']/i);
-    const altValue = altMatch?.[1]?.trim();
+    // WCAG sweep F baseline: flag only when alt attribute is fully absent.
+    const hasAltAttribute = /\balt\s*=\s*["'][^"']*["']/i.test(tag);
 
-    if (!altMatch || !altValue) {
+    if (!hasAltAttribute) {
       diags.push(makeDiag(
         doc, match.index, tag.length,
-        "Image is missing a meaningful alt attribute (screen readers may not describe it).",
+        "Image is missing an alt attribute (add alt text or alt=\"\" for decorative images).",
         vscode.DiagnosticSeverity.Warning
       ));
     }
@@ -75,40 +70,55 @@ export function findImgMissingAlt(doc: vscode.TextDocument): vscode.Diagnostic[]
 export function findInputsMissingLabel(doc: vscode.TextDocument): vscode.Diagnostic[] {
   const diags: vscode.Diagnostic[] = [];
   const text = doc.getText();
-  const inputRegex = /<input\b[^>]*>/gi;
+  const controlRegex = /<(input|select|textarea)\b[^>]*>/gi;
+
+  // Collect explicit <label for="..."> targets once.
+  const labelledIds = new Set<string>();
+  const labelForRegex = /<label\b[^>]*\bfor\s*=\s*["']([^"']+)["'][^>]*>/gi;
+  let labelForMatch: RegExpExecArray | null;
+  while ((labelForMatch = labelForRegex.exec(text)) !== null) {
+    const id = labelForMatch[1].trim();
+    if (id) {
+      labelledIds.add(id);
+    }
+  }
+
+  // Track <label>...</label> spans so wrapped controls are treated as labelled.
+  const labelRanges: Array<{ start: number; end: number }> = [];
+  const labelBlockRegex = /<label\b[^>]*>[\s\S]*?<\/label>/gi;
+  let labelBlockMatch: RegExpExecArray | null;
+  while ((labelBlockMatch = labelBlockRegex.exec(text)) !== null) {
+    labelRanges.push({
+      start: labelBlockMatch.index,
+      end: labelBlockMatch.index + labelBlockMatch[0].length,
+    });
+  }
 
   let match: RegExpExecArray | null;
-  while ((match = inputRegex.exec(text)) !== null) {
+  while ((match = controlRegex.exec(text)) !== null) {
     const tag = match[0];
+    const tagName = (match[1] || "").toLowerCase();
 
-    const typeMatch = tag.match(/\btype\s*=\s*["']([^"']+)["']/i);
-    const typeValue = typeMatch?.[1]?.trim().toLowerCase();
-    // Skip hidden inputs since they don't need labels
-    if (typeValue === "hidden") {
-      continue;
+    if (tagName === "input") {
+      const typeMatch = tag.match(/\btype\s*=\s*["']([^"']+)["']/i);
+      const typeValue = typeMatch?.[1]?.trim().toLowerCase();
+      // Inputs that do not require labels.
+      if (["hidden", "submit", "button", "reset", "image"].includes(typeValue || "text")) {
+        continue;
+      }
     }
 
     const idMatch = tag.match(/\bid\s*=\s*["']([^"']+)["']/i);
     const idValue = idMatch?.[1]?.trim();
+    const hasAriaLabel = /\baria-label\s*=\s*["']\s*[^"']+\s*["']/i.test(tag);
+    const hasAriaLabelledBy = /\baria-labelledby\s*=\s*["']\s*[^"']+\s*["']/i.test(tag);
+    const hasLabelFor = !!idValue && labelledIds.has(idValue);
+    const isWrappedByLabel = labelRanges.some(r => match!.index >= r.start && match!.index < r.end);
 
-    if (!idValue) {
+    if (!(hasAriaLabel || hasAriaLabelledBy || hasLabelFor || isWrappedByLabel)) {
       diags.push(makeDiag(
         doc, match.index, tag.length,
-        'Input is missing an id (needed to associate it with a <label for="...">).',
-        vscode.DiagnosticSeverity.Warning
-      ));
-      continue;
-    }
-
-    const labelForRegex = new RegExp(
-      `<label\\b[^>]*for\\s*=\\s*["']${escapeRegex(idValue)}["'][^>]*>`,
-      "i"
-    );
-
-    if (!labelForRegex.test(text)) {
-      diags.push(makeDiag(
-        doc, match.index, tag.length,
-        `Input id="${idValue}" has no matching <label for="${idValue}">.`,
+        "Form control is missing an accessible label (<label>, aria-label, or aria-labelledby).",
         vscode.DiagnosticSeverity.Warning
       ));
     }

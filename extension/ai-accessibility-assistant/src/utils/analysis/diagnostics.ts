@@ -24,23 +24,23 @@ export function aiIssueToDiagnostic(doc: vscode.TextDocument, issue: AiIssue): v
   const title = issue.title || "Accessibility issue";
   const explanation = issue.explanation || "";
   const fix = issue.fix || "No fix provided";
+  const linesLabel = issue.lineHints && issue.lineHints.length > 0
+    ? `Lines: ${issue.lineHints.join(", ")}`
+    : issue.lineHint
+      ? `Line: ${issue.lineHint}`
+      : "Line: unknown";
 
-  const parts = [title, explanation, `Fix: ${fix}`, evidence].filter(Boolean);
+  const parts = [title, linesLabel, explanation, `Fix: ${fix}`, evidence].filter(Boolean);
   const message = parts.join("\n");
 
-  // Determine which lines to create diagnostics for
-  const linesToReport = issue.lineHints && issue.lineHints.length > 0
-    ? issue.lineHints  // Multiple lines
-    : issue.lineHint   // Single line
-      ? [issue.lineHint]
-      : [1]; // Default to line 1 if no line hint
+  const primaryLine = issue.lineHints && issue.lineHints.length > 0
+    ? issue.lineHints[0]
+    : issue.lineHint;
 
-  return linesToReport.map(lineNum => {
-    const range = bestEffortRange(doc, lineNum);
-    const d = new vscode.Diagnostic(range, message, severity);
-    d.source = "AI Accessibility Assistant (RAG+Ollama)";
-    return d;
-  });
+  const range = bestEffortRange(doc, primaryLine);
+  const d = new vscode.Diagnostic(range, message, severity);
+  d.source = "AI Accessibility Assistant (RAG+Ollama)";
+  return [d];
 }
 
 // Try to highlight the right line, or just use line 1 if we don't have a line number

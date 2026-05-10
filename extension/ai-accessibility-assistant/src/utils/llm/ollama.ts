@@ -48,9 +48,6 @@ function getModelOptions(model: string): CloudOptions {
 // pipeline. There is no user-facing model/preset selection dropdown.
 
 
-
-
-
 // Strip trailing slashes so URL construction never produces double-slashes
 function normalizeHost(host: string): string {
   return host.replace(/\/$/, "");

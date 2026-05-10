@@ -21,7 +21,7 @@ export function parseTextResponse(text: string): AiIssue[] {
   }
 
   // Find every "Issue <number>:" header
-  const issuePattern = /Issue\s+\d+\s*:\s*/gi;
+  const issuePattern = /Issue\s+\d+\s*:?[ \t]*/gi;
   const starts: { matchEnd: number; matchStart: number }[] = [];
   let m: RegExpExecArray | null;
 
@@ -35,9 +35,10 @@ export function parseTextResponse(text: string): AiIssue[] {
     const block = text.slice(blockStart, blockEnd);
 
     // Title is the remainder of the "Issue N:" line
-    const afterColon = text.slice(starts[i].matchEnd, blockEnd);
-    const nlPos = afterColon.indexOf('\n');
-    const title = (nlPos >= 0 ? afterColon.slice(0, nlPos) : afterColon).trim();
+    const afterHeader = text.slice(starts[i].matchEnd, blockEnd).trimStart();
+    const firstLine = afterHeader.split(/\r?\n/)[0]?.trim() ?? "";
+    const looksLikeFieldLabel = /^(?:Severity|Line|Problem|Fix|Solution|WCAG)\b\s*:?$/i.test(firstLine);
+    const title = looksLikeFieldLabel ? "" : firstLine;
 
     const issue: AiIssue = {
       title: title || "Accessibility issue",
@@ -45,17 +46,41 @@ export function parseTextResponse(text: string): AiIssue[] {
     };
 
     // Severity
-    const sevMatch = block.match(/Severity\s*:\s*(HIGH|MEDIUM|LOW)/i);
+    const sevMatch = block.match(/\**\s*Severity\s*\**\s*:?[ \t]*(?:\r?\n[ \t]*)?(HIGH|MEDIUM|LOW)\b/i);
     if (sevMatch) {
       const s = sevMatch[1].toUpperCase();
       issue.severity = s === "HIGH" ? "high" : s === "LOW" ? "low" : "med";
     }
 
     // Line
-    const lineMatch = block.match(/Line\s*:\s*(\d+(?:\s*,\s*\d+)*)/i);
+    const lineMatch = block.match(/\**\s*Line\s*\**\s*:?[ \t]*(?:\r?\n[ \t]*)?([0-9\s,\-]+)/i);
     if (lineMatch) {
       const lineStr = lineMatch[1];
-      const lines = lineStr.split(',').map(l => parseInt(l.trim(), 10)).filter(l => !isNaN(l));
+      const lineSet = new Set<number>();
+      const tokens = lineStr.split(',').map(t => t.trim()).filter(Boolean);
+
+      for (const token of tokens) {
+        const range = token.match(/^(\d+)\s*-\s*(\d+)$/);
+        if (range) {
+          const start = parseInt(range[1], 10);
+          const end = parseInt(range[2], 10);
+          if (!isNaN(start) && !isNaN(end)) {
+            const lo = Math.min(start, end);
+            const hi = Math.max(start, end);
+            for (let ln = lo; ln <= hi; ln++) {
+              lineSet.add(ln);
+            }
+            continue;
+          }
+        }
+
+        const single = parseInt(token, 10);
+        if (!isNaN(single)) {
+          lineSet.add(single);
+        }
+      }
+
+      const lines = [...lineSet].sort((a, b) => a - b);
       if (lines.length > 0) {
         issue.lineHints = lines.length > 1 ? lines : undefined;
         issue.lineHint = lines[0];
@@ -63,13 +88,13 @@ export function parseTextResponse(text: string): AiIssue[] {
     }
 
     // Problem → explanation (capture everything until the next labelled field)
-    const problemMatch = block.match(/Problem\s*:([\s\S]*?)(?=\n\s*(?:Fix|Solution|WCAG|Severity|Line|Issue)\s*:|$)/i);
+    const problemMatch = block.match(/\**\s*Problem\s*\**\s*:?[ \t]*(?:\r?\n[ \t]*)?([\s\S]*?)(?=\n\s*\**\s*(?:Fix|Solution|WCAG|Severity|Line|Issue)\s*\**\s*:?|$)/i);
     if (problemMatch) {
       issue.explanation = problemMatch[1].trim();
     }
 
     // Fix (or legacy Solution) → fix (capture everything until next labelled field)
-    const fixMatch = block.match(/(?:Fix|Solution)\s*:([\s\S]*?)(?=\n\s*(?:Problem|WCAG|Severity|Line|Issue)\s*:|$)/i);
+    const fixMatch = block.match(/\**\s*(?:Fix|Solution)\s*\**\s*:?[ \t]*(?:\r?\n[ \t]*)?([\s\S]*?)(?=\n\s*\**\s*(?:Problem|WCAG|Severity|Line|Issue)\s*\**\s*:?|$)/i);
     if (fixMatch) {
       issue.fix = fixMatch[1].trim();
     }
