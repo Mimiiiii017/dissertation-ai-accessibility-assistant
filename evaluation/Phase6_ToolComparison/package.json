@@ -1,0 +1,26 @@
+{
+  "name": "study-6-tool-comparison",
+  "version": "1.0.0",
+  "description": "Study 6: Supplementary comparison of AI Accessibility Assistant vs Google Lighthouse vs Deque axe-core.",
+  "private": true,
+  "scripts": {
+    "study6:compare": "ts-node study-6-run.ts",
+    "study6:compare:all": "ts-node study-6-run.ts --all-fixtures",
+    "study6:compare:html": "ts-node study-6-run.ts --fixture study-6-html-medium",
+    "study6:compare:css": "ts-node study-6-run.ts --fixture study-6-css-medium",
+    "study6:compare:js": "ts-node study-6-run.ts --fixture study-6-js-medium",
+    "study6:compare:tsx": "ts-node study-6-run.ts --fixture study-6-tsx-medium"
+  },
+  "dependencies": {
+    "axe-core": "^4.8.0",
+    "esbuild": "^0.28.0",
+    "puppeteer": "^21.0.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0"
+  }
+}
