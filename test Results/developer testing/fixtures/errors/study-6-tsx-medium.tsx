@@ -77,12 +77,12 @@ const Tabs: React.FC<{ tabs: TabItem[] }> = ({ tabs }) => {
     <div>
       <div role="tablist">
         {tabs.map((tab, index) => (
-          // ERROR 9: aria-controls not set
-          // ERROR 10: onClick handler exists but no keyboard handler for Arrow keys
           <button
             key={tab.id}
             role="tab"
             aria-selected={index === activeTab}
+            {/* ERROR 9: aria-controls not set */}
+            {/* ERROR 10: onClick handler exists but no keyboard handler for Arrow keys */}
             onClick={() => setActiveTab(index)}
             tabIndex={index === activeTab ? 0 : -1}
           >
@@ -91,13 +91,13 @@ const Tabs: React.FC<{ tabs: TabItem[] }> = ({ tabs }) => {
         ))}
       </div>
       {tabs.map((tab, index) => (
-        // ERROR 11: aria-labelledby ID doesn't match button ID
-        // ERROR 12: using display:none hides from all users; visibility or separate render better
         <div
           key={tab.id}
           role="tabpanel"
           aria-labelledby={`tab-${tab.id}`}
+          {/* ERROR 11: aria-labelledby ID doesn't match button ID */}
           style={{ display: index === activeTab ? 'block' : 'none' }}
+          {/* ERROR 12: using display:none hides from all users; visibility or separate render better */}
         >
           {tab.content}
         </div>
@@ -153,15 +153,14 @@ const Form: React.FC<{ fields: FormField[]; onSubmit: (data: any) => void }> = (
         <div key={field.name}>
           <label htmlFor={field.name}>{field.label}</label>
           {field.type === 'textarea' ? (
-            // ERROR 17: aria-invalid not set based on errors state
             <textarea
               id={field.name}
               name={field.name}
               value={formData[field.name] || ''}
               onChange={handleChange}
+              {/* ERROR 17: aria-invalid not set based on errors state */}
             />
           ) : (
-            // ERROR 18: No aria-required when required is true (redundant but helpful)
             <input
               id={field.name}
               type={field.type}
@@ -169,6 +168,7 @@ const Form: React.FC<{ fields: FormField[]; onSubmit: (data: any) => void }> = (
               value={formData[field.name] || ''}
               onChange={handleChange}
               required={field.required}
+              {/* ERROR 18: No aria-required when required is true (redundant but helpful) */}
             />
           )}
           {errors[field.name] && (
@@ -253,22 +253,22 @@ const Dropdown: React.FC<{
   return (
     <div ref={dropdownRef}>
       {label && <label>{label}</label>}
-      {/* ERROR 24: aria-expanded not set */}
-      {/* ERROR 25: aria-controls not set to listbox ID */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
+        {/* ERROR 24: aria-expanded not set */}
+        {/* ERROR 25: aria-controls not set to listbox ID */}
       >
         {options.find(opt => opt.value === selectedValue)?.label || 'Select'}
       </button>
       {isOpen && (
         <ul role="listbox">
           {options.map(option => (
-            // Missing aria-selected
             <li
               key={option.value}
               role="option"
               onClick={() => handleSelect(option.value)}
+              {/* Missing aria-selected */}
             >
               {option.label}
             </li>
@@ -306,8 +306,6 @@ const LoadingSpinner: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
   if (!isLoading) return null;
 
   return (
-    // ERROR 29: No aria-live or role announcement; hidden from screen readers
-    // ERROR 28: Animation doesn't respect prefers-reduced-motion
     <div
       style={{
         animation: 'spin 1s linear infinite',
@@ -317,6 +315,8 @@ const LoadingSpinner: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
         borderTop: '2px solid #3498db',
         borderRadius: '50%',
       }}
+      {/* ERROR 29: No aria-live or role announcement; hidden from screen readers */}
+      {/* ERROR 28: Animation doesn't respect prefers-reduced-motion */}
     />
   );
 };
@@ -330,7 +330,6 @@ interface AlertProps {
 
 const Alert: React.FC<AlertProps> = ({ message, type, onDismiss }) => {
   return (
-    // ERROR 30: No aria-live="assertive" for urgent alerts
     <div
       role="alert"
       style={{
@@ -338,11 +337,12 @@ const Alert: React.FC<AlertProps> = ({ message, type, onDismiss }) => {
         color: type === 'error' ? 'red' : 'blue',
         background: type === 'error' ? '#ffe0e0' : '#e0e0ff',
       }}
+      {/* ERROR 30: No aria-live="assertive" for urgent alerts */}
     >
       {message}
-        {/* No keyboard way to dismiss via Escape */}
       {onDismiss && (
         <button onClick={onDismiss}>Dismiss</button>
+        {/* No keyboard way to dismiss via Escape */}
       )}
     </div>
   );

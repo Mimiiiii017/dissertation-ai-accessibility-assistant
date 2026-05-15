@@ -69,6 +69,13 @@ interface BrowserHarness {
   virtualFiles: Record<string, VirtualFile>;
 }
 
+interface SupplementaryToolOutputs {
+  axeLinter: ToolFinding[] | null;
+  eslintJsxA11y: ToolFinding[] | null;
+  webhint: ToolFinding[] | null;
+  stylelintA11y: ToolFinding[] | null;
+}
+
 /**
  * Parse command-line arguments.
  */
@@ -559,6 +566,278 @@ async function runAxeCore(browser: Browser, url: string): Promise<ToolFinding[]>
 }
 
 /**
+ * Run Axe Accessibility Linter (axe CLI).
+ * Note: this tool is URL/DOM oriented and not applicable to raw CSS-only source.
+ */
+async function runAxeLinter(url: string): Promise<ToolFinding[] | null> {
+  console.log(`[Axe Linter] Running axe CLI on ${url}...`);
+
+  try {
+    const chromedriverPath = `${process.env.HOME}/.browser-driver-manager/chromedriver/linux-148.0.7778.167/chromedriver-linux64/chromedriver`;
+    const chromePath = `${process.env.HOME}/.browser-driver-manager/chrome/linux-148.0.7778.167/chrome-linux64/chrome`;
+    const cmd = `npx --yes @axe-core/cli ${url} -j --chromedriver-path "${chromedriverPath}" --chrome-path "${chromePath}"`;
+
+    let stdout = '';
+    try {
+      ({ stdout } = await execAsync(cmd, { timeout: 90000, maxBuffer: 10 * 1024 * 1024 }));
+    } catch (err: any) {
+      // axe CLI can exit non-zero when violations exist; parse its stdout anyway.
+      stdout = err?.stdout || '';
+      if (!stdout) {
+        throw err;
+      }
+    }
+
+    // axe CLI -j outputs JSON array: [{violations:[...], passes:[...], ...}, ...]
+    const jsonStart = stdout.indexOf('[');
+    const jsonEnd = stdout.lastIndexOf(']');
+    const jsonText = jsonStart >= 0 && jsonEnd > jsonStart
+      ? stdout.slice(jsonStart, jsonEnd + 1)
+      : '[]';
+    const parsed = JSON.parse(jsonText);
+
+    const findings: ToolFinding[] = [];
+    // Flatten violations across all page results in the array
+    const violations = Array.isArray(parsed)
+      ? parsed.flatMap((r: any) => Array.isArray(r?.violations) ? r.violations : [])
+      : Array.isArray(parsed?.violations) ? parsed.violations : [];
+    for (const violation of violations) {
+      const nodes = Array.isArray(violation?.nodes) ? violation.nodes : [];
+      if (nodes.length === 0) {
+        findings.push({
+          wcag: (violation?.tags || []).find((t: string) => /^wcag/i.test(t)) || 'unknown',
+          issueType: violation?.id || 'axe-linter-issue',
+          severity: violation?.impact === 'critical' ? 'error' : 'warning',
+          description: violation?.description || violation?.help || 'Issue reported by Axe Accessibility Linter.',
+          toolSource: 'axeLinter',
+        });
+        continue;
+      }
+
+      for (const node of nodes) {
+        findings.push({
+          wcag: (violation?.tags || []).find((t: string) => /^wcag/i.test(t)) || 'unknown',
+          issueType: violation?.id || 'axe-linter-issue',
+          severity: violation?.impact === 'critical' ? 'error' : 'warning',
+          description: violation?.description || violation?.help || 'Issue reported by Axe Accessibility Linter.',
+          element: (node?.target && node.target[0]) || node?.html,
+          toolSource: 'axeLinter',
+        });
+      }
+    }
+
+    console.log(`[Axe Linter] Found ${findings.length} issues`);
+    return findings;
+  } catch (err) {
+    console.warn(`[Axe Linter] Failed: ${err}`);
+    return null;
+  }
+}
+
+/**
+ * Run ESLint + jsx-a11y on JS/TSX source.
+ */
+async function runEslintJsxA11y(sourceContent: string, fixture: Study6Fixture, outputDir: string): Promise<ToolFinding[] | null> {
+  if (fixture.sourceType !== 'tsx') {
+    console.log('[ESLint jsx-a11y] Not applicable (requires TSX), skipping.');
+    return null;
+  }
+
+  console.log(`[ESLint jsx-a11y] Running on ${fixture.name}...`);
+
+  try {
+    const tempDir = path.join(outputDir, 'tmp-lint');
+    fs.mkdirSync(tempDir, { recursive: true });
+    const ext = fixture.sourceType === 'tsx' ? '.tsx' : '.js';
+    const filePath = path.join(tempDir, `${fixture.name}${ext}`);
+    fs.writeFileSync(filePath, sourceContent, 'utf-8');
+
+    const { ESLint } = require('eslint');
+    const tsParser = require('@typescript-eslint/parser');
+
+    const eslint = new ESLint({
+      useEslintrc: false,
+      overrideConfig: {
+        parser: fixture.sourceType === 'tsx' ? '@typescript-eslint/parser' : undefined,
+        parserOptions: {
+          ecmaVersion: 2022,
+          sourceType: 'module',
+          ecmaFeatures: { jsx: true },
+        },
+        plugins: ['jsx-a11y'],
+        extends: ['plugin:jsx-a11y/recommended'],
+        rules: {
+          // Text alternatives
+          'jsx-a11y/alt-text': 'error',
+          // ARIA role rules
+          'jsx-a11y/aria-role': 'error',
+          'jsx-a11y/aria-props': 'error',
+          'jsx-a11y/aria-unsupported-elements': 'warn',
+          'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
+          // Heading rules
+          'jsx-a11y/heading-has-content': 'warn',
+          // Link rules
+          'jsx-a11y/anchor-is-valid': 'warn',
+          // Form rules
+          'jsx-a11y/label-has-associated-control': 'warn',
+          // Interactive element rules
+          'jsx-a11y/no-static-element-interactions': 'error',
+          'jsx-a11y/click-events-have-key-events': 'error',
+          'jsx-a11y/interactive-supports-focus': 'error',
+          'jsx-a11y/no-noninteractive-element-interactions': 'error',
+          'jsx-a11y/no-noninteractive-tabindex': 'error',
+          // Keyboard event rules
+          'jsx-a11y/mouse-events-have-key-events': 'error',
+          // Scope attribute rules
+          'jsx-a11y/scope': 'warn',
+          // Image role rules
+          'jsx-a11y/img-redundant-alt': 'warn',
+        },
+      },
+    });
+
+    // Make sure parser package is loaded when TSX is used.
+    void tsParser;
+
+    const results = await eslint.lintFiles([filePath]);
+
+    // If the file cannot be parsed, this tool did not run meaningfully.
+    // Return null so downstream reporting shows N/A rather than a misleading 0.
+    const fatalResult = results.find((r: any) => (r.fatalErrorCount || 0) > 0);
+    if (fatalResult) {
+      const fatalMessage = (fatalResult.messages || []).find((m: any) => m.fatal)?.message || 'Unknown parsing/config error';
+      console.warn(`[ESLint jsx-a11y] Fatal parse/config error: ${fatalMessage}`);
+      return null;
+    }
+
+    const findings: ToolFinding[] = [];
+    for (const result of results) {
+      for (const message of result.messages || []) {
+        if (!message.ruleId || !message.ruleId.startsWith('jsx-a11y/')) {
+          continue;
+        }
+        findings.push({
+          wcag: 'unknown',
+          issueType: message.ruleId,
+          severity: message.severity === 2 ? 'error' : 'warning',
+          description: message.message,
+          element: message.line ? `Line ${message.line}` : undefined,
+          toolSource: 'eslintJsxA11y',
+        });
+      }
+    }
+
+    console.log(`[ESLint jsx-a11y] Found ${findings.length} issues`);
+    return findings;
+  } catch (err) {
+    console.warn(`[ESLint jsx-a11y] Failed: ${err}`);
+    return null;
+  }
+}
+
+/**
+ * Run webhint against the rendered harness URL.
+ */
+async function runWebhint(url: string): Promise<ToolFinding[] | null> {
+  console.log(`[Webhint] Running on ${url}...`);
+
+  try {
+    // Use webhint built-in configuration to avoid interactive missing-package/config errors.
+    const cmd = `npx --yes hint ${url} -f json`;
+
+    let stdout = '';
+    try {
+      ({ stdout } = await execAsync(cmd, { timeout: 90000, maxBuffer: 10 * 1024 * 1024 }));
+    } catch (err: any) {
+      // webhint can return non-zero if hints are found; parse formatter output anyway.
+      stdout = err?.stdout || '';
+      if (!stdout) {
+        throw err;
+      }
+    }
+
+    const jsonStart = stdout.indexOf('[');
+    const jsonEnd = stdout.lastIndexOf(']');
+    const jsonText = jsonStart >= 0 && jsonEnd > jsonStart
+      ? stdout.slice(jsonStart, jsonEnd + 1)
+      : '[]';
+    const parsed = JSON.parse(jsonText);
+
+    const findings: ToolFinding[] = [];
+    const items = Array.isArray(parsed) ? parsed : [];
+
+    for (const item of items) {
+      // webhint severity is typically numeric: 1..4 (>= 4 is error)
+      const numericSeverity = Number(item?.severity);
+      const hintId = item?.hintId || item?.ruleId || 'webhint';
+      const location = item?.location;
+
+      findings.push({
+        wcag: 'unknown',
+        issueType: hintId,
+        severity: Number.isFinite(numericSeverity) && numericSeverity >= 4 ? 'error' : 'warning',
+        description: item?.message || 'Issue reported by webhint.',
+        element: location ? `${item?.resource || ''}:${location?.line || ''}` : item?.resource,
+        toolSource: 'webhint',
+      });
+    }
+
+    console.log(`[Webhint] Found ${findings.length} issues`);
+    return findings;
+  } catch (err) {
+    console.warn(`[Webhint] Failed: ${err}`);
+    return null;
+  }
+}
+
+/**
+ * Run stylelint with stylelint-a11y rules on CSS source.
+ */
+async function runStylelintA11y(sourceContent: string, fixture: Study6Fixture): Promise<ToolFinding[] | null> {
+  if (fixture.sourceType !== 'css') {
+    console.log('[stylelint-a11y] Not applicable to this fixture type, skipping.');
+    return null;
+  }
+
+  console.log(`[stylelint-a11y] Running on ${fixture.name}...`);
+
+  try {
+    const stylelint = require('stylelint');
+    const result = await stylelint.lint({
+      code: sourceContent,
+      codeFilename: path.basename(fixture.filePath),
+      config: {
+        plugins: ['@double-great/stylelint-a11y'],
+        rules: {
+          'a11y/media-prefers-reduced-motion': true,
+          'a11y/no-display-none': true,
+          'a11y/no-obsolete-attribute': true,
+        },
+      },
+    });
+
+    const findings: ToolFinding[] = [];
+    const warnings = result?.results?.[0]?.warnings || [];
+    for (const warning of warnings) {
+      findings.push({
+        wcag: 'unknown',
+        issueType: warning.rule || 'stylelint-a11y',
+        severity: warning.severity === 'error' ? 'error' : 'warning',
+        description: warning.text || 'Issue reported by stylelint-a11y.',
+        element: warning.line ? `Line ${warning.line}` : undefined,
+        toolSource: 'stylelintA11y',
+      });
+    }
+
+    console.log(`[stylelint-a11y] Found ${findings.length} issues`);
+    return findings;
+  } catch (err) {
+    console.warn(`[stylelint-a11y] Failed: ${err}`);
+    return null;
+  }
+}
+
+/**
  * Run comparison analysis for a single fixture.
  */
 async function analyzeFixture(
@@ -576,30 +855,43 @@ async function analyzeFixture(
 
   let lighthouseFindings: ToolFinding[] = [];
   let axeCoreFindings: ToolFinding[] = [];
+  const supplementary: SupplementaryToolOutputs = {
+    axeLinter: null,
+    eslintJsxA11y: null,
+    webhint: null,
+    stylelintA11y: null,
+  };
+
+  // Always start server for URL-based tools (axeLinter, webhint, Lighthouse, axe-core)
+  const harness = buildBrowserHarness(fixture, sourceContent);
+  const server = await startLocalServer(harness.html, fixture, opts.serverPort!, harness.virtualFiles);
+  const url = `http://localhost:${opts.serverPort}`;
 
   if (fixture.runBrowserAudits) {
-    const harness = buildBrowserHarness(fixture, sourceContent);
-
-    // 2. Start local server and run browser-based tools
-    const server = await startLocalServer(harness.html, fixture, opts.serverPort!, harness.virtualFiles);
-    const url = `http://localhost:${opts.serverPort}`;
-
-    // 3. Lighthouse (rendered DOM)
+    // 2. Lighthouse (rendered DOM)
     const lighthouseOutputPath = path.join(opts.outputDir!, `lighthouse-${fixture.name}.json`);
     lighthouseFindings = await runLighthouse(url, lighthouseOutputPath);
 
-    // 4. axe-core (rendered DOM)
+    // 3. axe-core (rendered DOM)
     const browser = await puppeteer.launch({ headless: opts.headless });
     axeCoreFindings = await runAxeCore(browser, url);
     await browser.close();
-
-    // 5. Stop server
-    server.close();
   } else {
-    console.log(`[Browser Audits] Skipped for ${fixture.sourceType.toUpperCase()} fixture (AI-only source analysis)`);
+    console.log(`[Browser Audits] Skipped for ${fixture.sourceType.toUpperCase()} fixture (fairness setting)`);
   }
+
+  // 4. Supplementary URL-capable tools (work regardless of runBrowserAudits)
+  supplementary.axeLinter = await runAxeLinter(url);
+  supplementary.webhint = await runWebhint(url);
+
+  // 5. Stop server
+  server.close();
+
+  // 6. Supplementary source linters.
+  supplementary.eslintJsxA11y = await runEslintJsxA11y(sourceContent, fixture, opts.outputDir!);
+  supplementary.stylelintA11y = await runStylelintA11y(sourceContent, fixture);
   
-  // 6. Generate comparison report
+  // 8. Generate comparison report
   const report = createComparisonReport(
     fixture.name,
     fixture.errorCount,
@@ -607,9 +899,10 @@ async function analyzeFixture(
     aiFindings,
     lighthouseFindings,
     axeCoreFindings,
+    supplementary,
   );
   
-  // 7. Save and print results
+  // 9. Save and print results
   const reportPath = path.join(opts.outputDir!, `${fixture.name}-comparison.json`);
   saveComparisonReport(report, reportPath);
   printAlignmentMatrix(report);
@@ -629,7 +922,7 @@ async function main() {
   console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                  Study 6: Supplementary Tool Comparison                    ║
-║ Comparing AI Accessibility Assistant vs Lighthouse vs axe-core             ║
+║ Core: AI + Lighthouse + axe-core | Extra: axe-linter, jsx-a11y, webhint   ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 `);
   

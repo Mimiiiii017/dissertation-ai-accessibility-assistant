@@ -105,7 +105,7 @@ export const STUDY_6_FIXTURES: Study6Fixture[] = [
     htmlSize: '32.5 kB',
     cssSize: '70 kB',
     jsSize: '485 kB',
-    description: 'CSS fixture test (AI-only source analysis).',
+    description: 'CSS fixture test (AI + browser audits + source linters).',
   },
   {
     name: 'study-6-js-medium',
@@ -116,18 +116,18 @@ export const STUDY_6_FIXTURES: Study6Fixture[] = [
     htmlSize: '32.5 kB',
     cssSize: '70 kB',
     jsSize: '485 kB',
-    description: 'JavaScript fixture test (AI-only source analysis).',
+    description: 'JavaScript fixture test (AI + browser audits + source linters).',
   },
   {
     name: 'study-6-tsx-medium',
     filePath: path.join(__dirname, 'fixtures/study-6-tsx-medium.tsx'),
     sourceType: 'tsx',
-    runBrowserAudits: true,
+    runBrowserAudits: false,
     errorCount: 30,
     htmlSize: '32.5 kB',
     cssSize: '70 kB',
     jsSize: '485 kB',
-    description: 'TSX fixture test (AI-only source analysis).',
+    description: 'TSX fixture test (AI + source linters; browser audits skipped for fairness).',
   },
 ];
 

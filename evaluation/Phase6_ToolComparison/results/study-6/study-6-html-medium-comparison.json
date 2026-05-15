@@ -2,121 +2,153 @@
   "metadata": {
     "fixture": "study-6-html-medium",
     "errorCount": 30,
-    "timestamp": "2026-05-10T15:47:11.791Z",
+    "timestamp": "2026-05-15T14:52:53.382Z",
     "aiModel": "kimi-k2.5:cloud + qwen3.5:397b-cloud"
   },
   "toolOutputs": {
     "ai": [
       {
         "wcag": "unknown",
-        "issueType": "Missing lang attribute on html element",
+        "issueType": "Page language not specified",
         "severity": "error",
-        "description": "The html element lacks a lang attribute, which prevents screen readers from correctly announcing the page language and pronunciation rules to users.",
+        "description": "The html element is missing the lang attribute, which prevents screen readers from correctly pronouncing the content in the appropriate language.",
         "element": "Lines 2",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Missing accessible name on link",
+        "issueType": "Link with non-descriptive text",
+        "severity": "warning",
+        "description": "The link text \"Click here\" does not describe the destination or purpose of the link, forcing screen reader users to navigate out of context to understand where the link leads.",
+        "element": "Lines 14, 109, 111",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Link with empty accessible name",
         "severity": "error",
-        "description": "The link has an empty aria-label attribute that overrides the visible text content, resulting in no accessible name for screen reader users.",
+        "description": "The link has an empty aria-label attribute which overrides the visible text, resulting in no accessible name for screen reader users.",
         "element": "Lines 15",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Non-descriptive link text",
-        "severity": "warning",
-        "description": "The link text \"Click here\" does not describe the destination or purpose of the link, forcing screen reader users to rely on surrounding context to understand where the link leads.",
-        "element": "Lines 14, 102, 103, 104",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Image missing alt attribute",
-        "severity": "error",
-        "description": "The logo image lacks an alt attribute, preventing screen readers from conveying the purpose or content of the image to blind users.",
-        "element": "Lines 20, 44, 91",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Element with role img missing accessible name",
-        "severity": "error",
-        "description": "The div element has role=\"img\" but lacks an aria-label, aria-labelledby, or title attribute to provide an accessible name for screen readers.",
-        "element": "Lines 94",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Form input missing label",
-        "severity": "error",
-        "description": "The email input has no associated label element or aria-label, so screen readers cannot identify the field's purpose to users.",
-        "element": "Lines 56, 57, 58",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Textarea missing label",
-        "severity": "error",
-        "description": "The textarea has no associated label, preventing screen readers from identifying that the field is for entering a message.",
-        "element": "Lines 64",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Fieldset missing legend",
-        "severity": "error",
-        "description": "The fieldset element lacks a legend child to describe the group of form controls, making it difficult for screen reader users to understand the purpose of this form section.",
-        "element": "Lines 55",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Table data cell used as header without th semantics",
-        "severity": "error",
-        "description": "The cell contains \"Plan\" which is a column header, but uses td instead of th, failing to convey the tabular structure and header relationships to assistive technologies.",
-        "element": "Lines 72, 73, 74",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Table missing caption",
-        "severity": "warning",
-        "description": "The data table lacks a caption element to provide a visible title or description, making it harder for screen reader users to understand the table's purpose and content.",
-        "element": "Lines 70",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Heading level skip",
-        "severity": "warning",
-        "description": "The heading hierarchy jumps from h2 to h4, skipping h3, which disrupts the logical navigation structure for screen reader users who rely on heading levels to understand page organization.",
-        "element": "Lines 34",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Section landmark missing distinguishing label",
-        "severity": "warning",
-        "description": "Multiple section elements exist on the page, but this section lacks an aria-label or aria-labelledby to distinguish it from other section landmarks in screen reader landmark lists.",
-        "element": "Lines 24, 32, 68, 88, 99",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Toggle button missing aria-expanded",
         "severity": "error",
-        "description": "The button with text \"Menu\" controls expandable content but lacks aria-expanded to indicate whether the menu is currently expanded or collapsed, leaving screen reader users unaware of the state.",
+        "description": "The button with text \"Menu\" controls a navigation menu but lacks aria-expanded attribute to indicate the current state (expanded/collapsed) to screen reader users.",
         "element": "Lines 16",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Personal data input missing autocomplete",
+        "issueType": "Image missing alt attribute",
+        "severity": "error",
+        "description": "The logo image lacks an alt attribute, preventing screen reader users from understanding that this is the company logo.",
+        "element": "Lines 20, 46, 97",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Section missing accessible name",
         "severity": "warning",
-        "description": "The email input collects personal information but lacks an autocomplete attribute, preventing browsers from assisting users with filling in their known email address.",
-        "element": "Lines 56, 57, 58",
+        "description": "Multiple section elements exist on the page without distinguishing labels, making it difficult for screen reader users to navigate between regions.",
+        "element": "Lines 25, 34, 73, 94, 106",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Heading level skip",
+        "severity": "warning",
+        "description": "The heading hierarchy skips from h2 to h4, bypassing h3, which disrupts the logical outline of the page for screen reader users.",
+        "element": "Lines 36",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Fieldset missing legend",
+        "severity": "warning",
+        "description": "The fieldset groups form controls but lacks a legend element, failing to provide a programmatic label for the group to screen reader users.",
+        "element": "Lines 59",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Email input missing label",
+        "severity": "error",
+        "description": "The email input field has no associated label, placeholder is not a sufficient accessible name, preventing screen reader users from knowing what information to enter.",
+        "element": "Lines 60",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Email input missing autocomplete",
+        "severity": "warning",
+        "description": "The email input collects personal data but lacks the autocomplete attribute, preventing browsers from assisting users with filling in their information.",
+        "element": "Lines 60",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Name input missing label",
+        "severity": "error",
+        "description": "The text input for full name has no associated label, making it impossible for screen reader users to identify the field's purpose.",
+        "element": "Lines 61",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Name input missing autocomplete",
+        "severity": "warning",
+        "description": "The input for full name collects personal data but lacks the autocomplete attribute, reducing usability for users with cognitive disabilities.",
+        "element": "Lines 61",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Telephone input missing label",
+        "severity": "error",
+        "description": "The telephone input field lacks a label, preventing screen reader users from understanding what data is required.",
+        "element": "Lines 62",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Telephone input missing autocomplete",
+        "severity": "warning",
+        "description": "The telephone input collects personal data but lacks the autocomplete attribute, preventing browsers from autofill assistance.",
+        "element": "Lines 62",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Select element missing label",
+        "severity": "error",
+        "description": "The select dropdown has no label, leaving screen reader users unaware of what option they are selecting.",
+        "element": "Lines 63",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Textarea missing label",
+        "severity": "error",
+        "description": "The textarea for messages has no associated label, making it inaccessible to screen reader users.",
+        "element": "Lines 68",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Table header cell not marked as th",
+        "severity": "warning",
+        "description": "The cell containing \"Plan\" functions as a column header but is marked as td instead of th, preventing screen readers from identifying it as a header.",
+        "element": "Lines 77, 78, 79",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Missing language attribute on html element",
+        "severity": "error",
+        "description": "The <html> element lacks a lang attribute, which prevents screen readers from identifying the page's primary language. This affects users who rely on correct pronunciation and language-specific processing.",
+        "element": "Lines 2",
         "toolSource": "ai"
       }
     ],
@@ -459,125 +491,413 @@
         "element": "select",
         "toolSource": "axeCore"
       }
-    ]
+    ],
+    "axeLinter": [
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"#home\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"#about\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"#services\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "li:nth-child(4) > button",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "#cta-btn",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "button[type=\"submit\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "heading-order",
+        "severity": "warning",
+        "description": "Ensure the order of headings is semantically correct",
+        "element": "h4",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "html-has-lang",
+        "severity": "warning",
+        "description": "Ensure every HTML document has a lang attribute",
+        "element": "html",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "image-alt",
+        "severity": "error",
+        "description": "Ensure <img> elements have alternative text or a role of none or presentation",
+        "element": "img[src$=\"logo.png\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "image-alt",
+        "severity": "error",
+        "description": "Ensure <img> elements have alternative text or a role of none or presentation",
+        "element": "img[src$=\"icon.png\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "image-alt",
+        "severity": "error",
+        "description": "Ensure <img> elements have alternative text or a role of none or presentation",
+        "element": "img[src$=\"photo1.jpg\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "landmark-banner-is-top-level",
+        "severity": "warning",
+        "description": "Ensure the banner landmark is at top level",
+        "element": "div[role=\"banner\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "landmark-no-duplicate-banner",
+        "severity": "warning",
+        "description": "Ensure the document has at most one banner landmark",
+        "element": "header",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "landmark-one-main",
+        "severity": "warning",
+        "description": "Ensure the document has a main landmark",
+        "element": "html",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "landmark-unique",
+        "severity": "warning",
+        "description": "Ensure landmarks are unique",
+        "element": "header",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "div > h2",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": ".hero > div > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": ".features",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "input[type=\"email\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "input[type=\"text\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "input[type=\"tel\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "select",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "textarea",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "section:nth-child(5)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": ".gallery",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "section:nth-child(7)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "role-img-alt",
+        "severity": "warning",
+        "description": "Ensure [role=\"img\"] elements have alternative text",
+        "element": "div[role=\"img\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2a",
+        "issueType": "select-name",
+        "severity": "error",
+        "description": "Ensure select element has an accessible name",
+        "element": "select",
+        "toolSource": "axeLinter"
+      }
+    ],
+    "eslintJsxA11y": null,
+    "webhint": [
+      {
+        "wcag": "unknown",
+        "issueType": "axe/language",
+        "severity": "warning",
+        "description": "<html> element must have a lang attribute: The <html> element does not have a lang attribute",
+        "element": "http://localhost:3456/:1",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:12",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:13",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:14",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 10.0pt (13.3333px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:15",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/text-alternatives",
+        "severity": "error",
+        "description": "Images must have alternative text: Element has no title attribute",
+        "element": "http://localhost:3456/:19",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.77 (foreground color: #ffffff, background color: #ff6b6b, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:28",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 5.74 (foreground color: #666666, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:41",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/text-alternatives",
+        "severity": "error",
+        "description": "Images must have alternative text: Element has no title attribute",
+        "element": "http://localhost:3456/:45",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 5.74 (foreground color: #666666, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:47",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/forms",
+        "severity": "error",
+        "description": "Select element must have an accessible name: Element has no title attribute",
+        "element": "http://localhost:3456/:62",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.97 (foreground color: #ffffff, background color: #007bff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:68",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/text-alternatives",
+        "severity": "error",
+        "description": "Images must have alternative text: Element has no title attribute",
+        "element": "http://localhost:3456/:96",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/text-alternatives",
+        "severity": "warning",
+        "description": "[role=\"img\"] elements must have alternative text: Element has no title attribute",
+        "element": "http://localhost:3456/:99",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:108",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:109",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:110",
+        "toolSource": "webhint"
+      }
+    ],
+    "stylelintA11y": null
   },
   "alignmentMatrix": [
     {
       "wcag": "unknown",
-      "issueType": "Missing lang attribute on html element",
+      "issueType": "Page language not specified",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AI_ONLY",
       "confidence": "LOW",
       "notes": ""
     },
     {
       "wcag": "unknown",
-      "issueType": "Missing accessible name on link",
+      "issueType": "Link with non-descriptive text",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AI_ONLY",
       "confidence": "LOW",
       "notes": ""
     },
     {
       "wcag": "unknown",
-      "issueType": "Non-descriptive link text",
+      "issueType": "Link with empty accessible name",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Image missing alt attribute",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Element with role img missing accessible name",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Form input missing label",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Textarea missing label",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Fieldset missing legend",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Table data cell used as header without th semantics",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Table missing caption",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Heading level skip",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Section landmark missing distinguishing label",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AI_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -588,16 +908,206 @@
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AI_ONLY",
       "confidence": "LOW",
       "notes": ""
     },
     {
       "wcag": "unknown",
-      "issueType": "Personal data input missing autocomplete",
+      "issueType": "Image missing alt attribute",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Section missing accessible name",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Heading level skip",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Fieldset missing legend",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Email input missing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Email input missing autocomplete",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Name input missing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Name input missing autocomplete",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Telephone input missing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Telephone input missing autocomplete",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Select element missing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Textarea missing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Table header cell not marked as th",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Missing language attribute on html element",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AI_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -608,6 +1118,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -618,6 +1132,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -628,6 +1146,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -638,6 +1160,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -648,6 +1174,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -658,6 +1188,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -668,6 +1202,10 @@
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "LIGHTHOUSE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -678,6 +1216,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -688,6 +1230,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -698,6 +1244,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -708,6 +1258,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -718,6 +1272,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -728,6 +1286,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -738,6 +1300,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -748,6 +1314,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -758,6 +1328,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -768,6 +1342,10 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
       "confidence": "LOW",
       "notes": ""
@@ -778,18 +1356,245 @@
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
       "classification": "AXE_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "wcag2aa",
+      "issueType": "color-contrast",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "heading-order",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "wcag2a",
+      "issueType": "html-has-lang",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "wcag2a",
+      "issueType": "image-alt",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "landmark-banner-is-top-level",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "landmark-no-duplicate-banner",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "landmark-one-main",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "landmark-unique",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "region",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "wcag2a",
+      "issueType": "role-img-alt",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "wcag2a",
+      "issueType": "select-name",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": true,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "axe/language",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": true,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "axe/color",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": true,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "axe/text-alternatives",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": true,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "axe/forms",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": true,
+      "stylelintA11yFinds": false,
+      "classification": "SUPPLEMENTARY_ONLY",
       "confidence": "LOW",
       "notes": ""
     }
   ],
   "statistics": {
-    "totalUnique": 32,
+    "totalUnique": 51,
     "totalShared": 0,
-    "totalAiOnly": 14,
+    "totalAiOnly": 18,
     "totalLighthouseOnly": 7,
     "totalAxeCoreOnly": 11,
+    "totalAxeLinterOnly": 11,
+    "totalEslintJsxA11yOnly": 0,
+    "totalWebhintOnly": 4,
+    "totalStylelintA11yOnly": 0,
     "sharedPercentage": 0,
-    "recallGaps": 18
+    "recallGaps": 33,
+    "perToolCounts": {
+      "ai": 18,
+      "lighthouse": 14,
+      "axeCore": 28,
+      "axeLinter": 28,
+      "eslintJsxA11y": null,
+      "webhint": 17,
+      "stylelintA11y": null
+    }
   }
 }
