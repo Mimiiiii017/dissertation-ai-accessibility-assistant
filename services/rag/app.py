@@ -1,10 +1,13 @@
 from pathlib import Path
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
 import chromadb
 from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 import re
 import os
+import httpx
 from rank_bm25 import BM25Okapi
 import pickle
 
@@ -21,6 +24,49 @@ COLLECTION_NAMES = {
 DB_DIR = Path(__file__).resolve().parent / "chroma_db"
 
 app = FastAPI(title="AI Accessibility Assistant - RAG Service")
+
+# Allow VS Code extension host (and webview) to call this service cross-origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ─── Ollama reverse proxy ─────────────────────────────────────────────────────
+# The extension points ollamaHost at  {ngrokURL}/proxy/ollama
+# Requests are forwarded to the local Ollama instance (port 11434) and
+# the response is streamed back unchanged — preserving NDJSON chunking.
+OLLAMA_BASE = "http://localhost:11434"
+
+@app.api_route("/proxy/ollama/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def proxy_ollama(path: str, request: Request):
+    url = f"{OLLAMA_BASE}/{path}"
+    body = await request.body()
+    # Strip hop-by-hop and host headers before forwarding
+    skip = {"host", "content-length", "transfer-encoding", "connection",
+            "ngrok-skip-browser-warning"}
+    headers = {k: v for k, v in request.headers.items() if k.lower() not in skip}
+
+    async def stream_upstream():
+        async with httpx.AsyncClient(timeout=360.0) as client:
+            async with client.stream(
+                method=request.method,
+                url=url,
+                content=body,
+                headers=headers,
+            ) as upstream:
+                async for chunk in upstream.aiter_raw(chunk_size=512):
+                    yield chunk
+
+    # Determine content-type from a HEAD/first-byte peek via a non-streaming call
+    # for non-streaming endpoints (tags, generate with stream=false).
+    # For /api/chat with stream=true we always stream.
+    return StreamingResponse(
+        stream_upstream(),
+        media_type="application/x-ndjson",
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
 
 # ─── Embedding model ────────────────────────────────────────────────────────
 # Uses ChromaDB's DefaultEmbeddingFunction (all-MiniLM-L6-v2 via onnxruntime).
@@ -44,6 +90,44 @@ MIN_CHUNK_CHARS  = 80    # discard/merge chunks shorter than this
 print(f"[RAG] embed=DefaultEmbeddingFunction(all-MiniLM-L6-v2/onnx)  MAX_CHUNK_TOKENS={MAX_CHUNK_TOKENS}  OVERLAP_TOKENS={OVERLAP_TOKENS}")
 
 
+def _rebuild_bm25_from_chroma(collection_name: str) -> int:
+    """Rebuild the in-memory BM25 index for a collection from its persisted ChromaDB data."""
+    try:
+        col = client.get_collection(name=collection_name, embedding_function=embed_fn)
+    except Exception:
+        return 0
+    count = col.count()
+    if count == 0:
+        return 0
+    # Fetch all docs in batches of 500 (ChromaDB .get() with no filter returns all)
+    all_ids: list[str] = []
+    all_docs: list[str] = []
+    batch_size = 500
+    offset = 0
+    while offset < count:
+        batch = col.get(limit=batch_size, offset=offset, include=["documents"])
+        all_ids.extend(batch["ids"])
+        all_docs.extend(batch["documents"])
+        offset += len(batch["ids"])
+        if len(batch["ids"]) == 0:
+            break
+    corpus = [doc.lower().split() for doc in all_docs]
+    bm25 = BM25Okapi(corpus)
+    bm25_indexes[collection_name] = (all_ids, bm25)
+    return len(all_ids)
+
+
+@app.on_event("startup")
+def startup_rebuild_bm25():
+    """Rebuild BM25 indexes from persisted ChromaDB data on every server start."""
+    for kb_type, collection_name in COLLECTION_NAMES.items():
+        n = _rebuild_bm25_from_chroma(collection_name)
+        if n:
+            print(f"[RAG] Rebuilt BM25 index for {collection_name} from {n} persisted docs")
+        else:
+            print(f"[RAG] {collection_name}: no persisted docs — run POST /index to ingest")
+
+
 class IndexResponse(BaseModel):
     indexed: int
 
@@ -51,7 +135,9 @@ class RetrieveRequest(BaseModel):
     query: str
     top_k: int = 3  # Reduced from 5 to avoid context overload
     kb_type: str = "accessibility"  # accessibility or tlx
-    distance_threshold: float = 0.65  # cosine distance; chunks above this are too dissimilar
+    distance_threshold: float = 1.2  # L2 distance (collection uses default L2 space, not cosine).
+                                     # all-MiniLM-L6-v2 L2 distances for relevant pairs: ~0.55-0.90;
+                                     # 1.2 passes all meaningful matches while excluding truly unrelated chunks.
     use_hybrid: bool = True  # Use hybrid search (BM25 + embeddings)
 
 class Chunk(BaseModel):

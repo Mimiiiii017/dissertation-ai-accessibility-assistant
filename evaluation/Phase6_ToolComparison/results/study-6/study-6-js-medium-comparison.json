@@ -2,137 +2,88 @@
   "metadata": {
     "fixture": "study-6-js-medium",
     "errorCount": 30,
-    "timestamp": "2026-05-15T15:00:59.177Z",
+    "timestamp": "2026-05-17T19:53:19.336Z",
     "aiModel": "kimi-k2.5:cloud + qwen3.5:397b-cloud"
   },
   "toolOutputs": {
     "ai": [
       {
         "wcag": "unknown",
-        "issueType": "Modal open button does not update aria-expanded",
+        "issueType": "Menu toggle button does not update aria-expanded",
         "severity": "error",
-        "description": "The click handler on .open-modal-btn shows the modal dialog by setting display to block, but does not set aria-expanded to true on the trigger button. Screen reader users are not informed that the button has expanded a dialog.",
-        "element": "Lines 141, 142, 143",
+        "description": "The click handler toggles the menu visibility using style.display but fails to update the aria-expanded attribute on the menuButton to reflect the open/closed state. Screen readers cannot announce the state change to users.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Modal close button does not update aria-expanded",
+        "issueType": "Contact form validation does not set aria-invalid on fields",
         "severity": "error",
-        "description": "The click handler on .close-btn hides the modal by setting display to none, but does not update the aria-expanded attribute on the trigger button to false. Screen reader users are not informed that the dialog has closed.",
-        "element": "Lines 146, 147, 148",
+        "description": "When validation fails, error messages are created and appended to the DOM, but the invalid input fields do not receive aria-invalid=\"true\". Screen readers cannot convey the invalid state to users.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Form submit validation does not set aria-invalid on invalid fields",
+        "issueType": "Contact form error messages not associated with inputs",
         "severity": "error",
-        "description": "When the contact form is submitted with empty fields, the validation creates visual error indicators including red borders and text content, but fails to programmatically set aria-invalid=\"true\" on the invalid input elements. Screen reader users cannot identify which fields have failed validation.",
-        "element": "Lines 52, 53, 54, 55, 56, 57, 58, 59, 60, 61",
+        "description": "Error spans are created with unique IDs but are not programmatically associated with their respective input fields using aria-describedby. Screen readers cannot announce the error message when the field is focused.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Form blur validation does not clear aria-invalid on valid fields",
+        "issueType": "Load more button content update not announced",
         "severity": "warning",
-        "description": "The blur event handler sets aria-invalid=\"true\" when a field is empty, but never removes this attribute or sets it to false when the field contains valid data. Screen reader users may continue to hear that the field is invalid even after correcting the error.",
-        "element": "Lines 71, 72, 73, 74, 75, 76",
+        "description": "New items are dynamically appended to the DOM after the fetch resolves, but there is no aria-live announcement to inform screen reader users that new content has loaded or how many items were added.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Load more button does not announce new content to screen readers",
+        "issueType": "Cart counter update not announced",
         "severity": "warning",
-        "description": "When the load more button is activated and new items are fetched and appended to the DOM, there is no announcement via an aria-live region to inform screen reader users that additional content has been added or that the action completed successfully.",
-        "element": "Lines 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102",
+        "description": "The cart count is incremented and the text content updated, but the change is not announced to screen readers. The code comment \"// missing aria-live\" acknowledges this gap.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Add to cart buttons do not announce cart updates",
+        "issueType": "Tab buttons missing aria-controls",
         "severity": "warning",
-        "description": "When items are added to the cart, the cart counter text is updated visually but no announcement is made to screen reader users to confirm the item was added or to communicate the new cart total.",
-        "element": "Lines 109, 110, 111, 112, 113, 114, 115",
+        "description": "The tab buttons have role=\"tab\" but lack aria-controls attributes linking each button to its corresponding tabpanel. Screen readers cannot establish the relationship between tabs and their content panels.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Filter select changes not announced to screen readers",
-        "severity": "warning",
-        "description": "When filter select values change, the application state updates but no announcement is made via the aria-live region to inform screen reader users that filters have been applied or that content may have changed.",
-        "element": "Lines 168, 169, 170, 171, 172, 173",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tab interface lacks keyboard navigation support",
+        "issueType": "Modal dialog missing focus management",
         "severity": "error",
-        "description": "The tab interface only handles mouse click events but does not implement keyboard event handlers for arrow keys, Home, or End keys required by the WAI-ARIA tabs pattern. Keyboard-only users cannot navigate between tabs using standard expected controls.",
-        "element": "Lines 32, 33, 34, 35, 36, 37, 38, 39",
+        "description": "Opening the modal does not move focus to it, and closing it does not restore focus to the trigger button. Keyboard users lose their place in the document. The modal also lacks aria-modal=\"true\".",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "1.3.5",
+        "issueType": "Newsletter email input missing autocomplete",
+        "severity": "warning",
+        "description": "The email input in the newsletter form collects personal data but lacks the autocomplete=\"email\" attribute, preventing browsers from autofill and violating SC 1.3.5.",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Modal dialog lacks focus management on open",
+        "issueType": "Contact form personal inputs missing autocomplete",
+        "severity": "warning",
+        "description": "The contact form inputs (presumably including name, email, tel fields) lack autocomplete attributes (e.g., autocomplete=\"name\", autocomplete=\"email\", autocomplete=\"tel\") to identify input purpose.",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Modal container not managed with aria-hidden",
+        "severity": "warning",
+        "description": "The modal is shown and hidden by toggling style.display, but the script does not toggle aria-hidden on the modal container. When closed, the modal content may remain in the accessibility tree, causing confusion for screen reader users who might navigate to hidden content.",
+        "element": "Lines 76, 79",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Solar system canvas lacks keyboard interaction",
         "severity": "error",
-        "description": "When the modal opens, focus is not programmatically moved to the modal dialog or its close button, and focus is not trapped within the modal. Keyboard users can navigate outside the modal while it remains visually open, creating a focus trap confusion.",
-        "element": "Lines 141, 142, 143",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Modal close does not return focus to trigger",
-        "severity": "warning",
-        "description": "When the modal is closed, focus is not returned to the button that opened it. Keyboard users lose their place in the page navigation sequence and must manually navigate back to the trigger location.",
-        "element": "Lines 146, 147, 148",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Form error messages not associated with inputs via aria-describedby",
-        "severity": "error",
-        "description": "Error message spans are created and appended to the DOM but lack unique ids and are not programmatically associated with their corresponding input fields using aria-describedby. Screen reader users cannot reliably access the error message content when navigating to invalid fields.",
-        "element": "Lines 52, 53, 54, 55, 56, 57, 58, 59, 60, 61",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Menu aria-expanded not initialised on page load",
-        "severity": "warning",
-        "description": "The menu button does not have its aria-expanded attribute set to 'false' during initialization. Assistive technologies will not report the initial closed state of the menu control.",
-        "element": "Lines 13",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "aria-invalid not cleared on valid input",
-        "severity": "warning",
-        "description": "The blur handler sets aria-invalid=\"true\" when the input is empty but never resets it to \"false\" when the input becomes valid. The invalid state persists incorrectly.",
-        "element": "Lines 51, 53",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "User action result not announced via aria-live region",
-        "severity": "warning",
-        "description": "Clicking add-to-cart-btn updates the cart count text but does not trigger an announcement. Screen reader users are not informed that the item was added to the cart.",
-        "element": "Lines 75, 78",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tab state not initialised on page load",
-        "severity": "warning",
-        "description": "The tab buttons and panels are selected via querySelector but no initialization code sets aria-selected=\"true\" on the first tab or displays the first panel. The initial state is undefined for assistive technology.",
-        "element": "Lines 20, 22",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Filter change result not announced via aria-live region",
-        "severity": "warning",
-        "description": "Changing a filter select updates the appState but does not announce the filter change or result update to screen readers. Users are unaware the view has changed.",
-        "element": "Lines 114, 118",
+        "description": "The solar system canvas has role=\"application\" and handles mouse click/move events to select planets, but there is no keyboard event listener (keydown) implemented on the canvas to allow keyboard users to select or interact with the planets. Keyboard users are forced to use the list below instead of the main interactive surface.",
+        "element": "Lines 843, 850, 863",
         "toolSource": "ai"
       }
     ],
@@ -358,7 +309,7 @@
   "alignmentMatrix": [
     {
       "wcag": "unknown",
-      "issueType": "Modal open button does not update aria-expanded",
+      "issueType": "Menu toggle button does not update aria-expanded",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -372,7 +323,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Modal close button does not update aria-expanded",
+      "issueType": "Contact form validation does not set aria-invalid on fields",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -386,7 +337,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Form submit validation does not set aria-invalid on invalid fields",
+      "issueType": "Contact form error messages not associated with inputs",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -400,7 +351,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Form blur validation does not clear aria-invalid on valid fields",
+      "issueType": "Load more button content update not announced",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -414,7 +365,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Load more button does not announce new content to screen readers",
+      "issueType": "Cart counter update not announced",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -428,7 +379,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Add to cart buttons do not announce cart updates",
+      "issueType": "Tab buttons missing aria-controls",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -442,7 +393,21 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Filter select changes not announced to screen readers",
+      "issueType": "Modal dialog missing focus management",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "1.3.5",
+      "issueType": "Newsletter email input missing autocomplete",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -456,7 +421,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Tab interface lacks keyboard navigation support",
+      "issueType": "Contact form personal inputs missing autocomplete",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -470,7 +435,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Modal dialog lacks focus management on open",
+      "issueType": "Modal container not managed with aria-hidden",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -484,91 +449,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Modal close does not return focus to trigger",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Form error messages not associated with inputs via aria-describedby",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Menu aria-expanded not initialised on page load",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "aria-invalid not cleared on valid input",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "User action result not announced via aria-live region",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Tab state not initialised on page load",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Filter change result not announced via aria-live region",
+      "issueType": "Solar system canvas lacks keyboard interaction",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -722,9 +603,9 @@
     }
   ],
   "statistics": {
-    "totalUnique": 26,
+    "totalUnique": 21,
     "totalShared": 0,
-    "totalAiOnly": 16,
+    "totalAiOnly": 11,
     "totalLighthouseOnly": 3,
     "totalAxeCoreOnly": 3,
     "totalAxeLinterOnly": 3,
@@ -734,7 +615,7 @@
     "sharedPercentage": 0,
     "recallGaps": 10,
     "perToolCounts": {
-      "ai": 16,
+      "ai": 11,
       "lighthouse": 9,
       "axeCore": 6,
       "axeLinter": 6,

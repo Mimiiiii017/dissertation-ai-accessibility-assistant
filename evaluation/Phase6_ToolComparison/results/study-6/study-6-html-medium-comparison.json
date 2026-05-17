@@ -2,153 +2,137 @@
   "metadata": {
     "fixture": "study-6-html-medium",
     "errorCount": 30,
-    "timestamp": "2026-05-15T14:52:53.382Z",
+    "timestamp": "2026-05-17T19:46:20.295Z",
     "aiModel": "kimi-k2.5:cloud + qwen3.5:397b-cloud"
   },
   "toolOutputs": {
     "ai": [
       {
         "wcag": "unknown",
-        "issueType": "Page language not specified",
-        "severity": "error",
-        "description": "The html element is missing the lang attribute, which prevents screen readers from correctly pronouncing the content in the appropriate language.",
-        "element": "Lines 2",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Link with non-descriptive text",
+        "issueType": "Non-descriptive link text",
         "severity": "warning",
-        "description": "The link text \"Click here\" does not describe the destination or purpose of the link, forcing screen reader users to navigate out of context to understand where the link leads.",
-        "element": "Lines 14, 109, 111",
+        "description": "The link text \"Click here\" is generic and provides no information about the destination when read out of context by screen readers.",
+        "element": "Lines 14",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Link with empty accessible name",
+        "issueType": "Missing accessible name on link",
         "severity": "error",
-        "description": "The link has an empty aria-label attribute which overrides the visible text, resulting in no accessible name for screen reader users.",
-        "element": "Lines 15",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Toggle button missing aria-expanded",
-        "severity": "error",
-        "description": "The button with text \"Menu\" controls a navigation menu but lacks aria-expanded attribute to indicate the current state (expanded/collapsed) to screen reader users.",
+        "description": "The link has an empty aria-label attribute which overrides the visible text, resulting in no accessible name being announced by assistive technologies.",
         "element": "Lines 16",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Image missing alt attribute",
-        "severity": "error",
-        "description": "The logo image lacks an alt attribute, preventing screen reader users from understanding that this is the company logo.",
-        "element": "Lines 20, 46, 97",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Section missing accessible name",
+        "issueType": "Label in Name mismatch on link",
         "severity": "warning",
-        "description": "Multiple section elements exist on the page without distinguishing labels, making it difficult for screen reader users to navigate between regions.",
-        "element": "Lines 25, 34, 73, 94, 106",
+        "description": "The visible link text \"Open in new tab\" is not contained within the accessible name \"Homepage (opens in new tab)\", failing to match the label visible on screen with the name spoken by speech recognition users.",
+        "element": "Lines 122",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Heading level skip",
         "severity": "warning",
-        "description": "The heading hierarchy skips from h2 to h4, bypassing h3, which disrupts the logical outline of the page for screen reader users.",
-        "element": "Lines 36",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Fieldset missing legend",
-        "severity": "warning",
-        "description": "The fieldset groups form controls but lacks a legend element, failing to provide a programmatic label for the group to screen reader users.",
-        "element": "Lines 59",
+        "description": "The heading hierarchy skips from h2 to h4, bypassing h3 and creating a confusing document outline for screen reader users.",
+        "element": "Lines 41",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Email input missing label",
         "severity": "error",
-        "description": "The email input field has no associated label, placeholder is not a sufficient accessible name, preventing screen reader users from knowing what information to enter.",
-        "element": "Lines 60",
+        "description": "The email input has no associated label or aria-label, making it unidentifiable to screen reader users.",
+        "element": "Lines 65",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Email input missing autocomplete",
         "severity": "warning",
-        "description": "The email input collects personal data but lacks the autocomplete attribute, preventing browsers from assisting users with filling in their information.",
-        "element": "Lines 60",
+        "description": "The email input collects personal data but lacks the autocomplete attribute, preventing browsers from assisting users with autofill.",
+        "element": "Lines 65",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Name input missing label",
         "severity": "error",
-        "description": "The text input for full name has no associated label, making it impossible for screen reader users to identify the field's purpose.",
-        "element": "Lines 61",
+        "description": "The text input for full name has no label or aria-label, so screen readers cannot convey its purpose.",
+        "element": "Lines 66",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Name input missing autocomplete",
         "severity": "warning",
-        "description": "The input for full name collects personal data but lacks the autocomplete attribute, reducing usability for users with cognitive disabilities.",
-        "element": "Lines 61",
+        "description": "The input for full name lacks the autocomplete attribute, preventing browsers from filling the user's name automatically.",
+        "element": "Lines 66",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Telephone input missing label",
+        "issueType": "Phone input missing label",
         "severity": "error",
-        "description": "The telephone input field lacks a label, preventing screen reader users from understanding what data is required.",
-        "element": "Lines 62",
+        "description": "The telephone input has no label or aria-label, making it inaccessible to screen reader users.",
+        "element": "Lines 67",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Telephone input missing autocomplete",
+        "issueType": "Phone input missing autocomplete",
         "severity": "warning",
-        "description": "The telephone input collects personal data but lacks the autocomplete attribute, preventing browsers from autofill assistance.",
-        "element": "Lines 62",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Select element missing label",
-        "severity": "error",
-        "description": "The select dropdown has no label, leaving screen reader users unaware of what option they are selecting.",
-        "element": "Lines 63",
+        "description": "The telephone input lacks the autocomplete attribute, preventing autofill of the user's phone number.",
+        "element": "Lines 67",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Textarea missing label",
         "severity": "error",
-        "description": "The textarea for messages has no associated label, making it inaccessible to screen reader users.",
-        "element": "Lines 68",
+        "description": "The textarea has no associated label or aria-label, making it unidentifiable to screen reader users.",
+        "element": "Lines 73",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Table header cell not marked as th",
-        "severity": "warning",
-        "description": "The cell containing \"Plan\" functions as a column header but is marked as td instead of th, preventing screen readers from identifying it as a header.",
-        "element": "Lines 77, 78, 79",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Missing language attribute on html element",
+        "issueType": "Image missing alt attribute",
         "severity": "error",
-        "description": "The <html> element lacks a lang attribute, which prevents screen readers from identifying the page's primary language. This affects users who rely on correct pronunciation and language-specific processing.",
-        "element": "Lines 2",
+        "description": "The logo image lacks an alt attribute, preventing screen readers from conveying its content to users.",
+        "element": "Lines 23, 51, 102",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Navigation landmark missing distinguishing label",
+        "severity": "warning",
+        "description": "The page contains two nav elements. This nav lacks an aria-label, making it impossible for screen reader users to distinguish it from the secondary legal navigation.",
+        "element": "Lines 11",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Toggle button missing aria-expanded",
+        "severity": "error",
+        "description": "The \"Menu\" button controls expandable navigation content but lacks the aria-expanded attribute, preventing screen reader users from knowing the current state.",
+        "element": "Lines 17",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Newsletter email input missing autocomplete",
+        "severity": "warning",
+        "description": "The email input in the newsletter form lacks the autocomplete attribute, preventing browsers from autofill assistance.",
+        "element": "Lines 254",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Div with role img missing accessible name",
+        "severity": "error",
+        "description": "The div has role=\"img\" but lacks an aria-label or aria-labelledby attribute, so screen readers cannot convey the image content.",
+        "element": "Lines 105",
         "toolSource": "ai"
       }
     ],
@@ -174,7 +158,15 @@
         "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
         "severity": "warning",
         "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
-        "element": "<a href=\"#services\" aria-label=\"\">",
+        "element": "<a href=\"#services\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"#features\" aria-label=\"\">",
         "toolSource": "lighthouse"
       },
       {
@@ -198,7 +190,319 @@
         "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
         "severity": "warning",
         "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
         "element": "<button type=\"submit\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<div role=\"img\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/docs\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/blog\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/faq\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Homepage (opens in new tab)\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p class=\"role\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p class=\"role\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p class=\"role\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/blog/accessibility-matters\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/blog/performance-2026\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<p>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/blog/low-vision-design\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<button type=\"submit\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/integrations/slack\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/integrations/jira\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/integrations/datadog\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"https://status.example.com\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<th scope=\"col\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<th scope=\"col\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<th scope=\"col\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"mailto:sales@example.com\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"mailto:support@example.com\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"mailto:billing@example.com\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/privacy\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/terms\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/cookies\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/dpa\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/accessibility\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/security\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"/sitemap.xml\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"https://discord.gg/synapse\" target=\"_blank\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "severity": "warning",
+        "description": "Low-contrast text is difficult or impossible for many users to read. [Learn how to provide sufficient color contrast](https://dequeuniversity.com/rules/axe/4.11/color-contrast).",
+        "element": "<a href=\"mailto:accessibility@synapse.io\">",
         "toolSource": "lighthouse"
       },
       {
@@ -207,14 +511,6 @@
         "severity": "warning",
         "description": "Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. [Learn more about heading order](https://dequeuniversity.com/rules/axe/4.11/heading-order).",
         "element": "<h4>",
-        "toolSource": "lighthouse"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "`<html>` element does not have a `[lang]` attribute",
-        "severity": "warning",
-        "description": "If a page doesn't specify a `lang` attribute, a screen reader assumes that the page is in the default language that the user chose when setting up the screen reader. If the page isn't actually in the default language, then the screen reader might not announce the page's text correctly. [Learn more about the `lang` attribute](https://dequeuniversity.com/rules/axe/4.11/html-has-lang).",
-        "element": "<html>",
         "toolSource": "lighthouse"
       },
       {
@@ -251,10 +547,90 @@
       },
       {
         "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<a href=\"/docs\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<a href=\"/blog\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<button class=\"carousel-prev\" aria-label=\"Previous testimonial\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<button class=\"carousel-next\" aria-label=\"Next testimonial\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<summary>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<summary>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<summary>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<summary>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Touch targets do not have sufficient size or spacing.",
+        "severity": "warning",
+        "description": "Touch targets with sufficient size and spacing help users who may have difficulty targeting small controls to activate the targets. [Learn more about touch targets](https://dequeuniversity.com/rules/axe/4.11/target-size).",
+        "element": "<summary>",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
         "issueType": "Document does not have a main landmark.",
         "severity": "warning",
         "description": "One main landmark helps screen reader users navigate a web page. [Learn more about landmarks](https://dequeuniversity.com/rules/axe/4.11/landmark-one-main).",
-        "element": "<html>",
+        "element": "<html lang=\"en\">",
+        "toolSource": "lighthouse"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Elements with visible text labels do not have matching accessible names.",
+        "severity": "warning",
+        "description": "Visible text labels that do not match the accessible name can result in a confusing experience for screen reader users. [Learn more about accessible names](https://dequeuniversity.com/rules/axe/4.11/label-content-name-mismatch).",
+        "element": "<a href=\"/\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Homepage (opens in new tab)\">",
         "toolSource": "lighthouse"
       },
       {
@@ -296,7 +672,15 @@
         "issueType": "color-contrast (serious)",
         "severity": "warning",
         "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "element": "li:nth-child(4) > button",
+        "element": "a[href$=\"#features\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "color-contrast (serious)",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "li:nth-child(5) > button",
         "toolSource": "axeCore"
       },
       {
@@ -312,7 +696,39 @@
         "issueType": "color-contrast (serious)",
         "severity": "warning",
         "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "element": "button[type=\"submit\"]",
+        "element": "fieldset > button[type=\"submit\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "color-contrast (serious)",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "time[datetime=\"2026-04-12\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "color-contrast (serious)",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "time[datetime=\"2026-03-28\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "color-contrast (serious)",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "time[datetime=\"2026-03-10\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "color-contrast (serious)",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".newsletter-form > button[type=\"submit\"]",
         "toolSource": "axeCore"
       },
       {
@@ -321,14 +737,6 @@
         "severity": "warning",
         "description": "Ensure the order of headings is semantically correct",
         "element": "h4",
-        "toolSource": "axeCore"
-      },
-      {
-        "wcag": "cat.language",
-        "issueType": "html-has-lang (serious)",
-        "severity": "warning",
-        "description": "Ensure every HTML document has a lang attribute",
-        "element": "html",
         "toolSource": "axeCore"
       },
       {
@@ -388,6 +796,30 @@
         "toolSource": "axeCore"
       },
       {
+        "wcag": "cat.color",
+        "issueType": "link-in-text-block (serious)",
+        "severity": "warning",
+        "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+        "element": "a[href$=\"status.example.com\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "link-in-text-block (serious)",
+        "severity": "warning",
+        "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+        "element": "a[href$=\"synapse\"]",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.color",
+        "issueType": "link-in-text-block (serious)",
+        "severity": "warning",
+        "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+        "element": "p:nth-child(3) > a",
+        "toolSource": "axeCore"
+      },
+      {
         "wcag": "cat.keyboard",
         "issueType": "region (moderate)",
         "severity": "warning",
@@ -416,7 +848,15 @@
         "issueType": "region (moderate)",
         "severity": "warning",
         "description": "Ensure all page content is contained by landmarks",
-        "element": "input[type=\"email\"]",
+        "element": "legend",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "input[placeholder=\"Your email\"]",
         "toolSource": "axeCore"
       },
       {
@@ -476,6 +916,142 @@
         "toolSource": "axeCore"
       },
       {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#team",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#testimonials",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#faq > h2",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#blog",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#newsletter > h2",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#newsletter > p",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#partners",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#case-studies",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#pricing-detail",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#docs-preview",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#security",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#changelog",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#integrations",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#accessibility-commitment",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#status",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#contact-detail",
+        "toolSource": "axeCore"
+      },
+      {
+        "wcag": "cat.keyboard",
+        "issueType": "region (moderate)",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#security-2",
+        "toolSource": "axeCore"
+      },
+      {
         "wcag": "cat.text-alternatives",
         "issueType": "role-img-alt (serious)",
         "severity": "warning",
@@ -522,7 +1098,15 @@
         "issueType": "color-contrast",
         "severity": "warning",
         "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "element": "li:nth-child(4) > button",
+        "element": "a[href$=\"#features\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "li:nth-child(5) > button",
         "toolSource": "axeLinter"
       },
       {
@@ -538,7 +1122,319 @@
         "issueType": "color-contrast",
         "severity": "warning",
         "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "element": "button[type=\"submit\"]",
+        "element": ".features > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "#feature3 > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "fieldset > button[type=\"submit\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "div[role=\"img\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"docs\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"blog\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"faq\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href=\"/\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(1) > .role",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(1) > p:nth-child(4)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(2) > .role",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(2) > p:nth-child(4)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(3) > .role",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".team-card:nth-child(3) > p:nth-child(4)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".blog-card:nth-child(1) > .blog-body > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"accessibility-matters\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".blog-card:nth-child(2) > .blog-body > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"performance-2026\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".blog-card:nth-child(3) > .blog-body > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"low-vision-design\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": ".newsletter-form > button[type=\"submit\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"slack\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"jira\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"datadog\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"status.example.com\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "th:nth-child(1)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "th:nth-child(2)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "th:nth-child(3)",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"mailto:sales@example.com\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href=\"mailto:support@example.com\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href=\"mailto:billing@example.com\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"privacy\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"terms\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"cookies\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"dpa\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"accessibility\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"security\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"sitemap.xml\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "a[href$=\"synapse\"]",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "wcag2aa",
+        "issueType": "color-contrast",
+        "severity": "warning",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "element": "p:nth-child(3) > a",
         "toolSource": "axeLinter"
       },
       {
@@ -547,14 +1443,6 @@
         "severity": "warning",
         "description": "Ensure the order of headings is semantically correct",
         "element": "h4",
-        "toolSource": "axeLinter"
-      },
-      {
-        "wcag": "wcag2a",
-        "issueType": "html-has-lang",
-        "severity": "warning",
-        "description": "Ensure every HTML document has a lang attribute",
-        "element": "html",
         "toolSource": "axeLinter"
       },
       {
@@ -642,7 +1530,15 @@
         "issueType": "region",
         "severity": "warning",
         "description": "Ensure all page content is contained by landmarks",
-        "element": "input[type=\"email\"]",
+        "element": "legend",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "input[placeholder=\"Your email\"]",
         "toolSource": "axeLinter"
       },
       {
@@ -702,6 +1598,142 @@
         "toolSource": "axeLinter"
       },
       {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#team",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#testimonials",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#faq > h2",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#blog",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#newsletter > h2",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#newsletter > p",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#partners",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#case-studies",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#pricing-detail",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#docs-preview",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#security",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#changelog",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#integrations",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#accessibility-commitment",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#status",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#contact-detail",
+        "toolSource": "axeLinter"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "region",
+        "severity": "warning",
+        "description": "Ensure all page content is contained by landmarks",
+        "element": "#security-2",
+        "toolSource": "axeLinter"
+      },
+      {
         "wcag": "wcag2a",
         "issueType": "role-img-alt",
         "severity": "warning",
@@ -720,14 +1752,6 @@
     ],
     "eslintJsxA11y": null,
     "webhint": [
-      {
-        "wcag": "unknown",
-        "issueType": "axe/language",
-        "severity": "warning",
-        "description": "<html> element must have a lang attribute: The <html> element does not have a lang attribute",
-        "element": "http://localhost:3456/:1",
-        "toolSource": "webhint"
-      },
       {
         "wcag": "unknown",
         "issueType": "axe/color",
@@ -756,8 +1780,16 @@
         "wcag": "unknown",
         "issueType": "axe/color",
         "severity": "warning",
-        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 10.0pt (13.3333px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
         "element": "http://localhost:3456/:15",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.6 (foreground color: #0066ff, background color: #003366, font size: 10.0pt (13.3333px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:16",
         "toolSource": "webhint"
       },
       {
@@ -765,7 +1797,7 @@
         "issueType": "axe/text-alternatives",
         "severity": "error",
         "description": "Images must have alternative text: Element has no title attribute",
-        "element": "http://localhost:3456/:19",
+        "element": "http://localhost:3456/:22",
         "toolSource": "webhint"
       },
       {
@@ -773,7 +1805,15 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.77 (foreground color: #ffffff, background color: #ff6b6b, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
-        "element": "http://localhost:3456/:28",
+        "element": "http://localhost:3456/:30",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.04 (foreground color: #f1f5f9, background color: #f9f9f9, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:41",
         "toolSource": "webhint"
       },
       {
@@ -781,7 +1821,7 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 5.74 (foreground color: #666666, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
-        "element": "http://localhost:3456/:41",
+        "element": "http://localhost:3456/:46",
         "toolSource": "webhint"
       },
       {
@@ -789,7 +1829,7 @@
         "issueType": "axe/text-alternatives",
         "severity": "error",
         "description": "Images must have alternative text: Element has no title attribute",
-        "element": "http://localhost:3456/:45",
+        "element": "http://localhost:3456/:50",
         "toolSource": "webhint"
       },
       {
@@ -797,7 +1837,15 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 5.74 (foreground color: #666666, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
-        "element": "http://localhost:3456/:47",
+        "element": "http://localhost:3456/:52",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.04 (foreground color: #f1f5f9, background color: #f9f9f9, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:58",
         "toolSource": "webhint"
       },
       {
@@ -805,7 +1853,7 @@
         "issueType": "axe/forms",
         "severity": "error",
         "description": "Select element must have an accessible name: Element has no title attribute",
-        "element": "http://localhost:3456/:62",
+        "element": "http://localhost:3456/:67",
         "toolSource": "webhint"
       },
       {
@@ -813,7 +1861,7 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.97 (foreground color: #ffffff, background color: #007bff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
-        "element": "http://localhost:3456/:68",
+        "element": "http://localhost:3456/:73",
         "toolSource": "webhint"
       },
       {
@@ -821,7 +1869,15 @@
         "issueType": "axe/text-alternatives",
         "severity": "error",
         "description": "Images must have alternative text: Element has no title attribute",
-        "element": "http://localhost:3456/:96",
+        "element": "http://localhost:3456/:101",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.09 (foreground color: #f1f5f9, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:104",
         "toolSource": "webhint"
       },
       {
@@ -829,7 +1885,159 @@
         "issueType": "axe/text-alternatives",
         "severity": "warning",
         "description": "[role=\"img\"] elements must have alternative text: Element has no title attribute",
-        "element": "http://localhost:3456/:99",
+        "element": "http://localhost:3456/:104",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:113",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:114",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:115",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:121",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:130",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:131",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 6.86 (foreground color: #4b5563, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:133",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 6.86 (foreground color: #4b5563, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 7:1",
+        "element": "http://localhost:3456/:134",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:140",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:141",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:146",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:147",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:224",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:225",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:233",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:234",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.36 (foreground color: #4b5563, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:242",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 2.83 (foreground color: #4f46e5, background color: #0f172a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:243",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.97 (foreground color: #ffffff, background color: #007bff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:254",
         "toolSource": "webhint"
       },
       {
@@ -837,7 +2045,7 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
-        "element": "http://localhost:3456/:108",
+        "element": "http://localhost:3456/:312",
         "toolSource": "webhint"
       },
       {
@@ -845,15 +2053,159 @@
         "issueType": "axe/color",
         "severity": "warning",
         "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
-        "element": "http://localhost:3456/:109",
+        "element": "http://localhost:3456/:340",
         "toolSource": "webhint"
       },
       {
         "wcag": "unknown",
         "issueType": "axe/color",
         "severity": "warning",
-        "description": "Elements must meet enhanced color contrast ratio thresholds: Element has insufficient color contrast of 4.83 (foreground color: #0066ff, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 7:1",
-        "element": "http://localhost:3456/:110",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:427",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:438",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:444",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:457",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.09 (foreground color: #f1f5f9, background color: #ffffff, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:462",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.09 (foreground color: #f1f5f9, background color: #ffffff, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:463",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.09 (foreground color: #f1f5f9, background color: #ffffff, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:464",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:484",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:490",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:496",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:504",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:505",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:506",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:507",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:508",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:509",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 1.89 (foreground color: #0000ee, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:510",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:563",
+        "toolSource": "webhint"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "axe/color",
+        "severity": "warning",
+        "description": "Elements must meet minimum color contrast ratio thresholds: Element has insufficient color contrast of 3.69 (foreground color: #0066ff, background color: #0f172a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "element": "http://localhost:3456/:573",
         "toolSource": "webhint"
       }
     ],
@@ -862,7 +2214,7 @@
   "alignmentMatrix": [
     {
       "wcag": "unknown",
-      "issueType": "Page language not specified",
+      "issueType": "Non-descriptive link text",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -876,7 +2228,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Link with non-descriptive text",
+      "issueType": "Missing accessible name on link",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -890,49 +2242,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Link with empty accessible name",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Toggle button missing aria-expanded",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Image missing alt attribute",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Section missing accessible name",
+      "issueType": "Label in Name mismatch on link",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -947,20 +2257,6 @@
     {
       "wcag": "unknown",
       "issueType": "Heading level skip",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Fieldset missing legend",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1030,7 +2326,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Telephone input missing label",
+      "issueType": "Phone input missing label",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1044,21 +2340,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Telephone input missing autocomplete",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Select element missing label",
+      "issueType": "Phone input missing autocomplete",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1086,7 +2368,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Table header cell not marked as th",
+      "issueType": "Image missing alt attribute",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1100,7 +2382,49 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Missing language attribute on html element",
+      "issueType": "Navigation landmark missing distinguishing label",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Toggle button missing aria-expanded",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Newsletter email input missing autocomplete",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Div with role img missing accessible name",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1142,20 +2466,6 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "`<html>` element does not have a `[lang]` attribute",
-      "aiFinds": false,
-      "lighthouseFinds": true,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "LIGHTHOUSE_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
       "issueType": "Image elements do not have `[alt]` attributes",
       "aiFinds": false,
       "lighthouseFinds": true,
@@ -1184,7 +2494,35 @@
     },
     {
       "wcag": "unknown",
+      "issueType": "Touch targets do not have sufficient size or spacing.",
+      "aiFinds": false,
+      "lighthouseFinds": true,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "LIGHTHOUSE_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
       "issueType": "Document does not have a main landmark.",
+      "aiFinds": false,
+      "lighthouseFinds": true,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "LIGHTHOUSE_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Elements with visible text labels do not have matching accessible names.",
       "aiFinds": false,
       "lighthouseFinds": true,
       "aXeFinds": false,
@@ -1227,20 +2565,6 @@
     {
       "wcag": "cat.semantics",
       "issueType": "heading-order (moderate)",
-      "aiFinds": false,
-      "lighthouseFinds": false,
-      "aXeFinds": true,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AXE_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "cat.language",
-      "issueType": "html-has-lang (serious)",
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": true,
@@ -1323,6 +2647,20 @@
       "notes": ""
     },
     {
+      "wcag": "cat.color",
+      "issueType": "link-in-text-block (serious)",
+      "aiFinds": false,
+      "lighthouseFinds": false,
+      "aXeFinds": true,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AXE_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
       "wcag": "cat.keyboard",
       "issueType": "region (moderate)",
       "aiFinds": false,
@@ -1381,20 +2719,6 @@
     {
       "wcag": "unknown",
       "issueType": "heading-order",
-      "aiFinds": false,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": true,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "SUPPLEMENTARY_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "wcag2a",
-      "issueType": "html-has-lang",
       "aiFinds": false,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -1520,20 +2844,6 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "axe/language",
-      "aiFinds": false,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": true,
-      "stylelintA11yFinds": false,
-      "classification": "SUPPLEMENTARY_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
       "issueType": "axe/color",
       "aiFinds": false,
       "lighthouseFinds": false,
@@ -1576,24 +2886,24 @@
     }
   ],
   "statistics": {
-    "totalUnique": 51,
+    "totalUnique": 48,
     "totalShared": 0,
-    "totalAiOnly": 18,
-    "totalLighthouseOnly": 7,
+    "totalAiOnly": 16,
+    "totalLighthouseOnly": 8,
     "totalAxeCoreOnly": 11,
-    "totalAxeLinterOnly": 11,
+    "totalAxeLinterOnly": 10,
     "totalEslintJsxA11yOnly": 0,
-    "totalWebhintOnly": 4,
+    "totalWebhintOnly": 3,
     "totalStylelintA11yOnly": 0,
     "sharedPercentage": 0,
-    "recallGaps": 33,
+    "recallGaps": 32,
     "perToolCounts": {
-      "ai": 18,
-      "lighthouse": 14,
-      "axeCore": 28,
-      "axeLinter": 28,
+      "ai": 16,
+      "lighthouse": 63,
+      "axeCore": 53,
+      "axeLinter": 85,
       "eslintJsxA11y": null,
-      "webhint": 17,
+      "webhint": 57,
       "stylelintA11y": null
     }
   }

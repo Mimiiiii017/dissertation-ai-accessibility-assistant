@@ -25,7 +25,7 @@ const HTML_SWEEP_QUERIES = [
   'aria-labelledby aria-describedby aria-controls broken reference id does not exist SC 4.1.2',
 ];
 const HTML_RAG_MAX_CHUNKS = 10;
-const HTML_RAG_DISTANCE_THRESHOLD = 0.5;
+const HTML_RAG_DISTANCE_THRESHOLD = 1.2;  // L2 distance space (ChromaDB default); relevant chunks score 0.55–0.93
 
 async function retrieveHtmlRag(
   ragEndpoint: string

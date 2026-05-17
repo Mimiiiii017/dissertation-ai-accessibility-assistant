@@ -2,127 +2,270 @@
   "metadata": {
     "fixture": "study-6-css-medium",
     "errorCount": 30,
-    "timestamp": "2026-05-15T14:57:39.506Z",
+    "timestamp": "2026-05-17T19:49:56.269Z",
     "aiModel": "kimi-k2.5:cloud + qwen3.5:397b-cloud"
   },
   "toolOutputs": {
     "ai": [
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on anchor elements",
+        "issueType": "CTA button focus indicator removed without replacement",
         "severity": "error",
-        "description": "The selector `a` sets outline: none without providing a visible focus indicator replacement such as box-shadow, border, or non-zero outline in the base rule or paired focus rules (lines 62 and 300 provide only colour change and underline, which do not satisfy the requirement for a visible focus ring). Keyboard users cannot see when links receive focus.",
-        "element": "Lines 19, 20",
+        "description": "The `#cta-btn:focus` selector sets `outline: none` without providing a visible alternative such as box-shadow, border-color change, or non-zero outline. Keyboard users cannot see when the button has focus.",
+        "element": "Lines 130, 131, 132",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on input elements",
+        "issueType": "Form control focus indicator removed without replacement",
         "severity": "error",
-        "description": "The selector `input:focus` sets outline: none and only changes border-color to #ddd, which is identical to the default border colour on line 190, failing to provide a visible focus indicator. Keyboard users cannot see when text inputs receive focus.",
-        "element": "Lines 196, 197, 198",
+        "description": "The `input:focus, select:focus, textarea:focus` selector removes the outline and sets `border-color: #ddd`, which is identical to the default border-color (#ddd) in line 195, resulting in no visible change. No alternative focus indicator is provided.",
+        "element": "Lines 202, 203, 204, 205",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on select elements",
+        "issueType": "Gallery image focus indicator removed without replacement",
         "severity": "error",
-        "description": "The selector `select:focus` sets outline: none with only a border-color of #ddd (identical to the default), providing no visible focus indicator. Keyboard users cannot see when select elements receive focus.",
-        "element": "Lines 196, 197, 198",
+        "description": "The `.gallery-grid img:focus` selector removes the outline without providing a visible alternative. If images are made interactive (e.g., with tabindex), keyboard users lose focus visibility.",
+        "element": "Lines 290, 291, 292",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on textarea elements",
+        "issueType": "Section link focus indicator removed with insufficient replacement",
         "severity": "error",
-        "description": "The selector `textarea:focus` sets outline: none with only a border-color of #ddd (identical to the default), providing no visible focus indicator. Keyboard users cannot see when textareas receive focus.",
-        "element": "Lines 196, 197, 198",
+        "description": "The `section a:focus` selector removes the outline and relies solely on `text-decoration: underline` for visibility. Text-decoration is not a sufficient replacement for a focus ring per WCAG 2.2 Focus Visible requirements (box-shadow, distinct border, or non-zero outline required).",
+        "element": "Lines 311, 312, 313, 314",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "2.5.5",
+        "issueType": "Checkbox touch target below minimum size",
+        "severity": "warning",
+        "description": "The `.form-check-input` selector sets `width: 1rem; height: 1rem;` (16px × 16px), which is below the minimum 24×24px touch target size required by WCAG 2.5.5 Target Size (Enhanced). Users with motor impairments may have difficulty activating the control.",
+        "element": "Lines 340, 341, 342, 343, 344, 345",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on button elements",
-        "severity": "error",
-        "description": "The selector `button` sets outline: none without ensuring all buttons have a visible focus replacement. While some buttons have specific focus styles (lines 79-80, 225-226), others such as generic buttons or those added dynamically lack a visible focus indicator.",
-        "element": "Lines 19, 20",
+        "issueType": "Toggle thumb motion animation lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.toggle-thumb` selector uses `transition: transform` which causes spatial movement, but there is no `@media (prefers-reduced-motion: reduce)` override to disable this animation. Users with vestibular disorders may experience discomfort.",
+        "element": "Lines 418",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on #cta-btn",
-        "severity": "error",
-        "description": "The selector `#cta-btn:focus` sets outline: none without providing a visible alternative such as box-shadow, border, or non-zero outline. Keyboard users cannot see when this specific button receives focus.",
-        "element": "Lines 125, 126",
+        "issueType": "Modal entrance animation lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.modal` selector uses `animation: modal-in` which includes transform (scale and translateY) causing spatial movement, but lacks a reduced-motion override. Users with vestibular disorders may experience discomfort.",
+        "element": "Lines 540",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Focus indicator removed without replacement on section links",
-        "severity": "error",
-        "description": "The selector `section a:focus` sets outline: none and provides only text-decoration: underline, which is not a box-shadow, border, or non-zero outline as required for a visible focus indicator. Keyboard users cannot see when these links receive focus.",
-        "element": "Lines 300, 301, 302",
+        "issueType": "Dropdown menu animation lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.dropdown-menu` selector uses `animation: dropdown-in` which includes transform (translateY) causing spatial movement, but lacks a reduced-motion override.",
+        "element": "Lines 562",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Insufficient colour contrast on .muted text",
+        "issueType": "Accordion icon transition lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.accordion-icon` selector uses `transition: transform` for the chevron rotation, causing spatial movement, but lacks a reduced-motion override.",
+        "element": "Lines 598",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Card hover/focus transform lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.card-elevated:hover, .card-elevated:focus-within` selector uses `transform: translateY(-2px)` causing spatial movement on hover/focus, but lacks a reduced-motion override.",
+        "element": "Lines 702, 703, 704, 705, 706",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Page enter transition lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.page-enter-active` selector includes `transform` in its transition, causing spatial movement, but lacks a reduced-motion override.",
+        "element": "Lines 1098, 1099, 1100, 1101",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Slide-up enter transition lacks reduced-motion override",
+        "severity": "warning",
+        "description": "The `.slide-up-enter-active` selector includes `transform` in its transition, causing spatial movement, but lacks a reduced-motion override.",
+        "element": "Lines 1110, 1111, 1112, 1113",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Insufficient colour contrast on light-text class",
         "severity": "error",
-        "description": "The colour #999 on the default background #fff produces a contrast ratio of approximately 2.8:1, which is below the minimum 4.5:1 required for normal text. Users with low vision cannot read this text.",
-        "element": "Lines 33, 34",
+        "description": "The `.light-text` selector sets `color: #666` on `background: #f5f5f5`, resulting in a contrast ratio of approximately 2.4:1, which fails the WCAG 2.2 AA requirement of 4.5:1 for normal text. Users with low vision cannot read the text.",
+        "element": "Lines 23, 24, 25, 26",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Insufficient colour contrast on header navigation links",
         "severity": "error",
-        "description": "The colour #0066ff on background #003366 produces a contrast ratio of approximately 2.3:1, which is below the minimum 4.5:1 required for normal text. Users cannot read the navigation links.",
-        "element": "Lines 55, 56, 57, 58, 59",
+        "description": "The `header nav a` selector sets `color: #0066ff` against the header's `background: #003366`, resulting in a contrast ratio of approximately 1.8:1, failing WCAG 2.2 AA. Users cannot read the navigation links.",
+        "element": "Lines 57, 58, 59, 60, 61, 62",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Insufficient colour contrast on header navigation buttons",
+        "issueType": "Insufficient colour contrast on header navigation button",
         "severity": "error",
-        "description": "The colour #0066ff on background #003366 produces a contrast ratio of approximately 2.3:1, which is below the minimum 4.5:1 required for normal text. Users cannot read the button text.",
-        "element": "Lines 67, 68, 69, 70, 71, 72",
+        "description": "The `header nav button` selector sets `color: #0066ff` on `background: #003366`, resulting in a contrast ratio of approximately 1.8:1, failing WCAG 2.2 AA.",
+        "element": "Lines 71, 72, 73, 74, 75, 76, 77",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Insufficient colour contrast on primary CTA button",
+        "issueType": "Insufficient colour contrast on CTA button",
         "severity": "error",
-        "description": "The background colour #ff6b6b with white text (#fff) produces a contrast ratio of approximately 2.6:1, which is below the minimum 4.5:1 required for normal text. Users cannot read the button text.",
-        "element": "Lines 110, 111, 112, 113, 114, 115, 116, 117, 118",
+        "description": "The `#cta-btn` selector sets `color: #fff` on `background: #ff6b6b`, resulting in a contrast ratio of approximately 2.6:1, failing the 4.5:1 requirement for normal text (16px regular weight).",
+        "element": "Lines 114, 115, 116, 117, 118, 119, 120, 121, 122, 123",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Insufficient colour contrast on input placeholders",
+        "issueType": "Insufficient colour contrast on features heading",
         "severity": "error",
-        "description": "The placeholder colour #999 on the input background produces a contrast ratio below 4.5:1. Since the associated labels are hidden (line 206), these placeholders serve as the only visible labels and must meet contrast requirements.",
-        "element": "Lines 201, 202, 203",
+        "description": "The `.features h2` selector sets `color: #333` on a background of `#f9f9f9` (from line 136), resulting in a contrast ratio of approximately 4.1:1, failing the 4.5:1 requirement.",
+        "element": "Lines 139, 140, 141, 142, 143",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Link underline removed without alternative on header navigation",
-        "severity": "warning",
-        "description": "The rule `text-decoration: none` on `header nav a` removes underlines from links without providing a non-colour visual differentiator such as font-weight change, border-bottom, or background highlight in the default state. Users with colour vision deficiencies cannot distinguish links from surrounding text.",
+        "issueType": "Insufficient colour contrast on submit button",
+        "severity": "error",
+        "description": "The `button[type=\"submit\"]` selector sets `color: #fff` on `background: #007bff`, resulting in a contrast ratio of approximately 3.5:1, failing the 4.5:1 requirement for normal text.",
+        "element": "Lines 216, 217, 218, 219, 220, 221, 222, 223, 224, 225",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Link underline removed without alternative on section links",
-        "severity": "warning",
-        "description": "The rule `text-decoration: none` on `section a` removes underlines without a non-colour visual differentiator in the default state (underline only appears on hover/focus). Users with colour vision deficiencies cannot distinguish links from surrounding text.",
+        "issueType": "Insufficient colour contrast on info alert",
+        "severity": "error",
+        "description": "The `.alert-info` selector sets `color: var(--color-info-dark)` (#1d4ed8) on `background: var(--color-info-light)` (#dbeafe), resulting in a contrast ratio of approximately 2.7:1, failing WCAG 2.2 AA.",
+        "element": "Lines 388",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Motion animation missing prefers-reduced-motion override",
+        "issueType": "Insufficient colour contrast on error alert",
+        "severity": "error",
+        "description": "The `.alert-error` selector sets `color: var(--color-error-dark)` (#b91c1c) on `background: var(--color-error-light)` (#fee2e2), resulting in a contrast ratio of approximately 4.0:1, failing the 4.5:1 requirement.",
+        "element": "Lines 391",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Insufficient colour contrast on error toast",
+        "severity": "error",
+        "description": "The `.toast-error` selector sets `color: #fff` on `background: var(--color-error-dark)` (#b91c1c), resulting in a contrast ratio of approximately 3.6:1, failing the 4.5:1 requirement.",
+        "element": "Lines 397",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Insufficient colour contrast on data table header",
+        "severity": "error",
+        "description": "The `.data-table th` selector sets `color: var(--color-neutral-600)` (#4b5563) on `background: var(--color-neutral-50)` (#f9fafb), resulting in a contrast ratio of approximately 2.7:1, failing WCAG 2.2 AA.",
+        "element": "Lines 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Link underline removed without alternative in header navigation",
         "severity": "warning",
-        "description": "A transition is defined on #cta-btn outside of a prefers-reduced-motion media query. Users with vestibular disorders may experience discomfort from this animation.",
-        "element": "Lines 118",
+        "description": "The `header nav a` selector sets `text-decoration: none` and provides no non-colour visual differentiator (such as underline on hover/focus or font-weight change) to distinguish links from surrounding text. Users with colour vision deficiencies cannot identify the links.",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Link underline removed without alternative in navbar links",
+        "severity": "warning",
+        "description": "The `.navbar-links a` selector sets `text-decoration: none` with no alternative visual indicator on hover or focus within the rule block. Users cannot distinguish links from text without colour vision.",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Link underline removed without alternative in mega menu",
+        "severity": "warning",
+        "description": "The `.mega-menu-col a` selector sets `text-decoration: none` with no alternative visual indicator provided in the hover state or elsewhere. Users rely solely on colour to identify links.",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on textarea",
+        "severity": "error",
+        "description": "The base selector 'textarea' has 'outline: none' which removes the default focus ring. No visible alternative (box-shadow, border, or outline) is provided in this rule or a paired :focus rule for this specific selector, making keyboard navigation impossible to track.",
+        "element": "Lines 13",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on #cta-btn:focus",
+        "severity": "error",
+        "description": "The '#cta-btn:focus' selector explicitly sets 'outline: none' without providing a visible alternative like box-shadow or border, removing the focus indicator for this button.",
+        "element": "Lines 136",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on input:focus",
+        "severity": "error",
+        "description": "The 'input:focus' selector sets 'outline: none'. Although it sets 'border-color: #ddd', the default border is already #ddd (Line 197), so there is no visible change to indicate focus.",
+        "element": "Lines 203",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on select:focus",
+        "severity": "error",
+        "description": "The 'select:focus' selector sets 'outline: none'. Although it sets 'border-color: #ddd', the default border is already #ddd (Line 197), so there is no visible change to indicate focus.",
+        "element": "Lines 203",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on textarea:focus",
+        "severity": "error",
+        "description": "The 'textarea:focus' selector sets 'outline: none'. Although it sets 'border-color: #ddd', the default border is already #ddd (Line 197), so there is no visible change to indicate focus.",
+        "element": "Lines 203",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on .gallery-grid img:focus",
+        "severity": "error",
+        "description": "The '.gallery-grid img:focus' selector sets 'outline: none' without providing a visible alternative, which removes the focus ring if the image is made focusable.",
+        "element": "Lines 283",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Focus indicator removed without replacement on section a:focus",
+        "severity": "error",
+        "description": "The 'section a:focus' selector sets 'outline: none'. While it adds 'text-decoration: underline', the sweep criteria require box-shadow, border, or outline for focus replacement to ensure high visibility.",
+        "element": "Lines 293",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Motion animation missing prefers-reduced-motion override on .dropdown-menu",
+        "severity": "warning",
+        "description": "The '.dropdown-menu' element uses 'animation: dropdown-in' which includes 'transform: translateY', causing spatial movement without a prefers-reduced-motion override.",
+        "element": "Lines 973",
         "toolSource": "ai"
       }
     ],
@@ -293,7 +436,287 @@
         "issueType": "a11y/media-prefers-reduced-motion",
         "severity": "error",
         "description": "Expected #cta-btn is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
-        "element": "Line 111",
+        "element": "Line 114",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .navbar-links a is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 708",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .mega-menu-col a is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 769",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .btn is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 820",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .form-control is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 909",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .toggle-track is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 959",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .toggle-thumb is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 967",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .file-upload is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 993",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .card is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1008",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .toast is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1095",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .modal-backdrop is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1118",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .modal is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1128",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .tab-btn is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1170",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .progress-bar is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1226",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .progress-bar.animated is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1230",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .spinner is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1234",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .skeleton is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1240",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected [data-tooltip]::after is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1251",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .accordion-trigger is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1459",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .accordion-icon is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1469",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .dropdown-menu is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1479",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .dropdown-item is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1489",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .step-indicator is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1518",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .social-links a is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1616",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .blog-card is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1628",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .page-enter-active is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1690",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .page-exit-active is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1692",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .fade-enter-active is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1695",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .fade-exit-active is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1697",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .slide-up-enter-active is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 1700",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .transition-all is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2013",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .transition-colors is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2014",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .transition-opacity is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2015",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .transition-transform is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2016",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .transition-shadow is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2017",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/media-prefers-reduced-motion",
+        "severity": "error",
+        "description": "Expected .card-elevated:hover,\n.card-elevated:focus-within is used with @media (prefers-reduced-motion) (a11y/media-prefers-reduced-motion)",
+        "element": "Line 2124",
         "toolSource": "stylelintA11y"
       },
       {
@@ -301,7 +724,135 @@
         "issueType": "a11y/no-display-none",
         "severity": "error",
         "description": "Expected \"display: none\" to not be used in label (a11y/no-display-none)",
-        "element": "Line 207",
+        "element": "Line 212",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in [hidden] (a11y/no-display-none)",
+        "element": "Line 666",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .navbar-mobile-toggle (a11y/no-display-none)",
+        "element": "Line 725",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .mega-menu (a11y/no-display-none)",
+        "element": "Line 745",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .tab-list::-webkit-scrollbar (a11y/no-display-none)",
+        "element": "Line 1169",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .sm-hidden (a11y/no-display-none)",
+        "element": "Line 1294",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .navbar-links (a11y/no-display-none)",
+        "element": "Line 1297",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .sidebar-nav (a11y/no-display-none)",
+        "element": "Line 1301",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .hero-image (a11y/no-display-none)",
+        "element": "Line 1302",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .md-hidden (a11y/no-display-none)",
+        "element": "Line 1308",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .navbar, .sidebar-nav, .toast-container, .modal-backdrop (a11y/no-display-none)",
+        "element": "Line 1330",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .search-clear (a11y/no-display-none)",
+        "element": "Line 1654",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .print-only (a11y/no-display-none)",
+        "element": "Line 1720",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .no-print (a11y/no-display-none)",
+        "element": "Line 1721",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .hidden (a11y/no-display-none)",
+        "element": "Line 1926",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .md\\:hidden (a11y/no-display-none)",
+        "element": "Line 2076",
+        "toolSource": "stylelintA11y"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "a11y/no-display-none",
+        "severity": "error",
+        "description": "Expected \"display: none\" to not be used in .lg\\:hidden (a11y/no-display-none)",
+        "element": "Line 2095",
         "toolSource": "stylelintA11y"
       }
     ]
@@ -309,7 +860,7 @@
   "alignmentMatrix": [
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on anchor elements",
+      "issueType": "CTA button focus indicator removed without replacement",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -323,7 +874,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on input elements",
+      "issueType": "Form control focus indicator removed without replacement",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -337,7 +888,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on select elements",
+      "issueType": "Gallery image focus indicator removed without replacement",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -351,7 +902,21 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on textarea elements",
+      "issueType": "Section link focus indicator removed with insufficient replacement",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "2.5.5",
+      "issueType": "Checkbox touch target below minimum size",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -365,7 +930,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on button elements",
+      "issueType": "Toggle thumb motion animation lacks reduced-motion override",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -379,7 +944,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on #cta-btn",
+      "issueType": "Modal entrance animation lacks reduced-motion override",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -393,7 +958,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Focus indicator removed without replacement on section links",
+      "issueType": "Dropdown menu animation lacks reduced-motion override",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -407,7 +972,63 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Insufficient colour contrast on .muted text",
+      "issueType": "Accordion icon transition lacks reduced-motion override",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Card hover/focus transform lacks reduced-motion override",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Page enter transition lacks reduced-motion override",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Slide-up enter transition lacks reduced-motion override",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Insufficient colour contrast on light-text class",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -435,7 +1056,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Insufficient colour contrast on header navigation buttons",
+      "issueType": "Insufficient colour contrast on header navigation button",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -449,7 +1070,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Insufficient colour contrast on primary CTA button",
+      "issueType": "Insufficient colour contrast on CTA button",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -463,7 +1084,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Insufficient colour contrast on input placeholders",
+      "issueType": "Insufficient colour contrast on features heading",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -477,7 +1098,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Link underline removed without alternative on header navigation",
+      "issueType": "Insufficient colour contrast on submit button",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -491,7 +1112,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Link underline removed without alternative on section links",
+      "issueType": "Insufficient colour contrast on info alert",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -505,7 +1126,189 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Motion animation missing prefers-reduced-motion override",
+      "issueType": "Insufficient colour contrast on error alert",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Insufficient colour contrast on error toast",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Insufficient colour contrast on data table header",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Link underline removed without alternative in header navigation",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Link underline removed without alternative in navbar links",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Link underline removed without alternative in mega menu",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on textarea",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on #cta-btn:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on input:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on select:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on textarea:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on .gallery-grid img:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Focus indicator removed without replacement on section a:focus",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Motion animation missing prefers-reduced-motion override on .dropdown-menu",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -701,9 +1504,9 @@
     }
   ],
   "statistics": {
-    "totalUnique": 28,
+    "totalUnique": 46,
     "totalShared": 0,
-    "totalAiOnly": 15,
+    "totalAiOnly": 33,
     "totalLighthouseOnly": 3,
     "totalAxeCoreOnly": 3,
     "totalAxeLinterOnly": 3,
@@ -713,13 +1516,13 @@
     "sharedPercentage": 0,
     "recallGaps": 13,
     "perToolCounts": {
-      "ai": 15,
+      "ai": 33,
       "lighthouse": 5,
       "axeCore": 5,
       "axeLinter": 5,
       "eslintJsxA11y": null,
       "webhint": 4,
-      "stylelintA11y": 2
+      "stylelintA11y": 53
     }
   }
 }

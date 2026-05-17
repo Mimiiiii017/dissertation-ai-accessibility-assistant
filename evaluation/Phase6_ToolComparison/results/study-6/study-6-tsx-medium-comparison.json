@@ -2,281 +2,193 @@
   "metadata": {
     "fixture": "study-6-tsx-medium",
     "errorCount": 30,
-    "timestamp": "2026-05-15T15:05:26.186Z",
+    "timestamp": "2026-05-17T19:55:37.330Z",
     "aiModel": "kimi-k2.5:cloud + qwen3.5:397b-cloud"
   },
   "toolOutputs": {
     "ai": [
       {
-        "wcag": "2.1.1",
-        "issueType": "CustomButton div element not keyboard accessible",
-        "severity": "error",
-        "description": "The CustomButton component renders a div with an onClick handler but no role=\"button\", tabindex, or keyboard event handlers. This makes it inaccessible to keyboard users and screen readers, violating WCAG 2.1.1 Keyboard.",
-        "element": "Lines 5",
-        "toolSource": "ai"
-      },
-      {
         "wcag": "unknown",
-        "issueType": "Navigation toggle button missing aria-expanded state",
+        "issueType": "CustomButton div lacks button semantics and keyboard support",
         "severity": "error",
-        "description": "The Menu button toggles the visibility of the navigation menu but lacks aria-expanded to indicate the current state (expanded/collapsed). This prevents screen reader users from knowing whether the menu is currently open or closed.",
-        "element": "Lines 18",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Navigation toggle missing aria-controls attribute",
-        "severity": "warning",
-        "description": "The Menu button controls the visibility of the ul menu but lacks aria-controls to programmatically associate it with the controlled element.",
-        "element": "Lines 18",
+        "description": "The CustomButton component renders a div with an onClick handler but no role=\"button\", tabindex, or keyboard event handlers. Screen reader users perceive it as a generic container rather than an interactive element, and keyboard-only users cannot focus or activate it.",
+        "element": "Lines 11",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Navigation menu missing id for aria-controls reference",
         "severity": "warning",
-        "description": "The ul element serves as the controlled region for the Menu button but lacks an id attribute, preventing aria-controls from functioning correctly.",
-        "element": "Lines 22",
+        "description": "The ul element that is conditionally rendered needs an id attribute so it can be programmatically associated with the toggle button via aria-controls.",
+        "element": "Lines 26",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Tab button missing id attribute for aria-labelledby reference",
+        "issueType": "Tabs tabpanel has broken aria-labelledby reference",
         "severity": "error",
-        "description": "The tab button uses key={tab.id} but lacks an id attribute. The associated tabpanel at line 58 references aria-labelledby={`tab-${tab.id}`}, which targets a non-existent ID, breaking the programmatic relationship for screen readers.",
-        "element": "Lines 46",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tab button missing aria-controls attribute",
-        "severity": "warning",
-        "description": "The tab button controls the visibility of its associated tabpanel but lacks aria-controls to establish the programmatic relationship required by the tabs pattern.",
-        "element": "Lines 46",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tabpanel missing id for aria-controls reference",
-        "severity": "warning",
-        "description": "The tabpanel element lacks an id attribute, preventing the tab button's aria-controls from referencing it correctly.",
+        "description": "The tabpanel references an id `wrong-tab-${tab.id}` that does not exist on any element in the document. The tab buttons lack id attributes, causing screen readers to fail when attempting to determine which tab controls which panel.",
         "element": "Lines 58",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Form textarea missing aria-invalid for validation errors",
-        "severity": "error",
-        "description": "The textarea element displays validation errors but lacks aria-invalid to communicate the invalid state to screen readers when errors[field.name] exists.",
-        "element": "Lines 105",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Form input missing aria-invalid for validation errors",
-        "severity": "error",
-        "description": "The input element displays validation errors but lacks aria-invalid to communicate the invalid state to screen readers when errors[field.name] exists.",
-        "element": "Lines 112",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Form error message not associated with input via aria-describedby",
-        "severity": "warning",
-        "description": "The error message span is not programmatically associated with its corresponding input field. Screen readers cannot announce the error message when the field is focused.",
-        "element": "Lines 122",
         "toolSource": "ai"
       },
       {
         "wcag": "1.3.5",
         "issueType": "Form email input missing autocomplete attribute",
         "severity": "warning",
-        "description": "The email input (type=\"email\") collects personal data but lacks the autocomplete=\"email\" attribute, preventing browsers from assisting users with autofill and violating WCAG 1.3.5 Identify Input Purpose.",
-        "element": "Lines 112",
+        "description": "The email input field collects personal data but lacks the autocomplete=\"email\" attribute, preventing browsers from assisting users with autofill and violating WCAG 2.2 SC 1.3.5.",
+        "element": "Lines 113",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Form name input missing autocomplete attribute",
         "severity": "warning",
-        "description": "The name input (name=\"name\") collects personal data but lacks the autocomplete=\"name\" attribute, preventing browsers from assisting users with autofill.",
-        "element": "Lines 112",
+        "description": "The name input field collects personal data but lacks the autocomplete=\"name\" attribute, preventing browsers from assisting users with autofill.",
+        "element": "Lines 113",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Form phone input missing autocomplete attribute",
         "severity": "warning",
-        "description": "The telephone input (type=\"tel\") collects personal data but lacks the autocomplete=\"tel\" attribute, preventing browsers from assisting users with autofill.",
-        "element": "Lines 112",
+        "description": "The telephone input field collects personal data but lacks the autocomplete=\"tel\" attribute, preventing browsers from assisting users with autofill.",
+        "element": "Lines 113",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Modal Escape key handler not implemented",
+        "issueType": "Form error message not programmatically associated with input",
+        "severity": "warning",
+        "description": "Error messages are rendered in spans but not associated with their corresponding inputs via aria-describedby or aria-errormessage. Screen reader users may not hear the error message when focusing the invalid field.",
+        "element": "Lines 122",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Form input missing aria-invalid during validation",
         "severity": "error",
-        "description": "The handleEscape function detects the Escape key but does not call onClose(), preventing keyboard users from closing the modal using the Escape key.",
-        "element": "Lines 141, 142, 143, 144",
+        "description": "When validation fails, the inputs do not receive aria-invalid=\"true\", so screen readers cannot convey the invalid state to users.",
+        "element": "Lines 113",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Modal Escape key handler empty",
+        "severity": "error",
+        "description": "The Escape key event listener is attached but the handler contains no logic to close the modal. Keyboard users expect to close the dialog with the Escape key, but the handler is empty and does not call onClose().",
+        "element": "Lines 151",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
         "issueType": "Modal dialog missing aria-modal attribute",
         "severity": "warning",
-        "description": "The dialog element lacks aria-modal=\"true\", which prevents screen readers from correctly handling the modal context and restricting navigation to the modal content.",
-        "element": "Lines 154",
+        "description": "The dialog container lacks aria-modal=\"true\", which prevents screen readers from properly restricting navigation to the modal content while it is open.",
+        "element": "Lines 164",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Modal missing initial focus management",
+        "issueType": "Dropdown toggle button missing aria-expanded",
         "severity": "error",
-        "description": "When the modal opens, focus is not moved to the modal dialog or its close button, causing keyboard users to lose their place in the document. The modalRef is not focused programmatically.",
-        "element": "Lines 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148",
+        "description": "The button toggles the listbox visibility but lacks aria-expanded to communicate the current expanded or collapsed state to assistive technologies.",
+        "element": "Lines 197",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown toggle button missing aria-expanded state",
+        "issueType": "Dropdown listbox missing id for aria-controls",
+        "severity": "warning",
+        "description": "The ul element acting as a listbox needs an id attribute to be referenced by the toggle button's aria-controls attribute.",
+        "element": "Lines 204",
+        "toolSource": "ai"
+      },
+      {
+        "wcag": "unknown",
+        "issueType": "Dropdown listbox options not keyboard accessible",
         "severity": "error",
-        "description": "The dropdown toggle button controls the visibility of the listbox but lacks aria-expanded to indicate whether the dropdown is currently open or closed.",
-        "element": "Lines 183",
+        "description": "The li elements with role=\"option\" are not focusable and lack keyboard event handlers. Users cannot navigate or select options using the keyboard alone.",
+        "element": "Lines 207",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown toggle missing aria-controls attribute",
+        "issueType": "Loading spinner missing accessible name",
         "severity": "warning",
-        "description": "The dropdown toggle button lacks aria-controls to programmatically associate it with the listbox element it controls.",
-        "element": "Lines 183",
+        "description": "The loading indicator is a div with no text content, aria-label, or role, making it invisible to screen readers. Users cannot perceive the loading state.",
+        "element": "Lines 245",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown toggle button missing id for label association",
+        "issueType": "View Cart toggle button missing aria-expanded and aria-controls",
         "severity": "warning",
-        "description": "The dropdown button lacks an id attribute, preventing the label element from associating with it via htmlFor.",
-        "element": "Lines 183",
+        "description": "The button toggles the cart modal but does not indicate the expanded state or programmatically associate with the controlled dialog via aria-controls.",
+        "element": "Lines 353",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown label not programmatically associated with button",
-        "severity": "warning",
-        "description": "The label element renders text but lacks htmlFor attribute to associate with the dropdown button, and the button lacks a corresponding id.",
-        "element": "Lines 182",
+        "issueType": "Skeleton loading animation missing reduced motion support",
+        "severity": "notice",
+        "description": "The skeleton component uses CSS animation without checking for prefers-reduced-motion, which may cause discomfort for users with vestibular disorders.",
+        "element": "Lines 575",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown listbox missing id for aria-controls reference",
-        "severity": "warning",
-        "description": "The ul element acting as listbox lacks an id attribute, preventing aria-controls on the toggle button from referencing it.",
-        "element": "Lines 190",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Dropdown option elements not keyboard accessible",
+        "issueType": "Non-semantic interactive element (CustomButton)",
         "severity": "error",
-        "description": "The li elements with role=\"option\" have onClick handlers but are not focusable (no tabindex) and have no keyboard event handlers (Enter/Space). This prevents keyboard users from selecting options.",
-        "element": "Lines 192, 193, 194, 195, 196, 197, 198",
+        "description": "The <div> element is used as a button with an onClick handler but lacks semantic role, keyboard focusability, and keyboard event support. Screen reader users will not identify it as a button, and keyboard users cannot activate it.",
+        "element": "Lines 10",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Cart toggle button missing aria-expanded state",
-        "severity": "error",
-        "description": "The View Cart button toggles the visibility of the cart modal but lacks aria-expanded to indicate the modal's current state.",
-        "element": "Lines 294",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Cart toggle button missing aria-controls attribute",
+        "issueType": "Loading spinner missing accessible status",
         "severity": "warning",
-        "description": "The View Cart button controls the cart modal but lacks aria-controls to programmatically associate it with the modal dialog.",
-        "element": "Lines 294",
+        "description": "The spinning <div> conveys loading state visually but has no role=\"status\" or aria-label. Screen reader users will not be aware of the loading activity.",
+        "element": "Lines 217",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "LoadingSpinner animation lacks reduced motion support",
-        "severity": "warning",
-        "description": "The spinner uses CSS animation 'spin 1s linear infinite' without checking for prefers-reduced-motion, which can trigger vestibular disorders in users sensitive to motion.",
-        "element": "Lines 227",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "4.1.3",
-        "issueType": "Cart item count updates not announced to screen readers",
-        "severity": "warning",
-        "description": "The cart count ({cartItems.length}) updates dynamically when items are added, but there is no aria-live region to announce these changes to screen reader users, violating WCAG 4.1.3 Status Messages.",
-        "element": "Lines 294, 295, 296",
+        "issueType": "Decorative badge dot missing aria-hidden",
+        "severity": "notice",
+        "description": "The <span> used for the decorative dot conveys no information but is exposed to the accessibility tree. It should be hidden to reduce noise.",
+        "element": "Lines 247",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Tab panel content changes not announced to screen readers",
-        "severity": "warning",
-        "description": "When users click a tab to switch panels, the content changes visibly but no aria-live region announces the new panel content or the selection change to screen readers.",
-        "element": "Lines 50",
+        "issueType": "Section landmark missing accessible name (Welcome)",
+        "severity": "notice",
+        "description": "The <section> element is used for structuring content but lacks an aria-label. While not a landmark without a label, adding one improves navigation for users browsing by regions.",
+        "element": "Lines 357",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Dropdown selection changes not announced to screen readers",
-        "severity": "warning",
-        "description": "When an option is selected in the dropdown, the button text updates to show the selected value, but this change is not announced to screen readers because there is no aria-live region associated with the selection.",
-        "element": "Lines 174, 175, 176, 177, 178",
+        "issueType": "Section landmark missing accessible name (Contact Us)",
+        "severity": "notice",
+        "description": "The <section> element is used for structuring content but lacks an aria-label. Adding one improves navigation for users browsing by regions.",
+        "element": "Lines 363",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Interactive div missing role and keyboard support",
-        "severity": "error",
-        "description": "The CustomButton component uses a <div> with an onClick handler, which is not natively focusable or clickable via keyboard. Screen reader users and keyboard-only users cannot access this control.",
-        "element": "Lines 7",
+        "issueType": "Section landmark missing accessible name (Filter Products)",
+        "severity": "notice",
+        "description": "The <section> element is used for structuring content but lacks an aria-label. Adding one improves navigation for users browsing by regions.",
+        "element": "Lines 369",
         "toolSource": "ai"
       },
       {
         "wcag": "unknown",
-        "issueType": "Navigation landmark missing accessible name",
-        "severity": "warning",
-        "description": "The <nav> element lacks an aria-label to distinguish it from other navigation regions, which is required when multiple navs exist or for best practice clarity.",
-        "element": "Lines 20",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tab panel aria-labelledby references non-existent ID",
-        "severity": "error",
-        "description": "The panel's aria-labelledby points to tab-${tab.id}, but the tab button does not have this ID, resulting in a broken ARIA reference.",
-        "element": "Lines 62",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Tab buttons missing keyboard navigation",
-        "severity": "error",
-        "description": "Tabs require arrow key navigation to move focus between tabs, which is not implemented, hindering keyboard users.",
-        "element": "Lines 49",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Modal focus not managed on open",
-        "severity": "error",
-        "description": "When the modal opens, focus is not moved inside the dialog, trapping keyboard users on the underlying page.",
-        "element": "Lines 153",
-        "toolSource": "ai"
-      },
-      {
-        "wcag": "unknown",
-        "issueType": "Loading spinner missing accessible role and label",
-        "severity": "error",
-        "description": "The animated div conveys status but has no role or label, so screen reader users are unaware of the loading state.",
-        "element": "Lines 185",
+        "issueType": "Section landmark missing accessible name (Products)",
+        "severity": "notice",
+        "description": "The <section> element is used for structuring content but lacks an aria-label. Adding one improves navigation for users browsing by regions.",
+        "element": "Lines 375",
         "toolSource": "ai"
       }
     ],
@@ -289,7 +201,7 @@
         "issueType": "jsx-a11y/no-static-element-interactions",
         "severity": "error",
         "description": "Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element.",
-        "element": "Line 8",
+        "element": "Line 12",
         "toolSource": "eslintJsxA11y"
       },
       {
@@ -297,7 +209,7 @@
         "issueType": "jsx-a11y/click-events-have-key-events",
         "severity": "error",
         "description": "Visible, non-interactive elements with click handlers must have at least one keyboard listener.",
-        "element": "Line 8",
+        "element": "Line 12",
         "toolSource": "eslintJsxA11y"
       },
       {
@@ -305,7 +217,7 @@
         "issueType": "jsx-a11y/click-events-have-key-events",
         "severity": "error",
         "description": "Visible, non-interactive elements with click handlers must have at least one keyboard listener.",
-        "element": "Line 219",
+        "element": "Line 208",
         "toolSource": "eslintJsxA11y"
       },
       {
@@ -313,7 +225,7 @@
         "issueType": "jsx-a11y/role-has-required-aria-props",
         "severity": "error",
         "description": "Elements with the ARIA role \"option\" must have the following attributes defined: aria-selected",
-        "element": "Line 221",
+        "element": "Line 210",
         "toolSource": "eslintJsxA11y"
       }
     ],
@@ -331,36 +243,8 @@
   },
   "alignmentMatrix": [
     {
-      "wcag": "2.1.1",
-      "issueType": "CustomButton div element not keyboard accessible",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
       "wcag": "unknown",
-      "issueType": "Navigation toggle button missing aria-expanded state",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Navigation toggle missing aria-controls attribute",
+      "issueType": "CustomButton div lacks button semantics and keyboard support",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -388,77 +272,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Tab button missing id attribute for aria-labelledby reference",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Tab button missing aria-controls attribute",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Tabpanel missing id for aria-controls reference",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Form textarea missing aria-invalid for validation errors",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Form input missing aria-invalid for validation errors",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Form error message not associated with input via aria-describedby",
+      "issueType": "Tabs tabpanel has broken aria-labelledby reference",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -514,7 +328,35 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Modal Escape key handler not implemented",
+      "issueType": "Form error message not programmatically associated with input",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Form input missing aria-invalid during validation",
+      "aiFinds": true,
+      "lighthouseFinds": false,
+      "aXeFinds": false,
+      "axeLinterFinds": false,
+      "eslintJsxA11yFinds": false,
+      "webhintFinds": false,
+      "stylelintA11yFinds": false,
+      "classification": "AI_ONLY",
+      "confidence": "LOW",
+      "notes": ""
+    },
+    {
+      "wcag": "unknown",
+      "issueType": "Modal Escape key handler empty",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -542,7 +384,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Modal missing initial focus management",
+      "issueType": "Dropdown toggle button missing aria-expanded",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -556,7 +398,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown toggle button missing aria-expanded state",
+      "issueType": "Dropdown listbox missing id for aria-controls",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -570,7 +412,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown toggle missing aria-controls attribute",
+      "issueType": "Dropdown listbox options not keyboard accessible",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -584,7 +426,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown toggle button missing id for label association",
+      "issueType": "Loading spinner missing accessible name",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -598,7 +440,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown label not programmatically associated with button",
+      "issueType": "View Cart toggle button missing aria-expanded and aria-controls",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -612,7 +454,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown listbox missing id for aria-controls reference",
+      "issueType": "Skeleton loading animation missing reduced motion support",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -626,7 +468,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown option elements not keyboard accessible",
+      "issueType": "Non-semantic interactive element (CustomButton)",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -640,7 +482,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Cart toggle button missing aria-expanded state",
+      "issueType": "Loading spinner missing accessible status",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -654,7 +496,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Cart toggle button missing aria-controls attribute",
+      "issueType": "Decorative badge dot missing aria-hidden",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -668,21 +510,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "LoadingSpinner animation lacks reduced motion support",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "4.1.3",
-      "issueType": "Cart item count updates not announced to screen readers",
+      "issueType": "Section landmark missing accessible name (Welcome)",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -696,7 +524,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Tab panel content changes not announced to screen readers",
+      "issueType": "Section landmark missing accessible name (Contact Us)",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -710,7 +538,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Dropdown selection changes not announced to screen readers",
+      "issueType": "Section landmark missing accessible name (Filter Products)",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -724,77 +552,7 @@
     },
     {
       "wcag": "unknown",
-      "issueType": "Interactive div missing role and keyboard support",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Navigation landmark missing accessible name",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Tab panel aria-labelledby references non-existent ID",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Tab buttons missing keyboard navigation",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Modal focus not managed on open",
-      "aiFinds": true,
-      "lighthouseFinds": false,
-      "aXeFinds": false,
-      "axeLinterFinds": false,
-      "eslintJsxA11yFinds": false,
-      "webhintFinds": false,
-      "stylelintA11yFinds": false,
-      "classification": "AI_ONLY",
-      "confidence": "LOW",
-      "notes": ""
-    },
-    {
-      "wcag": "unknown",
-      "issueType": "Loading spinner missing accessible role and label",
+      "issueType": "Section landmark missing accessible name (Products)",
       "aiFinds": true,
       "lighthouseFinds": false,
       "aXeFinds": false,
@@ -864,9 +622,9 @@
     }
   ],
   "statistics": {
-    "totalUnique": 38,
+    "totalUnique": 27,
     "totalShared": 0,
-    "totalAiOnly": 34,
+    "totalAiOnly": 23,
     "totalLighthouseOnly": 0,
     "totalAxeCoreOnly": 0,
     "totalAxeLinterOnly": 0,
@@ -876,7 +634,7 @@
     "sharedPercentage": 0,
     "recallGaps": 4,
     "perToolCounts": {
-      "ai": 34,
+      "ai": 23,
       "lighthouse": 0,
       "axeCore": 0,
       "axeLinter": 0,

@@ -16,6 +16,7 @@
     menuButton.addEventListener('click', function() {
       appState.menuOpen = !appState.menuOpen;
       menu.style.display = appState.menuOpen ? 'block' : 'none';
+      menuButton.setAttribute('aria-expanded', String(appState.menuOpen));
     });
   }
   const tabButtons = document.querySelectorAll('[role="tab"]');
@@ -24,8 +25,15 @@
     btn.addEventListener('click', () => {
       tabButtons.forEach(b => b.setAttribute('aria-selected', 'false'));
       btn.setAttribute('aria-selected', 'true');
-      tabPanels.forEach(p => { p.style.display = 'none'; }); 
+      tabPanels.forEach(p => { p.style.display = 'none'; p.setAttribute('aria-hidden', 'true'); });
       tabPanels[i].style.display = 'block';
+      tabPanels[i].removeAttribute('aria-hidden');
+    });
+    btn.addEventListener('keydown', (e) => {
+      const all = Array.from(tabButtons);
+      const idx = all.indexOf(btn);
+      if (e.key === 'ArrowRight') { e.preventDefault(); const next = all[(idx + 1) % all.length]; next.click(); next.focus(); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); const prev = all[(idx - 1 + all.length) % all.length]; prev.click(); prev.focus(); }
     });
   });
 
@@ -43,12 +51,25 @@
           errorMsg.id = 'err-' + idx;
           errorMsg.textContent = 'This field is required';
           errorMsg.style.color = 'red';
+          input.setAttribute('aria-describedby', 'err-' + idx);
           input.parentElement.appendChild(errorMsg);
           hasErrors = true;
         }
       });
       if (hasErrors) {
-        console.error('Validation errors: focus NOT moved to first invalid field.');
+        const firstInvalid = contactForm.querySelector('[aria-describedby]');
+        if (firstInvalid) firstInvalid.focus();
+        const errorCount = contactForm.querySelectorAll('[aria-describedby]').length;
+        const formLive = document.getElementById('form-error-live') || (() => {
+          const r = document.createElement('div');
+          r.id = 'form-error-live';
+          r.setAttribute('aria-live', 'assertive');
+          r.setAttribute('aria-atomic', 'true');
+          r.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)';
+          document.body.appendChild(r);
+          return r;
+        })();
+        formLive.textContent = `${errorCount} field${errorCount !== 1 ? 's' : ''} require attention.`;
         return;
       }
     });
@@ -60,28 +81,34 @@
     loadMoreButton.addEventListener('click', async function() {
       this.disabled = true;
       this.textContent = 'Loading…';
+      const container = document.querySelector('.items-container');
+      if (container) container.setAttribute('aria-busy', 'true');
       try {
         const response = await fetch('/api/more-items');
         const data = await response.json();
-        const container = document.querySelector('.items-container');
         data.items.forEach(item => {
           const el = document.createElement('div');
           el.textContent = item.title;
-          container.appendChild(el);
+          if (container) container.appendChild(el);
         });
       } catch (e) {
         console.error('Load more failed:', e);
       } finally {
         this.disabled = false;
         this.textContent = 'Load More';
+        if (container) container.removeAttribute('aria-busy');
       }
     });
   }
 
   const cartCounter = document.querySelector('.cart-count');
+  if (cartCounter) {
+    cartCounter.setAttribute('aria-live', 'polite');
+    cartCounter.setAttribute('aria-atomic', 'true');
+  }
   const cartButtons = document.querySelectorAll('.add-to-cart-btn');
   cartButtons.forEach(btn => btn.addEventListener('click', function() {
-    cartCounter.textContent = ++appState.cartCount; // missing aria-live
+    if (cartCounter) cartCounter.textContent = ++appState.cartCount;
   }));
 
 
@@ -92,6 +119,9 @@
   if (modalButton && modal) {
     modalButton.addEventListener('click', function() {
       modal.style.display = 'block';
+      modal.setAttribute('aria-modal', 'true');
+      const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable) focusable.focus();
     });
     if (closeButton) {
       closeButton.addEventListener('click', function() {
@@ -104,9 +134,9 @@
     const announcement = document.createElement('div');
     announcement.setAttribute('role', 'status');
     announcement.setAttribute('aria-live', priority || 'polite');
-    announcement.textContent = message;
-    setTimeout(() => announcement.remove(), 1000);
     document.body.appendChild(announcement);
+    setTimeout(() => { announcement.textContent = message; }, 50);
+    setTimeout(() => announcement.remove(), 5000);
   }
 
 
@@ -173,6 +203,7 @@ const dom = {
   query: (sel) => document.querySelector(sel),
   queryAll: (sel) => document.querySelectorAll(sel),
 
+  /* attrs supports ARIA attributes: { role: 'button', 'aria-expanded': 'false', 'aria-label': '...' } */
   create: (tag, attrs = {}) => {
     const el = document.createElement(tag);
     Object.keys(attrs).forEach(key => el.setAttribute(key, attrs[key]));
@@ -196,6 +227,16 @@ const largeDataSet = Array.from({ length: 1000 }, (_, i) => ({
 function delegate(selector, eventName, handler) {
   document.addEventListener(eventName, (event) => {
     if (event.target.matches(selector)) {
+      handler.call(event.target, event);
+    }
+  });
+}
+
+function delegateClick(selector, handler) {
+  delegate(selector, 'click', handler);
+  document.addEventListener('keydown', (event) => {
+    if ((event.key === 'Enter' || event.key === ' ') && event.target.matches && event.target.matches(selector)) {
+      event.preventDefault();
       handler.call(event.target, event);
     }
   });
@@ -389,6 +430,20 @@ const MiniFramework = (function () {
       const newEl = createElement(newVNode);
       if (this._el && this._el.parentNode) {
         this._el.parentNode.replaceChild(newEl, this._el);
+        if (this._announceUpdates) {
+          const liveId = 'mini-framework-live';
+          let live = document.getElementById(liveId);
+          if (!live) {
+            live = document.createElement('div');
+            live.id = liveId;
+            live.setAttribute('aria-live', 'polite');
+            live.setAttribute('aria-atomic', 'true');
+            live.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)';
+            document.body.appendChild(live);
+          }
+          live.textContent = '';
+          setTimeout(() => { live.textContent = 'Content updated'; }, 50);
+        }
       }
       this._el = newEl;
       this._vnode = newVNode;
@@ -538,7 +593,7 @@ const I18n = (function () {
 
   let locale = 'en';
 
-  function setLocale(l) { locale = l; }
+  function setLocale(l) { locale = l; document.documentElement.lang = l; }
   const translations = {
     en: {
       'action.save': 'Save',
@@ -756,7 +811,18 @@ const Analytics = (function () {
   function onFID(cb) { try { new PerformanceObserver(list => { list.getEntries().forEach(e => cb(e.processingStart - e.startTime)); }).observe({ type: 'first-input', buffered: true }); } catch(e) {} }
   function onINP(cb) { try { new PerformanceObserver(list => { list.getEntries().forEach(e => cb(e.duration)); }).observe({ type: 'event', durationThreshold: 16, buffered: true }); } catch(e) {} }
 
-  return { init, track, trackPageview, identify, page, flush, onCLS, onLCP, onFID, onINP };
+  function trackInteraction(selector, eventName, props = {}) {
+    document.addEventListener('click', e => {
+      if (e.target.matches && e.target.matches(selector)) track(eventName, { ...props, inputMethod: 'mouse' });
+    });
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches(selector)) {
+        track(eventName, { ...props, inputMethod: 'keyboard' });
+      }
+    });
+  }
+
+  return { init, track, trackPageview, identify, page, flush, trackInteraction, onCLS, onLCP, onFID, onINP };
 })();
 
 
@@ -860,6 +926,17 @@ const HttpClient = (function () {
       });
     } catch (e) {
       for (const fn of interceptors.error) await fn(e, resolvedConfig);
+      const netLive = document.getElementById('http-error-live') || (() => {
+        const r = document.createElement('div');
+        r.id = 'http-error-live';
+        r.setAttribute('aria-live', 'assertive');
+        r.setAttribute('aria-atomic', 'true');
+        r.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)';
+        document.body.appendChild(r);
+        return r;
+      })();
+      netLive.textContent = '';
+      setTimeout(() => { netLive.textContent = 'Network error: request failed.'; }, 50);
       throw e;
     } finally {
       clearTimeout(tid);
@@ -940,15 +1017,29 @@ const A11y = (function () {
   }
 
 
-  function announce(message, priority = 'polite') {
+  const _livePolite = (() => {
     const el = document.createElement('div');
-    el.setAttribute('aria-live', priority);
+    el.setAttribute('aria-live', 'polite');
     el.setAttribute('aria-atomic', 'true');
-    el.setAttribute('role', priority === 'assertive' ? 'alert' : 'status');
+    el.setAttribute('role', 'status');
     el.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;left:-10000px;';
     document.body.appendChild(el);
+    return el;
+  })();
+  const _liveAssertive = (() => {
+    const el = document.createElement('div');
+    el.setAttribute('aria-live', 'assertive');
+    el.setAttribute('aria-atomic', 'true');
+    el.setAttribute('role', 'alert');
+    el.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;left:-10000px;';
+    document.body.appendChild(el);
+    return el;
+  })();
+
+  function announce(message, priority = 'polite') {
+    const el = priority === 'assertive' ? _liveAssertive : _livePolite;
+    el.textContent = '';
     setTimeout(() => { el.textContent = message; }, 50);
-    setTimeout(() => document.body.removeChild(el), 3000);
   }
 
   function setAriaExpanded(trigger, expanded) {
@@ -1186,7 +1277,7 @@ const CosmosState = (() => {
       fontSize:       'base',
       lineSpacing:    'normal',
       dyslexicFont:   false,
-      reducedMotion:  false,
+      reducedMotion:  window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       highContrast:   false,
     },
   };
@@ -1374,6 +1465,7 @@ const CosmosTheme = (() => {
     const resolved = resolve(mode);
     applyResolved(resolved);
     updateToggleButtons(mode);
+    CosmosAnnouncer.announce(`Theme changed to ${mode} mode`);
   }
 
   function updateToggleButtons(mode) {
@@ -1469,6 +1561,7 @@ const CosmosReadingPrefs = (() => {
     try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (_) {}
     applyPrefs(prefs);
     CosmosEvents.emit('cosmos:prefs-changed', prefs);
+    CosmosAnnouncer.announce('Reading preferences saved');
   }
 
   function setPref(key, value) {
@@ -1512,27 +1605,38 @@ const CosmosReadingPrefs = (() => {
 
 
 const CosmosAnnouncer = (() => {
-  let _el = null;
+  let _politeEl = null;
+  let _assertiveEl = null;
 
-  function getEl() {
-    if (!_el) {
-      _el = document.getElementById(CosmosConfig.a11y.liveRegionId);
-      if (!_el) {
-        _el = document.createElement('div');
-        _el.id = CosmosConfig.a11y.liveRegionId;
-        _el.setAttribute('aria-live', 'polite');
-        _el.setAttribute('aria-atomic', 'true');
-        _el.className = 'sr-only';
-        document.body.appendChild(_el);
+  function getPoliteEl() {
+    if (!_politeEl) {
+      _politeEl = document.getElementById(CosmosConfig.a11y.liveRegionId);
+      if (!_politeEl) {
+        _politeEl = document.createElement('div');
+        _politeEl.id = CosmosConfig.a11y.liveRegionId;
+        _politeEl.setAttribute('aria-live', 'polite');
+        _politeEl.setAttribute('aria-atomic', 'true');
+        _politeEl.className = 'sr-only';
+        document.body.appendChild(_politeEl);
       }
     }
-    return _el;
+    return _politeEl;
+  }
+
+  function getAssertiveEl() {
+    if (!_assertiveEl) {
+      _assertiveEl = document.createElement('div');
+      _assertiveEl.id = CosmosConfig.a11y.liveRegionId + '-assertive';
+      _assertiveEl.setAttribute('aria-live', 'assertive');
+      _assertiveEl.setAttribute('aria-atomic', 'true');
+      _assertiveEl.className = 'sr-only';
+      document.body.appendChild(_assertiveEl);
+    }
+    return _assertiveEl;
   }
 
   function announce(message, { assertive = false, delay = 100 } = {}) {
-    const el = getEl();
-    el.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
-    
+    const el = assertive ? getAssertiveEl() : getPoliteEl();
     el.textContent = '';
     setTimeout(() => { el.textContent = message; }, delay);
   }
@@ -1826,7 +1930,10 @@ const CosmosReader = (() => {
     const textContent = articleEl.textContent || '';
     const { minutes, wordCount } = calcReadingTime(textContent);
     target.textContent = `${minutes} min read`;
-    target.setAttribute('title', `${wordCount.toLocaleString()} words`);
+    const wordCountSpan = document.createElement('span');
+    wordCountSpan.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)';
+    wordCountSpan.textContent = ` (${wordCount.toLocaleString()} words)`;
+    target.appendChild(wordCountSpan);
   }
 
   
@@ -2210,10 +2317,11 @@ const CosmosSearch = (() => {
     const header = document.createElement('p');
     header.className = 'search-count';
     header.setAttribute('aria-live', 'polite');
+    container.appendChild(header);
     header.textContent = results.length
       ? `${results.length} result${results.length !== 1 ? 's' : ''} for "${q}"`
       : `No results for "${q}"`;
-    container.appendChild(header);
+
 
     if (!results.length) {
       const empty = document.createElement('p');
@@ -2625,6 +2733,19 @@ const CosmosSolarViz = (() => {
     _canvas.setAttribute('tabindex', '0');
     _canvas.setAttribute('role', 'application');
     _canvas.setAttribute('aria-label', 'Interactive solar system diagram. Use the list below to select planets.');
+    _canvas.addEventListener('keydown', e => {
+      const idx = PLANETS.findIndex(p => p === _selected);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectPlanet(PLANETS[(idx + 1) % PLANETS.length]);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectPlanet(PLANETS[(idx - 1 + PLANETS.length) % PLANETS.length]);
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (_selected) CosmosAnnouncer.announce(_selected.name + ': ' + _selected.info);
+      }
+    });
 
     const pauseBtn = document.querySelector('[data-solar-pause]');
     if (pauseBtn) {
@@ -3069,7 +3190,7 @@ const CosmosQuiz = (() => {
     const grade  = pct >= 80 ? 'Excellent' : pct >= 60 ? 'Good' : pct >= 40 ? 'Fair' : 'Needs work';
 
     _container.innerHTML = `
-      <div class="quiz-results" role="region" aria-label="Quiz results">
+      <div class="quiz-results" role="region" aria-label="Quiz results" aria-live="assertive">
         <h3 class="quiz-results-title">Quiz Complete!</h3>
         <div class="quiz-score" aria-label="Your score">
           <span class="quiz-score-value">${_score}/${total}</span>
@@ -3562,6 +3683,9 @@ const CosmosAnimations = (() => {
     const prefix   = el.dataset.countPrefix || '';
     const start    = performance.now();
 
+    el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('aria-label', prefix + target.toFixed(decimals) + suffix);
+
     function step(now) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
@@ -3569,7 +3693,11 @@ const CosmosAnimations = (() => {
       const eased = 1 - Math.pow(1 - progress, 3);
       const value = eased * target;
       el.textContent = prefix + value.toFixed(decimals) + suffix;
-      if (progress < 1) requestAnimationFrame(step);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.removeAttribute('aria-hidden');
+      }
     }
     requestAnimationFrame(step);
   }
@@ -3881,9 +4009,12 @@ const CosmosNewsletter = (() => {
     const msg = form.querySelector('[data-newsletter-msg]');
     if (!msg) return;
     msg.className = `newsletter-msg newsletter-msg--${state}`;
-    msg.textContent = message;
-    msg.removeAttribute('hidden');
     msg.setAttribute('role', state === 'error' ? 'alert' : 'status');
+    msg.setAttribute('aria-live', state === 'error' ? 'assertive' : 'polite');
+    msg.setAttribute('aria-atomic', 'true');
+    msg.removeAttribute('hidden');
+    msg.textContent = '';
+    setTimeout(() => { msg.textContent = message; }, 50);
     CosmosAnnouncer.announce(message, { assertive: state === 'error' });
   }
 
@@ -3923,6 +4054,11 @@ const CosmosNewsletter = (() => {
   CosmosBootstrap.register('newsletter', () => {
     document.querySelectorAll('[data-newsletter-form]').forEach(form => {
       form.setAttribute('novalidate', '');
+      const msg = form.querySelector('[data-newsletter-msg]');
+      if (msg) {
+        msg.setAttribute('aria-live', 'polite');
+        msg.setAttribute('aria-atomic', 'true');
+      }
       form.addEventListener('submit', handleSubmit);
     });
   }, { critical: false, priority: 75 });
@@ -5486,11 +5622,27 @@ const CosmosGlossary = (() => {
       section.appendChild(h2);
       const dl = document.createElement('dl');
       grouped[letter].forEach(entry => {
+        const termKey = entry.term.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const termId  = 'glossary-term-' + termKey;
+        const defId   = 'glossary-def-'  + termKey;
         const dt = document.createElement('dt');
-        dt.textContent = entry.term;
-        dt.id = 'glossary-term-' + entry.term.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        dt.id = termId;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = entry.term;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-controls', defId);
+        btn.className = 'cosmos-glossary-term-btn';
         const dd = document.createElement('dd');
+        dd.id = defId;
         dd.textContent = entry.definition;
+        dd.hidden = true;
+        btn.addEventListener('click', () => {
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!expanded));
+          dd.hidden = expanded;
+        });
+        dt.appendChild(btn);
         dl.appendChild(dt);
         dl.appendChild(dd);
       });

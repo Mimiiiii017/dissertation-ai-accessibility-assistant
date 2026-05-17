@@ -205,6 +205,7 @@ const CSS_HIGH_EXTRA: IssueConcept[] = [
   { id: 'footer-nav-outline',       keywords: ['footer nav focus', 'footer navigation focus', 'footer link outline', 'footer-nav'],  description: 'Footer nav links focus-visible sets outline: none' },
   { id: 'social-link-small-h',      keywords: ['social links min-height', 'social target', '28px social', 'social-link', 'social link'],             description: 'Social links min-height reduced below 44px' },
   { id: 'social-link-outline',      keywords: ['social link focus', 'social link outline', 'social a focus', 'social-a', 'social-link'],          description: 'Social links focus-visible sets outline: none' },
+  { id: 'cookie-btn-focus',          keywords: ['cookie button', 'cookie outline', 'consent focus', 'cookie-banner-btn', 'cookie-btn', 'cookie banner'],  description: 'Cookie consent confirm button :focus-visible sets outline: none' },
 ];
 
 const CSS_LOW: FixtureGroundTruth = {
@@ -300,6 +301,7 @@ const JS_HIGH_EXTRA: IssueConcept[] = [
   { id: 'pricing-aria-selected',    keywords: ['aria-selected billing', 'period selected', 'billing selected'],        description: 'Pricing _syncToggleState() does not set aria-selected on buttons' },
   { id: 'pricing-aria-checked',     keywords: ['aria-checked', 'toggle switch', 'billing checked'],                    description: 'Pricing toggle switch does not set aria-checked' },
   { id: 'comparison-col-selected',  keywords: ['aria-selected column', 'comparison column', 'highlighted column'],     description: 'Comparison table column header not given aria-selected when highlighted' },
+  { id: 'toast-role-missing',        keywords: ['toast', 'toast container', 'role status', 'inittoastcontainer', 'live region toast'],             description: 'initToastContainer() sets aria-atomic but omits role="status" and aria-live="polite"' },
 ];
 
 const JS_LOW: FixtureGroundTruth = {
@@ -395,6 +397,7 @@ const TSX_HIGH_EXTRA: IssueConcept[] = [
   { id: 'search-form-role',         keywords: ['role search', 'search form', 'search landmark'],                       description: 'SearchInput form missing role="search"' },
   { id: 'account-actions-label',    keywords: ['account actions', 'site-header ctas', 'header cta label'],             description: 'Account actions div missing aria-label="Account actions"' },
   { id: 'hero-overlay-hidden',      keywords: ['hero overlay', 'overlay aria-hidden', 'hero section overlay'],         description: 'Hero overlay div missing aria-hidden="true"' },
+  { id: 'notification-live',         keywords: ['notificationcontainer', 'notification container', 'aria-live notification', 'toast live', 'aria-live polite'], description: 'NotificationContainer missing aria-live="polite" attribute' },
 ];
 
 const TSX_LOW: FixtureGroundTruth = {

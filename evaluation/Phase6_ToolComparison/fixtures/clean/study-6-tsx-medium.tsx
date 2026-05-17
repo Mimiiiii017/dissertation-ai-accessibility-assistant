@@ -5,13 +5,17 @@ interface NavItem { label: string; href: string; icon?: string; }
 interface TabItem { id: string; label: string; content: React.ReactNode; }
 interface FormField { name: string; label: string; type: 'text' | 'email' | 'tel' | 'textarea'; required?: boolean; }
 
-const CustomButton: React.FC<{ onClick: () => void; children: React.ReactNode }> = ({
-  onClick, children,
+const CustomButton: React.FC<{ onClick: () => void; children: React.ReactNode; 'aria-label'?: string }> = ({
+  onClick, children, 'aria-label': ariaLabel,
 }) => {
   return (
-    <div onClick={onClick} style={{ cursor: 'pointer', padding: '8px' }}>
+    <button
+      onClick={onClick}
+      aria-label={ariaLabel}
+      style={{ cursor: 'pointer', padding: '8px', background: 'none', border: 'none' }}
+    >
       {children}
-    </div>
+    </button>
   );
 };
 
@@ -20,21 +24,29 @@ const Navigation: React.FC<{ items: NavItem[] }> = ({ items }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <nav>
-      <button onClick={() => setIsOpen(!isOpen)}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls="main-nav-menu"
+      >
         Menu
       </button>
       {isOpen && (
-        <ul>
-          {items.map((item, index) => (
-            <li key={index}>
+        <ul id="main-nav-menu">
+          {items.map((item) => (
+            <li key={item.href}>
               <a href={item.href}>
-                {item.icon && <span>{item.icon}</span>}
+                {item.icon && <span aria-hidden="true">{item.icon}</span>}
                 {item.label}
               </a>
             </li>
           ))}
         </ul>
       )}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {isOpen ? 'Navigation menu opened' : ''}
+      </div>
     </nav>
   );
 };
@@ -48,16 +60,30 @@ const Tabs: React.FC<{ tabs: TabItem[]; activeTab?: number }> = ({
     <div>
       <div role="tablist">
         {tabs.map((tab, i) => (
-          <button key={tab.id} role="tab" aria-selected={i === activeTab}
-            onClick={() => setActiveTab(i)} tabIndex={i === activeTab ? 0 : -1}
+          <button
+            key={tab.id}
+            id={`tab-btn-${tab.id}`}
+            role="tab"
+            aria-selected={i === activeTab}
+            aria-controls={`tabpanel-${tab.id}`}
+            onClick={() => setActiveTab(i)}
+            tabIndex={i === activeTab ? 0 : -1}
+            onKeyDown={e => {
+              if (e.key === 'ArrowRight') { e.preventDefault(); setActiveTab(j => (j + 1) % tabs.length); }
+              if (e.key === 'ArrowLeft')  { e.preventDefault(); setActiveTab(j => (j - 1 + tabs.length) % tabs.length); }
+            }}
           >
             {tab.label}
           </button>
         ))}
       </div>
       {tabs.map((tab, i) => (
-        <div role="tabpanel" aria-labelledby={`wrong-tab-${tab.id}`}
-          style={{ display: i === activeTab ? 'block' : 'none' }}
+        <div
+          key={tab.id}
+          id={`tabpanel-${tab.id}`}
+          role="tabpanel"
+          aria-labelledby={`tab-btn-${tab.id}`}
+          hidden={i !== activeTab}
         >
           {tab.content}
         </div>
@@ -65,12 +91,13 @@ const Tabs: React.FC<{ tabs: TabItem[]; activeTab?: number }> = ({
     </div>
   );
 };
-
-const Form: React.FC<{
-  fields: FormField[];
-  onSubmit: (data: Record<string, string>) => void;
-}> = ({
-  fields,
+        >
+          {tab.content}
+        </div>
+      ))}
+    </div>
+  );
+};
   onSubmit,
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -507,6 +534,7 @@ const Badge: React.FC<BadgeProps> = ({
   >
     {dot && (
       <span
+        aria-hidden="true"
         style={{
           width: '6px', height: '6px', borderRadius: '50%',
           background: 'currentColor', flexShrink: 0,
@@ -802,6 +830,7 @@ function DataTable<T extends Record<string, unknown>>({
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
   const [selected, setSelected] = useState<Set<T[keyof T]>>(new Set());
+  const [sortAnnouncement, setSortAnnouncement] = useState('');
 
   const sortedData = useMemo(() => {
     if (!sortKey || !sortDir) return data;
@@ -814,11 +843,14 @@ function DataTable<T extends Record<string, unknown>>({
 
   const handleSort = (key: keyof T) => {
     if (sortKey === key) {
-      setSortDir(d => (d === 'asc' ? 'desc' : d === 'desc' ? null : 'asc'));
-      if (sortDir === 'desc') setSortKey(null);
+      const nextDir = sortDir === 'asc' ? 'desc' : sortDir === 'desc' ? null : 'asc';
+      setSortDir(nextDir as SortDir);
+      if (sortDir === 'desc') { setSortKey(null); setSortAnnouncement('Sort cleared'); }
+      else setSortAnnouncement(`Sorted ${String(key)} ${nextDir === 'asc' ? 'ascending' : 'descending'}`);
     } else {
       setSortKey(key);
       setSortDir('asc');
+      setSortAnnouncement(`Sorted ${String(key)} ascending`);
     }
   };
 
@@ -843,6 +875,9 @@ function DataTable<T extends Record<string, unknown>>({
 
   return (
     <div style={{ overflowX: 'auto' }}>
+      <div aria-live="polite" aria-atomic="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+        {sortAnnouncement}
+      </div>
       <table aria-labelledby={caption ? captionId : undefined} style={{ borderCollapse: 'collapse', width: '100%' }}>
         {caption && <caption id={captionId}>{caption}</caption>}
         <thead style={stickyHeader ? { position: 'sticky', top: 0, background: '#fff', zIndex: 1 } : {}}>
@@ -908,7 +943,7 @@ function DataTable<T extends Record<string, unknown>>({
               </td>
             </tr>
           )}
-        </tbody>
+            <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>
       </table>
     </div>
   );
@@ -924,7 +959,7 @@ interface Toast {
   duration?: number;
   action?: { label: string; onClick: () => void };
 }
-
+              aria-label="Close"
 interface ToastContextValue {
   add: (toast: Omit<Toast, 'id'>) => void;
   remove: (id: string) => void;
@@ -1034,13 +1069,14 @@ interface ComboboxProps {
   allowFreeText?: boolean;
   maxVisible?: number;
   noResultsText?: string;
+  required?: boolean;
 }
 
 
 
 const Combobox: React.FC<ComboboxProps> = ({
   options, value, onChange, placeholder = 'Search…', label, id,
-  allowFreeText = false, maxVisible = 8, noResultsText = 'No results',
+  allowFreeText = false, maxVisible = 8, noResultsText = 'No results', required = false,
 }) => {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -1083,6 +1119,7 @@ const Combobox: React.FC<ComboboxProps> = ({
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         aria-activedescendant={open && activeIdx >= 0 ? `${listId}-option-${activeIdx}` : undefined}
+        aria-required={required || undefined}
         value={query}
         placeholder={placeholder}
         onFocus={() => setOpen(true)}
@@ -1104,7 +1141,7 @@ const Combobox: React.FC<ComboboxProps> = ({
           }}
         >
           {filtered.length === 0 ? (
-            <li style={{ padding: '8px 12px', color: '#9ca3af' }}>{noResultsText}</li>
+            <li role="status" aria-live="polite" style={{ padding: '8px 12px', color: '#9ca3af' }}>{noResultsText}</li>
           ) : filtered.map((opt, i) => (
             <li
               key={opt.value}
@@ -1208,14 +1245,19 @@ interface StepperProps {
 const Stepper: React.FC<StepperProps> = ({
   steps, currentStep, orientation = 'horizontal', onStepClick, completedSteps = new Set(),
 }) => {
+  const currentLabel = steps[currentStep]?.label ?? '';
   return (
-    <ol
-      aria-label="Progress"
-      style={{
-        display: 'flex', flexDirection: orientation === 'vertical' ? 'column' : 'row',
-        listStyle: 'none', padding: 0, margin: 0, gap: 0,
-      }}
-    >
+    <>
+      <div aria-live="polite" aria-atomic="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+        {`Step ${currentStep + 1} of ${steps.length}: ${currentLabel}`}
+      </div>
+      <ol
+        aria-label="Progress"
+        style={{
+          display: 'flex', flexDirection: orientation === 'vertical' ? 'column' : 'row',
+          listStyle: 'none', padding: 0, margin: 0, gap: 0,
+        }}
+      >
       {steps.map((step, i) => {
         const done = completedSteps.has(i);
         const active = i === currentStep;
@@ -1254,7 +1296,8 @@ const Stepper: React.FC<StepperProps> = ({
           </li>
         );
       })}
-    </ol>
+      </ol>
+    </>
   );
 };
 
@@ -1284,7 +1327,30 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const [open, setOpen] = useState(false);
   const [viewDate, setViewDate] = useState(value ?? new Date());
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const dialogId = `${id}-calendar`;
+
+  // Focus trap + Escape key
+  useEffect(() => {
+    if (!open) return;
+    const el = dialogRef.current;
+    if (!el) return;
+    const focusable = el.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length) focusable[0].focus();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpen(false); triggerRef.current?.focus(); return; }
+      if (e.key === 'Tab') {
+        const all = Array.from(focusable);
+        const first = all[0]; const last = all[all.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   const year  = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -1319,24 +1385,39 @@ const DatePicker: React.FC<DatePickerProps> = ({
         value={value ? value.toLocaleDateString() : ''}
         placeholder="Select date"
         onClick={() => setOpen(o => !o)}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setOpen(o => !o); }}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') setOpen(o => !o);
+          if (e.key === 'Escape') { setOpen(false); }
+        }}
         aria-haspopup="dialog"
-
+        aria-expanded={open}
+        aria-controls={open ? dialogId : undefined}
         aria-label={label}
         style={{ cursor: 'pointer' }}
       />
       {open && (
-        <div
-          id={dialogId}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Choose date, ${MONTHS[month]} ${year}`}
-          style={{
-            position: 'absolute', top: '100%', left: 0, zIndex: 200,
-            background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8,
-            padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,.12)', minWidth: 280,
-          }}
-        >
+        <>
+          {/* Backdrop overlay — closes on click-outside, provides visual modal cue */}
+          <div
+            aria-hidden="true"
+            onClick={() => { setOpen(false); triggerRef.current?.focus(); }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 199,
+              background: 'rgba(0,0,0,0.3)',
+            }}
+          />
+          <div
+            ref={dialogRef}
+            id={dialogId}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Choose date, ${MONTHS[month]} ${year}`}
+            style={{
+              position: 'absolute', top: '100%', left: 0, zIndex: 200,
+              background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8,
+              padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,.12)', minWidth: 280,
+            }}
+          >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <button
               onClick={() => setViewDate(new Date(year, month - 1, 1))}
@@ -1390,6 +1471,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -1504,7 +1586,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }}
         role="button"
         tabIndex={0}
-        aria-describedby={[description ? descId : '', error ? errId : ''].filter(Boolean).join(' ') || undefined}
+        aria-describedby={[description ? descId : '', errId].filter(Boolean).join(' ') || undefined}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click(); }}
       >
         <span aria-hidden="true" style={{ fontSize: 36 }}>📂</span>
@@ -1520,7 +1602,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           multiple={multiple}
           onChange={e => validate(e.target.files)}
           style={{ display: 'none' }}
-          aria-describedby={[description ? descId : '', error ? errId : ''].filter(Boolean).join(' ') || undefined}
+          aria-describedby={[description ? descId : '', errId].filter(Boolean).join(' ') || undefined}
         />
       </div>
       {error && (
@@ -1548,6 +1630,7 @@ interface ColorPickerProps {
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, label, id, showInput = true }) => {
   const [customColor, setCustomColor] = useState(value);
+  const isValidHex = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
 
   return (
     <div role="group" aria-labelledby={`${id}-label`}>
@@ -1583,10 +1666,11 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, label, id, s
             value={customColor}
             maxLength={7}
             pattern="^#[0-9a-fA-F]{6}$"
+            aria-invalid={customColor.length > 0 && !isValidHex(customColor) ? true : undefined}
             onChange={e => {
               const v = e.target.value;
               setCustomColor(v);
-              if (/^#[0-9a-fA-F]{6}$/.test(v)) onChange(v);
+              if (isValidHex(v)) onChange(v);
             }}
             aria-label="Hex color value"
             style={{ width: 90, padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: 4, fontFamily: 'monospace' }}

@@ -11,16 +11,16 @@
         <nav>
             <ul>
                 <li><a href="#home">Home</a></li>
-                <li><a href="#about">Click here</a></li>
+                <li><a href="#about">About us</a></li>
                 <li><a href="#services">Services</a></li>
-                <li><a href="#features" aria-label="">Features</a></li>
+                <li><a href="#features">Features</a></li>
                 <li><button>Menu</button></li>
             </ul>
         </nav>
 
-        <div role="banner">
+        <div>
             <h1>Company Name</h1>
-            <img src="logo.png" />
+            <img src="logo.png" alt="Company Name logo" />
         </div>
     </header>
 
@@ -32,13 +32,13 @@
         </div>
 
 
-        <img src="hero.jpg" alt="">
+        <img src="hero.jpg" alt="A team of developers collaborating around a computer screen">
     </section>
 
     <section class="features">
         <h2>Our Features</h2>
 
-        <h4>Feature One</h4>
+        <h3>Feature One</h3>
         <p>Description here.</p>
 
         <div class="feature-box">
@@ -48,7 +48,7 @@
         </div>
 
         <div class="feature-box">
-            <img src="icon.png">
+            <img src="icon.png" alt="Reports icon">
             <h5>Reports</h5>
             <p>Generate detailed reports.</p>
         </div>
@@ -60,29 +60,37 @@
         </div>
     </section>
 
-    <form id="contact-form">
+    <form id="contact-form" aria-label="Contact us">
         <fieldset><legend class="sr-only">Contact us</legend>
-            <input type="email" placeholder="Your email">
-            <input type="text" placeholder="Full name">
-            <input type="tel" placeholder="Phone">
-            <select>
+            <label for="contact-email">Email address</label>
+            <input type="email" id="contact-email" placeholder="Your email">
+            <label for="contact-name">Full name</label>
+            <input type="text" id="contact-name" placeholder="Full name">
+            <label for="contact-phone">Phone number</label>
+            <input type="tel" id="contact-phone" placeholder="Phone">
+            <label for="contact-subject">Subject</label>
+            <select id="contact-subject">
                 <option value="">Select an option</option>
                 <option value="option1">Option 1</option>
                 <option value="option2">Option 2</option>
             </select>
-            <textarea placeholder="Message"></textarea>
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" placeholder="Message"></textarea>
             <button type="submit">Send</button>
         </fieldset>
     </form>
 
     <section>
         <h2>Pricing</h2>
-        <table>
+        <table aria-label="Pricing plans">
+            <thead>
             <tr>
-                <td>Plan</td>
-                <td>Price</td>
-                <td>Features</td>
+                <th scope="col">Plan</th>
+                <th scope="col">Price</th>
+                <th scope="col">Features</th>
             </tr>
+            </thead>
+            <tbody>
             <tr>
                 <td>Basic</td>
                 <td>$29</td>
@@ -93,16 +101,17 @@
                 <td>$79</td>
                 <td>20 users</td>
             </tr>
+            </tbody>
         </table>
     </section>
 
     <section class="gallery">
         <h2>Gallery</h2>
         <div class="gallery-grid">
-            <img src="photo1.jpg">
-            <img src="photo2.jpg" alt="">
-            <img src="photo3.jpg" alt="Not descriptive enough"/>
-            <div role="img">Visual content</div>
+            <img src="photo1.jpg" alt="Gallery image 1">
+            <img src="photo2.jpg" alt="Gallery image 2">
+            <img src="photo3.jpg" alt="A scenic landscape photograph"/>
+            <div role="img" aria-label="Visual content illustration">Visual content</div>
             <img src="photo4.jpg" alt="Sample photo 4"/>
             <img src="photo5.jpg" alt="Sample photo 5"/>
         </div>
@@ -304,13 +313,7 @@
                     <li>100 API calls per day</li>
                 </ul>
 
-
-
-
-
-
-
-                <a href="/signup" class="btn-cta">Get Started</a>
+                <a href="/signup" class="btn-cta">Get Started with Starter</a>
             </div>
             <div class="pricing-card featured">
                 <h3>Pro</h3>
@@ -348,7 +351,7 @@
         <p>Our REST API is fully documented with interactive examples. The client SDKs cover JavaScript/TypeScript, Python, Ruby, Go, and Java.</p>
 
         <h3>Quick Start</h3>
-        <pre><code>curl -X POST https://api.example.com/v1/events \
+        <pre><code lang="sh">curl -X POST https://api.example.com/v1/events \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"event": "page_view", "properties": {"path": "/home"}}'</code></pre>
@@ -384,7 +387,7 @@
     <section id="changelog">
         <h2>Recent Changelog</h2>
 
-        <article aria-label="3.4.0">
+        <article aria-label="Release 3.4.0">
             <h3>v3.4.0 &mdash; 2 May 2026</h3>
             <ul>
                 <li>Added real-time collaboration cursors to the shared dashboard.</li>
@@ -431,6 +434,7 @@
                 <img src="integrations/github.svg" alt="GitHub logo">
                 <h3>GitHub</h3>
                 <p>Trigger workflows from pull request merges and track release impact in real time.</p>
+                <a href="/integrations/github">Learn more about GitHub integration</a>
             </div>
             <div class="integration-card">
                 <img src="integrations/jira.svg" alt="Jira logo">
@@ -458,6 +462,7 @@
         <p>All systems are currently operating normally. View our live <a href="https://status.example.com">status page</a> for real-time updates on API availability, incident history, and planned maintenance windows.</p>
 
         <table aria-label="Current system component status">
+            <caption>Current system component status</caption>
             <thead>
                 <tr>
                     <th scope="col">Component</th>
@@ -482,7 +487,7 @@
                 <h3>Sales</h3>
                 <p>Discussing a new contract or proof-of-concept? Our sales team is ready to help.</p>
 
-                <a href="mailto:sales@example.com">sales@example.com</a>
+                <a href="mailto:sales@example.com">Email the sales team (sales@example.com)</a>
                 <p>Response time: within 4 business hours.</p>
             </div>
             <div class="contact-card">
@@ -529,7 +534,7 @@
         <h2>Join Our Team</h2>
         <p>We are a remote-first company building tools that help millions of developers ship better software.
         We value autonomy, transparency, and craft. Our team spans 22 countries.</p>
-        <ul>
+        <ul aria-label="Open positions">
             <li><strong>Senior Backend Engineer</strong> &mdash; Platform team, Remote (EU/UK)</li>
             <li><strong>Product Designer</strong> &mdash; Growth squad, Remote (US East)</li>
             <li><strong>Developer Advocate</strong> &mdash; DevRel, Remote (Global)</li>
@@ -543,10 +548,7 @@
         <h2>Press &amp; Media</h2>
         <p>Download our brand kit, logos, and press assets below. For media enquiries please contact press@synapse.io.</p>
         <ul>
-            <li><strong>TechCrunch</strong> &mdash; &ldquo;Synapse raises $42&nbsp;m Series B&rdquo; &mdash;
-
-
-            March 2024</li>
+            <li><strong>TechCrunch</strong> &mdash; &ldquo;Synapse raises $42&nbsp;m Series B&rdquo; &mdash; <time datetime="2024-03">March 2024</time></li>
             <li><strong>VentureBeat</strong> &mdash; &ldquo;How Synapse cuts sprint planning time by 60%&rdquo; &mdash; January 2024</li>
             <li><strong>InfoQ</strong> &mdash; &ldquo;Inside Synapse's hybrid retrieval architecture&rdquo; &mdash; November 2023</li>
         </ul>
@@ -561,7 +563,7 @@
             <li>Synapse Community Blog &mdash; submit your own posts and tutorials</li>
 
 
-            <li><a href="https://discord.gg/synapse" target="_blank">Discord</a> &mdash; channels for #general, #support</li>
+            <li><a href="https://discord.gg/synapse" target="_blank" rel="noopener noreferrer">Discord <span class="sr-only">(opens in new tab)</span></a> &mdash; channels for #general, #support</li>
         </ul>
     </section>
 
@@ -571,11 +573,11 @@
 
 
 
-        <p>Contact <a href="mailto:accessibility@synapse.io">accessibility@synapse.io</a> to report issues.</p>
+        <p>Contact <a href="mailto:accessibility@synapse.io">accessibility@synapse.io</a> or call <a href="tel:+442012345678">+44 20 1234 5678</a> to report issues.</p>
     </section>
 
 
-    <div id="cookie-banner" role="region" aria-label="Cookie consent notice" hidden>
+    <div id="cookie-banner" role="dialog" aria-label="Cookie consent notice" aria-modal="true" hidden>
         <p>We use essential and analytics cookies. See our <a href="/legal/cookie-policy">Cookie Policy</a>.</p>
         <button type="button" id="accept-all-cookies">Accept all</button>
         <button type="button" id="manage-cookie-prefs">Manage preferences</button>

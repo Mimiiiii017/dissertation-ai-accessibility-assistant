@@ -149,9 +149,6 @@ export class AccessibilityPanelProvider implements vscode.WebviewViewProvider {
 <body>
   <div class="header">
     <div class="model-row">
-      <select id="modelSelect" title="Select the analysis profile preset to use">
-        <option value="" disabled selected>Loading presets…</option>
-      </select>
       <span class="model-badge">
         <span class="dot"></span>
         <span id="modelName">${FIXED_MODEL}</span>

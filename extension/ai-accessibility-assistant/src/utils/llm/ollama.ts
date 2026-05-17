@@ -53,6 +53,14 @@ function normalizeHost(host: string): string {
   return host.replace(/\/$/, "");
 }
 
+// Base headers for all Ollama requests.
+// ngrok-skip-browser-warning bypasses ngrok's free-tier interstitial page
+// so API calls receive JSON directly instead of an HTML redirect.
+const BASE_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json",
+  "ngrok-skip-browser-warning": "true",
+};
+
 // Read the response body and throw a descriptive error if the request failed
 async function throwIfNotOk(res: Response, context: string): Promise<void> {
   if (!res.ok) {
@@ -65,7 +73,7 @@ async function throwIfNotOk(res: Response, context: string): Promise<void> {
 export async function ollamaListModels(host: string): Promise<string[]> {
   const url = `${normalizeHost(host)}/api/tags`;
 
-  const res = await fetch(url, { method: "GET" });
+  const res = await fetch(url, { method: "GET", headers: BASE_HEADERS });
   await throwIfNotOk(res, "Ollama tags failed");
 
   const data = (await res.json()) as OllamaTagsResponse;
@@ -79,7 +87,7 @@ export async function ollamaWarmup(host: string, model: string): Promise<void> {
   try {
     await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: BASE_HEADERS,
       body: JSON.stringify({
         model,
         prompt: "warm up",
@@ -133,7 +141,7 @@ export async function ollamaGenerateStream(
   try {
     res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: BASE_HEADERS,
       body: JSON.stringify({
         model,
         messages,

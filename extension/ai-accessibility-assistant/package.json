@@ -1,12 +1,13 @@
 {
   "name": "ai-accessibility-assistant",
   "displayName": "AI Accessibility Assistant",
-  "description": "",
-  "version": "0.0.1",
+  "description": "AI-powered accessibility analysis for HTML, CSS, JavaScript and TSX files with NASA-TLX cognitive load estimation.",
+  "version": "1.0.0",
+  "publisher": "dissertation-local",
   "engines": {
     "vscode": "^1.108.0"
   },
-  "categories": ["Other"],
+  "categories": ["Linters", "Other"],
 
   "activationEvents": [
     "onView:aiAccessibilityAssistant.panel"
@@ -52,7 +53,7 @@
       "properties": {
         "aiAccessibilityAssistant.ollamaHost": {
           "type": "string",
-          "default": "http://localhost:11434",
+          "default": "https://proven-specks-badge.ngrok-free.dev/proxy/ollama",
           "description": "Base URL for the Ollama server."
         },
         "aiAccessibilityAssistant.analysisPreset": {
@@ -69,7 +70,7 @@
         },
         "aiAccessibilityAssistant.ragEndpoint": {
         "type": "string",
-        "default": "http://127.0.0.1:8000",
+        "default": "https://proven-specks-badge.ngrok-free.dev",
         "description": "Local RAG retrieval service endpoint (FastAPI + Chroma)."
         }
       }

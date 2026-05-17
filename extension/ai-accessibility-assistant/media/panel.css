@@ -31,29 +31,11 @@ body {
   color: var(--vscode-foreground);
   margin-bottom: 6px;
 }
-/* Model row (dropdown + badge) */
+/* Model row (badge only — preset picker removed) */
 .model-row {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-#modelSelect {
-  flex: 1;
-  min-width: 0;
-  padding: 4px 6px;
-  font-family: var(--font-ui);
-  font-size: 11px;
-  color: var(--vscode-dropdown-foreground);
-  background: var(--vscode-dropdown-background);
-  border: 1px solid var(--vscode-dropdown-border);
-  border-radius: 4px;
-  outline: none;
-  cursor: pointer;
-  appearance: auto;
-}
-#modelSelect:focus {
-  border-color: var(--vscode-focusBorder);
 }
 
 .model-badge {
